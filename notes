@@ -1,0 +1,3 @@
+SNS_TOPIC_ARN: arn:aws:sns:us-east-1:753344699862:InventoryIQ-Alerts
+SQS_QUEUE_ARN: arn:aws:sqs:us-east-1:753344699862:InventoryIQ-StockQueue
+SQS_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/753344699862/InventoryIQ-StockQueue
