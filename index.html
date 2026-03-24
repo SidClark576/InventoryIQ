@@ -1,359 +1,894 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>InventoryIQ</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
-    
-    /* Login Page */
-    #login-page {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; height: 100vh; background: #1a1a2e;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    #login-page h1 { color: #e94560; font-size: 2.5rem; margin-bottom: 8px; }
-    #login-page p { color: #aaa; margin-bottom: 30px; }
-    #login-page input {
-      padding: 12px 20px; width: 300px; border: none;
-      border-radius: 6px; font-size: 1rem; margin-bottom: 12px;
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #333;
     }
-    #login-page button {
-      padding: 12px 40px; background: #e94560; color: white;
-      border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; width: 300px;
+
+    /* ── AUTH ── */
+    #auth-screen {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
     }
-    #login-error { color: #e94560; font-size: 0.9rem; margin-top: 8px; }
-    
-    /* Main App */
-    #app { display: none; }
-    header {
-      background: #1a1a2e; color: white; padding: 16px 32px;
-      display: flex; justify-content: space-between; align-items: center;
+
+    .auth-box {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     }
-    header h1 { color: #e94560; }
-    nav button {
-      background: none; color: white; border: 1px solid #555;
-      padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-left: 8px;
+
+    .auth-box h1 {
+      text-align: center;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+      font-size: 28px;
     }
-    nav button.active { background: #e94560; border-color: #e94560; }
-    
-    .page { display: none; padding: 32px; }
-    .page.active { display: block; }
-    
-    /* Cards */
+
+    .auth-box .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 28px;
+      font-size: 14px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      color: #888;
+      font-weight: 600;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      margin-bottom: -2px;
+    }
+
+    .auth-tab.active {
+      color: #4f46e5;
+      border-bottom-color: #4f46e5;
+    }
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #4f46e5;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #4338ca;
+    }
+
+    .auth-msg {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
+      display: none;
+    }
+
+    .auth-msg.error {
+      background: #fee2e2;
+      color: #b91c1c;
+      display: block;
+    }
+
+    .auth-msg.success {
+      background: #dcfce7;
+      color: #15803d;
+      display: block;
+    }
+
+    /* ── APP ── */
+    #app {
+      display: none;
+    }
+
+    nav {
+      background: #1a1a2e;
+      color: white;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 700;
+      color: #a5b4fc;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 6px;
+    }
+
+    .nav-btn {
+      padding: 7px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      background: transparent;
+      color: #cbd5e1;
+      transition: background 0.2s;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: #4f46e5;
+      color: white;
+    }
+
+    .nav-user {
+      font-size: 13px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-logout {
+      padding: 6px 14px;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* ── PAGES ── */
+    .page {
+      display: none;
+      padding: 28px 32px;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .page-header h2 {
+      font-size: 22px;
+      color: #1a1a2e;
+    }
+
+    /* ── STATS CARDS ── */
     .stats-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px; margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
     }
+
     .stat-card {
-      background: white; padding: 20px; border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.07); text-align: center;
+      background: white;
+      border-radius: 10px;
+      padding: 22px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
     }
-    .stat-card h3 { font-size: 2rem; color: #e94560; }
-    .stat-card p { color: #777; font-size: 0.85rem; margin-top: 4px; }
-    
-    table { width: 100%; border-collapse: collapse; background: white;
-            border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
-    th { background: #1a1a2e; color: white; padding: 12px 16px; text-align: left; }
-    td { padding: 10px 16px; border-bottom: 1px solid #eee; }
-    tr:hover td { background: #f9f9f9; }
-    
-    .btn { padding: 6px 14px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.85rem; }
-    .btn-edit { background: #3498db; color: white; }
-    .btn-delete { background: #e74c3c; color: white; }
-    .btn-primary { background: #e94560; color: white; padding: 10px 24px; font-size: 1rem; border-radius: 6px; }
-    
-    /* Form */
+
+    .stat-card .label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-top: 6px;
+    }
+
+    .stat-card.red .value {
+      color: #dc2626;
+    }
+
+    .stat-card.yellow .value {
+      color: #d97706;
+    }
+
+    .stat-card.green .value {
+      color: #16a34a;
+    }
+
+    /* ── ALERTS ── */
+    .alert-banner {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .alert-banner.red {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-left: 4px solid #dc2626;
+    }
+
+    .alert-banner.yellow {
+      background: #fef9c3;
+      color: #92400e;
+      border-left: 4px solid #d97706;
+    }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #f8fafc;
+      padding: 13px 16px;
+      text-align: left;
+      font-size: 12px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 13px 16px;
+      border-top: 1px solid #f1f5f9;
+      font-size: 14px;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge.ok {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .badge.low {
+      background: #fef9c3;
+      color: #92400e;
+    }
+
+    .badge.out {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .btn-sm {
+      padding: 5px 12px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-edit {
+      background: #e0e7ff;
+      color: #4f46e5;
+    }
+
+    .btn-delete {
+      background: #fee2e2;
+      color: #dc2626;
+      margin-left: 6px;
+    }
+
+    .btn-action {
+      padding: 9px 18px;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-add {
+      background: #4f46e5;
+      color: white;
+    }
+
+    .btn-export {
+      background: #e0e7ff;
+      color: #4f46e5;
+      margin-left: 10px;
+    }
+
+    /* ── FORM ── */
+    .form-card {
+      background: white;
+      border-radius: 10px;
+      padding: 28px;
+      max-width: 600px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    }
+
     .form-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px; background: white; padding: 24px; border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
     }
-    .form-grid input, .form-grid select {
-      padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 100%;
+
+    .form-grid .full {
+      grid-column: 1 / -1;
     }
-    .form-grid label { font-size: 0.85rem; color: #777; margin-bottom: 4px; display: block; }
-    
-    /* Alerts */
-    .alert { padding: 14px 18px; border-radius: 8px; margin-bottom: 12px; }
-    .alert-red { background: #fde8e8; border-left: 4px solid #e74c3c; }
-    .alert-yellow { background: #fef9e7; border-left: 4px solid #f39c12; }
-    .alert-green { background: #eafaf1; border-left: 4px solid #27ae60; }
-    
-    .low-stock td:nth-child(4) { color: #e74c3c; font-weight: bold; }
-    
-    #logout-btn { background: #555; color: white; border: none; padding: 8px 16px;
-                  border-radius: 6px; cursor: pointer; }
+
+    .form-card label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    .form-card input,
+    .form-card select,
+    .form-card textarea {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid #ddd;
+      border-radius: 7px;
+      font-size: 14px;
+    }
+
+    .form-card input:focus,
+    .form-card select:focus {
+      outline: none;
+      border-color: #4f46e5;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-save {
+      padding: 10px 24px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      padding: 10px 24px;
+      background: #e2e8f0;
+      color: #475569;
+      border: none;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ── INSIGHTS ── */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .insight-card {
+      background: white;
+      border-radius: 10px;
+      padding: 22px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    }
+
+    .insight-card h3 {
+      font-size: 15px;
+      color: #1a1a2e;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    .insight-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13px;
+    }
+
+    .insight-item:last-child {
+      border-bottom: none;
+    }
+
+    .btn-refresh {
+      padding: 9px 20px;
+      background: #16a34a;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .loading {
+      color: #888;
+      font-style: italic;
+    }
   </style>
 </head>
+
 <body>
 
-<!-- ====== LOGIN PAGE ====== -->
-<div id="login-page">
-  <h1>📦 InventoryIQ</h1>
-  <p>Smart Inventory for Small Business</p>
-  <input type="password" id="password-input" placeholder="Enter store password" />
-  <button onclick="attemptLogin()">Sign In</button>
-  <p id="login-error"></p>
-  <p style="color:#555; font-size:0.75rem; margin-top:20px;">
-    ⚠️ Demo auth only — not for production use
-  </p>
-</div>
+  <!-- ══ AUTH SCREEN ══════════════════════════════════════════════ -->
+  <div id="auth-screen">
+    <div class="auth-box">
+      <h1>📦 InventoryIQ</h1>
+      <p class="subtitle">Smart Inventory Management</p>
 
-<!-- ====== MAIN APP ====== -->
-<div id="app">
-  <header>
-    <h1>📦 InventoryIQ</h1>
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
+        <div class="auth-tab" onclick="switchAuthTab('register')">Register</div>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-form" class="auth-form active">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="login-email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="Enter your password"
+            onkeydown="if(event.key==='Enter') handleLogin()" />
+        </div>
+        <button class="btn-primary" onclick="handleLogin()">Login</button>
+        <div id="login-msg" class="auth-msg"></div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-form" class="auth-form">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="reg-email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="Create a password" />
+        </div>
+        <button class="btn-primary" onclick="handleRegister()">Create Account</button>
+        <div id="reg-msg" class="auth-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN APP ══════════════════════════════════════════════════ -->
+  <div id="app">
     <nav>
-      <button class="active" onclick="showPage('dashboard', this)">Dashboard</button>
-      <button onclick="showPage('inventory', this)">Inventory</button>
-      <button onclick="showPage('add-item', this)">+ Add Item</button>
-      <button onclick="showPage('insights', this)">Insights</button>
-      <button id="logout-btn" onclick="logout()">Logout</button>
+      <span class="nav-brand">📦 InventoryIQ</span>
+      <div class="nav-links">
+        <button class="nav-btn active" onclick="showPage('dashboard', this)">Dashboard</button>
+        <button class="nav-btn" onclick="showPage('inventory', this)">Inventory</button>
+        <button class="nav-btn" onclick="showPage('insights', this)">Insights</button>
+      </div>
+      <div class="nav-user">
+        <span id="nav-email"></span>
+        <button class="btn-logout" onclick="handleLogout()">Logout</button>
+      </div>
     </nav>
-  </header>
 
-  <!-- DASHBOARD -->
-  <div id="dashboard" class="page active">
-    <h2 style="margin-bottom:20px;">Dashboard</h2>
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat-card"><h3 id="stat-total">—</h3><p>Total Products</p></div>
-      <div class="stat-card"><h3 id="stat-low">—</h3><p>Low Stock Items</p></div>
-      <div class="stat-card"><h3 id="stat-out">—</h3><p>Out of Stock</p></div>
-      <div class="stat-card"><h3 id="stat-value">—</h3><p>Inventory Value</p></div>
+    <!-- Dashboard -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header">
+        <h2>📊 Dashboard</h2>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">Total Products</div>
+          <div class="value" id="stat-total">—</div>
+        </div>
+        <div class="stat-card red">
+          <div class="label">Out of Stock</div>
+          <div class="value" id="stat-out">—</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="label">Low Stock</div>
+          <div class="value" id="stat-low">—</div>
+        </div>
+        <div class="stat-card green">
+          <div class="label">Inventory Value</div>
+          <div class="value" id="stat-value">—</div>
+        </div>
+      </div>
+      <div id="dashboard-alerts"></div>
     </div>
-    <div id="dashboard-alerts"></div>
-  </div>
 
-  <!-- INVENTORY LIST -->
-  <div id="inventory" class="page">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <h2>All Inventory</h2>
-      <button class="btn-primary btn" onclick="exportCSV()">⬇ Export CSV</button>
+    <!-- Inventory -->
+    <div id="page-inventory" class="page">
+      <div class="page-header">
+        <h2>📦 Inventory</h2>
+        <div>
+          <button class="btn-action btn-add" onclick="showPage('add-item', document.querySelector('.nav-btn.active'))">+
+            Add Item</button>
+          <button class="btn-action btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-body">
+            <tr>
+              <td colspan="6" class="loading" style="padding:24px;text-align:center">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <table>
-      <thead>
-        <tr><th>Name</th><th>Category</th><th>Price</th><th>Qty</th><th>Threshold</th><th>Actions</th></tr>
-      </thead>
-      <tbody id="inventory-table-body"></tbody>
-    </table>
-  </div>
 
-  <!-- ADD ITEM FORM -->
-  <div id="add-item" class="page">
-    <h2 style="margin-bottom:20px;" id="form-title">Add New Item</h2>
-    <div class="form-grid">
-      <div><label>Product Name *</label><input id="f-name" placeholder="e.g. Bag of Rice" /></div>
-      <div><label>Category</label><input id="f-category" placeholder="e.g. Food" /></div>
-      <div><label>Description</label><input id="f-description" placeholder="Optional" /></div>
-      <div><label>Quantity</label><input id="f-quantity" type="number" placeholder="0" /></div>
-      <div><label>Price ($)</label><input id="f-price" type="number" step="0.01" placeholder="0.00" /></div>
-      <div><label>Low Stock Threshold</label><input id="f-threshold" type="number" placeholder="10" /></div>
+    <!-- Add / Edit Item -->
+    <div id="page-add-item" class="page">
+      <div class="page-header">
+        <h2 id="form-title">➕ Add Item</h2>
+      </div>
+      <div class="form-card">
+        <input type="hidden" id="edit-id" />
+        <div class="form-grid">
+          <div class="full form-group-inner">
+            <label>Product Name *</label>
+            <input type="text" id="f-name" placeholder="e.g. Bag of Rice" />
+          </div>
+          <div>
+            <label>Category</label>
+            <input type="text" id="f-category" placeholder="e.g. Food" />
+          </div>
+          <div>
+            <label>Price ($)</label>
+            <input type="number" id="f-price" placeholder="0.00" step="0.01" min="0" />
+          </div>
+          <div>
+            <label>Quantity</label>
+            <input type="number" id="f-quantity" placeholder="0" min="0" />
+          </div>
+          <div>
+            <label>Low Stock Threshold</label>
+            <input type="number" id="f-threshold" placeholder="10" min="0" />
+          </div>
+          <div class="full">
+            <label>Description</label>
+            <input type="text" id="f-description" placeholder="Optional description" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" onclick="handleSaveItem()">Save Item</button>
+          <button class="btn-cancel"
+            onclick="showPage('inventory', document.querySelector('.nav-btn.active'))">Cancel</button>
+        </div>
+        <div id="form-msg" style="margin-top:12px;font-size:13px;color:#16a34a;"></div>
+      </div>
     </div>
-    <button class="btn btn-primary" onclick="submitItem()">Save Item</button>
-    <button class="btn" style="background:#ccc; margin-left:8px;" onclick="cancelEdit()">Cancel</button>
-    <p id="form-status" style="margin-top:12px;"></p>
+
+    <!-- Insights -->
+    <div id="page-insights" class="page">
+      <div class="page-header">
+        <h2>💡 Insights</h2>
+        <button class="btn-refresh" onclick="loadInsights()">🔄 Refresh Insights</button>
+      </div>
+      <div id="insights-content">
+        <p class="loading">Click "Refresh Insights" to load data and trigger stock alerts.</p>
+      </div>
+    </div>
   </div>
 
-  <!-- INSIGHTS -->
-  <div id="insights" class="page">
-    <h2 style="margin-bottom:20px;">AI Insights & Alerts</h2>
-    <div id="insights-container"><p>Loading insights...</p></div>
-  </div>
-</div>
+  <script src="config.js"></script>
+  <script src="api.js"></script>
+  <script>
 
-<script src="config.js"></script>
-<script src="api.js"></script>
-<script>
-  let editingItemId = null;
-  let allItems = [];
+    // ── AUTH LOGIC ───────────────────────────────────────────────
 
-  // ===== AUTH =====
-  function attemptLogin() {
-    const pwd = document.getElementById('password-input').value;
-    if (pwd === CONFIG.LOGIN_PASSWORD) {
-      sessionStorage.setItem('iq_auth', 'true');
-      document.getElementById('login-page').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      loadDashboard();
-    } else {
-      document.getElementById('login-error').textContent = 'Incorrect password. Try again.';
+    function switchAuthTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', i === (tab === 'login' ? 0 : 1)));
+      document.getElementById('login-form').classList.toggle('active', tab === 'login');
+      document.getElementById('register-form').classList.toggle('active', tab === 'register');
     }
-  }
 
-  function logout() {
-    sessionStorage.removeItem('iq_auth');
-    location.reload();
-  }
+    async function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const msg = document.getElementById('login-msg');
+      msg.className = 'auth-msg';
+      if (!email || !password) { msg.className = 'auth-msg error'; msg.textContent = 'Please enter email and password.'; return; }
+      msg.textContent = 'Logging in...'; msg.style.display = 'block'; msg.style.background = '#f1f5f9'; msg.style.color = '#475569';
+      const { status, data } = await authLogin(email, password);
+      if (status === 200) {
+        sessionStorage.setItem('authToken', data.token);
+        sessionStorage.setItem('userEmail', data.email);
+        launchApp();
+      } else {
+        msg.className = 'auth-msg error'; msg.textContent = data.message || 'Login failed.';
+      }
+    }
 
-  // Check if already logged in
-  if (sessionStorage.getItem('iq_auth') === 'true') {
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadDashboard();
-  }
+    async function handleRegister() {
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const msg = document.getElementById('reg-msg');
+      msg.className = 'auth-msg';
+      if (!email || !password) { msg.className = 'auth-msg error'; msg.textContent = 'Please enter email and password.'; return; }
+      if (password.length < 6) { msg.className = 'auth-msg error'; msg.textContent = 'Password must be at least 6 characters.'; return; }
+      msg.textContent = 'Creating account...'; msg.style.display = 'block'; msg.style.background = '#f1f5f9'; msg.style.color = '#475569';
+      const { status, data } = await authRegister(email, password);
+      if (status === 200) {
+        msg.className = 'auth-msg success'; msg.textContent = '✅ Account created! You can now log in.';
+        setTimeout(() => switchAuthTab('login'), 1500);
+      } else {
+        msg.className = 'auth-msg error'; msg.textContent = data.message || 'Registration failed.';
+      }
+    }
 
-  // ===== NAVIGATION =====
-  function showPage(pageId, btn) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
-    if (btn) btn.classList.add('active');
+    function handleLogout() {
+      sessionStorage.clear();
+      location.reload();
+    }
 
-    if (pageId === 'inventory') loadInventory();
-    if (pageId === 'insights') loadInsights();
-    if (pageId === 'dashboard') loadDashboard();
-    if (pageId === 'add-item') { editingItemId = null; resetForm(); }
-  }
+    function launchApp() {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('nav-email').textContent = sessionStorage.getItem('userEmail') || '';
+      loadDashboard();
+      loadInventory();
+    }
 
-  // ===== DASHBOARD =====
-  async function loadDashboard() {
-    try {
-      const data = await getAllItems();
-      allItems = data.items || [];
-      const insightData = await getInsights();
-      const s = insightData.summary || {};
-      
-      document.getElementById('stat-total').textContent = s.totalProducts || 0;
-      document.getElementById('stat-low').textContent = s.lowStockCount || 0;
-      document.getElementById('stat-out').textContent = s.outOfStockCount || 0;
-      document.getElementById('stat-value').textContent = '$' + (s.estimatedInventoryValue || 0).toFixed(2);
-      
+    // ── NAVIGATION ───────────────────────────────────────────────
+
+    function showPage(pageId, btn) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + pageId).classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      if (btn && btn.classList.contains('nav-btn')) btn.classList.add('active');
+      if (pageId === 'inventory') loadInventory();
+      if (pageId === 'add-item') clearForm();
+    }
+
+    // ── DASHBOARD ────────────────────────────────────────────────
+
+    async function loadDashboard() {
+      const data = await getInsights();
+      const s = data.summary || {};
+      document.getElementById('stat-total').textContent = s.totalProducts ?? '—';
+      document.getElementById('stat-out').textContent = s.outOfStockCount ?? '—';
+      document.getElementById('stat-low').textContent = s.lowStockCount ?? '—';
+      document.getElementById('stat-value').textContent = s.estimatedInventoryValue != null ? '$' + s.estimatedInventoryValue.toFixed(2) : '—';
       const alertsDiv = document.getElementById('dashboard-alerts');
       alertsDiv.innerHTML = '';
-      (insightData.recommendations || []).forEach(r => {
-        const div = document.createElement('div');
-        div.className = 'alert ' + (r.includes('🔴') ? 'alert-red' : r.includes('🟡') ? 'alert-yellow' : 'alert-green');
-        div.textContent = r;
-        alertsDiv.appendChild(div);
+      (data.outOfStockItems || []).forEach(i => {
+        alertsDiv.innerHTML += `<div class="alert-banner red">🚨 <strong>${i.name}</strong> is OUT OF STOCK</div>`;
       });
-    } catch(e) { console.error(e); }
-  }
-
-  // ===== INVENTORY =====
-  async function loadInventory() {
-    const data = await getAllItems();
-    allItems = data.items || [];
-    const tbody = document.getElementById('inventory-table-body');
-    tbody.innerHTML = '';
-    allItems.forEach(item => {
-      const isLow = parseInt(item.quantity) <= parseInt(item.lowStockThreshold || 10);
-      const tr = document.createElement('tr');
-      if (isLow) tr.classList.add('low-stock');
-      tr.innerHTML = `
-        <td>${item.name}</td>
-        <td>${item.category || '—'}</td>
-        <td>$${parseFloat(item.price || 0).toFixed(2)}</td>
-        <td>${item.quantity}${isLow ? ' ⚠️' : ''}</td>
-        <td>${item.lowStockThreshold || 10}</td>
-        <td>
-          <button class="btn btn-edit" onclick="editItem('${item.itemId}')">Edit</button>
-          <button class="btn btn-delete" onclick="removeItem('${item.itemId}')">Delete</button>
-        </td>`;
-      tbody.appendChild(tr);
-    });
-  }
-
-  // ===== FORM =====
-  function resetForm() {
-    ['f-name','f-category','f-description','f-quantity','f-price','f-threshold'].forEach(id => {
-      document.getElementById(id).value = '';
-    });
-    document.getElementById('form-title').textContent = 'Add New Item';
-    document.getElementById('form-status').textContent = '';
-    editingItemId = null;
-  }
-
-  function cancelEdit() { resetForm(); }
-
-  async function submitItem() {
-    const item = {
-      name: document.getElementById('f-name').value,
-      category: document.getElementById('f-category').value,
-      description: document.getElementById('f-description').value,
-      quantity: parseInt(document.getElementById('f-quantity').value) || 0,
-      price: parseFloat(document.getElementById('f-price').value) || 0,
-      lowStockThreshold: parseInt(document.getElementById('f-threshold').value) || 10
-    };
-    if (!item.name) { document.getElementById('form-status').textContent = '❌ Name is required'; return; }
-    
-    try {
-      if (editingItemId) {
-        await updateItem(editingItemId, item);
-        document.getElementById('form-status').textContent = '✅ Item updated!';
-      } else {
-        await addItem(item);
-        document.getElementById('form-status').textContent = '✅ Item added!';
-      }
-      resetForm();
-    } catch(e) {
-      document.getElementById('form-status').textContent = '❌ Error: ' + e.message;
+      (data.lowStockItems || []).forEach(i => {
+        alertsDiv.innerHTML += `<div class="alert-banner yellow">⚠️ <strong>${i.name}</strong> — only ${i.quantity} units left (threshold: ${i.threshold})</div>`;
+      });
     }
-  }
 
-  function editItem(itemId) {
-    const item = allItems.find(i => i.itemId === itemId);
-    if (!item) return;
-    editingItemId = itemId;
-    document.getElementById('f-name').value = item.name || '';
-    document.getElementById('f-category').value = item.category || '';
-    document.getElementById('f-description').value = item.description || '';
-    document.getElementById('f-quantity').value = item.quantity || 0;
-    document.getElementById('f-price').value = item.price || 0;
-    document.getElementById('f-threshold').value = item.lowStockThreshold || 10;
-    document.getElementById('form-title').textContent = 'Edit Item';
-    showPage('add-item', null);
-  }
+    // ── INVENTORY ────────────────────────────────────────────────
 
-  async function removeItem(itemId) {
-    if (!confirm('Delete this item?')) return;
-    await deleteItem(itemId);
-    loadInventory();
-  }
+    let allItems = [];
 
-  // ===== INSIGHTS =====
-  async function loadInsights() {
-    const container = document.getElementById('insights-container');
-    container.innerHTML = '<p>Loading...</p>';
-    try {
-      const data = await getInsights();
-      let html = '';
-      (data.recommendations || []).forEach(r => {
-        html += `<div class="alert ${r.includes('🔴') ? 'alert-red' : r.includes('🟡') ? 'alert-yellow' : 'alert-green'}">${r}</div>`;
-      });
-      html += '<h3 style="margin:20px 0 12px;">Category Breakdown</h3>';
-      const cats = data.categoryBreakdown || {};
-      Object.entries(cats).forEach(([cat, qty]) => {
-        html += `<div class="alert alert-green"><strong>${cat}</strong>: ${qty} units in stock</div>`;
-      });
-      if (data.lowStockItems && data.lowStockItems.length > 0) {
-        html += '<h3 style="margin:20px 0 12px;">⚠️ Low Stock Items</h3>';
-        html += '<table><thead><tr><th>Name</th><th>Category</th><th>Qty</th><th>Threshold</th></tr></thead><tbody>';
-        data.lowStockItems.forEach(i => {
-          html += `<tr><td>${i.name}</td><td>${i.category}</td><td>${i.quantity}</td><td>${i.threshold}</td></tr>`;
-        });
-        html += '</tbody></table>';
+    async function loadInventory() {
+      const tbody = document.getElementById('inventory-body');
+      tbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:#888;">Loading...</td></tr>';
+      const data = await getAllItems();
+      allItems = data.items || [];
+      if (!allItems.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:#888;">No items found. Add your first product!</td></tr>';
+        return;
       }
-      container.innerHTML = html || '<p>✅ All stock levels are healthy!</p>';
-    } catch(e) { container.innerHTML = '<p>Error loading insights: ' + e.message + '</p>'; }
-  }
+      tbody.innerHTML = allItems.map(item => {
+        const qty = item.quantity ?? 0;
+        const threshold = item.lowStockThreshold ?? 10;
+        const badge = qty === 0 ? '<span class="badge out">Out of Stock</span>'
+          : qty <= threshold ? '<span class="badge low">Low Stock</span>'
+            : '<span class="badge ok">In Stock</span>';
+        return `<tr>
+            <td><strong>${item.name}</strong>${item.description ? '<br><small style="color:#888">' + item.description + '</small>' : ''}</td>
+            <td>${item.category || '—'}</td>
+            <td>${qty}</td>
+            <td>$${parseFloat(item.price || 0).toFixed(2)}</td>
+            <td>${badge}</td>
+            <td>
+                <button class="btn-sm btn-edit" onclick="editItem('${item.itemID}')">Edit</button>
+                <button class="btn-sm btn-delete" onclick="handleDelete('${item.itemID}', '${item.name}')">Delete</button>
+            </td>
+        </tr>`;
+      }).join('');
+    }
 
-  // ===== EXPORT CSV =====
-  function exportCSV() {
-    if (!allItems.length) { alert('No items to export.'); return; }
-    const headers = ['itemId','name','category','description','quantity','price','lowStockThreshold','createdAt','updatedAt'];
-    const rows = allItems.map(i => headers.map(h => `"${i[h] || ''}"`).join(','));
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'inventoryiq-export.csv'; a.click();
-  }
+    // ── ADD / EDIT ITEM ──────────────────────────────────────────
 
-  // Press Enter to login
-  document.getElementById('password-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') attemptLogin();
-  });
-</script>
+    function clearForm() {
+      document.getElementById('edit-id').value = '';
+      document.getElementById('form-title').textContent = '➕ Add Item';
+      ['f-name', 'f-category', 'f-price', 'f-quantity', 'f-threshold', 'f-description'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('form-msg').textContent = '';
+    }
+
+    function editItem(itemID) {
+      const item = allItems.find(i => i.itemID === itemID);
+      if (!item) return;
+      document.getElementById('edit-id').value = itemID;
+      document.getElementById('form-title').textContent = '✏️ Edit Item';
+      document.getElementById('f-name').value = item.name || '';
+      document.getElementById('f-category').value = item.category || '';
+      document.getElementById('f-price').value = item.price || '';
+      document.getElementById('f-quantity').value = item.quantity ?? '';
+      document.getElementById('f-threshold').value = item.lowStockThreshold ?? '';
+      document.getElementById('f-description').value = item.description || '';
+      showPage('add-item', null);
+    }
+
+    async function handleSaveItem() {
+      const itemID = document.getElementById('edit-id').value;
+      const payload = {
+        name: document.getElementById('f-name').value.trim(),
+        category: document.getElementById('f-category').value.trim(),
+        price: parseFloat(document.getElementById('f-price').value) || 0,
+        quantity: parseInt(document.getElementById('f-quantity').value) || 0,
+        lowStockThreshold: parseInt(document.getElementById('f-threshold').value) || 10,
+        description: document.getElementById('f-description').value.trim()
+      };
+      if (!payload.name) { document.getElementById('form-msg').style.color = '#dc2626'; document.getElementById('form-msg').textContent = 'Product name is required.'; return; }
+      const msg = document.getElementById('form-msg');
+      msg.style.color = '#888'; msg.textContent = 'Saving...';
+      const result = itemID ? await updateItem(itemID, payload) : await addItem(payload);
+      msg.style.color = '#16a34a'; msg.textContent = '✅ ' + (result.message || 'Saved!');
+      setTimeout(() => showPage('inventory', document.querySelectorAll('.nav-btn')[1]), 1200);
+    }
+
+    async function handleDelete(itemID, name) {
+      if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+      await deleteItem(itemID);
+      loadInventory();
+    }
+
+    // ── INSIGHTS ────────────────────────────────────────────────
+
+    async function loadInsights() {
+      document.getElementById('insights-content').innerHTML = '<p class="loading">Loading insights and sending alerts...</p>';
+      const data = await getInsights();
+      const s = data.summary || {};
+      const recs = (data.recommendations || []).map(r => `<div class="insight-item">${r}</div>`).join('');
+      const cats = Object.entries(data.categoryBreakdown || {}).map(([k, v]) => `<div class="insight-item"><strong>${k}</strong>: ${v} units</div>`).join('') || '<div class="insight-item">No data</div>';
+      const lowItems = (data.lowStockItems || []).map(i => `<div class="insight-item">⚠️ <strong>${i.name}</strong> — ${i.quantity} left</div>`).join('') || '<div class="insight-item">None</div>';
+      const outItems = (data.outOfStockItems || []).map(i => `<div class="insight-item">🚨 <strong>${i.name}</strong> (${i.category})</div>`).join('') || '<div class="insight-item">None</div>';
+      document.getElementById('insights-content').innerHTML = `
+        <div class="insights-grid">
+            <div class="insight-card"><h3>📋 Recommendations</h3>${recs}</div>
+            <div class="insight-card"><h3>🏷️ Category Breakdown</h3>${cats}</div>
+            <div class="insight-card"><h3>⚠️ Low Stock Items</h3>${lowItems}</div>
+            <div class="insight-card"><h3>🚨 Out of Stock</h3>${outItems}</div>
+        </div>
+        <p style="margin-top:16px;font-size:13px;color:#888;">💌 SNS alert sent to your email (if stock issues exist). SQS message logged.</p>`;
+    }
+
+    // ── EXPORT CSV ───────────────────────────────────────────────
+
+    function exportCSV() {
+      if (!allItems.length) { alert('No items to export.'); return; }
+      const headers = ['itemID', 'name', 'category', 'quantity', 'price', 'lowStockThreshold', 'description', 'createdAt'];
+      const rows = allItems.map(i => headers.map(h => `"${(i[h] ?? '').toString().replace(/"/g, '""')}"`).join(','));
+      const csv = [headers.join(','), ...rows].join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = `inventoryiq_export_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+    }
+
+    // ── INIT ─────────────────────────────────────────────────────
+
+    window.onload = () => {
+      if (sessionStorage.getItem('authToken')) {
+        launchApp();
+      }
+    };
+  </script>
 </body>
+
 </html>
