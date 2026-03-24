@@ -2,3 +2,4 @@ SNS_TOPIC_ARN: arn:aws:sns:us-east-1:753344699862:InventoryIQ-Alerts
 SQS_QUEUE_ARN: arn:aws:sqs:us-east-1:753344699862:InventoryIQ-StockQueue
 SQS_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/753344699862/InventoryIQ-StockQueue
 API_INVOKE_URL: https://xti5le6ccg.execute-api.us-east-1.amazonaws.com/prod
+API_KEY: j161VqGi743fBSf9IChk16U3RtBwqG7L1BMpGt5V
