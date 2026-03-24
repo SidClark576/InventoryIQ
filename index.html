@@ -1,894 +1,385 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html class="dark" lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>InventoryIQ</title>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>InventoryIQ | Digital Curator</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-surface": "#dee5ff", "surface-dim": "#060e20", "on-secondary-container": "#e9cdff", "surface-variant": "#192540",
+            "on-error": "#490013", "surface": "#060e20", "surface-container-highest": "#192540", "on-tertiary-fixed": "#00452d",
+            "primary-dim": "#6063ee", "secondary": "#c180ff", "inverse-surface": "#faf8ff", "surface-tint": "#a3a6ff",
+            "on-tertiary-container": "#005a3c", "inverse-on-surface": "#4d556b", "surface-bright": "#1f2b49", "secondary-fixed": "#e5c6ff",
+            "primary-fixed-dim": "#8387ff", "error": "#ff6e84", "primary-container": "#9396ff", "outline-variant": "#40485d",
+            "background": "#060e20", "tertiary": "#9bffce", "surface-container": "#0f1930", "on-primary": "#0f00a4",
+            "tertiary-container": "#69f6b8", "inverse-primary": "#494bd7", "on-secondary": "#33005b", "on-error-container": "#ffb2b9",
+            "on-secondary-fixed": "#4f0089", "secondary-fixed-dim": "#dbb4ff", "secondary-dim": "#9c48ea", "surface-container-high": "#141f38",
+            "error-container": "#a70138", "tertiary-fixed-dim": "#58e7ab", "surface-container-low": "#091328", "on-primary-container": "#0a0081",
+            "on-background": "#dee5ff", "primary": "#a3a6ff", "tertiary-dim": "#58e7ab", "primary-fixed": "#9396ff",
+            "error-dim": "#d73357", "secondary-container": "#6f00be", "on-tertiary": "#006443", "tertiary-fixed": "#69f6b8",
+            "on-surface-variant": "#a3aac4", "surface-container-lowest": "#000000", "on-primary-fixed": "#000000", "outline": "#6d758c"
+          },
+          fontFamily: { "body": ["Inter"], "headline": ["Inter"] },
+        },
+      },
+    }
+  </script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f2f5;
-      color: #333;
-    }
-
-    /* ── AUTH ── */
-    #auth-screen {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-    }
-
-    .auth-box {
-      background: white;
-      border-radius: 12px;
-      padding: 40px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    }
-
-    .auth-box h1 {
-      text-align: center;
-      color: #1a1a2e;
-      margin-bottom: 6px;
-      font-size: 28px;
-    }
-
-    .auth-box .subtitle {
-      text-align: center;
-      color: #888;
-      margin-bottom: 28px;
-      font-size: 14px;
-    }
-
-    .auth-tabs {
-      display: flex;
-      margin-bottom: 24px;
-      border-bottom: 2px solid #eee;
-    }
-
-    .auth-tab {
-      flex: 1;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      color: #888;
-      font-weight: 600;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
-      margin-bottom: -2px;
-    }
-
-    .auth-tab.active {
-      color: #4f46e5;
-      border-bottom-color: #4f46e5;
-    }
-
-    .auth-form {
-      display: none;
-    }
-
-    .auth-form.active {
-      display: block;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 6px;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: border-color 0.2s;
-    }
-
-    .form-group input:focus {
-      outline: none;
-      border-color: #4f46e5;
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 12px;
-      background: #4f46e5;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-primary:hover {
-      background: #4338ca;
-    }
-
-    .auth-msg {
-      margin-top: 14px;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      text-align: center;
-      display: none;
-    }
-
-    .auth-msg.error {
-      background: #fee2e2;
-      color: #b91c1c;
-      display: block;
-    }
-
-    .auth-msg.success {
-      background: #dcfce7;
-      color: #15803d;
-      display: block;
-    }
-
-    /* ── APP ── */
-    #app {
-      display: none;
-    }
-
-    nav {
-      background: #1a1a2e;
-      color: white;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 60px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .nav-brand {
-      font-size: 20px;
-      font-weight: 700;
-      color: #a5b4fc;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 6px;
-    }
-
-    .nav-btn {
-      padding: 7px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      border: none;
-      font-size: 14px;
-      font-weight: 500;
-      background: transparent;
-      color: #cbd5e1;
-      transition: background 0.2s;
-    }
-
-    .nav-btn:hover,
-    .nav-btn.active {
-      background: #4f46e5;
-      color: white;
-    }
-
-    .nav-user {
-      font-size: 13px;
-      color: #94a3b8;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .btn-logout {
-      padding: 6px 14px;
-      background: #dc2626;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    /* ── PAGES ── */
-    .page {
-      display: none;
-      padding: 28px 32px;
-    }
-
-    .page.active {
-      display: block;
-    }
-
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-
-    .page-header h2 {
-      font-size: 22px;
-      color: #1a1a2e;
-    }
-
-    /* ── STATS CARDS ── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 18px;
-      margin-bottom: 28px;
-    }
-
-    .stat-card {
-      background: white;
-      border-radius: 10px;
-      padding: 22px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-    }
-
-    .stat-card .label {
-      font-size: 12px;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .stat-card .value {
-      font-size: 32px;
-      font-weight: 700;
-      color: #1a1a2e;
-      margin-top: 6px;
-    }
-
-    .stat-card.red .value {
-      color: #dc2626;
-    }
-
-    .stat-card.yellow .value {
-      color: #d97706;
-    }
-
-    .stat-card.green .value {
-      color: #16a34a;
-    }
-
-    /* ── ALERTS ── */
-    .alert-banner {
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .alert-banner.red {
-      background: #fee2e2;
-      color: #b91c1c;
-      border-left: 4px solid #dc2626;
-    }
-
-    .alert-banner.yellow {
-      background: #fef9c3;
-      color: #92400e;
-      border-left: 4px solid #d97706;
-    }
-
-    /* ── TABLE ── */
-    .table-wrap {
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-      overflow: hidden;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th {
-      background: #f8fafc;
-      padding: 13px 16px;
-      text-align: left;
-      font-size: 12px;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    td {
-      padding: 13px 16px;
-      border-top: 1px solid #f1f5f9;
-      font-size: 14px;
-    }
-
-    tr:hover td {
-      background: #f8fafc;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .badge.ok {
-      background: #dcfce7;
-      color: #15803d;
-    }
-
-    .badge.low {
-      background: #fef9c3;
-      color: #92400e;
-    }
-
-    .badge.out {
-      background: #fee2e2;
-      color: #b91c1c;
-    }
-
-    .btn-sm {
-      padding: 5px 12px;
-      border-radius: 5px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-    }
-
-    .btn-edit {
-      background: #e0e7ff;
-      color: #4f46e5;
-    }
-
-    .btn-delete {
-      background: #fee2e2;
-      color: #dc2626;
-      margin-left: 6px;
-    }
-
-    .btn-action {
-      padding: 9px 18px;
-      border-radius: 7px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-    }
-
-    .btn-add {
-      background: #4f46e5;
-      color: white;
-    }
-
-    .btn-export {
-      background: #e0e7ff;
-      color: #4f46e5;
-      margin-left: 10px;
-    }
-
-    /* ── FORM ── */
-    .form-card {
-      background: white;
-      border-radius: 10px;
-      padding: 28px;
-      max-width: 600px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .form-grid .full {
-      grid-column: 1 / -1;
-    }
-
-    .form-card label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 5px;
-    }
-
-    .form-card input,
-    .form-card select,
-    .form-card textarea {
-      width: 100%;
-      padding: 10px 13px;
-      border: 1.5px solid #ddd;
-      border-radius: 7px;
-      font-size: 14px;
-    }
-
-    .form-card input:focus,
-    .form-card select:focus {
-      outline: none;
-      border-color: #4f46e5;
-    }
-
-    .form-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .btn-save {
-      padding: 10px 24px;
-      background: #4f46e5;
-      color: white;
-      border: none;
-      border-radius: 7px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-cancel {
-      padding: 10px 24px;
-      background: #e2e8f0;
-      color: #475569;
-      border: none;
-      border-radius: 7px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    /* ── INSIGHTS ── */
-    .insights-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 18px;
-    }
-
-    .insight-card {
-      background: white;
-      border-radius: 10px;
-      padding: 22px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-    }
-
-    .insight-card h3 {
-      font-size: 15px;
-      color: #1a1a2e;
-      margin-bottom: 14px;
-      font-weight: 700;
-    }
-
-    .insight-item {
-      padding: 8px 0;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 13px;
-    }
-
-    .insight-item:last-child {
-      border-bottom: none;
-    }
-
-    .btn-refresh {
-      padding: 9px 20px;
-      background: #16a34a;
-      color: white;
-      border: none;
-      border-radius: 7px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .loading {
-      color: #888;
-      font-style: italic;
-    }
+      background-color: #060e20;
+      background-image: radial-gradient(at 0% 0%, rgba(163, 166, 255, 0.15) 0px, transparent 50%),
+                        radial-gradient(at 100% 100%, rgba(156, 72, 234, 0.1) 0px, transparent 50%);
+      min-height: 100vh; color: #dee5ff; font-family: 'Inter', sans-serif;
+    }
+    .glass-panel { background: rgba(9, 19, 40, 0.6); backdrop-filter: blur(24px); outline: 1px solid rgba(109, 117, 140, 0.15); }
+    .ghost-border { outline: 0.5px solid rgba(64, 72, 93, 0.2); }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    
+    .page { display: none; }
+    .page.active { display: block; animation: fadeIn 0.4s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .auth-tab.active { color: #a3a6ff; border-bottom: 2px solid #a3a6ff; }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+    
+    input, select, textarea {
+      background: rgba(25, 37, 64, 0.5); border: 1px solid rgba(109, 117, 140, 0.3); color: #dee5ff;
+    }
+    input:focus { border-color: #a3a6ff; outline: none; box-shadow: 0 0 0 2px rgba(163, 166, 255, 0.2); }
   </style>
 </head>
-
-<body>
-
-  <!-- ══ AUTH SCREEN ══════════════════════════════════════════════ -->
-  <div id="auth-screen">
-    <div class="auth-box">
-      <h1>📦 InventoryIQ</h1>
-      <p class="subtitle">Smart Inventory Management</p>
-
-      <div class="auth-tabs">
-        <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
-        <div class="auth-tab" onclick="switchAuthTab('register')">Register</div>
+<body class="selection:bg-primary/30 antialiased">
+  <!-- AUTH SCREEN -->
+  <div id="auth-screen" class="flex items-center justify-center min-h-[100dvh] p-4 text-left">
+    <div class="glass-panel w-full max-w-md p-8 rounded-3xl ghost-border">
+      <div class="text-center mb-8">
+        <span class="material-symbols-outlined text-primary text-5xl mb-3 block">grid_view</span>
+        <h1 class="text-3xl font-black tracking-tight bg-gradient-to-r from-indigo-400 to-indigo-600 bg-clip-text text-transparent">InventoryIQ</h1>
+        <p class="text-on-surface-variant mt-2 text-xs uppercase tracking-widest font-bold">Digital Curator</p>
       </div>
 
-      <!-- Login Form -->
-      <div id="login-form" class="auth-form active">
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" id="login-email" placeholder="you@example.com" />
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="login-password" placeholder="Enter your password"
-            onkeydown="if(event.key==='Enter') handleLogin()" />
-        </div>
-        <button class="btn-primary" onclick="handleLogin()">Login</button>
-        <div id="login-msg" class="auth-msg"></div>
+      <div class="flex border-b border-white/10 mb-6 font-[Inter]">
+        <button class="flex-1 pb-3 text-sm font-bold tracking-wider uppercase text-indigo-400 border-b-2 border-indigo-400 auth-tab active" onclick="switchAuthTab('login', this)">Log In</button>
+        <button class="flex-1 pb-3 text-sm font-bold tracking-wider uppercase text-on-surface-variant border-b-2 border-transparent auth-tab" onclick="switchAuthTab('register', this)">Register</button>
       </div>
 
-      <!-- Register Form -->
-      <div id="register-form" class="auth-form">
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" id="reg-email" placeholder="you@example.com" />
+      <div id="login-form" class="auth-form active space-y-5">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Email Address</label>
+          <input type="email" id="login-email" class="w-full rounded-xl px-4 py-3 text-sm" placeholder="you@example.com" />
         </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="reg-password" placeholder="Create a password" />
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Password</label>
+          <input type="password" id="login-password" class="w-full rounded-xl px-4 py-3 text-sm" placeholder="Enter password" onkeydown="if(event.key==='Enter') handleLogin()" />
         </div>
-        <button class="btn-primary" onclick="handleRegister()">Create Account</button>
-        <div id="reg-msg" class="auth-msg"></div>
+        <button class="w-full mt-4 bg-gradient-to-r from-primary to-primary-dim text-on-primary py-4 rounded-xl font-bold shadow-[0_0_20px_rgba(163,166,255,0.2)] hover:shadow-[0_0_30px_rgba(163,166,255,0.4)] transition-all cursor-pointer" onclick="handleLogin()">Log In</button>
+        <div id="login-msg" class="hidden mt-4 p-3 rounded-xl text-center text-sm font-medium"></div>
+      </div>
+
+      <div id="register-form" class="auth-form space-y-5">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Email Address</label>
+          <input type="email" id="reg-email" class="w-full rounded-xl px-4 py-3 text-sm" placeholder="you@example.com" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Password</label>
+          <input type="password" id="reg-password" class="w-full rounded-xl px-4 py-3 text-sm" placeholder="Create passsword" />
+        </div>
+        <button class="w-full mt-4 bg-gradient-to-r from-primary to-primary-dim text-on-primary py-4 rounded-xl font-bold hover:shadow-[0_0_20px_rgba(163,166,255,0.3)] transition-all cursor-pointer" onclick="handleRegister()">Create Account</button>
+        <div id="reg-msg" class="hidden mt-4 p-3 rounded-xl text-center text-sm font-medium"></div>
       </div>
     </div>
   </div>
 
-  <!-- ══ MAIN APP ══════════════════════════════════════════════════ -->
-  <div id="app">
-    <nav>
-      <span class="nav-brand">📦 InventoryIQ</span>
-      <div class="nav-links">
-        <button class="nav-btn active" onclick="showPage('dashboard', this)">Dashboard</button>
-        <button class="nav-btn" onclick="showPage('inventory', this)">Inventory</button>
-        <button class="nav-btn" onclick="showPage('insights', this)">Insights</button>
+  <!-- MAIN APP -->
+  <div id="app" class="hidden">
+    <nav class="fixed top-0 w-full z-50 bg-slate-950/60 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-8 h-20 shadow-[0_8px_32px_0_rgba(6,14,32,0.8)]">
+      <div class="flex items-center gap-8">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-indigo-400 text-3xl">grid_view</span>
+          <span class="text-2xl font-bold tracking-tighter bg-gradient-to-r from-indigo-400 to-indigo-600 bg-clip-text text-transparent">InventoryIQ</span>
+        </div>
+        <div class="hidden md:flex items-center gap-6 ml-4">
+          <button class="nav-btn text-indigo-400 font-semibold border-b-2 border-indigo-400 pb-1 font-['Inter'] tracking-tight" onclick="showPage('dashboard', this)">Dashboard</button>
+          <button class="nav-btn text-slate-400 hover:text-slate-200 transition-colors font-['Inter'] tracking-tight" onclick="showPage('inventory', this)">Inventory</button>
+          <button class="nav-btn text-slate-400 hover:text-slate-200 transition-colors font-['Inter'] tracking-tight" onclick="showPage('insights', this)">Insights</button>
+        </div>
       </div>
-      <div class="nav-user">
-        <span id="nav-email"></span>
-        <button class="btn-logout" onclick="handleLogout()">Logout</button>
+      <div class="flex items-center gap-4">
+        <div class="text-sm font-medium text-slate-400" id="nav-email"></div>
+        <button class="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-400 hover:text-error hover:bg-error/5 transition-colors group cursor-pointer" onclick="handleLogout()">
+          <span class="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform">logout</span>
+          <span class="text-sm font-medium">Logout</span>
+        </button>
       </div>
     </nav>
 
-    <!-- Dashboard -->
-    <div id="page-dashboard" class="page active">
-      <div class="page-header">
-        <h2>📊 Dashboard</h2>
+    <main class="pt-28 pb-12 px-8 max-w-[1600px] mx-auto min-h-screen flex flex-col">
+      
+      <!-- Dashboard -->
+      <div id="page-dashboard" class="page active space-y-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-on-surface-variant font-bold tracking-wide text-sm uppercase">Total Products</span>
+              <span class="material-symbols-outlined text-primary">inventory_2</span>
+            </div>
+            <div class="relative z-10"><h2 class="text-5xl font-black text-on-surface tracking-tighter" id="stat-total">—</h2></div>
+          </div>
+          <div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-on-surface-variant font-bold tracking-wide text-sm uppercase">Out of Stock</span>
+              <span class="material-symbols-outlined text-error">cancel</span>
+            </div>
+            <div class="relative z-10"><h2 class="text-5xl font-black text-on-surface tracking-tighter" id="stat-out">—</h2></div>
+          </div>
+          <div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-on-surface-variant font-bold tracking-wide text-sm uppercase">Low Stock</span>
+              <span class="material-symbols-outlined text-secondary">error_outline</span>
+            </div>
+            <div class="relative z-10"><h2 class="text-5xl font-black text-on-surface tracking-tighter" id="stat-low">—</h2></div>
+          </div>
+          <div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
+            <div class="flex justify-between items-start mb-4">
+              <span class="text-on-surface-variant font-bold tracking-wide text-sm uppercase">Total Value</span>
+              <span class="material-symbols-outlined text-tertiary">payments</span>
+            </div>
+            <div class="relative z-10"><h2 class="text-5xl font-black text-on-surface tracking-tighter" id="stat-value">—</h2></div>
+          </div>
+        </div>
+        <div id="dashboard-alerts" class="space-y-3"></div>
       </div>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="label">Total Products</div>
-          <div class="value" id="stat-total">—</div>
-        </div>
-        <div class="stat-card red">
-          <div class="label">Out of Stock</div>
-          <div class="value" id="stat-out">—</div>
-        </div>
-        <div class="stat-card yellow">
-          <div class="label">Low Stock</div>
-          <div class="value" id="stat-low">—</div>
-        </div>
-        <div class="stat-card green">
-          <div class="label">Inventory Value</div>
-          <div class="value" id="stat-value">—</div>
-        </div>
-      </div>
-      <div id="dashboard-alerts"></div>
-    </div>
 
-    <!-- Inventory -->
-    <div id="page-inventory" class="page">
-      <div class="page-header">
-        <h2>📦 Inventory</h2>
-        <div>
-          <button class="btn-action btn-add" onclick="showPage('add-item', document.querySelector('.nav-btn.active'))">+
-            Add Item</button>
-          <button class="btn-action btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+      <!-- Inventory -->
+      <div id="page-inventory" class="page space-y-6">
+        <div class="flex items-center justify-between">
+          <div><h1 class="text-3xl font-bold text-on-surface tracking-tight">Active Inventory</h1><p class="text-on-surface-variant mt-1">Manage and track your high-end assets in real-time.</p></div>
+          <div class="flex gap-4">
+            <button class="bg-surface-variant text-on-surface border border-outline-variant px-6 py-3 rounded-2xl font-bold hover:bg-white/10 transition-all flex items-center gap-2 cursor-pointer" onclick="exportCSV()"><span class="material-symbols-outlined font-bold">download</span> Export CSV</button>
+            <button class="bg-gradient-to-r from-primary to-primary-dim text-on-primary px-8 py-3 rounded-2xl font-bold shadow-[0_0_20px_rgba(163,166,255,0.3)] hover:shadow-[0_0_30px_rgba(163,166,255,0.5)] transition-all flex items-center gap-2 cursor-pointer" onclick="showPage('add-item', document.querySelectorAll('.nav-btn')[1])"><span class="material-symbols-outlined font-bold">add</span> Add Item</button>
+          </div>
+        </div>
+        <div class="glass-panel rounded-3xl overflow-hidden ghost-border">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead><tr class="bg-surface-container-high/50">
+                <th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold">Asset Name</th>
+                <th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold">Category</th>
+                <th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold">Quantity</th>
+                <th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold">Unit Price</th>
+                <th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold">Status</th>
+                <th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold text-right">Actions</th>
+              </tr></thead>
+              <tbody id="inventory-body" class="divide-y divide-white/5">
+                <tr><td colspan="6" class="px-8 py-10 text-center text-on-surface-variant">Loading Items...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Quantity</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="inventory-body">
-            <tr>
-              <td colspan="6" class="loading" style="padding:24px;text-align:center">Loading...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
 
-    <!-- Add / Edit Item -->
-    <div id="page-add-item" class="page">
-      <div class="page-header">
-        <h2 id="form-title">➕ Add Item</h2>
-      </div>
-      <div class="form-card">
-        <input type="hidden" id="edit-id" />
-        <div class="form-grid">
-          <div class="full form-group-inner">
-            <label>Product Name *</label>
-            <input type="text" id="f-name" placeholder="e.g. Bag of Rice" />
+      <!-- Add / Edit Item -->
+      <div id="page-add-item" class="page space-y-6">
+        <div><h1 id="form-title" class="text-3xl font-bold text-on-surface tracking-tight">Add Item</h1></div>
+        <div class="glass-panel rounded-3xl p-8 max-w-2xl ghost-border">
+          <input type="hidden" id="edit-id" />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="col-span-full"><label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Product Name *</label><input type="text" id="f-name" class="w-full rounded-xl px-4 py-3" placeholder="e.g. Pro Studio Display" /></div>
+            <div><label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Category</label><input type="text" id="f-category" class="w-full rounded-xl px-4 py-3" placeholder="e.g. Electronics" /></div>
+            <div><label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Price ($)</label><input type="number" id="f-price" class="w-full rounded-xl px-4 py-3" placeholder="0.00" step="0.01" min="0" /></div>
+            <div><label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Quantity</label><input type="number" id="f-quantity" class="w-full rounded-xl px-4 py-3" placeholder="0" min="0" /></div>
+            <div><label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Low Stock Threshold</label><input type="number" id="f-threshold" class="w-full rounded-xl px-4 py-3" placeholder="10" min="0" /></div>
+            <div class="col-span-full"><label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Description</label><input type="text" id="f-description" class="w-full rounded-xl px-4 py-3" placeholder="Optional details..." /></div>
           </div>
-          <div>
-            <label>Category</label>
-            <input type="text" id="f-category" placeholder="e.g. Food" />
+          <div class="flex gap-4 mt-8 pt-6 border-t border-white/10">
+            <button class="bg-gradient-to-r from-primary to-primary-dim text-on-primary px-8 py-3 rounded-2xl font-bold shadow-[0_0_20px_rgba(163,166,255,0.3)] transition-all cursor-pointer" onclick="handleSaveItem()">Save Asset</button>
+            <button class="px-8 py-3 rounded-2xl font-bold text-on-surface-variant border border-outline-variant hover:bg-white/10 transition-all cursor-pointer" onclick="showPage('inventory', document.querySelectorAll('.nav-btn')[1])">Cancel</button>
           </div>
-          <div>
-            <label>Price ($)</label>
-            <input type="number" id="f-price" placeholder="0.00" step="0.01" min="0" />
-          </div>
-          <div>
-            <label>Quantity</label>
-            <input type="number" id="f-quantity" placeholder="0" min="0" />
-          </div>
-          <div>
-            <label>Low Stock Threshold</label>
-            <input type="number" id="f-threshold" placeholder="10" min="0" />
-          </div>
-          <div class="full">
-            <label>Description</label>
-            <input type="text" id="f-description" placeholder="Optional description" />
-          </div>
+          <div id="form-msg" class="mt-4 text-sm font-semibold"></div>
         </div>
-        <div class="form-actions">
-          <button class="btn-save" onclick="handleSaveItem()">Save Item</button>
-          <button class="btn-cancel"
-            onclick="showPage('inventory', document.querySelector('.nav-btn.active'))">Cancel</button>
-        </div>
-        <div id="form-msg" style="margin-top:12px;font-size:13px;color:#16a34a;"></div>
       </div>
-    </div>
 
-    <!-- Insights -->
-    <div id="page-insights" class="page">
-      <div class="page-header">
-        <h2>💡 Insights</h2>
-        <button class="btn-refresh" onclick="loadInsights()">🔄 Refresh Insights</button>
+      <!-- Insights -->
+      <div id="page-insights" class="page space-y-6">
+        <div class="flex items-center justify-between">
+          <div><h1 class="text-3xl font-bold text-on-surface tracking-tight">Intelligence</h1><p class="text-on-surface-variant mt-1">AI-driven curation and tracking analysis</p></div>
+          <button class="bg-gradient-to-r from-tertiary to-tertiary-dim text-on-tertiary-fixed px-6 py-3 rounded-2xl font-bold shadow-[0_0_20px_rgba(105,246,184,0.3)] transition-all flex items-center gap-2 cursor-pointer" onclick="loadInsights()"><span class="material-symbols-outlined font-bold">refresh</span> Refresh Analysis</button>
+        </div>
+        <div id="insights-content" class="text-on-surface-variant glass-panel p-8 rounded-3xl ghost-border"><p>Ready to process your data...</p></div>
       </div>
-      <div id="insights-content">
-        <p class="loading">Click "Refresh Insights" to load data and trigger stock alerts.</p>
-      </div>
-    </div>
+      
+      <!-- Footer -->
+      <footer class="mt-auto pt-16 pb-4 flex justify-between items-center font-['Inter'] text-xs uppercase tracking-widest text-slate-500">
+        <div class="flex gap-8"><a class="hover:text-indigo-300 transition-all cursor-pointer">Support</a><a class="hover:text-indigo-300 transition-all cursor-pointer">Privacy</a></div>
+        <span class="opacity-80">© 2026 InventoryIQ Digital Curator</span>
+      </footer>
+    </main>
   </div>
 
   <script src="config.js"></script>
   <script src="api.js"></script>
   <script>
-
-    // ── AUTH LOGIC ───────────────────────────────────────────────
-
-    function switchAuthTab(tab) {
-      document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', i === (tab === 'login' ? 0 : 1)));
+    function switchAuthTab(tab, btn) {
+      document.querySelectorAll('.auth-tab').forEach(t => {
+        t.classList.remove('active', 'text-indigo-400', 'border-indigo-400');
+        t.classList.add('text-on-surface-variant', 'border-transparent');
+      });
+      btn.classList.add('active', 'text-indigo-400', 'border-indigo-400');
+      btn.classList.remove('text-on-surface-variant', 'border-transparent');
       document.getElementById('login-form').classList.toggle('active', tab === 'login');
       document.getElementById('register-form').classList.toggle('active', tab === 'register');
     }
 
     async function handleLogin() {
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
+      const email = document.getElementById('login-email').value.trim(), pwd = document.getElementById('login-password').value;
       const msg = document.getElementById('login-msg');
-      msg.className = 'auth-msg';
-      if (!email || !password) { msg.className = 'auth-msg error'; msg.textContent = 'Please enter email and password.'; return; }
-      msg.textContent = 'Logging in...'; msg.style.display = 'block'; msg.style.background = '#f1f5f9'; msg.style.color = '#475569';
-      const { status, data } = await authLogin(email, password);
-      if (status === 200) {
-        sessionStorage.setItem('authToken', data.token);
-        sessionStorage.setItem('userEmail', data.email);
-        launchApp();
-      } else {
-        msg.className = 'auth-msg error'; msg.textContent = data.message || 'Login failed.';
-      }
+      msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium";
+      if (!email || !pwd) { msg.classList.add('bg-error-container/20','text-error','block'); msg.textContent = 'Enter email & password.'; return; }
+      msg.classList.add('bg-surface-variant','text-on-surface','block'); msg.textContent = 'Logging in...';
+      const { status, data } = await authLogin(email, pwd);
+      if (status === 200) { sessionStorage.setItem('authToken', data.token); sessionStorage.setItem('userEmail', data.email); launchApp(); }
+      else { msg.className="mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-error-container/20 text-error"; msg.textContent = data.message || 'Login failed.'; }
     }
 
     async function handleRegister() {
-      const email = document.getElementById('reg-email').value.trim();
-      const password = document.getElementById('reg-password').value;
+      const email = document.getElementById('reg-email').value.trim(), pwd = document.getElementById('reg-password').value;
       const msg = document.getElementById('reg-msg');
-      msg.className = 'auth-msg';
-      if (!email || !password) { msg.className = 'auth-msg error'; msg.textContent = 'Please enter email and password.'; return; }
-      if (password.length < 6) { msg.className = 'auth-msg error'; msg.textContent = 'Password must be at least 6 characters.'; return; }
-      msg.textContent = 'Creating account...'; msg.style.display = 'block'; msg.style.background = '#f1f5f9'; msg.style.color = '#475569';
-      const { status, data } = await authRegister(email, password);
+      msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium";
+      if (!email || !pwd) { msg.classList.add('bg-error-container/20','text-error','block'); msg.textContent = 'Enter email & password.'; return; }
+      if (pwd.length < 6) { msg.classList.add('bg-error-container/20','text-error','block'); msg.textContent = 'Password >= 6 characters.'; return; }
+      msg.classList.add('bg-surface-variant','text-on-surface','block'); msg.textContent = 'Creating account...';
+      const { status, data } = await authRegister(email, pwd);
       if (status === 200) {
-        msg.className = 'auth-msg success'; msg.textContent = '✅ Account created! You can now log in.';
-        setTimeout(() => switchAuthTab('login'), 1500);
-      } else {
-        msg.className = 'auth-msg error'; msg.textContent = data.message || 'Registration failed.';
-      }
+        msg.className="mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-tertiary-container/30 text-tertiary"; msg.textContent = 'Account created!';
+        setTimeout(() => switchAuthTab('login', document.querySelector('.auth-tab')), 1500);
+      } else { msg.className="mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-error-container/20 text-error"; msg.textContent = data.message || 'Fail'; }
     }
 
-    function handleLogout() {
-      sessionStorage.clear();
-      location.reload();
-    }
+    function handleLogout() { sessionStorage.clear(); location.reload(); }
 
     function launchApp() {
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      document.getElementById('nav-email').textContent = sessionStorage.getItem('userEmail') || '';
-      loadDashboard();
-      loadInventory();
+      document.getElementById('auth-screen').classList.add('hidden'); document.getElementById('auth-screen').classList.remove('flex');
+      document.getElementById('app').classList.remove('hidden'); document.getElementById('nav-email').textContent = sessionStorage.getItem('userEmail') || '';
+      loadDashboard(); loadInventory();
     }
-
-    // ── NAVIGATION ───────────────────────────────────────────────
 
     function showPage(pageId, btn) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById('page-' + pageId).classList.add('active');
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      if (btn && btn.classList.contains('nav-btn')) btn.classList.add('active');
-      if (pageId === 'inventory') loadInventory();
-      if (pageId === 'add-item') clearForm();
+      document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('text-indigo-400','border-b-2','border-indigo-400','pb-1'); b.classList.add('text-slate-400'); });
+      if (btn) { btn.classList.add('text-indigo-400','border-b-2','border-indigo-400','pb-1'); btn.classList.remove('text-slate-400'); }
+      if (pageId === 'inventory') loadInventory(); if (pageId === 'add-item') clearForm();
     }
 
-    // ── DASHBOARD ────────────────────────────────────────────────
-
     async function loadDashboard() {
-      const data = await getInsights();
-      const s = data.summary || {};
+      const data = await getInsights(); const s = data.summary || {};
       document.getElementById('stat-total').textContent = s.totalProducts ?? '—';
       document.getElementById('stat-out').textContent = s.outOfStockCount ?? '—';
       document.getElementById('stat-low').textContent = s.lowStockCount ?? '—';
       document.getElementById('stat-value').textContent = s.estimatedInventoryValue != null ? '$' + s.estimatedInventoryValue.toFixed(2) : '—';
-      const alertsDiv = document.getElementById('dashboard-alerts');
-      alertsDiv.innerHTML = '';
-      (data.outOfStockItems || []).forEach(i => {
-        alertsDiv.innerHTML += `<div class="alert-banner red">🚨 <strong>${i.name}</strong> is OUT OF STOCK</div>`;
-      });
-      (data.lowStockItems || []).forEach(i => {
-        alertsDiv.innerHTML += `<div class="alert-banner yellow">⚠️ <strong>${i.name}</strong> — only ${i.quantity} units left (threshold: ${i.threshold})</div>`;
-      });
+      
+      const alertsDiv = document.getElementById('dashboard-alerts'); alertsDiv.innerHTML = '';
+      (data.outOfStockItems || []).forEach(i => { alertsDiv.innerHTML += `<div class="p-4 rounded-xl bg-error-container/20 border border-error/20 flex items-center gap-3"><span class="material-symbols-outlined text-error">cancel</span><span class="text-error-dim"><strong>${i.name}</strong> is OUT OF STOCK</span></div>`; });
+      (data.lowStockItems || []).forEach(i => { alertsDiv.innerHTML += `<div class="p-4 rounded-xl bg-secondary-container/20 border border-secondary/20 flex items-center gap-3"><span class="material-symbols-outlined text-secondary">warning</span><span class="text-secondary-dim"><strong>${i.name}</strong> — ${i.quantity} left</span></div>`; });
     }
 
-    // ── INVENTORY ────────────────────────────────────────────────
-
     let allItems = [];
-
     async function loadInventory() {
-      const tbody = document.getElementById('inventory-body');
-      tbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:#888;">Loading...</td></tr>';
-      const data = await getAllItems();
-      allItems = data.items || [];
-      if (!allItems.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:#888;">No items found. Add your first product!</td></tr>';
-        return;
-      }
-      tbody.innerHTML = allItems.map(item => {
-        const qty = item.quantity ?? 0;
-        const threshold = item.lowStockThreshold ?? 10;
-        const badge = qty === 0 ? '<span class="badge out">Out of Stock</span>'
-          : qty <= threshold ? '<span class="badge low">Low Stock</span>'
-            : '<span class="badge ok">In Stock</span>';
-        return `<tr>
-            <td><strong>${item.name}</strong>${item.description ? '<br><small style="color:#888">' + item.description + '</small>' : ''}</td>
-            <td>${item.category || '—'}</td>
-            <td>${qty}</td>
-            <td>$${parseFloat(item.price || 0).toFixed(2)}</td>
-            <td>${badge}</td>
-            <td>
-                <button class="btn-sm btn-edit" onclick="editItem('${item.itemID}')">Edit</button>
-                <button class="btn-sm btn-delete" onclick="handleDelete('${item.itemID}', '${item.name}')">Delete</button>
-            </td>
-        </tr>`;
+      const tb = document.getElementById('inventory-body'); tb.innerHTML = '<tr><td colspan="6" class="px-8 py-10 text-center text-on-surface-variant">Loading Items...</td></tr>';
+      const data = await getAllItems(); allItems = data.items || [];
+      if (!allItems.length) { tb.innerHTML = '<tr><td colspan="6" class="px-8 py-10 text-center text-on-surface-variant">No items found.</td></tr>'; return; }
+      
+      tb.innerHTML = allItems.map((c, idx) => {
+        const qty = c.quantity ?? 0, thr = c.lowStockThreshold ?? 10, bg = idx%2===1 ? 'bg-surface-container-low/30' : '';
+        const badge = qty === 0 ? '<span class="px-4 py-1.5 text-xs font-bold uppercase rounded-full bg-error-container/20 text-error-dim border border-error/20">Out of Stock</span>'
+          : qty <= thr ? '<span class="px-4 py-1.5 text-xs font-bold uppercase rounded-full bg-secondary-container/20 text-secondary border border-secondary/20">Low Stock</span>'
+          : '<span class="px-4 py-1.5 text-xs font-bold uppercase rounded-full bg-tertiary-container/20 text-tertiary border border-tertiary/20">In Stock</span>';
+        
+        return `<tr class="hover:bg-white/5 transition-colors group ${bg}">
+          <td class="px-8 py-5"><div class="font-semibold text-on-surface">${c.name}</div>${c.description?`<div class="text-xs text-on-surface-variant">${c.description}</div>`:''}</td>
+          <td class="px-8 py-5 text-on-surface-variant">${c.category||'—'}</td>
+          <td class="px-8 py-5 font-mono text-on-surface">${qty}</td>
+          <td class="px-8 py-5 font-mono text-on-surface">$${parseFloat(c.price||0).toFixed(2)}</td>
+          <td class="px-8 py-5">${badge}</td>
+          <td class="px-8 py-5 text-right"><div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg cursor-pointer" onclick="editItem('${c.itemID}')"><span class="material-symbols-outlined text-xl">edit</span></button>
+            <button class="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg cursor-pointer" onclick="handleDelete('${c.itemID}', '${c.name.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')"><span class="material-symbols-outlined text-xl">delete</span></button>
+          </div></td></tr>`;
       }).join('');
     }
 
-    // ── ADD / EDIT ITEM ──────────────────────────────────────────
-
     function clearForm() {
-      document.getElementById('edit-id').value = '';
-      document.getElementById('form-title').textContent = '➕ Add Item';
-      ['f-name', 'f-category', 'f-price', 'f-quantity', 'f-threshold', 'f-description'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('edit-id').value = ''; document.getElementById('form-title').textContent = 'Add Item';
+      ['f-name','f-category','f-price','f-quantity','f-threshold','f-description'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('form-msg').textContent = '';
     }
 
-    function editItem(itemID) {
-      const item = allItems.find(i => i.itemID === itemID);
-      if (!item) return;
-      document.getElementById('edit-id').value = itemID;
-      document.getElementById('form-title').textContent = '✏️ Edit Item';
-      document.getElementById('f-name').value = item.name || '';
-      document.getElementById('f-category').value = item.category || '';
-      document.getElementById('f-price').value = item.price || '';
-      document.getElementById('f-quantity').value = item.quantity ?? '';
-      document.getElementById('f-threshold').value = item.lowStockThreshold ?? '';
-      document.getElementById('f-description').value = item.description || '';
+    function editItem(id) {
+      const it = allItems.find(i => i.itemID === id); if(!it) return;
+      document.getElementById('edit-id').value = id; document.getElementById('form-title').textContent = 'Edit Item';
+      document.getElementById('f-name').value = it.name||''; document.getElementById('f-category').value = it.category||'';
+      document.getElementById('f-price').value = it.price||''; document.getElementById('f-quantity').value = it.quantity??'';
+      document.getElementById('f-threshold').value = it.lowStockThreshold??''; document.getElementById('f-description').value = it.description||'';
       showPage('add-item', null);
     }
 
     async function handleSaveItem() {
-      const itemID = document.getElementById('edit-id').value;
-      const payload = {
-        name: document.getElementById('f-name').value.trim(),
-        category: document.getElementById('f-category').value.trim(),
-        price: parseFloat(document.getElementById('f-price').value) || 0,
-        quantity: parseInt(document.getElementById('f-quantity').value) || 0,
-        lowStockThreshold: parseInt(document.getElementById('f-threshold').value) || 10,
-        description: document.getElementById('f-description').value.trim()
-      };
-      if (!payload.name) { document.getElementById('form-msg').style.color = '#dc2626'; document.getElementById('form-msg').textContent = 'Product name is required.'; return; }
-      const msg = document.getElementById('form-msg');
-      msg.style.color = '#888'; msg.textContent = 'Saving...';
-      const result = itemID ? await updateItem(itemID, payload) : await addItem(payload);
-      msg.style.color = '#16a34a'; msg.textContent = '✅ ' + (result.message || 'Saved!');
+      const id = document.getElementById('edit-id').value;
+      const p = { name: document.getElementById('f-name').value.trim(), category: document.getElementById('f-category').value.trim(), price: parseFloat(document.getElementById('f-price').value)||0, quantity: parseInt(document.getElementById('f-quantity').value)||0, lowStockThreshold: parseInt(document.getElementById('f-threshold').value)||10, description: document.getElementById('f-description').value.trim() };
+      const m = document.getElementById('form-msg');
+      if(!p.name) { m.style.color='#ff6e84'; m.textContent='Name required.'; return; }
+      m.style.color='#a3a6ff'; m.textContent='Saving...';
+      const r = id ? await updateItem(id, p) : await addItem(p);
+      m.style.color='#9bffce'; m.textContent='✅ '+(r.message||'Saved!');
       setTimeout(() => showPage('inventory', document.querySelectorAll('.nav-btn')[1]), 1200);
     }
 
-    async function handleDelete(itemID, name) {
-      if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-      await deleteItem(itemID);
+    async function handleDelete(id, name) {
+      if(!confirm(`Delete "${name}"?`)) return;
+      try {
+        await deleteItem(id);
+      } catch(e) {
+        console.error('Delete failed:', e);
+        alert('Failed to delete item. Please try again.');
+      }
       loadInventory();
     }
 
-    // ── INSIGHTS ────────────────────────────────────────────────
-
     async function loadInsights() {
-      document.getElementById('insights-content').innerHTML = '<p class="loading">Loading insights and sending alerts...</p>';
-      const data = await getInsights();
-      const s = data.summary || {};
-      const recs = (data.recommendations || []).map(r => `<div class="insight-item">${r}</div>`).join('');
-      const cats = Object.entries(data.categoryBreakdown || {}).map(([k, v]) => `<div class="insight-item"><strong>${k}</strong>: ${v} units</div>`).join('') || '<div class="insight-item">No data</div>';
-      const lowItems = (data.lowStockItems || []).map(i => `<div class="insight-item">⚠️ <strong>${i.name}</strong> — ${i.quantity} left</div>`).join('') || '<div class="insight-item">None</div>';
-      const outItems = (data.outOfStockItems || []).map(i => `<div class="insight-item">🚨 <strong>${i.name}</strong> (${i.category})</div>`).join('') || '<div class="insight-item">None</div>';
+      document.getElementById('insights-content').innerHTML = '<p class="text-on-surface-variant py-4">Analyzing...</p>';
+      const d = await getInsights(); const s = d.summary||{};
+      const recs = (d.recommendations||[]).map(r=>`<li class="py-2 border-b border-white/5 last:border-0">${r}</li>`).join('');
+      const cats = Object.entries(d.categoryBreakdown||{}).map(([k,v])=>`<li class="py-2 border-b border-white/5 last:border-0"><strong>${k}</strong>: ${v} units</li>`).join('')||'<li>No data</li>';
+      const low = (d.lowStockItems||[]).map(i=>`<li class="py-2 border-b border-white/5 last:border-0 text-secondary-dim">⚠️ <strong>${i.name}</strong> — ${i.quantity} left</li>`).join('')||'<li>None</li>';
+      const out = (d.outOfStockItems||[]).map(i=>`<li class="py-2 border-b border-white/5 last:border-0 text-error-dim">🚨 <strong>${i.name}</strong></li>`).join('')||'<li>None</li>';
+      
       document.getElementById('insights-content').innerHTML = `
-        <div class="insights-grid">
-            <div class="insight-card"><h3>📋 Recommendations</h3>${recs}</div>
-            <div class="insight-card"><h3>🏷️ Category Breakdown</h3>${cats}</div>
-            <div class="insight-card"><h3>⚠️ Low Stock Items</h3>${lowItems}</div>
-            <div class="insight-card"><h3>🚨 Out of Stock</h3>${outItems}</div>
-        </div>
-        <p style="margin-top:16px;font-size:13px;color:#888;">💌 SNS alert sent to your email (if stock issues exist). SQS message logged.</p>`;
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-white/10">Suggestions</h3><ul>${recs}</ul></div>
+            <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-white/10">Categories</h3><ul>${cats}</ul></div>
+            <div><h3 class="text-lg font-bold text-secondary mb-2 pb-2 border-b border-white/10">Low Stock</h3><ul>${low}</ul></div>
+            <div><h3 class="text-lg font-bold text-error mb-2 pb-2 border-b border-white/10">Out of Stock</h3><ul>${out}</ul></div>
+        </div>`;
     }
-
-    // ── EXPORT CSV ───────────────────────────────────────────────
 
     function exportCSV() {
-      if (!allItems.length) { alert('No items to export.'); return; }
-      const headers = ['itemID', 'name', 'category', 'quantity', 'price', 'lowStockThreshold', 'description', 'createdAt'];
-      const rows = allItems.map(i => headers.map(h => `"${(i[h] ?? '').toString().replace(/"/g, '""')}"`).join(','));
-      const csv = [headers.join(','), ...rows].join('\n');
-      const a = document.createElement('a');
-      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-      a.download = `inventoryiq_export_${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
+      if(!allItems.length) { alert('No items'); return; }
+      const headers = ['itemID','name','category','quantity','price','lowStockThreshold','description'];
+      const rows = allItems.map(i=>headers.map(h=>`"${(i[h]??'').toString().replace(/"/g,'""')}"`).join(','));
+      const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent([headers.join(','),...rows].join('\n'));
+      a.download = `inventoryiq_${new Date().toISOString().slice(0,10)}.csv`; a.click();
     }
 
-    // ── INIT ─────────────────────────────────────────────────────
-
-    window.onload = () => {
-      if (sessionStorage.getItem('authToken')) {
-        launchApp();
-      }
-    };
+    window.onload = () => { if(sessionStorage.getItem('authToken')) launchApp(); };
   </script>
 </body>
-
 </html>

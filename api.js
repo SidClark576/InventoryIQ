@@ -48,7 +48,11 @@ async function updateItem(itemID, updates) {
     },
     body: JSON.stringify(updates)
   });
-  return await res.json();
+  try {
+    return await res.json();
+  } catch {
+    return { message: res.ok ? "Item updated" : "Update failed", status: res.status };
+  }
 }
 
 async function deleteItem(itemID) {
@@ -56,7 +60,11 @@ async function deleteItem(itemID) {
     method: "DELETE",
     headers: { "x-api-key": CONFIG.API_KEY }
   });
-  return await res.json();
+  try {
+    return await res.json();
+  } catch {
+    return { message: res.ok ? "Item deleted" : "Delete failed", status: res.status };
+  }
 }
 
 async function getInsights() {

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>InventoryIQ | Digital Curator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#dee5ff",
+                        "surface-dim": "#060e20",
+                        "on-secondary-container": "#e9cdff",
+                        "surface-variant": "#192540",
+                        "on-error": "#490013",
+                        "surface": "#060e20",
+                        "surface-container-highest": "#192540",
+                        "on-tertiary-fixed": "#00452d",
+                        "primary-dim": "#6063ee",
+                        "secondary": "#c180ff",
+                        "inverse-surface": "#faf8ff",
+                        "surface-tint": "#a3a6ff",
+                        "on-tertiary-container": "#005a3c",
+                        "inverse-on-surface": "#4d556b",
+                        "surface-bright": "#1f2b49",
+                        "secondary-fixed": "#e5c6ff",
+                        "primary-fixed-dim": "#8387ff",
+                        "error": "#ff6e84",
+                        "primary-container": "#9396ff",
+                        "outline-variant": "#40485d",
+                        "background": "#060e20",
+                        "tertiary": "#9bffce",
+                        "on-secondary-fixed-variant": "#7511c3",
+                        "on-primary-fixed-variant": "#0e009d",
+                        "surface-container": "#0f1930",
+                        "on-primary": "#0f00a4",
+                        "tertiary-container": "#69f6b8",
+                        "inverse-primary": "#494bd7",
+                        "on-secondary": "#33005b",
+                        "on-error-container": "#ffb2b9",
+                        "on-secondary-fixed": "#4f0089",
+                        "secondary-fixed-dim": "#dbb4ff",
+                        "secondary-dim": "#9c48ea",
+                        "surface-container-high": "#141f38",
+                        "error-container": "#a70138",
+                        "tertiary-fixed-dim": "#58e7ab",
+                        "on-tertiary-fixed-variant": "#006544",
+                        "surface-container-low": "#091328",
+                        "on-primary-container": "#0a0081",
+                        "on-background": "#dee5ff",
+                        "primary": "#a3a6ff",
+                        "tertiary-dim": "#58e7ab",
+                        "primary-fixed": "#9396ff",
+                        "error-dim": "#d73357",
+                        "secondary-container": "#6f00be",
+                        "on-tertiary": "#006443",
+                        "tertiary-fixed": "#69f6b8",
+                        "on-surface-variant": "#a3aac4",
+                        "surface-container-lowest": "#000000",
+                        "on-primary-fixed": "#000000",
+                        "outline": "#6d758c"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #060e20;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(163, 166, 255, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(156, 72, 234, 0.1) 0px, transparent 50%);
+            min-height: 100vh;
+            color: #dee5ff;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(9, 19, 40, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            outline: 1px solid rgba(109, 117, 140, 0.15);
+        }
+        .ghost-border {
+            outline: 0.5px solid rgba(64, 72, 93, 0.2);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pulse-sparkline {
+            mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0));
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="selection:bg-primary/30">
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 bg-slate-950/60 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-8 h-20 shadow-[0_8px_32px_0_rgba(6,14,32,0.8)]">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 active:scale-95 transition-transform cursor-pointer">
+<span class="material-symbols-outlined text-indigo-400 text-3xl">grid_view</span>
+<span class="text-2xl font-bold tracking-tighter bg-gradient-to-r from-indigo-400 to-indigo-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(163,166,255,0.3)]">InventoryIQ</span>
+</div>
+<div class="hidden md:flex items-center gap-6 ml-4">
+<a class="text-indigo-400 font-semibold border-b-2 border-indigo-400 pb-1 font-['Inter'] tracking-tight" href="#">Dashboard</a>
+<a class="text-slate-400 hover:text-slate-200 transition-colors font-['Inter'] tracking-tight" href="#">Inventory</a>
+<a class="text-slate-400 hover:text-slate-200 transition-colors font-['Inter'] tracking-tight" href="#">Insights</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-400 hover:bg-white/5 rounded-full transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-surface-bright border border-outline-variant overflow-hidden">
+<img alt="User" class="w-full h-full object-cover" data-alt="close-up portrait of a professional business person with soft studio lighting and a clean dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrti2qjzAfUD-SCW8Za_sNttCbh84HQgLFLNLrQvL_9wDr8_7zwdbxPL4wnynk7ZScGyCK0VRXdASClrGsqN1S1f-rdEEtaqKMB63YWR4MVxIL9HlPydYckyTy-gaT-5sVXPmOvXR5iVWP0-jf9_JDnDsE3lmYf4wQBfktf4vWjrGnSK_xH1GgKrBkLS2E2pg5qfnNyeHFBdhgibfm_7VanJnJU-OCZV6AxPtTfyEAqlH2Ejt7a7D2st32EG71WAe0Ounr_8N3HB4"/>
+</div>
+<button class="ml-2 flex items-center gap-2 px-4 py-2 rounded-lg text-slate-400 hover:text-error transition-colors hover:bg-error/5 group">
+<span class="material-symbols-outlined text-xl group-hover:rotate-12 transition-transform">logout</span>
+<span class="text-sm font-medium">Logout</span>
+</button>
+</div>
+</nav>
+<main class="pt-28 pb-12 px-8 max-w-[1600px] mx-auto space-y-12">
+<!-- Stats Section (The Inventory Pulse) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Total Products -->
+<div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-on-surface-variant font-medium tracking-wide text-sm uppercase">Total Products</span>
+<span class="material-symbols-outlined text-primary">inventory_2</span>
+</div>
+<div class="relative z-10">
+<h2 class="text-5xl font-black text-on-surface tracking-tighter">1,284</h2>
+<p class="text-tertiary text-sm font-medium mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> +12% this month
+                    </p>
+</div>
+<div class="absolute bottom-0 right-0 left-0 h-16 opacity-20 pointer-events-none pulse-sparkline">
+<svg class="w-full h-full fill-none stroke-primary stroke-2" viewbox="0 0 100 20">
+<path d="M0,15 Q10,5 20,12 T40,8 T60,15 T80,5 T100,10"></path>
+</svg>
+</div>
+</div>
+<!-- Out of Stock -->
+<div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-on-surface-variant font-medium tracking-wide text-sm uppercase">Out of Stock</span>
+<span class="material-symbols-outlined text-error">cancel</span>
+</div>
+<div class="relative z-10">
+<h2 class="text-5xl font-black text-on-surface tracking-tighter">12</h2>
+<p class="text-error text-sm font-medium mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">warning</span> Action required
+                    </p>
+</div>
+</div>
+<!-- Low Stock -->
+<div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-on-surface-variant font-medium tracking-wide text-sm uppercase">Low Stock</span>
+<span class="material-symbols-outlined text-secondary">error_outline</span>
+</div>
+<div class="relative z-10">
+<h2 class="text-5xl font-black text-on-surface tracking-tighter">48</h2>
+<p class="text-secondary text-sm font-medium mt-2">Critical threshold reached</p>
+</div>
+</div>
+<!-- Inventory Value -->
+<div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="text-on-surface-variant font-medium tracking-wide text-sm uppercase">Total Value</span>
+<span class="material-symbols-outlined text-tertiary">payments</span>
+</div>
+<div class="relative z-10">
+<h2 class="text-5xl font-black text-on-surface tracking-tighter">$142.8k</h2>
+<p class="text-tertiary text-sm font-medium mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">verified</span> Verified valuation
+                    </p>
+</div>
+</div>
+</div>
+<!-- Inventory List Section -->
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<div>
+<h1 class="text-3xl font-bold text-on-surface tracking-tight">Active Inventory</h1>
+<p class="text-on-surface-variant mt-1">Manage and track your high-end assets in real-time.</p>
+</div>
+<button class="bg-gradient-to-r from-primary to-primary-dim text-on-primary px-8 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-[0_0_20px_rgba(163,166,255,0.3)] hover:shadow-[0_0_30px_rgba(163,166,255,0.5)] active:scale-95 transition-all">
+<span class="material-symbols-outlined font-bold">add</span>
+                    Add Item
+                </button>
+</div>
+<div class="glass-panel rounded-3xl overflow-hidden ghost-border">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high/50">
+<th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold">Asset Name</th>
+<th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold">Category</th>
+<th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold">Quantity</th>
+<th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold">Unit Price</th>
+<th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold">Status</th>
+<th class="px-8 py-5 text-xs uppercase tracking-widest text-on-surface-variant font-bold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<!-- Row 1 -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-8 py-6">
+<div class="flex items-center gap-4">
+<div class="h-12 w-12 rounded-xl bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">laptop_mac</span>
+</div>
+<span class="font-semibold text-on-surface">Pro Studio Display X1</span>
+</div>
+</td>
+<td class="px-8 py-6 text-on-surface-variant">Electronics</td>
+<td class="px-8 py-6 font-mono text-on-surface">142</td>
+<td class="px-8 py-6 font-mono text-on-surface">$1,499.00</td>
+<td class="px-8 py-6">
+<span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-tertiary-container/20 text-tertiary-fixed border border-tertiary/20">In Stock</span>
+</td>
+<td class="px-8 py-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-white/5 transition-colors group bg-surface-container-low/30">
+<td class="px-8 py-6">
+<div class="flex items-center gap-4">
+<div class="h-12 w-12 rounded-xl bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">chair</span>
+</div>
+<span class="font-semibold text-on-surface">Ergo-Flow Executive</span>
+</div>
+</td>
+<td class="px-8 py-6 text-on-surface-variant">Furniture</td>
+<td class="px-8 py-6 font-mono text-on-surface">8</td>
+<td class="px-8 py-6 font-mono text-on-surface">$549.00</td>
+<td class="px-8 py-6">
+<span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-secondary-container/20 text-secondary-fixed border border-secondary/20">Low Stock</span>
+</td>
+<td class="px-8 py-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-8 py-6">
+<div class="flex items-center gap-4">
+<div class="h-12 w-12 rounded-xl bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-error">router</span>
+</div>
+<span class="font-semibold text-on-surface">Neural Hub V5</span>
+</div>
+</td>
+<td class="px-8 py-6 text-on-surface-variant">Networking</td>
+<td class="px-8 py-6 font-mono text-on-surface">0</td>
+<td class="px-8 py-6 font-mono text-on-surface">$890.00</td>
+<td class="px-8 py-6">
+<span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-error-container/20 text-error-dim border border-error/20">Out of Stock</span>
+</td>
+<td class="px-8 py-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-white/5 transition-colors group bg-surface-container-low/30">
+<td class="px-8 py-6">
+<div class="flex items-center gap-4">
+<div class="h-12 w-12 rounded-xl bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">keyboard</span>
+</div>
+<span class="font-semibold text-on-surface">Quantum Mech MK-II</span>
+</div>
+</td>
+<td class="px-8 py-6 text-on-surface-variant">Peripherals</td>
+<td class="px-8 py-6 font-mono text-on-surface">256</td>
+<td class="px-8 py-6 font-mono text-on-surface">$220.00</td>
+<td class="px-8 py-6">
+<span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-tertiary-container/20 text-tertiary-fixed border border-tertiary/20">In Stock</span>
+</td>
+<td class="px-8 py-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-all">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="flex justify-between items-center px-12 py-8 mt-auto font-['Inter'] text-xs uppercase tracking-widest text-slate-500">
+<div class="flex gap-8">
+<a class="text-slate-600 hover:text-indigo-300 opacity-80 hover:opacity-100 transition-all" href="#">Support</a>
+<a class="text-slate-600 hover:text-indigo-300 opacity-80 hover:opacity-100 transition-all" href="#">Privacy</a>
+<a class="text-slate-600 hover:text-indigo-300 opacity-80 hover:opacity-100 transition-all" href="#">Terms</a>
+</div>
+<span class="opacity-80">© 2024 InventoryIQ Digital Curator</span>
+</footer>
+</body></html>
