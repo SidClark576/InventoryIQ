@@ -1,0 +1,22 @@
+body {
+  background-color: #f9f9ff;
+  background-image: radial-gradient(at 0% 0%, rgba(0, 90, 180, 0.1) 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, rgba(70, 95, 137, 0.1) 0px, transparent 50%);
+  min-height: 100vh; color: #181c22; font-family: 'Inter', sans-serif;
+}
+.glass-panel { background: rgba(242, 243, 253, 0.6); backdrop-filter: blur(24px); outline: 1px solid rgba(193, 198, 213, 0.5); }
+.ghost-border { outline: 0.5px solid rgba(193, 198, 213, 0.8); }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.4s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.auth-tab.active { color: #005ab4; border-bottom: 2px solid #005ab4; }
+.auth-form { display: none; }
+.auth-form.active { display: block; }
+
+input, select, textarea {
+  background: rgba(236, 237, 247, 0.5); border: 1px solid rgba(193, 198, 213, 0.6); color: #181c22;
+}
+input:focus { border-color: #005ab4; outline: none; box-shadow: 0 0 0 2px rgba(0, 90, 180, 0.2); }

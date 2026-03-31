@@ -24,7 +24,25 @@ async function getAllItems() {
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items`, {
     headers: { "x-api-key": CONFIG.API_KEY }
   });
-  return await res.json();
+
+  const raw = await res.text();
+  let data = [];
+  if (raw) {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = [];
+    }
+  }
+
+  if (!res.ok) {
+    const errMsg = data && typeof data === "object" ? data.error : null;
+    throw new Error(errMsg || "Failed to fetch items");
+  }
+
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.items)) return data.items;
+  return [];
 }
 
 async function addItem(item) {
@@ -36,7 +54,9 @@ async function addItem(item) {
     },
     body: JSON.stringify(item)
   });
-  return await res.json();
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to add item");
+  return data;
 }
 
 async function updateItem(itemID, updates) {
@@ -48,28 +68,42 @@ async function updateItem(itemID, updates) {
     },
     body: JSON.stringify(updates)
   });
+  let data;
   try {
-    return await res.json();
+    data = await res.json();
   } catch {
-    return { message: res.ok ? "Item updated" : "Update failed", status: res.status };
+    data = { message: "Update failed" };
   }
+  if (!res.ok) throw new Error(data.error || data.message || "Failed to update item");
+  return data;
 }
 
 async function deleteItem(itemID) {
-  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}`, {
+  // Adding a timestamp query param bypasses any cached failed CORS preflight responses in the browser
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}?_cb=${Date.now()}`, {
     method: "DELETE",
-    headers: { "x-api-key": CONFIG.API_KEY }
+    headers: { 
+      "x-api-key": CONFIG.API_KEY,
+      "Content-Type": "application/json"
+    },
+    cache: "no-store",
+    mode: "cors"
   });
+  let data;
   try {
-    return await res.json();
+    data = await res.json();
   } catch {
-    return { message: res.ok ? "Item deleted" : "Delete failed", status: res.status };
+    data = { message: "Delete failed" };
   }
+  if (!res.ok) throw new Error(data.error || data.message || "Failed to delete item");
+  return data;
 }
 
 async function getInsights() {
   const res = await fetch(`${CONFIG.API_ENDPOINT}/insights`, {
     headers: { "x-api-key": CONFIG.API_KEY }
   });
-  return await res.json();
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to fetch insights");
+  return data;
 }

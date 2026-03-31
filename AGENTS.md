@@ -41,7 +41,7 @@ InventoryIQ is a **serverless inventory management application** built on AWS. T
 ### Frontend (deploy to S3)
 | File | Purpose |
 |---|---|
-| `index.html` | SPA with Tailwind CSS (CDN), Inter font, glassmorphic "Indigo Nebula" design. Contains all page views (Auth, Dashboard, Inventory, Add/Edit Item, Insights) and client-side JS logic. |
+| `index.html` | SPA with Tailwind CSS (CDN), Inter font, light mode sidebar layout. Contains all page views (Auth, Dashboard, Inventory, Add/Edit Item, Insights) and client-side JS logic. |
 | `api.js` | API wrapper functions: `authLogin`, `authRegister`, `getAllItems`, `addItem`, `updateItem`, `deleteItem`, `getInsights`. Includes try/catch fallbacks for endpoints that may return empty bodies. |
 | `config.js` | Holds `CONFIG` object with `API_ENDPOINT`, `API_KEY`, and `AUTH_ENDPOINT`. |
 
@@ -86,18 +86,18 @@ InventoryIQ is a **serverless inventory management application** built on AWS. T
 ---
 
 ## Frontend Design System
-The UI uses the **"Indigo Nebula"** design system generated via Stitch MCP:
+The UI uses a **Clean Light Mode Sidebar** design:
 - **Framework:** Tailwind CSS (CDN), no build step required
 - **Font:** Inter (Google Fonts CDN)
-- **Theme:** Dark mode glassmorphism — deep indigo background (`#060e20`) with radial mesh gradients, translucent glass panels (`backdrop-filter: blur`), ghost borders
-- **Primary color:** `#a3a6ff` (indigo), Secondary: `#c180ff` (purple), Tertiary: `#9bffce` (emerald)
-- **Status badges:** Emerald = In Stock, Purple = Low Stock, Red = Out of Stock
+- **Theme:** Minimalist light mode with a fixed left sidebar (`#f5f6fa` background), white rounded cards, subtle gray borders, and strong typography.
+- **Primary color:** `#005ab4` (blue), Secondary: `#e8f0fe` (light blue)
+- **Status badges:** Emerald = In Stock, Yellow = Low Stock, Red = Out of Stock
 
 ---
 
 ## Key Conventions
 1. **Auth flow:** Email/password. Passwords hashed with `scrypt` + random salt. Session token stored in `sessionStorage` (not a JWT — no server-side validation after login).
 2. **API auth:** All inventory endpoints require `x-api-key` header. Auth endpoints do not.
-3. **CORS:** All Lambdas return `Access-Control-Allow-Origin: *`.
+3. **CORS:** All Lambdas return `Access-Control-Allow-Origin: *`. The frontend `deleteItem` function appends a cache-busting timestamp (`?_cb=...`) and uses `cache: "no-store"` to bypass browser-cached CORS preflight failures.
 4. **Error handling:** `api.js` wraps `updateItem` and `deleteItem` responses in try/catch to handle empty response bodies gracefully.
 5. **No build step:** The frontend is plain HTML/JS loaded via CDN — just upload the 3 frontend files to S3.
