@@ -4,6 +4,7 @@ import os
 from decimal import Decimal
 from collections import defaultdict
 from datetime import datetime, timezone
+from boto3.dynamodb.conditions import Attr
 
 dynamodb = boto3.resource('dynamodb')
 sns = boto3.client('sns')
@@ -17,6 +18,14 @@ def lambda_handler(event, context):
     try:
         result = table.scan()
         items = result.get('Items', [])
+        params = event.get('queryStringParameters') or {}
+        user_id = params.get('userID', '').strip()
+
+        if user_id:
+            result = table.scan(FilterExpression=Attr('userID').eq(user_id))
+        else:
+            result = table.scan()
+            
         while 'LastEvaluatedKey' in result:
             result = table.scan(ExclusiveStartKey=result['LastEvaluatedKey'])
             items.extend(result.get('Items', []))

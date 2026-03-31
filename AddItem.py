@@ -17,9 +17,11 @@ def lambda_handler(event, context):
 
         item_id = str(uuid.uuid4())
         timestamp = datetime.utcnow().isoformat()
+        user_id = body.get('userID', '').strip()
 
         item = {
             'itemID': item_id,
+            'userID': user_id,
             'name': body.get('name'),
             'description': body.get('description', ''),
             'category': body.get('category', 'Uncategorized'),

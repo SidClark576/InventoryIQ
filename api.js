@@ -1,5 +1,9 @@
 // ── AUTH FUNCTIONS ────────────────────────────────────────────
 
+function getCurrentUserID() {
+  return sessionStorage.getItem('userEmail') || '';
+}
+
 async function authRegister(email, password) {
   const res = await fetch(`${CONFIG.AUTH_ENDPOINT}/register`, {
     method: "POST",
