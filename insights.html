@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>InventoryIQ | Insights</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#f9f9ff", "error": "#ba1a1a", "error-container": "#ffdad6", "inverse-on-surface": "#eff0fa",
+            "inverse-primary": "#aac7ff", "inverse-surface": "#2d3038", "on-background": "#181c22", "on-error": "#ffffff",
+            "on-error-container": "#93000a", "on-primary": "#ffffff", "on-primary-container": "#fefcff", "on-primary-fixed": "#001b3e",
+            "on-primary-fixed-variant": "#00458d", "on-secondary": "#ffffff", "on-secondary-container": "#405882", "on-secondary-fixed": "#001b3e",
+            "on-secondary-fixed-variant": "#2e4770", "on-surface": "#181c22", "on-surface-variant": "#414753", "on-tertiary": "#ffffff",
+            "on-tertiary-container": "#fffbff", "on-tertiary-fixed": "#321200", "on-tertiary-fixed-variant": "#763400", "outline": "#717785",
+            "outline-variant": "#c1c6d5", "primary": "#005ab4", "primary-container": "#0873df", "primary-fixed": "#d6e3ff",
+            "primary-fixed-dim": "#aac7ff", "secondary": "#465f89", "secondary-container": "#b7cfff", "secondary-fixed": "#d6e3ff",
+            "secondary-fixed-dim": "#afc7f7", "surface": "#f9f9ff", "surface-bright": "#f9f9ff", "surface-container": "#ecedf7",
+            "surface-container-high": "#e6e8f1", "surface-container-highest": "#e0e2ec", "surface-container-low": "#f2f3fd", "surface-container-lowest": "#ffffff",
+            "surface-dim": "#d8dae3", "surface-tint": "#005db8", "surface-variant": "#e0e2ec", "tertiary": "#964400",
+            "tertiary-container": "#bd5700", "tertiary-fixed": "#ffdbc9", "tertiary-fixed-dim": "#ffb68c",
+            "primary-dim": "#00458d", "secondary-dim": "#2e4770", "tertiary-dim": "#763400", "error-dim": "#93000a",
+            "slate-950": "#f9f9ff", "slate-400": "#414753", "slate-500": "#717785", "slate-200": "#181c22"
+          },
+          fontFamily: { "body": ["Inter"], "headline": ["Inter"] },
+        },
+      },
+    }
+  </script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="selection:bg-primary/30 antialiased">
+  <div class="h-screen overflow-hidden flex bg-[#f5f6fa]">
+
+    <!-- Sidebar -->
+    <aside class="w-[260px] bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
+      <div>
+        <div class="h-24 flex items-center px-6 border-b border-gray-100">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-[#060e20] rounded-xl flex items-center justify-center p-2 shadow-sm">
+              <svg viewBox="0 0 100 100" class="w-full h-full">
+                <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
+                <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
+                <polygon points="85,35 50,55 50,90 85,70" fill="#9c3f91" />
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[17px] font-bold text-gray-900 leading-tight">InventoryIQ</span>
+              <span class="text-[10px] font-bold text-gray-400 tracking-wider uppercase mt-0.5">Management Portal</span>
+            </div>
+          </div>
+        </div>
+
+        <nav class="p-4 space-y-1.5 mt-2">
+          <a href="dashboard.html" data-page="dashboard"
+            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            <span class="material-symbols-outlined text-xl">grid_view</span> Dashboard
+          </a>
+          <a href="inventory.html" data-page="inventory"
+            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            <span class="material-symbols-outlined text-xl">inventory_2</span> Inventory
+          </a>
+          <a href="insights.html" data-page="insights"
+            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            <span class="material-symbols-outlined text-xl">bar_chart</span> Insights
+          </a>
+        </nav>
+      </div>
+
+      <div class="p-4 space-y-1 mb-2 border-t border-gray-100 pt-6">
+        <button class="flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors">
+          <span class="material-symbols-outlined text-xl">help</span> Help Center
+        </button>
+        <button
+          class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer"
+          onclick="handleLogout()">
+          <span class="material-symbols-outlined text-xl">logout</span> Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+      <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
+        <div class="relative w-[480px]">
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+          <input type="text" placeholder="Search inventory, assets, or orders..."
+            class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium" />
+        </div>
+        <div class="flex items-center gap-6">
+          <button class="text-gray-400 hover:text-gray-700 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+          </button>
+          <button class="text-gray-400 hover:text-gray-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <div class="h-10 w-px bg-gray-200 ml-2 mr-2"></div>
+          <div class="flex items-center gap-3 pr-2">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#005ab4] to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm opacity-90" id="nav-avatar">A</div>
+            <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1 overflow-auto p-10 space-y-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Insights</h1>
+            <p class="text-gray-500 mt-2 font-medium">AI-driven curation and tracking analysis</p>
+          </div>
+          <button
+            class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
+            onclick="loadInsights()">
+            <span class="material-symbols-outlined font-bold text-[18px]">refresh</span> Refresh
+          </button>
+        </div>
+        <div id="insights-content" class="bg-white p-10 rounded-3xl shadow-sm border border-gray-200">
+          <p class="text-gray-500 font-medium">Ready to process your data...</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="utils.js"></script>
+  <script src="api.js"></script>
+  <script>
+    requireAuth();
+    initNav('insights');
+
+    async function loadInsights() {
+      const panel = document.getElementById('insights-content');
+      panel.innerHTML = '<p class="text-on-surface-variant py-4">Analyzing...</p>';
+
+      try {
+        const d = await getInsights();
+        const s = d.summary || {};
+
+        const healthScore = Number.isFinite(Number(s.healthScore)) ? Number(s.healthScore) : 100;
+        const atRiskCount = Number.isFinite(Number(s.atRiskCount)) ? Number(s.atRiskCount) : 0;
+        const totalProducts = Number.isFinite(Number(s.totalProducts)) ? Number(s.totalProducts) : 0;
+        const estValue = Number.isFinite(Number(s.estimatedInventoryValue)) ? Number(s.estimatedInventoryValue) : 0;
+
+        const recs = (d.recommendations || []).map(r => `<li class="py-2 border-b border-outline-variant/30 last:border-0">${r}</li>`).join('') || '<li>No recommendations yet.</li>';
+        const reorder = (d.topReorderPriorities || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0"><strong>${i.name}</strong> (${i.category}) — Qty ${i.currentQuantity}, reorder ~${i.suggestedOrderQuantity} <span class="uppercase text-xs ml-2 ${i.urgency === 'critical' ? 'text-error' : i.urgency === 'high' ? 'text-secondary' : 'text-tertiary'}">${i.urgency}</span></li>`).join('') || '<li>None</li>';
+        const risk = (d.categoryRiskBreakdown || []).map(c => `<li class="py-2 border-b border-outline-variant/30 last:border-0"><strong>${c.category}</strong>: ${c.atRiskItems}/${c.totalItems} at risk (${c.riskPercent}%)</li>`).join('') || '<li>No data</li>';
+        const low = (d.lowStockItems || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0 text-secondary-dim">⚠️ <strong>${i.name}</strong> — ${i.quantity} left</li>`).join('') || '<li>None</li>';
+        const out = (d.outOfStockItems || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0 text-error-dim">🚨 <strong>${i.name}</strong></li>`).join('') || '<li>None</li>';
+
+        panel.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Health Score</div><div class="text-3xl font-black ${healthScore < 50 ? 'text-error' : healthScore < 80 ? 'text-secondary' : 'text-tertiary'}">${healthScore}/100</div></div>
+            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">At Risk</div><div class="text-3xl font-black text-on-surface">${atRiskCount}</div></div>
+            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Products</div><div class="text-3xl font-black text-on-surface">${totalProducts}</div></div>
+            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Inventory Value</div><div class="text-3xl font-black text-on-surface">$${estValue.toFixed(2)}</div></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-outline-variant/50">Recommendations</h3><ul>${recs}</ul></div>
+            <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-outline-variant/50">Top Reorder Priorities</h3><ul>${reorder}</ul></div>
+            <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-outline-variant/50">Category Risk</h3><ul>${risk}</ul></div>
+            <div><h3 class="text-lg font-bold text-secondary mb-2 pb-2 border-b border-outline-variant/50">Low Stock</h3><ul>${low}</ul></div>
+            <div><h3 class="text-lg font-bold text-error mb-2 pb-2 border-b border-outline-variant/50">Out of Stock</h3><ul>${out}</ul></div>
+          </div>`;
+      } catch (e) {
+        panel.innerHTML = `<p class="text-error py-4">Unable to analyze right now: ${e.message}</p>`;
+      }
+    }
+
+    loadInsights();
+  </script>
+</body>
+</html>

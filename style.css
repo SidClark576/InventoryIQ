@@ -8,9 +8,6 @@ body {
 .ghost-border { outline: 0.5px solid rgba(193, 198, 213, 0.8); }
 .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 
-.page { display: none; }
-.page.active { display: block; animation: fadeIn 0.4s ease forwards; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 .auth-tab.active { color: #005ab4; border-bottom: 2px solid #005ab4; }
 .auth-form { display: none; }

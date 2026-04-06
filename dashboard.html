@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>InventoryIQ | Dashboard</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#f9f9ff", "error": "#ba1a1a", "error-container": "#ffdad6", "inverse-on-surface": "#eff0fa",
+            "inverse-primary": "#aac7ff", "inverse-surface": "#2d3038", "on-background": "#181c22", "on-error": "#ffffff",
+            "on-error-container": "#93000a", "on-primary": "#ffffff", "on-primary-container": "#fefcff", "on-primary-fixed": "#001b3e",
+            "on-primary-fixed-variant": "#00458d", "on-secondary": "#ffffff", "on-secondary-container": "#405882", "on-secondary-fixed": "#001b3e",
+            "on-secondary-fixed-variant": "#2e4770", "on-surface": "#181c22", "on-surface-variant": "#414753", "on-tertiary": "#ffffff",
+            "on-tertiary-container": "#fffbff", "on-tertiary-fixed": "#321200", "on-tertiary-fixed-variant": "#763400", "outline": "#717785",
+            "outline-variant": "#c1c6d5", "primary": "#005ab4", "primary-container": "#0873df", "primary-fixed": "#d6e3ff",
+            "primary-fixed-dim": "#aac7ff", "secondary": "#465f89", "secondary-container": "#b7cfff", "secondary-fixed": "#d6e3ff",
+            "secondary-fixed-dim": "#afc7f7", "surface": "#f9f9ff", "surface-bright": "#f9f9ff", "surface-container": "#ecedf7",
+            "surface-container-high": "#e6e8f1", "surface-container-highest": "#e0e2ec", "surface-container-low": "#f2f3fd", "surface-container-lowest": "#ffffff",
+            "surface-dim": "#d8dae3", "surface-tint": "#005db8", "surface-variant": "#e0e2ec", "tertiary": "#964400",
+            "tertiary-container": "#bd5700", "tertiary-fixed": "#ffdbc9", "tertiary-fixed-dim": "#ffb68c",
+            "primary-dim": "#00458d", "secondary-dim": "#2e4770", "tertiary-dim": "#763400", "error-dim": "#93000a",
+            "slate-950": "#f9f9ff", "slate-400": "#414753", "slate-500": "#717785", "slate-200": "#181c22"
+          },
+          fontFamily: { "body": ["Inter"], "headline": ["Inter"] },
+        },
+      },
+    }
+  </script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="selection:bg-primary/30 antialiased">
+  <div class="h-screen overflow-hidden flex bg-[#f5f6fa]">
+
+    <!-- Sidebar -->
+    <aside class="w-[260px] bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
+      <div>
+        <div class="h-24 flex items-center px-6 border-b border-gray-100">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-[#060e20] rounded-xl flex items-center justify-center p-2 shadow-sm">
+              <svg viewBox="0 0 100 100" class="w-full h-full">
+                <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
+                <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
+                <polygon points="85,35 50,55 50,90 85,70" fill="#9c3f91" />
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[17px] font-bold text-gray-900 leading-tight">InventoryIQ</span>
+              <span class="text-[10px] font-bold text-gray-400 tracking-wider uppercase mt-0.5">Management Portal</span>
+            </div>
+          </div>
+        </div>
+
+        <nav class="p-4 space-y-1.5 mt-2">
+          <a href="dashboard.html" data-page="dashboard"
+            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            <span class="material-symbols-outlined text-xl">grid_view</span> Dashboard
+          </a>
+          <a href="inventory.html" data-page="inventory"
+            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            <span class="material-symbols-outlined text-xl">inventory_2</span> Inventory
+          </a>
+          <a href="insights.html" data-page="insights"
+            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            <span class="material-symbols-outlined text-xl">bar_chart</span> Insights
+          </a>
+        </nav>
+      </div>
+
+      <div class="p-4 space-y-1 mb-2 border-t border-gray-100 pt-6">
+        <button class="flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors">
+          <span class="material-symbols-outlined text-xl">help</span> Help Center
+        </button>
+        <button
+          class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer"
+          onclick="handleLogout()">
+          <span class="material-symbols-outlined text-xl">logout</span> Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+      <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
+        <div class="relative w-[480px]">
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+          <input type="text" placeholder="Search inventory, assets, or orders..."
+            class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium" />
+        </div>
+        <div class="flex items-center gap-6">
+          <button class="text-gray-400 hover:text-gray-700 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+          </button>
+          <button class="text-gray-400 hover:text-gray-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+          <div class="h-10 w-px bg-gray-200 ml-2 mr-2"></div>
+          <div class="flex items-center gap-3 pr-2">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#005ab4] to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm opacity-90" id="nav-avatar">A</div>
+            <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1 overflow-auto p-10 space-y-10">
+
+        <!-- Stat Cards -->
+        <div class="flex justify-end -mb-4">
+          <button
+            class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
+            onclick="loadDashboard(); loadInventory()">
+            <span class="material-symbols-outlined font-bold text-[18px]">refresh</span> Refresh
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
+            <div class="flex justify-between items-start mb-1">
+              <div>
+                <span class="text-gray-500 font-medium text-sm">Total Products</span>
+                <h2 class="text-[40px] leading-tight font-black text-gray-900 mt-2 tracking-tight" id="stat-total">—</h2>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-[#e8f0fe] flex items-center justify-center text-[#005ab4]">
+                <span class="material-symbols-outlined">inventory_2</span>
+              </div>
+            </div>
+            <div class="mt-auto pt-6 flex items-start gap-1 text-[#005ab4] text-xs font-bold w-3/4 leading-tight">
+              <span class="material-symbols-outlined text-[16px] mr-1">trending_up</span> +2.5% vs last month
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
+            <div class="flex justify-between items-start mb-1">
+              <div>
+                <span class="text-gray-500 font-medium text-sm">Out of Stock</span>
+                <h2 class="text-[40px] leading-tight font-black text-[#dc2626] mt-2 tracking-tight" id="stat-out">—</h2>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-[#fef2f2] flex items-center justify-center text-[#dc2626]">
+                <span class="material-symbols-outlined">error</span>
+              </div>
+            </div>
+            <div class="mt-auto pt-6 flex items-start gap-1 text-[#dc2626] text-xs font-bold leading-tight">
+              <span class="material-symbols-outlined text-[14px]">warning</span> Critical attention required
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
+            <div class="flex justify-between items-start mb-1">
+              <div>
+                <span class="text-gray-500 font-medium text-sm">Low Stock</span>
+                <h2 class="text-[40px] leading-tight font-black text-[#d97706] mt-2 tracking-tight" id="stat-low">—</h2>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-[#fffbeb] flex items-center justify-center text-[#d97706]">
+                <span class="material-symbols-outlined">sort</span>
+              </div>
+            </div>
+            <div class="mt-auto pt-6 flex items-start gap-1 text-[#b45309] text-xs font-bold leading-tight">
+              <span class="material-symbols-outlined text-[14px]">notifications_active</span> Items nearing threshold
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
+            <div class="flex justify-between items-start mb-1">
+              <div>
+                <span class="text-gray-500 font-medium text-sm">Total Value</span>
+                <h2 class="text-[40px] leading-tight font-black text-gray-900 mt-2 tracking-tight" id="stat-value">—</h2>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600">
+                <span class="material-symbols-outlined">payments</span>
+              </div>
+            </div>
+            <div class="mt-auto pt-6 flex items-start gap-1 text-[#005ab4] text-xs font-bold leading-tight">
+              <span class="material-symbols-outlined text-[14px]">account_balance_wallet</span> Net asset valuation
+            </div>
+          </div>
+        </div>
+
+        <!-- Inventory Table -->
+        <div class="bg-white rounded-[1.25rem] shadow-sm border border-gray-200 overflow-hidden">
+          <div class="p-6 pb-5 flex items-start justify-between">
+            <div>
+              <h3 class="text-xl font-bold text-gray-900">Active Inventory</h3>
+              <p class="text-[13px] font-medium text-gray-500 mt-1">Real-time status of all tracked assets and warehouse stock.</p>
+            </div>
+            <div class="flex items-center gap-4">
+              <button
+                class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
+                onclick="exportCSV()">
+                <span class="material-symbols-outlined text-[16px]">download</span> Export CSV
+              </button>
+              <a href="add-item.html"
+                class="px-6 py-2.5 bg-[#005ab4] hover:bg-[#00458d] text-white rounded-xl text-[13px] font-bold flex items-center gap-2 cursor-pointer shadow-sm transition">
+                <span class="material-symbols-outlined text-[18px]">add</span> Add New Asset
+              </a>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-y border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50/50">
+                  <th class="px-8 py-4">Asset Name</th>
+                  <th class="px-6 py-4">Category</th>
+                  <th class="px-6 py-4">Qty</th>
+                  <th class="px-6 py-4">Status</th>
+                  <th class="px-8 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-body" class="divide-y divide-gray-100">
+                <tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-6 flex items-center justify-between text-[13px] font-medium text-gray-500 border-t border-gray-100">
+            <span id="pagination-text">Showing 0 of 0 assets</span>
+            <div class="flex items-center gap-1">
+              <button class="w-8 h-8 rounded-lg border border-transparent hover:bg-gray-100 flex items-center justify-center text-gray-400">
+                <span class="material-symbols-outlined text-sm">chevron_left</span>
+              </button>
+              <button class="w-8 h-8 rounded-lg bg-[#005ab4] text-white font-bold flex items-center justify-center">1</button>
+              <button class="w-8 h-8 rounded-lg border border-transparent hover:bg-gray-100 flex items-center justify-center text-gray-400">
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert banners -->
+        <div id="dashboard-alerts" class="space-y-3"></div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="utils.js"></script>
+  <script src="api.js"></script>
+  <script>
+    requireAuth();
+    initNav('dashboard');
+
+    async function loadDashboard() {
+      let data = {};
+      try { data = await getInsights(); } catch { data = {}; }
+
+      const s = data.summary || {};
+      const outOfStockItems = Array.isArray(data.outOfStockItems) ? data.outOfStockItems : [];
+      const lowStockItems = Array.isArray(data.lowStockItems) ? data.lowStockItems : [];
+      const totalProducts = Number.isFinite(Number(s.totalProducts)) ? Number(s.totalProducts) : outOfStockItems.length + lowStockItems.length;
+      const outOfStockCount = Number.isFinite(Number(s.outOfStockCount)) ? Number(s.outOfStockCount) : outOfStockItems.length;
+      const lowStockCount = Number.isFinite(Number(s.lowStockCount)) ? Number(s.lowStockCount) : lowStockItems.length;
+      const estimatedInventoryValue = Number.isFinite(Number(s.estimatedInventoryValue)) ? Number(s.estimatedInventoryValue) : 0;
+
+      document.getElementById('stat-total').textContent = String(totalProducts || 0);
+      document.getElementById('stat-out').textContent = String(outOfStockCount || 0);
+      document.getElementById('stat-low').textContent = String(lowStockCount || 0);
+
+      let valStr = estimatedInventoryValue.toFixed(2);
+      if (estimatedInventoryValue >= 1000000) valStr = (estimatedInventoryValue / 1000000).toFixed(2) + 'M';
+      else if (estimatedInventoryValue >= 1000) valStr = (estimatedInventoryValue / 1000).toFixed(1) + 'k';
+      document.getElementById('stat-value').textContent = '$' + valStr;
+
+      const alertsDiv = document.getElementById('dashboard-alerts');
+      alertsDiv.innerHTML = '';
+      outOfStockItems.forEach(i => {
+        alertsDiv.innerHTML += `<div class="p-4 rounded-xl bg-[#fef2f2] border border-red-100 flex items-center gap-3"><span class="material-symbols-outlined text-[#dc2626]">cancel</span><span class="text-[#dc2626] text-sm"><strong>${i.name}</strong> is OUT OF STOCK</span></div>`;
+      });
+      lowStockItems.forEach(i => {
+        alertsDiv.innerHTML += `<div class="p-4 rounded-xl bg-[#fffbeb] border border-orange-100 flex items-center gap-3"><span class="material-symbols-outlined text-[#d97706]">warning</span><span class="text-[#b45309] text-sm"><strong>${i.name}</strong> — ${i.quantity} left</span></div>`;
+      });
+    }
+
+    let allItems = [];
+    async function loadInventory() {
+      const tb = document.getElementById('inventory-body');
+      tb.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>';
+
+      allItems = await getAllItems();
+      if (!allItems.length) {
+        tb.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">No items found.</td></tr>';
+        document.getElementById('pagination-text').textContent = 'Showing 0 of 0 assets';
+        return;
+      }
+
+      tb.innerHTML = allItems.map(c => {
+        const qty = c.quantity ?? 0, thr = c.lowStockThreshold ?? 10;
+        const iconDiv = `<div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 mr-4 border border-gray-100"><span class="material-symbols-outlined text-xl">devices</span></div>`;
+        const sku = `SKU: ${c.itemID.substring(0, 8).toUpperCase()}`;
+        const badge = qty === 0
+          ? '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#fef2f2] text-[#dc2626]">Out of Stock</span>'
+          : qty <= thr
+            ? '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#fffbeb] text-[#d97706]">Low Stock</span>'
+            : '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#ecfdf5] text-[#059669]">In Stock</span>';
+        return `<tr class="hover:bg-gray-50/80 transition-colors group">
+          <td class="px-8 py-4">
+            <div class="flex items-center">
+              ${iconDiv}
+              <div>
+                <div class="font-bold text-gray-900 text-[13px]">${c.name}</div>
+                <div class="text-[11px] font-medium text-gray-400 mt-0.5">${sku}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-gray-500 text-[13px] font-medium">${c.category || '—'}</td>
+          <td class="px-6 py-4 font-bold text-gray-900 text-[13px]">${qty}</td>
+          <td class="px-6 py-4">${badge}</td>
+          <td class="px-8 py-4 text-right relative">
+            <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#005ab4] hover:bg-[#e8f0fe] rounded-lg cursor-pointer transition p-0" onclick="editItem('${c.itemID}')"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition p-0" onclick="handleDelete('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+            </div>
+            <span class="material-symbols-outlined text-gray-400 absolute right-8 top-1/2 -translate-y-1/2 group-hover:hidden transition">more_vert</span>
+          </td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('pagination-text').textContent = `Showing ${allItems.length} of ${allItems.length} assets`;
+    }
+
+    function editItem(id) {
+      const it = allItems.find(i => i.itemID === id);
+      if (!it) return;
+      sessionStorage.setItem('iq_editItem', JSON.stringify(it));
+      window.location.href = 'add-item.html';
+    }
+
+    async function handleDelete(id, name) {
+      if (!confirm(`Delete "${name}"?`)) return;
+      try {
+        await deleteItem(id);
+      } catch (e) {
+        console.error('Delete failed:', e);
+        if (e.message.includes("Failed to fetch")) {
+          alert(`Failed to delete item: Network or CORS Error.\n\nMake sure the OPTIONS method is enabled and deployed for the /items/{itemID} endpoint in API Gateway.`);
+        } else {
+          alert(`Failed to delete item: ${e.message}`);
+        }
+      }
+      loadInventory();
+    }
+
+    function exportCSV() {
+      if (!allItems.length) { alert('No items'); return; }
+      const headers = ['itemID', 'name', 'category', 'quantity', 'price', 'lowStockThreshold', 'description'];
+      const rows = allItems.map(i => headers.map(h => `"${(i[h] ?? '').toString().replace(/"/g, '""')}"`).join(','));
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent([headers.join(','), ...rows].join('\n'));
+      a.download = `inventoryiq_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+    }
+
+    loadDashboard();
+    loadInventory();
+  </script>
+</body>
+</html>

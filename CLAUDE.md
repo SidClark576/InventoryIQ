@@ -10,7 +10,9 @@ InventoryIQ is a **serverless inventory management app** on AWS. There is no loc
 
 **Frontend** — upload these files directly to S3:
 ```
-index.html  api.js  config.js  style.css
+login.html  dashboard.html  add-item.html  insights.html
+utils.js    api.js          config.js      style.css
+index.html  (redirect shim → login.html)
 ```
 
 **Backend** — each `.py` file and `index.mjs` is a standalone Lambda function. Deploy individually via the AWS console or CLI:
@@ -25,7 +27,7 @@ No package manager, no build tool, no test suite exists in this repo.
 ## Architecture
 
 ```
-S3 (index.html, api.js, config.js, style.css)
+S3 (login.html, dashboard.html, add-item.html, insights.html, utils.js, api.js, config.js, style.css)
         │ HTTPS
         ▼
 API Gateway (REST, x-api-key auth)
@@ -76,4 +78,12 @@ Python Lambdas read these from `os.environ`:
 
 ## Frontend Design System
 
-Tailwind CSS via CDN (no build step). Inter font via Google Fonts CDN. Primary color `#005ab4`. Status badges: emerald = In Stock, yellow = Low Stock, red = Out of Stock. All UI views live inside a single `index.html`; `style.css` provides supplemental custom styles.
+Tailwind CSS via CDN (no build step). Inter font via Google Fonts CDN. Primary color `#005ab4`. Status badges: emerald = In Stock, yellow = Low Stock, red = Out of Stock.
+
+The app is split into multiple HTML pages (multi-page app, not SPA):
+- `login.html` — login + register
+- `dashboard.html` — inventory list + stat cards
+- `add-item.html` — add/edit form (edit data passed via `sessionStorage` key `iq_editItem`)
+- `insights.html` — low-stock analytics
+
+`utils.js` provides shared helpers: `requireAuth()` (redirects to `login.html` if not authed), `initNav(activePageId)` (highlights active sidebar link), `handleLogout()`. Every protected page loads `config.js`, `utils.js`, `api.js` in that order. The Tailwind config object is duplicated inline in each page's `<head>` (must precede the CDN `<script src>`).
