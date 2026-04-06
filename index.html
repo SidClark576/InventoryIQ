@@ -600,8 +600,7 @@
 
     async function handleSaveItem() {
       const id = document.getElementById('edit-id').value;
-      const p = { name: document.getElementById('f-name').value.trim(), category: document.getElementById('f-category').value.trim(), price: parseFloat(document.getElementById('f-price').value)||0, quantity: parseInt(document.getElementById('f-quantity').value)||0, lowStockThreshold: parseInt(document.getElementById('f-threshold').value)||10, description: document.getElementById('f-description').value.trim() };
-      const m = document.getElementById('form-msg');
+      const p = { name: document.getElementById('f-name').value.trim(), category: document.getElementById('f-category').value.trim(), price: parseFloat(document.getElementById('f-price').value)||0, quantity: parseInt(document.getElementById('f-quantity').value)||0, lowStockThreshold: parseInt(document.getElementById('f-threshold').value)||10, description: document.getElementById('f-description').value.trim(), userID: sessionStorage.getItem('userEmail') || '' };
       if(!p.name) { m.style.color='#ba1a1a'; m.textContent='Name required.'; return; }
       m.style.color='#005ab4'; m.textContent='Saving...';
       try {

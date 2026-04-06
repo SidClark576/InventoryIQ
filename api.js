@@ -25,7 +25,11 @@ async function authLogin(email, password) {
 // ── INVENTORY FUNCTIONS ───────────────────────────────────────
 
 async function getAllItems() {
-  const res = await fetch(`${CONFIG.API_ENDPOINT}/items`, {
+  const userID = getCurrentUserID();
+  const url = userID
+    ? `${CONFIG.API_ENDPOINT}/items?userID=${encodeURIComponent(userID)}`
+    : `${CONFIG.API_ENDPOINT}/items`;
+  const res = await fetch(url, {
     headers: { "x-api-key": CONFIG.API_KEY }
   });
 
@@ -104,6 +108,11 @@ async function deleteItem(itemID) {
 }
 
 async function getInsights() {
+  const userID = getCurrentUserID();
+  const url = userID
+    ? `${CONFIG.API_ENDPOINT}/insights?userID=${encodeURIComponent(userID)}`
+    : `${CONFIG.API_ENDPOINT}/insights`;
+  
   const res = await fetch(`${CONFIG.API_ENDPOINT}/insights`, {
     headers: { "x-api-key": CONFIG.API_KEY }
   });
