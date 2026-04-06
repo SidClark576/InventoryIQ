@@ -103,3 +103,27 @@ The sidebar navigation has 4 items: Dashboard, Inventory, Insights, Transactions
 
 ### Print Report
 `inventory.html` has a hidden `#print-section` div populated by `printReport()` before calling `window.print()`. `style.css` contains `@media print` rules that hide the sidebar/header and show only `#print-section`.
+
+## Error Handling
+
+All frontend pages that fetch data (`dashboard.html`, `inventory.html`, `transactions.html`, `insights.html`) display API errors as red text in the UI instead of silently failing:
+- **`api.js`** has a `checkQuota(res)` helper that detects HTTP 429 "API quota exceeded" responses and throws a clear error message
+- Each page's data-fetch function wraps `getTransactions()` / `getAllItems()` / `getInsights()` in try-catch
+- Errors render inline in tables or panels (e.g., "API quota exceeded — please wait a moment...")
+
+This prevents users from seeing blank/stuck loading states when the API is unavailable or quota is exhausted.
+
+## Troubleshooting
+
+**API returns 429 "Limit Exceeded":**
+- Your API Gateway usage plan quota has been exhausted. To fix:
+  1. AWS Console → **API Gateway** → **Usage Plans** (left sidebar)
+  2. Click the usage plan linked to your API key
+  3. Click **Edit**
+  4. Under **Quota**: uncheck "Enable quota" or raise to 10,000+/day
+  5. Click **Save** — takes effect immediately (no redeployment needed)
+- All inventory data will appear zero until quota is fixed
+
+**Lambda Proxy Integration disabled:**
+- If a Lambda endpoint returns `{"statusCode": 400, "body": "..."}` in the response body (instead of just the body), you forgot to enable Lambda Proxy Integration in API Gateway
+- Fix: API Gateway → Resource → Method → Integration Request → enable "Lambda Proxy Integration" → Save → redeploy
