@@ -56,29 +56,6 @@ def lambda_handler(event, context):
         updated = result.get('Attributes', {})
         updated = {k: float(v) if isinstance(v, Decimal) else v for k, v in updated.items()}
 
-        new_qty = int(updated.get('quantity', 9999))
-        threshold = int(updated.get('lowStockThreshold', 10))
-        item_name = updated.get('name', item_id)
-
-        if SNS_TOPIC_ARN:
-            if new_qty == 0:
-                sns.publish(
-                    TopicArn=SNS_TOPIC_ARN,
-                    Subject='InventoryIQ — Item Out of Stock',
-                    Message=f"🚨 {item_name} is now OUT OF STOCK. Reorder immediately."
-                )
-            elif new_qty <= threshold:
-                sns.publish(
-                    TopicArn=SNS_TOPIC_ARN,
-                    Subject='InventoryIQ — Low Stock Warning',
-                    Message=(
-                        f"⚠️ {item_name} is running low.\n"
-                        f"Current quantity: {new_qty} units\n"
-                        f"Low-stock threshold: {threshold} units\n"
-                        f"Please reorder soon."
-                    )
-                )
-
         return response(200, {'message': 'Item updated', 'item': updated})
 
     except Exception as e:

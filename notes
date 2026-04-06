@@ -3,3 +3,11 @@ SQS_QUEUE_ARN: arn:aws:sqs:us-east-1:753344699862:InventoryIQ-StockQueue
 SQS_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/753344699862/InventoryIQ-StockQueue
 API_INVOKE_URL: https://xti5le6ccg.execute-api.us-east-1.amazonaws.com/prod
 API_KEY: j161VqGi743fBSf9IChk16U3RtBwqG7L1BMpGt5V
+
+
+Issues:
+Added SNS code block in UpdateItem.py and I got a problem with multiple emails. I don't want to make the emails go to junk.
+I therefore deleted it
+
+Implementing EventBridge:
+I have created a new file DailyAlert.py that will be triggered by EventBridge on a daily basis. It will scan the DynamoDB table and send an email to the user if there are any items that are out of stock or low in stock.
