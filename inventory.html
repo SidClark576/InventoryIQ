@@ -149,7 +149,7 @@
               </button>
               <a href="add-item.html"
                 class="px-6 py-2.5 bg-[#005ab4] hover:bg-[#00458d] text-white rounded-xl text-[13px] font-bold flex items-center gap-2 cursor-pointer shadow-sm transition">
-                <span class="material-symbols-outlined text-[18px]">add</span> Add New Asset
+                <span class="material-symbols-outlined text-[18px]">add</span> Add New Items
               </a>
             </div>
           </div>
@@ -216,7 +216,12 @@
       const tb = document.getElementById('inventory-body');
       tb.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>';
 
-      allItems = await getAllItems();
+      try {
+        allItems = await getAllItems();
+      } catch (e) {
+        tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${e.message}</td></tr>`;
+        return;
+      }
       if (!allItems.length) {
         tb.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">No items found.</td></tr>';
         document.getElementById('pagination-text').textContent = 'Showing 0 of 0 assets';

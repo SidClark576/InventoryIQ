@@ -1,5 +1,11 @@
 // ── AUTH FUNCTIONS ────────────────────────────────────────────
 
+function checkQuota(res) {
+  if (res.status === 429) {
+    throw new Error('API quota exceeded — please wait a moment and try again, or contact your administrator.');
+  }
+}
+
 function getCurrentUserID() {
   return sessionStorage.getItem('userEmail') || '';
 }
@@ -33,6 +39,7 @@ async function getAllItems() {
     headers: { "x-api-key": CONFIG.API_KEY }
   });
 
+  checkQuota(res);
   const raw = await res.text();
   let data = [];
   if (raw) {
@@ -62,6 +69,7 @@ async function addItem(item) {
     },
     body: JSON.stringify(item)
   });
+  checkQuota(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to add item");
   return data;
@@ -76,6 +84,7 @@ async function updateItem(itemID, updates) {
     },
     body: JSON.stringify(updates)
   });
+  checkQuota(res);
   let data;
   try {
     data = await res.json();
@@ -97,6 +106,7 @@ async function deleteItem(itemID) {
     cache: "no-store",
     mode: "cors"
   });
+  checkQuota(res);
   let data;
   try {
     data = await res.json();
@@ -116,6 +126,7 @@ async function getInsights() {
   const res = await fetch(url, {
     headers: { "x-api-key": CONFIG.API_KEY }
   });
+  checkQuota(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch insights");
   return data;
@@ -127,6 +138,7 @@ async function getTransactions() {
     ? `${CONFIG.API_ENDPOINT}/transactions?userID=${encodeURIComponent(userID)}`
     : `${CONFIG.API_ENDPOINT}/transactions`;
   const res = await fetch(url, { headers: { "x-api-key": CONFIG.API_KEY } });
+  checkQuota(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch transactions");
   return Array.isArray(data) ? data : [];
