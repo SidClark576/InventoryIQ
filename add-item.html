@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>InventoryIQ | Add Asset</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
   <script>
     tailwind.config = {
       darkMode: "class",
@@ -75,9 +77,6 @@
       </div>
 
       <div class="p-4 space-y-1 mb-2 border-t border-gray-100 pt-6">
-        <button class="flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors">
-          <span class="material-symbols-outlined text-xl">help</span> Help Center
-        </button>
         <button
           class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer"
           onclick="handleLogout()">
@@ -90,16 +89,19 @@
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
       <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
         <div class="relative w-[480px]">
-          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+          <span
+            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
           <input type="text" placeholder="Search inventory, assets, or orders..."
             class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium" />
         </div>
         <div class="flex items-center gap-6">
-          <button class="text-gray-400 hover:text-gray-700 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
+          <button
+            class="text-gray-400 hover:text-gray-700 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
             <span class="material-symbols-outlined">notifications</span>
             <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
-          <button class="text-gray-400 hover:text-gray-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
+          <button
+            class="text-gray-400 hover:text-gray-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
             <span class="material-symbols-outlined">settings</span>
           </button>
           <div class="h-10 w-px bg-gray-200 ml-2 mr-2"></div>
@@ -111,13 +113,14 @@
 
       <main class="flex-1 overflow-auto p-10 space-y-8">
         <div>
-          <h1 id="form-title" class="text-3xl font-black text-gray-900 tracking-tight">Add Asset</h1>
+          <h1 id="form-title" class="text-3xl font-black text-gray-900 tracking-tight">Add New Item</h1>
         </div>
         <div class="bg-white rounded-3xl p-10 max-w-3xl shadow-sm border border-gray-200">
           <input type="hidden" id="edit-id" />
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="col-span-full">
-              <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Product Name *</label>
+              <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Product Name
+                *</label>
               <input type="text" id="f-name"
                 class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
                 placeholder="e.g. Pro Studio Display" />
@@ -141,13 +144,15 @@
                 placeholder="0" min="0" />
             </div>
             <div>
-              <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Low Stock Threshold</label>
+              <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Low Stock
+                Threshold</label>
               <input type="number" id="f-threshold"
                 class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
                 placeholder="10" min="0" />
             </div>
             <div class="col-span-full">
-              <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Description</label>
+              <label
+                class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Description</label>
               <textarea id="f-description"
                 class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900 min-h-[100px]"
                 placeholder="Optional details..."></textarea>
@@ -176,7 +181,7 @@
 
     function clearForm() {
       document.getElementById('edit-id').value = '';
-      document.getElementById('form-title').textContent = 'Add Asset';
+      document.getElementById('form-title').textContent = 'Add New Item';
       ['f-name', 'f-category', 'f-price', 'f-quantity', 'f-threshold', 'f-description'].forEach(id => {
         document.getElementById(id).value = '';
       });
@@ -189,7 +194,7 @@
       sessionStorage.removeItem('iq_editItem');
       const it = JSON.parse(raw);
       document.getElementById('edit-id').value = it.itemID;
-      document.getElementById('form-title').textContent = 'Edit Asset';
+      document.getElementById('form-title').textContent = 'Edit Item';
       document.getElementById('f-name').value = it.name || '';
       document.getElementById('f-category').value = it.category || '';
       document.getElementById('f-price').value = it.price || '';
@@ -224,4 +229,5 @@
     }
   </script>
 </body>
+
 </html>
