@@ -112,11 +112,22 @@ async function getInsights() {
   const url = userID
     ? `${CONFIG.API_ENDPOINT}/insights?userID=${encodeURIComponent(userID)}`
     : `${CONFIG.API_ENDPOINT}/insights`;
-  
+
   const res = await fetch(url, {
     headers: { "x-api-key": CONFIG.API_KEY }
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch insights");
   return data;
+}
+
+async function getTransactions() {
+  const userID = getCurrentUserID();
+  const url = userID
+    ? `${CONFIG.API_ENDPOINT}/transactions?userID=${encodeURIComponent(userID)}`
+    : `${CONFIG.API_ENDPOINT}/transactions`;
+  const res = await fetch(url, { headers: { "x-api-key": CONFIG.API_KEY } });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to fetch transactions");
+  return Array.isArray(data) ? data : [];
 }

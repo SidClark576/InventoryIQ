@@ -1,4 +1,5 @@
 import json
+import uuid
 import boto3
 import os
 from datetime import datetime
@@ -7,6 +8,7 @@ from decimal import Decimal
 dynamodb = boto3.resource('dynamodb')
 sns = boto3.client('sns')
 table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
+tx_table = dynamodb.Table(os.environ.get('TRANSACTIONS_TABLE', 'InventoryTransactions'))
 SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN', '')
 
 def lambda_handler(event, context):
@@ -17,6 +19,9 @@ def lambda_handler(event, context):
 
         body = json.loads(event.get('body', '{}'))
         timestamp = datetime.utcnow().isoformat()
+
+        # Read existing item to capture quantityBefore
+        existing = table.get_item(Key={'itemID': item_id}).get('Item', {})
 
         update_expr = "SET updatedAt = :ts"
         expr_values = {':ts': timestamp}
@@ -55,6 +60,28 @@ def lambda_handler(event, context):
 
         updated = result.get('Attributes', {})
         updated = {k: float(v) if isinstance(v, Decimal) else v for k, v in updated.items()}
+
+        # Write transaction record
+        qty_before = int(existing.get('quantity', 0))
+        qty_after = int(body['quantity']) if 'quantity' in body else qty_before
+        if qty_after > qty_before:
+            change_type = 'stock_in'
+        elif qty_after < qty_before:
+            change_type = 'stock_out'
+        else:
+            change_type = 'update'
+        tx_table.put_item(Item={
+            'transactionID': str(uuid.uuid4()),
+            'itemID': item_id,
+            'itemName': body.get('name', existing.get('name', '')),
+            'userID': body.get('userID', existing.get('userID', '')),
+            'changeType': change_type,
+            'quantityBefore': qty_before,
+            'quantityAfter': qty_after,
+            'quantityDelta': qty_after - qty_before,
+            'notes': body.get('notes', ''),
+            'createdAt': timestamp
+        })
 
         return response(200, {'message': 'Item updated', 'item': updated})
 

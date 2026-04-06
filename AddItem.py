@@ -7,6 +7,7 @@ from decimal import Decimal
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
+tx_table = dynamodb.Table(os.environ.get('TRANSACTIONS_TABLE', 'InventoryTransactions'))
 
 def lambda_handler(event, context):
     try:
@@ -34,6 +35,21 @@ def lambda_handler(event, context):
 
         table.put_item(Item=item)
         item['price'] = float(item['price'])
+
+        # Write transaction record
+        tx_table.put_item(Item={
+            'transactionID': str(uuid.uuid4()),
+            'itemID': item_id,
+            'itemName': item['name'],
+            'userID': user_id,
+            'changeType': 'create',
+            'quantityBefore': 0,
+            'quantityAfter': item['quantity'],
+            'quantityDelta': item['quantity'],
+            'notes': 'Item created',
+            'createdAt': timestamp
+        })
+
         return response(201, {'message': 'Item added successfully', 'item': item})
 
     except Exception as e:

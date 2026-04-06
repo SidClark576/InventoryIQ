@@ -73,6 +73,10 @@
             class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
             <span class="material-symbols-outlined text-xl">bar_chart</span> Insights
           </a>
+          <a href="transactions.html" data-page="transactions"
+            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            <span class="material-symbols-outlined text-xl">receipt_long</span> Transactions
+          </a>
         </nav>
       </div>
 
@@ -135,6 +139,11 @@
             <div class="flex items-center gap-4">
               <button
                 class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
+                onclick="printReport()">
+                <span class="material-symbols-outlined text-[16px]">print</span> Print Report
+              </button>
+              <button
+                class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
                 onclick="exportCSV()">
                 <span class="material-symbols-outlined text-[16px]">download</span> Export CSV
               </button>
@@ -181,6 +190,13 @@
               </button>
             </div>
           </div>
+        </div>
+
+        <!-- Hidden print section — shown only via @media print -->
+        <div id="print-section" class="hidden">
+          <div id="print-header"></div>
+          <table id="print-table" style="width:100%;border-collapse:collapse;font-size:12px;"></table>
+          <div id="print-summary"></div>
         </div>
 
       </main>
@@ -262,6 +278,50 @@
         }
       }
       loadInventory();
+    }
+
+    function printReport() {
+      if (!allItems.length) { alert('No items to print'); return; }
+      const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const total = allItems.length;
+      const outOfStock = allItems.filter(i => (i.quantity ?? 0) === 0).length;
+      const lowStock = allItems.filter(i => (i.quantity ?? 0) > 0 && (i.quantity ?? 0) <= (i.lowStockThreshold ?? 10)).length;
+      const totalValue = allItems.reduce((s, i) => s + ((i.price ?? 0) * (i.quantity ?? 0)), 0);
+
+      document.getElementById('print-header').innerHTML = `
+        <h1 style="font-size:20px;font-weight:900;margin:0 0 4px">InventoryIQ — Inventory Report</h1>
+        <p style="color:#666;margin:0 0 16px">Generated: ${date} &nbsp;|&nbsp; User: ${sessionStorage.getItem('userEmail') || ''}</p>`;
+
+      document.getElementById('print-summary').innerHTML = `
+        <p style="margin-top:12px;font-size:12px;color:#444">
+          <strong>Total Products:</strong> ${total} &nbsp;|&nbsp;
+          <strong>In Stock:</strong> ${total - outOfStock - lowStock} &nbsp;|&nbsp;
+          <strong>Low Stock:</strong> ${lowStock} &nbsp;|&nbsp;
+          <strong>Out of Stock:</strong> ${outOfStock} &nbsp;|&nbsp;
+          <strong>Total Value:</strong> $${totalValue.toFixed(2)}
+        </p>`;
+
+      const rows = allItems.map(i => {
+        const qty = i.quantity ?? 0, thr = i.lowStockThreshold ?? 10;
+        const status = qty === 0 ? 'Out of Stock' : qty <= thr ? 'Low Stock' : 'In Stock';
+        return `<tr style="border-bottom:1px solid #eee">
+          <td style="padding:6px 8px">${i.name}</td>
+          <td style="padding:6px 8px">${i.category || '—'}</td>
+          <td style="padding:6px 8px;text-align:right">${qty}</td>
+          <td style="padding:6px 8px;text-align:right">$${(i.price ?? 0).toFixed(2)}</td>
+          <td style="padding:6px 8px">${status}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('print-table').innerHTML = `
+        <thead><tr style="background:#f0f0f0;font-weight:bold">
+          <th style="padding:6px 8px;text-align:left">Name</th>
+          <th style="padding:6px 8px;text-align:left">Category</th>
+          <th style="padding:6px 8px;text-align:right">Qty</th>
+          <th style="padding:6px 8px;text-align:right">Price</th>
+          <th style="padding:6px 8px;text-align:left">Status</th>
+        </tr></thead><tbody>${rows}</tbody>`;
+
+      window.print();
     }
 
     function exportCSV() {

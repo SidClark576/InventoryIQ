@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>InventoryIQ | Insights</title>
+  <title>InventoryIQ | Transactions</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   <script>
     tailwind.config = {
       darkMode: "class",
@@ -81,6 +79,9 @@
       </div>
 
       <div class="p-4 space-y-1 mb-2 border-t border-gray-100 pt-6">
+        <button class="flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors">
+          <span class="material-symbols-outlined text-xl">help</span> Help Center
+        </button>
         <button
           class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer"
           onclick="handleLogout()">
@@ -93,23 +94,22 @@
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
       <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
         <div class="relative w-[480px]">
-          <span
-            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
-          <input type="text" placeholder="Search inventory, assets, or orders..."
-            class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium" />
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+          <input type="text" placeholder="Search transactions..." id="tx-search"
+            class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium"
+            oninput="applyFilters()" />
         </div>
         <div class="flex items-center gap-6">
-          <button
-            class="text-gray-400 hover:text-gray-700 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
+          <button class="text-gray-400 hover:text-gray-700 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
             <span class="material-symbols-outlined">notifications</span>
             <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
-          <button
-            class="text-gray-400 hover:text-gray-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
+          <button class="text-gray-400 hover:text-gray-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
             <span class="material-symbols-outlined">settings</span>
           </button>
           <div class="h-10 w-px bg-gray-200 ml-2 mr-2"></div>
           <div class="flex items-center gap-3 pr-2">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#005ab4] to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm opacity-90" id="nav-avatar">A</div>
             <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
           </div>
         </div>
@@ -118,17 +118,52 @@
       <main class="flex-1 overflow-auto p-10 space-y-8">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Insights</h1>
-            <p class="text-gray-500 mt-2 font-medium">AI-driven curation and tracking analysis</p>
+            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Transaction Log</h1>
+            <p class="text-gray-500 mt-2 font-medium">Running history of all stock-in, stock-out, and item changes.</p>
           </div>
           <button
             class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
-            onclick="loadInsights()">
+            onclick="loadTransactions()">
             <span class="material-symbols-outlined font-bold text-[18px]">refresh</span> Refresh
           </button>
         </div>
-        <div id="insights-content" class="bg-white p-10 rounded-3xl shadow-sm border border-gray-200">
-          <p class="text-gray-500 font-medium">Ready to process your data...</p>
+
+        <!-- Filters -->
+        <div class="flex items-center gap-4">
+          <select id="tx-filter"
+            class="rounded-xl px-4 py-2.5 bg-white border border-gray-200 text-[13px] font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-100 cursor-pointer"
+            onchange="applyFilters()">
+            <option value="">All Types</option>
+            <option value="stock_in">Stock In</option>
+            <option value="stock_out">Stock Out</option>
+            <option value="create">Create</option>
+            <option value="update">Update</option>
+            <option value="delete">Delete</option>
+          </select>
+          <span class="text-[13px] font-medium text-gray-400" id="tx-count">0 transactions</span>
+        </div>
+
+        <div class="bg-white rounded-[1.25rem] shadow-sm border border-gray-200 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-y border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50/50">
+                  <th class="px-6 py-4">Date / Time</th>
+                  <th class="px-6 py-4">Item</th>
+                  <th class="px-6 py-4">Type</th>
+                  <th class="px-6 py-4 text-right">Before</th>
+                  <th class="px-6 py-4 text-right">After</th>
+                  <th class="px-6 py-4 text-right">Delta</th>
+                  <th class="px-6 py-4">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="tx-body" class="divide-y divide-gray-100">
+                <tr>
+                  <td colspan="7" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
     </div>
@@ -139,48 +174,69 @@
   <script src="api.js"></script>
   <script>
     requireAuth();
-    initNav('insights');
+    initNav('transactions');
 
-    async function loadInsights() {
-      const panel = document.getElementById('insights-content');
-      panel.innerHTML = '<p class="text-on-surface-variant py-4">Analyzing...</p>';
+    let allTx = [];
 
+    const BADGE = {
+      stock_in:  'bg-emerald-50 text-emerald-700',
+      stock_out: 'bg-red-50 text-red-700',
+      create:    'bg-blue-50 text-blue-700',
+      delete:    'bg-gray-100 text-gray-600',
+      update:    'bg-yellow-50 text-yellow-700'
+    };
+
+    async function loadTransactions() {
+      const tb = document.getElementById('tx-body');
+      tb.innerHTML = '<tr><td colspan="7" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading...</td></tr>';
       try {
-        const d = await getInsights();
-        const s = d.summary || {};
-
-        const healthScore = Number.isFinite(Number(s.healthScore)) ? Number(s.healthScore) : 100;
-        const atRiskCount = Number.isFinite(Number(s.atRiskCount)) ? Number(s.atRiskCount) : 0;
-        const totalProducts = Number.isFinite(Number(s.totalProducts)) ? Number(s.totalProducts) : 0;
-        const estValue = Number.isFinite(Number(s.estimatedInventoryValue)) ? Number(s.estimatedInventoryValue) : 0;
-
-        const recs = (d.recommendations || []).map(r => `<li class="py-2 border-b border-outline-variant/30 last:border-0">${r}</li>`).join('') || '<li>No recommendations yet.</li>';
-        const reorder = (d.topReorderPriorities || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0"><strong>${i.name}</strong> (${i.category}) — Qty ${i.currentQuantity}, reorder ~${i.suggestedOrderQuantity} <span class="uppercase text-xs ml-2 ${i.urgency === 'critical' ? 'text-error' : i.urgency === 'high' ? 'text-secondary' : 'text-tertiary'}">${i.urgency}</span></li>`).join('') || '<li>None</li>';
-        const risk = (d.categoryRiskBreakdown || []).map(c => `<li class="py-2 border-b border-outline-variant/30 last:border-0"><strong>${c.category}</strong>: ${c.atRiskItems}/${c.totalItems} at risk (${c.riskPercent}%)</li>`).join('') || '<li>No data</li>';
-        const low = (d.lowStockItems || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0 text-secondary-dim">⚠️ <strong>${i.name}</strong> — ${i.quantity} left</li>`).join('') || '<li>None</li>';
-        const out = (d.outOfStockItems || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0 text-error-dim">🚨 <strong>${i.name}</strong></li>`).join('') || '<li>None</li>';
-
-        panel.innerHTML = `
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Health Score</div><div class="text-3xl font-black ${healthScore < 50 ? 'text-error' : healthScore < 80 ? 'text-secondary' : 'text-tertiary'}">${healthScore}/100</div></div>
-            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">At Risk</div><div class="text-3xl font-black text-on-surface">${atRiskCount}</div></div>
-            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Products</div><div class="text-3xl font-black text-on-surface">${totalProducts}</div></div>
-            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Inventory Value</div><div class="text-3xl font-black text-on-surface">$${estValue.toFixed(2)}</div></div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-outline-variant/50">Recommendations</h3><ul>${recs}</ul></div>
-            <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-outline-variant/50">Top Reorder Priorities</h3><ul>${reorder}</ul></div>
-            <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-outline-variant/50">Category Risk</h3><ul>${risk}</ul></div>
-            <div><h3 class="text-lg font-bold text-secondary mb-2 pb-2 border-b border-outline-variant/50">Low Stock</h3><ul>${low}</ul></div>
-            <div><h3 class="text-lg font-bold text-error mb-2 pb-2 border-b border-outline-variant/50">Out of Stock</h3><ul>${out}</ul></div>
-          </div>`;
+        allTx = await getTransactions();
+        applyFilters();
       } catch (e) {
-        panel.innerHTML = `<p class="text-error py-4">Unable to analyze right now: ${e.message}</p>`;
+        tb.innerHTML = `<tr><td colspan="7" class="px-8 py-12 text-center text-sm font-medium text-red-500">${e.message}</td></tr>`;
       }
     }
 
-    loadInsights();
+    function applyFilters() {
+      const typeFilter = document.getElementById('tx-filter').value;
+      const search = document.getElementById('tx-search').value.toLowerCase();
+      const filtered = allTx.filter(t => {
+        if (typeFilter && t.changeType !== typeFilter) return false;
+        if (search && !(t.itemName || '').toLowerCase().includes(search)) return false;
+        return true;
+      });
+      renderTable(filtered);
+    }
+
+    function renderTable(rows) {
+      const tb = document.getElementById('tx-body');
+      document.getElementById('tx-count').textContent = `${rows.length} transaction${rows.length !== 1 ? 's' : ''}`;
+      if (!rows.length) {
+        tb.innerHTML = '<tr><td colspan="7" class="px-8 py-12 text-center text-sm font-medium text-gray-400">No transactions found.</td></tr>';
+        return;
+      }
+      tb.innerHTML = rows.map(t => {
+        const dt = t.createdAt ? new Date(t.createdAt).toLocaleString() : '—';
+        const delta = t.quantityDelta ?? 0;
+        const deltaStr = delta > 0
+          ? `<span class="text-emerald-600 font-bold">+${delta}</span>`
+          : delta < 0
+            ? `<span class="text-red-600 font-bold">${delta}</span>`
+            : `<span class="text-gray-400">0</span>`;
+        const badge = `<span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md ${BADGE[t.changeType] || 'bg-gray-100 text-gray-600'}">${(t.changeType || '').replace('_', ' ')}</span>`;
+        return `<tr class="hover:bg-gray-50/80 transition-colors">
+          <td class="px-6 py-3 text-[12px] text-gray-500 whitespace-nowrap">${dt}</td>
+          <td class="px-6 py-3 font-bold text-[13px] text-gray-900">${t.itemName || '—'}</td>
+          <td class="px-6 py-3">${badge}</td>
+          <td class="px-6 py-3 text-[13px] text-gray-600 text-right">${t.quantityBefore ?? '—'}</td>
+          <td class="px-6 py-3 text-[13px] text-gray-600 text-right">${t.quantityAfter ?? '—'}</td>
+          <td class="px-6 py-3 text-right">${deltaStr}</td>
+          <td class="px-6 py-3 text-[12px] text-gray-400">${t.notes || '—'}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    loadTransactions();
   </script>
 </body>
-
 </html>
