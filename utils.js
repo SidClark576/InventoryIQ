@@ -5,9 +5,7 @@ function requireAuth() {
 function initNav(activePageId) {
   const email = sessionStorage.getItem('userEmail') || '';
   const el = document.getElementById('nav-email');
-  const av = document.getElementById('nav-avatar');
   if (el) el.textContent = email;
-  if (av) av.textContent = email.charAt(0).toUpperCase();
 
   document.querySelectorAll('[data-page]').forEach(function(a) {
     const active = a.dataset.page === activePageId;
