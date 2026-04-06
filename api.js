@@ -113,7 +113,7 @@ async function getInsights() {
     ? `${CONFIG.API_ENDPOINT}/insights?userID=${encodeURIComponent(userID)}`
     : `${CONFIG.API_ENDPOINT}/insights`;
   
-  const res = await fetch(`${CONFIG.API_ENDPOINT}/insights`, {
+  const res = await fetch(url, {
     headers: { "x-api-key": CONFIG.API_KEY }
   });
   const data = await res.json();

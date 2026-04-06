@@ -9,18 +9,29 @@ table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
 
 def lambda_handler(event, context):
     try:
-        result = table.scan()
-        items = result.get('Items', [])
         params = event.get('queryStringParameters') or {}
         user_id = params.get('userID', '').strip()
 
-        if user_id:
-            result = table.scan(FilterExpression=Attr('userID').eq(user_id))
-        else:
-            result = table.scan()
+        if not user_id:
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+                },
+                'body': json.dumps({'items': [], 'count': 0})
+            }
+
+        result = table.scan(FilterExpression=Attr('userID').eq(user_id))
+        items = result.get('Items', [])
 
         while 'LastEvaluatedKey' in result:
-            result = table.scan(ExclusiveStartKey=result['LastEvaluatedKey'])
+            result = table.scan(
+                ExclusiveStartKey=result['LastEvaluatedKey'],
+                FilterExpression=Attr('userID').eq(user_id)
+            )
             items.extend(result.get('Items', []))
 
         items = [

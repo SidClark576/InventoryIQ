@@ -1,0 +1,79 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+InventoryIQ is a **serverless inventory management app** on AWS. There is no local build step — changes are deployed manually to AWS Lambda (Python/Node.js functions) and S3 (frontend).
+
+## Deployment
+
+**Frontend** — upload these files directly to S3:
+```
+index.html  api.js  config.js  style.css
+```
+
+**Backend** — each `.py` file and `index.mjs` is a standalone Lambda function. Deploy individually via the AWS console or CLI:
+```bash
+zip function.zip AddItem.py && aws lambda update-function-code --function-name AddItem --zip-file fileb://function.zip
+```
+
+No package manager, no build tool, no test suite exists in this repo.
+
+**Files NOT deployed:** `notes`, `stitch_design.html`, `update_css.py`. The `notes` file contains live API keys and ARNs — do not modify or commit it.
+
+## Architecture
+
+```
+S3 (index.html, api.js, config.js, style.css)
+        │ HTTPS
+        ▼
+API Gateway (REST, x-api-key auth)
+        │
+  ┌─────┼─────────────┐
+  ▼     ▼             ▼
+DynamoDB  SNS Topic  SQS Queue
+InventoryIQ  Alerts   StockQueue
+Users
+```
+
+### API Routes → Lambda mapping
+| Method | Path | Lambda |
+|--------|------|--------|
+| POST | `/auth/register`, `/auth/login` | `index.mjs` (Node.js ESM) |
+| GET | `/items` | `GetAllItems.py` |
+| POST | `/items` | `AddItem.py` |
+| PUT | `/items/{itemID}` | `UpdateStock.py` |
+| DELETE | `/items/{itemID}` | `DeleteItem.py` |
+| GET | `/insights` | `LowStockInsight.py` |
+
+## Key Conventions
+
+- **Auth:** Passwords hashed with `crypto.scryptSync` (Node.js) + random salt. Login returns a UUID session token stored in `sessionStorage` — there is no server-side token validation after login. All inventory endpoints require `x-api-key` header; auth endpoints do not.
+- **Multi-user isolation:** Items are scoped by `userID` (the user's email) stored on each DynamoDB item. `GET /items` and `GET /insights` require `?userID=` — if omitted, they return an empty result. `userID` is trusted from the client request body (no server-side ownership check on writes).
+- **Decimal handling:** DynamoDB returns `Decimal` types — all Python Lambdas convert to `float` before `json.dumps`.
+- **CORS:** All Lambdas return `Access-Control-Allow-Origin: *`. The frontend `deleteItem` call appends `?_cb=<timestamp>` with `cache: "no-store"` to avoid stale CORS preflight caches.
+- **Low stock logic:** An item is "low stock" when `quantity <= lowStockThreshold`. Out-of-stock is `quantity == 0`. `UpdateStock.py` publishes SNS alerts after writes; `LowStockInsight.py` also publishes SNS + SQS on every GET.
+- **`name` is a DynamoDB reserved word** — `UpdateStock.py` uses the `#nm` expression alias when updating it.
+
+## DynamoDB Tables
+
+**`InventoryIQ`** — partition key: `itemID` (UUID string)  
+Fields: `name`, `description`, `category`, `quantity`, `price`, `lowStockThreshold`, `userID`, `createdAt`, `updatedAt`
+
+**`Users`** — partition key: `Email` (capital E, string)  
+Fields: `passwordHash`, `salt`, `createdAt`
+
+## Lambda Environment Variables
+
+Python Lambdas read these from `os.environ`:
+- `DYNAMODB_TABLE` — defaults to `"InventoryIQ"`
+- `SNS_TOPIC_ARN` — ARN for stock alerts
+- `SQS_QUEUE_URL` — URL for stock event queue
+
+`index.mjs` reads:
+- `USERS_TABLE` — defaults to `"Users"`
+
+## Frontend Design System
+
+Tailwind CSS via CDN (no build step). Inter font via Google Fonts CDN. Primary color `#005ab4`. Status badges: emerald = In Stock, yellow = Low Stock, red = Out of Stock. All UI views live inside a single `index.html`; `style.css` provides supplemental custom styles.

@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>InventoryIQ | Digital Curator</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
   <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
@@ -35,6 +37,7 @@
   </script>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body class="selection:bg-primary/30 antialiased">
   <!-- AUTH SCREEN -->
   <div id="auth-screen" class="flex items-center justify-center min-h-[100dvh] p-4 text-left relative bg-background">
@@ -42,32 +45,33 @@
     <div class="absolute top-8 left-8 flex items-center gap-3">
       <div class="w-8 h-8 drop-shadow-sm">
         <svg viewBox="0 0 100 100" class="w-full h-full">
-          <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c"/>
-          <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b"/>
-          <polygon points="85,35 50,55 50,90 85,70" fill="#9c3f91"/>
+          <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
+          <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
+          <polygon points="85,35 50,55 50,90 85,70" fill="#9c3f91" />
         </svg>
       </div>
       <span class="text-2xl font-bold tracking-tight text-primary">InventoryIQ</span>
     </div>
 
     <!-- Auth Card -->
-    <div class="bg-surface-container-lowest w-full max-w-md rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-outline-variant/30 overflow-hidden z-10 relative">
+    <div
+      class="bg-surface-container-lowest w-full max-w-md rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-outline-variant/30 overflow-hidden z-10 relative">
       <!-- Card header -->
       <div class="bg-[#1864c0] h-36 relative flex items-center justify-center">
         <!-- Faint networking pattern -->
         <svg class="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
           <pattern id="net-pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 0 0 L 40 40 M 40 0 L 0 40" stroke="white" stroke-width="0.5" fill="none"/>
-            <circle cx="20" cy="20" r="1.5" fill="white"/>
+            <path d="M 0 0 L 40 40 M 40 0 L 0 40" stroke="white" stroke-width="0.5" fill="none" />
+            <circle cx="20" cy="20" r="1.5" fill="white" />
           </pattern>
-          <rect x="0" y="0" width="100%" height="100%" fill="url(#net-pattern)"/>
+          <rect x="0" y="0" width="100%" height="100%" fill="url(#net-pattern)" />
         </svg>
         <div class="relative z-10 w-20 h-20 bg-white rounded-2xl shadow-md flex items-center justify-center">
           <div class="w-12 h-12">
             <svg viewBox="0 0 100 100" class="w-full h-full">
-              <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c"/>
-              <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b"/>
-              <polygon points="85,35 50,55 50,90 85,70" fill="#9c3f91"/>
+              <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
+              <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
+              <polygon points="85,35 50,55 50,90 85,70" fill="#9c3f91" />
             </svg>
           </div>
         </div>
@@ -86,10 +90,12 @@
             <label class="block text-sm font-semibold text-on-surface mb-2">Email address</label>
             <div class="relative flex items-center">
               <span class="material-symbols-outlined absolute left-3 text-outline text-xl">mail</span>
-              <input type="email" id="login-email" class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm" placeholder="name@company.com" />
+              <input type="email" id="login-email"
+                class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm"
+                placeholder="name@company.com" />
             </div>
           </div>
-          
+
           <!-- Password -->
           <div>
             <div class="flex justify-between items-center mb-2">
@@ -98,28 +104,36 @@
             </div>
             <div class="relative flex items-center">
               <span class="material-symbols-outlined absolute left-3 text-outline text-xl">lock</span>
-              <input type="password" id="login-password" class="w-full pl-10 pr-10 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm tracking-widest" placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()" />
-              <button class="material-symbols-outlined absolute right-3 text-outline hover:text-on-surface transition-colors cursor-pointer text-xl" tabindex="-1">visibility</button>
+              <input type="password" id="login-password"
+                class="w-full pl-10 pr-10 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm tracking-widest"
+                placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()" />
+              <button
+                class="material-symbols-outlined absolute right-3 text-outline hover:text-on-surface transition-colors cursor-pointer text-xl"
+                tabindex="-1">visibility</button>
             </div>
           </div>
 
           <!-- Checkbox -->
           <div class="flex items-center gap-2 pt-1 pb-1">
-            <input type="checkbox" id="remember" class="w-4 h-4 rounded border-outline-variant/50 text-primary focus:ring-primary" />
+            <input type="checkbox" id="remember"
+              class="w-4 h-4 rounded border-outline-variant/50 text-primary focus:ring-primary" />
             <label for="remember" class="text-sm text-on-surface-variant">Remember this device</label>
           </div>
 
           <!-- Login Button -->
-          <button class="w-full bg-primary hover:bg-primary-dim text-on-primary py-3 rounded-lg font-bold transition-all cursor-pointer flex justify-center items-center gap-2 text-base shadow-sm" onclick="handleLogin()">
+          <button
+            class="w-full bg-primary hover:bg-primary-dim text-on-primary py-3 rounded-lg font-bold transition-all cursor-pointer flex justify-center items-center gap-2 text-base shadow-sm"
+            onclick="handleLogin()">
             Login
             <span class="material-symbols-outlined text-xl">arrow_forward</span>
           </button>
-          
+
           <div id="login-msg" class="hidden mt-4 p-3 rounded-md text-center text-sm font-medium"></div>
 
           <!-- Divider -->
           <div class="pt-6 border-t border-outline-variant/30 mt-6 text-center text-sm text-on-surface-variant">
-            Don't have an account? <span class="text-primary font-bold cursor-pointer hover:underline" onclick="switchAuthTab('register', null)">Sign Up</span>
+            Don't have an account? <span class="text-primary font-bold cursor-pointer hover:underline"
+              onclick="switchAuthTab('register', null)">Sign Up</span>
           </div>
         </div>
 
@@ -128,24 +142,31 @@
             <label class="block text-sm font-semibold text-on-surface mb-2">Email address</label>
             <div class="relative flex items-center">
               <span class="material-symbols-outlined absolute left-3 text-outline text-xl">mail</span>
-              <input type="email" id="reg-email" class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm" placeholder="name@company.com" />
+              <input type="email" id="reg-email"
+                class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm"
+                placeholder="name@company.com" />
             </div>
           </div>
           <div>
             <label class="block text-sm font-semibold text-on-surface mb-2">Password</label>
             <div class="relative flex items-center">
               <span class="material-symbols-outlined absolute left-3 text-outline text-xl">lock</span>
-              <input type="password" id="reg-password" class="w-full pl-10 pr-10 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm" placeholder="Create password" />
+              <input type="password" id="reg-password"
+                class="w-full pl-10 pr-10 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm"
+                placeholder="Create password" />
             </div>
           </div>
-          <button class="w-full mt-2 bg-primary hover:bg-primary-dim text-on-primary py-3 rounded-lg font-bold transition-all cursor-pointer flex justify-center items-center gap-2 text-base shadow-sm" onclick="handleRegister()">
+          <button
+            class="w-full mt-2 bg-primary hover:bg-primary-dim text-on-primary py-3 rounded-lg font-bold transition-all cursor-pointer flex justify-center items-center gap-2 text-base shadow-sm"
+            onclick="handleRegister()">
             Create Account
             <span class="material-symbols-outlined text-xl">person_add</span>
           </button>
           <div id="reg-msg" class="hidden mt-4 p-3 rounded-md text-center text-sm font-medium"></div>
-          
+
           <div class="pt-6 border-t border-outline-variant/30 mt-6 text-center text-sm text-on-surface-variant">
-            Already have an account? <span class="text-primary font-bold cursor-pointer hover:underline" onclick="switchAuthTab('login', null)">Log In</span>
+            Already have an account? <span class="text-primary font-bold cursor-pointer hover:underline"
+              onclick="switchAuthTab('login', null)">Log In</span>
           </div>
         </div>
       </div>
@@ -159,16 +180,16 @@
         <span>© 2024 InventoryIQ. All rights reserved.</span>
       </div>
       <div class="text-sm text-on-surface-variant flex gap-6 justify-center mt-3">
-         <a href="#" class="hover:text-primary transition-colors">Privacy Policy</a>
-         <a href="#" class="hover:text-primary transition-colors">Terms of Service</a>
-         <a href="#" class="hover:text-primary transition-colors">Help Center</a>
+        <a href="#" class="hover:text-primary transition-colors">Privacy Policy</a>
+        <a href="#" class="hover:text-primary transition-colors">Terms of Service</a>
+        <a href="#" class="hover:text-primary transition-colors">Help Center</a>
       </div>
     </footer>
   </div>
 
   <!-- MAIN APP -->
   <div id="app" class="hidden h-screen overflow-hidden flex bg-[#f5f6fa]">
-    
+
     <!-- Sidebar -->
     <aside class="w-[260px] bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
       <div>
@@ -177,27 +198,33 @@
           <div class="flex items-center gap-4">
             <div class="w-10 h-10 bg-[#060e20] rounded-xl flex items-center justify-center p-2 shadow-sm">
               <svg viewBox="0 0 100 100" class="w-full h-full">
-                <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c"/>
-                <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b"/>
-                <polygon points="85,35 50,55 50,90 85,70" fill="#9c3f91"/>
+                <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
+                <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
+                <polygon points="85,35 50,55 50,90 85,70" fill="#9c3f91" />
               </svg>
             </div>
             <div class="flex flex-col">
-               <span class="text-[17px] font-bold text-gray-900 leading-tight">InventoryIQ</span>
-               <span class="text-[10px] font-bold text-gray-400 tracking-wider uppercase mt-0.5">Management Portal</span>
+              <span class="text-[17px] font-bold text-gray-900 leading-tight">InventoryIQ</span>
+              <span class="text-[10px] font-bold text-gray-400 tracking-wider uppercase mt-0.5">Management Portal</span>
             </div>
           </div>
         </div>
-        
+
         <!-- Navigation -->
         <nav class="p-4 space-y-1.5 mt-2">
-          <button class="nav-btn active flex items-center gap-3 w-full px-4 py-3 bg-[#e8f0fe] text-[#005ab4] rounded-xl font-bold text-sm transition-colors border-l-4 border-[#005ab4]" onclick="showPage('dashboard', this)">
+          <button
+            class="nav-btn active flex items-center gap-3 w-full px-4 py-3 bg-[#e8f0fe] text-[#005ab4] rounded-xl font-bold text-sm transition-colors border-l-4 border-[#005ab4]"
+            onclick="showPage('dashboard', this)">
             <span class="material-symbols-outlined text-xl">grid_view</span> Dashboard
           </button>
-          <button class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors border-l-4 border-transparent" onclick="showPage('inventory', this)">
+          <button
+            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors border-l-4 border-transparent"
+            onclick="showPage('inventory', this)">
             <span class="material-symbols-outlined text-xl">inventory_2</span> Inventory
           </button>
-          <button class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors border-l-4 border-transparent" onclick="showPage('insights', this)">
+          <button
+            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors border-l-4 border-transparent"
+            onclick="showPage('insights', this)">
             <span class="material-symbols-outlined text-xl">bar_chart</span> Insights
           </button>
         </nav>
@@ -205,10 +232,13 @@
 
       <!-- Bottom actions -->
       <div class="p-4 space-y-1 mb-2 border-t border-gray-100 pt-6">
-        <button class="flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors">
+        <button
+          class="flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors">
           <span class="material-symbols-outlined text-xl">help</span> Help Center
         </button>
-        <button class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer" onclick="handleLogout()">
+        <button
+          class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer"
+          onclick="handleLogout()">
           <span class="material-symbols-outlined text-xl">logout</span> Logout
         </button>
       </div>
@@ -220,22 +250,28 @@
       <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
         <!-- Search -->
         <div class="relative w-[480px]">
-          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
-          <input type="text" placeholder="Search inventory, assets, or orders..." class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium" />
+          <span
+            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+          <input type="text" placeholder="Search inventory, assets, or orders..."
+            class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium" />
         </div>
-        
+
         <!-- Header right -->
         <div class="flex items-center gap-6">
-          <button class="text-gray-400 hover:text-gray-700 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
+          <button
+            class="text-gray-400 hover:text-gray-700 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
             <span class="material-symbols-outlined">notifications</span>
             <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
-          <button class="text-gray-400 hover:text-gray-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
+          <button
+            class="text-gray-400 hover:text-gray-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
             <span class="material-symbols-outlined">settings</span>
           </button>
           <div class="h-10 w-px bg-gray-200 ml-2 mr-2"></div>
           <div class="flex items-center gap-3 pr-2">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#005ab4] to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm opacity-90" id="nav-avatar">A</div>
+            <div
+              class="w-10 h-10 rounded-full bg-gradient-to-br from-[#005ab4] to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm opacity-90"
+              id="nav-avatar">A</div>
             <span class="text-sm font-bold text-gray-700" id="nav-email">Alex Richards</span>
           </div>
         </div>
@@ -243,69 +279,85 @@
 
       <!-- Scrollable Main -->
       <main class="flex-1 overflow-auto p-10">
-        
+
         <!-- Dashboard -->
         <div id="page-dashboard" class="page active space-y-10">
-          
+
+          <div class="flex justify-end -mb-4">
+            <button
+              class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
+              onclick="loadDashboard(); loadInventory()">
+              <span class="material-symbols-outlined font-bold text-[18px]">refresh</span> Refresh
+            </button>
+          </div>
+
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
-               <div class="flex justify-between items-start mb-1">
-                   <div>
-                     <span class="text-gray-500 font-medium text-sm">Total Products</span>
-                     <h2 class="text-[40px] leading-tight font-black text-gray-900 mt-2 tracking-tight" id="stat-total">—</h2>
-                   </div>
-                   <div class="w-12 h-12 rounded-xl bg-[#e8f0fe] flex items-center justify-center text-[#005ab4]">
-                      <span class="material-symbols-outlined">inventory_2</span>
-                   </div>
-               </div>
-               <div class="mt-auto pt-6 flex items-start gap-1 text-[#005ab4] text-xs font-bold w-3/4 leading-tight">
-                  <span class="material-symbols-outlined text-[16px] mr-1">trending_up</span> +2.5% vs last month
-               </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
+              <div class="flex justify-between items-start mb-1">
+                <div>
+                  <span class="text-gray-500 font-medium text-sm">Total Products</span>
+                  <h2 class="text-[40px] leading-tight font-black text-gray-900 mt-2 tracking-tight" id="stat-total">—
+                  </h2>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-[#e8f0fe] flex items-center justify-center text-[#005ab4]">
+                  <span class="material-symbols-outlined">inventory_2</span>
+                </div>
+              </div>
+              <div class="mt-auto pt-6 flex items-start gap-1 text-[#005ab4] text-xs font-bold w-3/4 leading-tight">
+                <span class="material-symbols-outlined text-[16px] mr-1">trending_up</span> +2.5% vs last month
+              </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
-               <div class="flex justify-between items-start mb-1">
-                   <div>
-                     <span class="text-gray-500 font-medium text-sm">Out of Stock</span>
-                     <h2 class="text-[40px] leading-tight font-black text-[#dc2626] mt-2 tracking-tight" id="stat-out">—</h2>
-                   </div>
-                   <div class="w-12 h-12 rounded-xl bg-[#fef2f2] flex items-center justify-center text-[#dc2626]">
-                      <span class="material-symbols-outlined">error</span>
-                   </div>
-               </div>
-               <div class="mt-auto pt-6 flex items-start gap-1 text-[#dc2626] text-xs font-bold leading-tight">
-                  <span class="material-symbols-outlined text-[14px]">warning</span> Critical attention required
-               </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
+              <div class="flex justify-between items-start mb-1">
+                <div>
+                  <span class="text-gray-500 font-medium text-sm">Out of Stock</span>
+                  <h2 class="text-[40px] leading-tight font-black text-[#dc2626] mt-2 tracking-tight" id="stat-out">—
+                  </h2>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-[#fef2f2] flex items-center justify-center text-[#dc2626]">
+                  <span class="material-symbols-outlined">error</span>
+                </div>
+              </div>
+              <div class="mt-auto pt-6 flex items-start gap-1 text-[#dc2626] text-xs font-bold leading-tight">
+                <span class="material-symbols-outlined text-[14px]">warning</span> Critical attention required
+              </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
-               <div class="flex justify-between items-start mb-1">
-                   <div>
-                     <span class="text-gray-500 font-medium text-sm">Low Stock</span>
-                     <h2 class="text-[40px] leading-tight font-black text-[#d97706] mt-2 tracking-tight" id="stat-low">—</h2>
-                   </div>
-                   <div class="w-12 h-12 rounded-xl bg-[#fffbeb] flex items-center justify-center text-[#d97706]">
-                      <span class="material-symbols-outlined">sort</span>
-                   </div>
-               </div>
-               <div class="mt-auto pt-6 flex items-start gap-1 text-[#b45309] text-xs font-bold leading-tight">
-                  <span class="material-symbols-outlined text-[14px]">notifications_active</span> Items nearing threshold
-               </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
+              <div class="flex justify-between items-start mb-1">
+                <div>
+                  <span class="text-gray-500 font-medium text-sm">Low Stock</span>
+                  <h2 class="text-[40px] leading-tight font-black text-[#d97706] mt-2 tracking-tight" id="stat-low">—
+                  </h2>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-[#fffbeb] flex items-center justify-center text-[#d97706]">
+                  <span class="material-symbols-outlined">sort</span>
+                </div>
+              </div>
+              <div class="mt-auto pt-6 flex items-start gap-1 text-[#b45309] text-xs font-bold leading-tight">
+                <span class="material-symbols-outlined text-[14px]">notifications_active</span> Items nearing threshold
+              </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
-               <div class="flex justify-between items-start mb-1">
-                   <div>
-                     <span class="text-gray-500 font-medium text-sm">Total Value</span>
-                     <h2 class="text-[40px] leading-tight font-black text-gray-900 mt-2 tracking-tight" id="stat-value">—</h2>
-                   </div>
-                   <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600">
-                      <span class="material-symbols-outlined">payments</span>
-                   </div>
-               </div>
-               <div class="mt-auto pt-6 flex items-start gap-1 text-[#005ab4] text-xs font-bold leading-tight">
-                  <span class="material-symbols-outlined text-[14px]">account_balance_wallet</span> Net asset valuation
-               </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/80 flex flex-col relative overflow-hidden group hover:shadow-md transition">
+              <div class="flex justify-between items-start mb-1">
+                <div>
+                  <span class="text-gray-500 font-medium text-sm">Total Value</span>
+                  <h2 class="text-[40px] leading-tight font-black text-gray-900 mt-2 tracking-tight" id="stat-value">—
+                  </h2>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600">
+                  <span class="material-symbols-outlined">payments</span>
+                </div>
+              </div>
+              <div class="mt-auto pt-6 flex items-start gap-1 text-[#005ab4] text-xs font-bold leading-tight">
+                <span class="material-symbols-outlined text-[14px]">account_balance_wallet</span> Net asset valuation
+              </div>
             </div>
           </div>
 
@@ -314,22 +366,28 @@
             <div class="p-6 pb-5 flex items-start justify-between">
               <div>
                 <h3 class="text-xl font-bold text-gray-900">Active Inventory</h3>
-                <p class="text-[13px] font-medium text-gray-500 mt-1">Real-time status of all tracked assets and warehouse stock.</p>
+                <p class="text-[13px] font-medium text-gray-500 mt-1">Real-time status of all tracked assets and
+                  warehouse stock.</p>
               </div>
               <div class="flex items-center gap-4">
-                <button class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition">
-                  <span class="material-symbols-outlined text-[16px]">filter_list</span> All Categories <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                <button
+                  class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition">
+                  <span class="material-symbols-outlined text-[16px]">filter_list</span> All Categories <span
+                    class="material-symbols-outlined text-[18px]">expand_more</span>
                 </button>
-                <button class="px-6 py-2.5 bg-[#005ab4] hover:bg-[#00458d] text-white rounded-xl text-[13px] font-bold flex items-center gap-2 cursor-pointer shadow-sm transition" onclick="showPage('add-item', document.querySelectorAll('.nav-btn')[1])">
+                <button
+                  class="px-6 py-2.5 bg-[#005ab4] hover:bg-[#00458d] text-white rounded-xl text-[13px] font-bold flex items-center gap-2 cursor-pointer shadow-sm transition"
+                  onclick="showPage('add-item', document.querySelectorAll('.nav-btn')[1])">
                   <span class="material-symbols-outlined text-[18px]">add</span> Add New Asset
                 </button>
               </div>
             </div>
-            
+
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
-                  <tr class="border-y border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50/50">
+                  <tr
+                    class="border-y border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50/50">
                     <th class="px-8 py-4">Asset Name</th>
                     <th class="px-6 py-4">Category</th>
                     <th class="px-6 py-4">Qty</th>
@@ -338,80 +396,127 @@
                   </tr>
                 </thead>
                 <tbody id="inventory-body" class="divide-y divide-gray-100">
-                  <tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>
+                  <tr>
+                    <td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
-            
-            <div class="p-6 flex items-center justify-between text-[13px] font-medium text-gray-500 border-t border-gray-100">
+
+            <div
+              class="p-6 flex items-center justify-between text-[13px] font-medium text-gray-500 border-t border-gray-100">
               <span id="pagination-text">Showing 0 of 0 assets</span>
               <div class="flex items-center gap-1">
-                 <button class="w-8 h-8 rounded-lg border border-transparent hover:bg-gray-100 flex items-center justify-center text-gray-400"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
-                 <button class="w-8 h-8 rounded-lg bg-[#005ab4] text-white font-bold flex items-center justify-center">1</button>
-                 <button class="w-8 h-8 rounded-lg border border-transparent hover:bg-gray-100 flex items-center justify-center text-gray-400"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+                <button
+                  class="w-8 h-8 rounded-lg border border-transparent hover:bg-gray-100 flex items-center justify-center text-gray-400"><span
+                    class="material-symbols-outlined text-sm">chevron_left</span></button>
+                <button
+                  class="w-8 h-8 rounded-lg bg-[#005ab4] text-white font-bold flex items-center justify-center">1</button>
+                <button
+                  class="w-8 h-8 rounded-lg border border-transparent hover:bg-gray-100 flex items-center justify-center text-gray-400"><span
+                    class="material-symbols-outlined text-sm">chevron_right</span></button>
               </div>
             </div>
           </div>
-          
+
           <div id="dashboard-alerts" class="space-y-3"></div>
         </div>
 
         <!-- Inventory List Page (Fallback / Full page) -->
         <div id="page-inventory" class="page space-y-8">
-           <div class="flex items-center justify-between">
-             <div><h1 class="text-3xl font-black text-gray-900 tracking-tight">Full Inventory</h1><p class="text-gray-500 mt-2 font-medium">Manage and track your assets.</p></div>
-             <div class="flex gap-4">
-               <button class="bg-white text-gray-700 border border-gray-200 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer shadow-sm" onclick="exportCSV()"><span class="material-symbols-outlined font-bold text">download</span> Export CSV</button>
-             </div>
-           </div>
-           
-           <div class="bg-white rounded-[1.25rem] shadow-sm border border-gray-200 overflow-hidden">
-             <!-- Cloned structure from dashboard to reuse js injection -->
-             <table class="w-full text-left border-collapse">
-                <thead><tr class="border-b border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50/50">
-                  <th class="px-8 py-4">Asset Name</th><th class="px-6 py-4">Category</th><th class="px-6 py-4">Qty</th><th class="px-6 py-4">Status</th><th class="px-8 py-4 text-right">Actions</th>
-                </tr></thead>
-                <tbody id="inventory-body-full" class="divide-y divide-gray-100">
-                  <tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>
-                </tbody>
-              </table>
-           </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-3xl font-black text-gray-900 tracking-tight">Full Inventory</h1>
+              <p class="text-gray-500 mt-2 font-medium">Manage and track your assets.</p>
+            </div>
+            <div class="flex gap-4">
+              <button
+                class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
+                onclick="exportCSV()"><span class="material-symbols-outlined font-bold text-[18px]">download</span>
+                Export
+                CSV</button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-[1.25rem] shadow-sm border border-gray-200 overflow-hidden">
+            <!-- Cloned structure from dashboard to reuse js injection -->
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  class="border-b border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50/50">
+                  <th class="px-8 py-4">Asset Name</th>
+                  <th class="px-6 py-4">Category</th>
+                  <th class="px-6 py-4">Qty</th>
+                  <th class="px-6 py-4">Status</th>
+                  <th class="px-8 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-body-full" class="divide-y divide-gray-100">
+                <tr>
+                  <td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Add / Edit Item -->
         <div id="page-add-item" class="page space-y-8">
-          <div><h1 id="form-title" class="text-3xl font-black text-gray-900 tracking-tight">Add Asset</h1></div>
+          <div>
+            <h1 id="form-title" class="text-3xl font-black text-gray-900 tracking-tight">Add Asset</h1>
+          </div>
           <div class="bg-white rounded-3xl p-10 max-w-3xl shadow-sm border border-gray-200">
             <input type="hidden" id="edit-id" />
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div class="col-span-full">
-                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Product Name *</label>
-                <input type="text" id="f-name" class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900" placeholder="e.g. Pro Studio Display" />
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Product Name
+                  *</label>
+                <input type="text" id="f-name"
+                  class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
+                  placeholder="e.g. Pro Studio Display" />
               </div>
               <div>
                 <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Category</label>
-                <input type="text" id="f-category" class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900" placeholder="e.g. Electronics" />
+                <input type="text" id="f-category"
+                  class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
+                  placeholder="e.g. Electronics" />
               </div>
               <div>
-                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Price ($)</label>
-                <input type="number" id="f-price" class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900" placeholder="0.00" step="0.01" min="0" />
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Price
+                  ($)</label>
+                <input type="number" id="f-price"
+                  class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
+                  placeholder="0.00" step="0.01" min="0" />
               </div>
               <div>
                 <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Quantity</label>
-                <input type="number" id="f-quantity" class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900" placeholder="0" min="0" />
+                <input type="number" id="f-quantity"
+                  class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
+                  placeholder="0" min="0" />
               </div>
               <div>
-                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Low Stock Threshold</label>
-                <input type="number" id="f-threshold" class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900" placeholder="10" min="0" />
+                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Low Stock
+                  Threshold</label>
+                <input type="number" id="f-threshold"
+                  class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
+                  placeholder="10" min="0" />
               </div>
               <div class="col-span-full">
-                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Description</label>
-                <textarea id="f-description" class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900 min-h-[100px]" placeholder="Optional details..."></textarea>
+                <label
+                  class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Description</label>
+                <textarea id="f-description"
+                  class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900 min-h-[100px]"
+                  placeholder="Optional details..."></textarea>
               </div>
             </div>
             <div class="flex gap-4 mt-10 pt-8 border-t border-gray-100">
-              <button class="bg-[#005ab4] hover:bg-[#00458d] text-white px-10 py-4 rounded-xl font-bold shadow-sm transition-all cursor-pointer" onclick="handleSaveItem()">Save Asset</button>
-              <button class="px-10 py-4 rounded-xl font-bold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-all cursor-pointer" onclick="showPage('dashboard', document.querySelectorAll('.nav-btn')[0])">Cancel</button>
+              <button
+                class="bg-[#005ab4] hover:bg-[#00458d] text-white px-10 py-4 rounded-xl font-bold shadow-sm transition-all cursor-pointer"
+                onclick="handleSaveItem()">Save Asset</button>
+              <button
+                class="px-10 py-4 rounded-xl font-bold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-all cursor-pointer"
+                onclick="showPage('dashboard', document.querySelectorAll('.nav-btn')[0])">Cancel</button>
             </div>
             <div id="form-msg" class="mt-4 text-sm font-semibold"></div>
           </div>
@@ -420,10 +525,19 @@
         <!-- Insights -->
         <div id="page-insights" class="page space-y-8">
           <div class="flex items-center justify-between">
-            <div><h1 class="text-3xl font-black text-gray-900 tracking-tight">Insights</h1><p class="text-gray-500 mt-2 font-medium">AI-driven curation and tracking analysis</p></div>
-            <button class="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold shadow-sm hover:bg-gray-50 transition-all flex items-center gap-2 cursor-pointer" onclick="loadInsights()"><span class="material-symbols-outlined font-bold text-lg">refresh</span> Refresh</button>
+            <div>
+              <h1 class="text-3xl font-black text-gray-900 tracking-tight">Insights</h1>
+              <p class="text-gray-500 mt-2 font-medium">AI-driven curation and tracking analysis</p>
+            </div>
+            <button
+              class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
+              onclick="loadInsights()"><span class="material-symbols-outlined font-bold text-[18px]">refresh</span>
+              Refresh
+            </button>
           </div>
-          <div id="insights-content" class="bg-white p-10 rounded-3xl shadow-sm border border-gray-200"><p class="text-gray-500 font-medium">Ready to process your data...</p></div>
+          <div id="insights-content" class="bg-white p-10 rounded-3xl shadow-sm border border-gray-200">
+            <p class="text-gray-500 font-medium">Ready to process your data...</p>
+          </div>
         </div>
 
       </main>
@@ -437,7 +551,7 @@
     function switchAuthTab(tab, btn) {
       document.getElementById('login-form').classList.toggle('active', tab === 'login');
       document.getElementById('register-form').classList.toggle('active', tab === 'register');
-      
+
       const title = document.getElementById('auth-title');
       const subtitle = document.getElementById('auth-subtitle');
       if (title && subtitle) {
@@ -455,32 +569,32 @@
       const email = document.getElementById('login-email').value.trim(), pwd = document.getElementById('login-password').value;
       const msg = document.getElementById('login-msg');
       msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium";
-      if (!email || !pwd) { msg.classList.add('bg-error-container/20','text-error','block'); msg.textContent = 'Enter email & password.'; return; }
-      msg.classList.add('bg-surface-variant','text-on-surface','block'); msg.textContent = 'Logging in...';
+      if (!email || !pwd) { msg.classList.add('bg-error-container/20', 'text-error', 'block'); msg.textContent = 'Enter email & password.'; return; }
+      msg.classList.add('bg-surface-variant', 'text-on-surface', 'block'); msg.textContent = 'Logging in...';
       const { status, data } = await authLogin(email, pwd);
       if (status === 200) { sessionStorage.setItem('authToken', data.token); sessionStorage.setItem('userEmail', data.email); launchApp(); }
-      else { msg.className="mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-error-container/20 text-error"; msg.textContent = data.message || 'Login failed.'; }
+      else { msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-error-container/20 text-error"; msg.textContent = data.message || 'Login failed.'; }
     }
 
     async function handleRegister() {
       const email = document.getElementById('reg-email').value.trim(), pwd = document.getElementById('reg-password').value;
       const msg = document.getElementById('reg-msg');
       msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium";
-      if (!email || !pwd) { msg.classList.add('bg-error-container/20','text-error','block'); msg.textContent = 'Enter email & password.'; return; }
-      if (pwd.length < 6) { msg.classList.add('bg-error-container/20','text-error','block'); msg.textContent = 'Password >= 6 characters.'; return; }
-      msg.classList.add('bg-surface-variant','text-on-surface','block'); msg.textContent = 'Creating account...';
+      if (!email || !pwd) { msg.classList.add('bg-error-container/20', 'text-error', 'block'); msg.textContent = 'Enter email & password.'; return; }
+      if (pwd.length < 6) { msg.classList.add('bg-error-container/20', 'text-error', 'block'); msg.textContent = 'Password >= 6 characters.'; return; }
+      msg.classList.add('bg-surface-variant', 'text-on-surface', 'block'); msg.textContent = 'Creating account...';
       const { status, data } = await authRegister(email, pwd);
       if (status === 200) {
-        msg.className="mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-tertiary-container/30 text-tertiary"; msg.textContent = 'Account created!';
+        msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-tertiary-container/30 text-tertiary"; msg.textContent = 'Account created!';
         setTimeout(() => switchAuthTab('login', document.querySelector('.auth-tab')), 1500);
-      } else { msg.className="mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-error-container/20 text-error"; msg.textContent = data.message || 'Fail'; }
+      } else { msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-error-container/20 text-error"; msg.textContent = data.message || 'Fail'; }
     }
 
     function handleLogout() { sessionStorage.clear(); location.reload(); }
 
     function launchApp() {
       document.getElementById('auth-screen').classList.add('hidden'); document.getElementById('auth-screen').classList.remove('flex');
-      document.getElementById('app').classList.remove('hidden'); 
+      document.getElementById('app').classList.remove('hidden');
       const email = sessionStorage.getItem('userEmail') || '';
       document.getElementById('nav-email').textContent = email;
       const avatar = document.getElementById('nav-avatar');
@@ -491,13 +605,13 @@
     function showPage(pageId, btn) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById('page-' + pageId).classList.add('active');
-      document.querySelectorAll('.nav-btn').forEach(b => { 
-        b.classList.remove('text-[#005ab4]', 'bg-[#e8f0fe]', 'border-[#005ab4]'); 
-        b.classList.add('text-gray-500', 'border-transparent'); 
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('text-[#005ab4]', 'bg-[#e8f0fe]', 'border-[#005ab4]');
+        b.classList.add('text-gray-500', 'border-transparent');
       });
-      if (btn && btn.classList.contains('nav-btn')) { 
-        btn.classList.add('text-[#005ab4]', 'bg-[#e8f0fe]', 'border-[#005ab4]'); 
-        btn.classList.remove('text-gray-500', 'border-transparent'); 
+      if (btn && btn.classList.contains('nav-btn')) {
+        btn.classList.add('text-[#005ab4]', 'bg-[#e8f0fe]', 'border-[#005ab4]');
+        btn.classList.remove('text-gray-500', 'border-transparent');
       }
       if (pageId === 'inventory' || pageId === 'dashboard') loadInventory();
       if (pageId === 'add-item') clearForm();
@@ -522,7 +636,7 @@
       document.getElementById('stat-total').textContent = String(totalProducts || 0);
       document.getElementById('stat-out').textContent = String(outOfStockCount || 0);
       document.getElementById('stat-low').textContent = String(lowStockCount || 0);
-      
+
       let valStr = estimatedInventoryValue.toFixed(2);
       if (estimatedInventoryValue >= 1000000) valStr = (estimatedInventoryValue / 1000000).toFixed(2) + 'M';
       else if (estimatedInventoryValue >= 1000) valStr = (estimatedInventoryValue / 1000).toFixed(1) + 'k';
@@ -535,26 +649,26 @@
 
     let allItems = [];
     async function loadInventory() {
-      const tb1 = document.getElementById('inventory-body'); if(tb1) tb1.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>';
-      const tb2 = document.getElementById('inventory-body-full'); if(tb2) tb2.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>';
-      
+      const tb1 = document.getElementById('inventory-body'); if (tb1) tb1.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>';
+      const tb2 = document.getElementById('inventory-body-full'); if (tb2) tb2.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>';
+
       allItems = await getAllItems();
-      if (!allItems.length) { 
-        if(tb1) tb1.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">No items found.</td></tr>'; 
-        if(tb2) tb2.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">No items found.</td></tr>'; 
-        const pt = document.getElementById('pagination-text'); if(pt) pt.textContent = 'Showing 0 of 0 assets';
-        return; 
+      if (!allItems.length) {
+        if (tb1) tb1.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">No items found.</td></tr>';
+        if (tb2) tb2.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">No items found.</td></tr>';
+        const pt = document.getElementById('pagination-text'); if (pt) pt.textContent = 'Showing 0 of 0 assets';
+        return;
       }
-      
+
       const rows = allItems.map((c, idx) => {
         const qty = c.quantity ?? 0, thr = c.lowStockThreshold ?? 10;
         const iconDiv = `<div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 mr-4 border border-gray-100"><span class="material-symbols-outlined text-xl">devices</span></div>`;
-        const sku = `SKU: ${c.itemID.substring(0,8).toUpperCase()}`;
+        const sku = `SKU: ${c.itemID.substring(0, 8).toUpperCase()}`;
 
         const badge = qty === 0 ? '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#fef2f2] text-[#dc2626]">Out of Stock</span>'
           : qty <= thr ? '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#fffbeb] text-[#d97706]">Low Stock</span>'
-          : '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#ecfdf5] text-[#059669]">In Stock</span>';
-        
+            : '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#ecfdf5] text-[#059669]">In Stock</span>';
+
         return `<tr class="hover:bg-gray-50/80 transition-colors group">
           <td class="px-8 py-4">
             <div class="flex items-center">
@@ -565,58 +679,59 @@
               </div>
             </div>
           </td>
-          <td class="px-6 py-4 text-gray-500 text-[13px] font-medium">${c.category||'—'}</td>
+          <td class="px-6 py-4 text-gray-500 text-[13px] font-medium">${c.category || '—'}</td>
           <td class="px-6 py-4 font-bold text-gray-900 text-[13px]">${qty}</td>
           <td class="px-6 py-4">${badge}</td>
           <td class="px-8 py-4 text-right relative">
              <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#005ab4] hover:bg-[#e8f0fe] rounded-lg cursor-pointer transition p-0" onclick="editItem('${c.itemID}')"><span class="material-symbols-outlined text-[18px]">edit</span></button>
-                <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition p-0" onclick="handleDelete('${c.itemID}', '${c.name.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+                <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition p-0" onclick="handleDelete('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"><span class="material-symbols-outlined text-[18px]">delete</span></button>
              </div>
              <span class="material-symbols-outlined text-gray-400 absolute right-8 top-1/2 -translate-y-1/2 group-hover:hidden transition">more_vert</span>
           </td></tr>`;
       }).join('');
-      
-      if(tb1) tb1.innerHTML = rows;
-      if(tb2) tb2.innerHTML = rows;
+
+      if (tb1) tb1.innerHTML = rows;
+      if (tb2) tb2.innerHTML = rows;
       const pt = document.getElementById('pagination-text');
-      if(pt) pt.textContent = `Showing ${allItems.length} of ${allItems.length} assets`;
+      if (pt) pt.textContent = `Showing ${allItems.length} of ${allItems.length} assets`;
     }
 
     function clearForm() {
       document.getElementById('edit-id').value = ''; document.getElementById('form-title').textContent = 'Add Item';
-      ['f-name','f-category','f-price','f-quantity','f-threshold','f-description'].forEach(id => document.getElementById(id).value = '');
+      ['f-name', 'f-category', 'f-price', 'f-quantity', 'f-threshold', 'f-description'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('form-msg').textContent = '';
     }
 
     function editItem(id) {
-      const it = allItems.find(i => i.itemID === id); if(!it) return;
+      const it = allItems.find(i => i.itemID === id); if (!it) return;
       document.getElementById('edit-id').value = id; document.getElementById('form-title').textContent = 'Edit Item';
-      document.getElementById('f-name').value = it.name||''; document.getElementById('f-category').value = it.category||'';
-      document.getElementById('f-price').value = it.price||''; document.getElementById('f-quantity').value = it.quantity??'';
-      document.getElementById('f-threshold').value = it.lowStockThreshold??''; document.getElementById('f-description').value = it.description||'';
+      document.getElementById('f-name').value = it.name || ''; document.getElementById('f-category').value = it.category || '';
+      document.getElementById('f-price').value = it.price || ''; document.getElementById('f-quantity').value = it.quantity ?? '';
+      document.getElementById('f-threshold').value = it.lowStockThreshold ?? ''; document.getElementById('f-description').value = it.description || '';
       showPage('add-item', null);
     }
 
     async function handleSaveItem() {
       const id = document.getElementById('edit-id').value;
-      const p = { name: document.getElementById('f-name').value.trim(), category: document.getElementById('f-category').value.trim(), price: parseFloat(document.getElementById('f-price').value)||0, quantity: parseInt(document.getElementById('f-quantity').value)||0, lowStockThreshold: parseInt(document.getElementById('f-threshold').value)||10, description: document.getElementById('f-description').value.trim(), userID: sessionStorage.getItem('userEmail') || '' };
-      if(!p.name) { m.style.color='#ba1a1a'; m.textContent='Name required.'; return; }
-      m.style.color='#005ab4'; m.textContent='Saving...';
+      const m = document.getElementById('form-msg');
+      const p = { name: document.getElementById('f-name').value.trim(), category: document.getElementById('f-category').value.trim(), price: parseFloat(document.getElementById('f-price').value) || 0, quantity: parseInt(document.getElementById('f-quantity').value) || 0, lowStockThreshold: parseInt(document.getElementById('f-threshold').value) || 10, description: document.getElementById('f-description').value.trim(), userID: sessionStorage.getItem('userEmail') || '' };
+      if (!p.name) { m.style.color = '#ba1a1a'; m.textContent = 'Name required.'; return; }
+      m.style.color = '#005ab4'; m.textContent = 'Saving...';
       try {
         const r = id ? await updateItem(id, p) : await addItem(p);
-        m.style.color='#964400'; m.textContent='✅ '+(r.message||'Saved!');
+        m.style.color = '#964400'; m.textContent = '✅ ' + (r.message || 'Saved!');
         setTimeout(() => showPage('inventory', document.querySelectorAll('.nav-btn')[1]), 1200);
       } catch (e) {
-        m.style.color='#ba1a1a'; m.textContent='❌ ' + e.message;
+        m.style.color = '#ba1a1a'; m.textContent = '❌ ' + e.message;
       }
     }
 
     async function handleDelete(id, name) {
-      if(!confirm(`Delete "${name}"?`)) return;
+      if (!confirm(`Delete "${name}"?`)) return;
       try {
         await deleteItem(id);
-      } catch(e) {
+      } catch (e) {
         console.error('Delete failed:', e);
         if (e.message.includes("Failed to fetch")) {
           alert(`Failed to delete item: Network or CORS Error.\n\nMake sure the OPTIONS method is enabled and deployed for the /items/{itemID} endpoint in API Gateway.`);
@@ -641,7 +756,7 @@
         const estValue = Number.isFinite(Number(s.estimatedInventoryValue)) ? Number(s.estimatedInventoryValue) : 0;
 
         const recs = (d.recommendations || []).map(r => `<li class="py-2 border-b border-outline-variant/30 last:border-0">${r}</li>`).join('') || '<li>No recommendations yet.</li>';
-        const reorder = (d.topReorderPriorities || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0"><strong>${i.name}</strong> (${i.category}) — Qty ${i.currentQuantity}, reorder ~${i.suggestedOrderQuantity} <span class="uppercase text-xs ml-2 ${i.urgency==='critical'?'text-error':i.urgency==='high'?'text-secondary':'text-tertiary'}">${i.urgency}</span></li>`).join('') || '<li>None</li>';
+        const reorder = (d.topReorderPriorities || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0"><strong>${i.name}</strong> (${i.category}) — Qty ${i.currentQuantity}, reorder ~${i.suggestedOrderQuantity} <span class="uppercase text-xs ml-2 ${i.urgency === 'critical' ? 'text-error' : i.urgency === 'high' ? 'text-secondary' : 'text-tertiary'}">${i.urgency}</span></li>`).join('') || '<li>None</li>';
         const risk = (d.categoryRiskBreakdown || []).map(c => `<li class="py-2 border-b border-outline-variant/30 last:border-0"><strong>${c.category}</strong>: ${c.atRiskItems}/${c.totalItems} at risk (${c.riskPercent}%)</li>`).join('') || '<li>No data</li>';
         const low = (d.lowStockItems || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0 text-secondary-dim">⚠️ <strong>${i.name}</strong> — ${i.quantity} left</li>`).join('') || '<li>None</li>';
         const out = (d.outOfStockItems || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0 text-error-dim">🚨 <strong>${i.name}</strong></li>`).join('') || '<li>None</li>';
@@ -666,14 +781,15 @@
     }
 
     function exportCSV() {
-      if(!allItems.length) { alert('No items'); return; }
-      const headers = ['itemID','name','category','quantity','price','lowStockThreshold','description'];
-      const rows = allItems.map(i=>headers.map(h=>`"${(i[h]??'').toString().replace(/"/g,'""')}"`).join(','));
-      const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent([headers.join(','),...rows].join('\n'));
-      a.download = `inventoryiq_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+      if (!allItems.length) { alert('No items'); return; }
+      const headers = ['itemID', 'name', 'category', 'quantity', 'price', 'lowStockThreshold', 'description'];
+      const rows = allItems.map(i => headers.map(h => `"${(i[h] ?? '').toString().replace(/"/g, '""')}"`).join(','));
+      const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent([headers.join(','), ...rows].join('\n'));
+      a.download = `inventoryiq_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
     }
 
-    window.onload = () => { if(sessionStorage.getItem('authToken')) launchApp(); };
+    window.onload = () => { if (sessionStorage.getItem('authToken')) launchApp(); };
   </script>
 </body>
+
 </html>
