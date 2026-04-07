@@ -4,12 +4,15 @@ import {
     PutCommand,
     GetCommand
 } from "@aws-sdk/lib-dynamodb";
+import { SNSClient, SubscribeCommand } from "@aws-sdk/client-sns";
 import crypto from "crypto";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
+const snsClient = new SNSClient({});
 
 const USERS_TABLE = process.env.USERS_TABLE || "Users";
+const SNS_TOPIC_ARN = process.env.SNS_TOPIC_ARN;
 
 const headers = {
     "Access-Control-Allow-Origin": "*",
@@ -25,7 +28,6 @@ const hashPassword = (password, salt) => {
 export const handler = async (event) => {
     try {
 
-        // Handle CORS preflight
         if (event.httpMethod === "OPTIONS") {
             return { statusCode: 200, headers, body: JSON.stringify({}) };
         }
@@ -48,6 +50,7 @@ export const handler = async (event) => {
             const salt = crypto.randomBytes(16).toString("hex");
             const hashedPassword = hashPassword(password, salt);
 
+            // Write user to DynamoDB
             await docClient.send(new PutCommand({
                 TableName: USERS_TABLE,
                 ConditionExpression: "attribute_not_exists(Email)",
@@ -59,10 +62,22 @@ export const handler = async (event) => {
                 }
             }));
 
+            // Subscribe the new user's email to SNS topic for stock alerts
+            if (SNS_TOPIC_ARN) {
+                await snsClient.send(new SubscribeCommand({
+                    TopicArn: SNS_TOPIC_ARN,
+                    Protocol: "email",
+                    Endpoint: email,
+                    ReturnSubscriptionArn: true
+                }));
+            }
+
             return {
                 statusCode: 200,
                 headers,
-                body: JSON.stringify({ message: "User registered successfully!" })
+                body: JSON.stringify({
+                    message: "User registered successfully! Please check your email to confirm your alert subscription."
+                })
             };
         }
 
