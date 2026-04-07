@@ -1,0 +1,226 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e12]:
+          - generic [ref=e13]: InventoryIQ
+          - generic [ref=e14]: Management Portal
+      - navigation [ref=e15]:
+        - link "grid_view Dashboard" [ref=e16] [cursor=pointer]:
+          - /url: dashboard.html
+          - generic [ref=e17]: grid_view
+          - text: Dashboard
+        - link "inventory_2 Inventory" [ref=e18] [cursor=pointer]:
+          - /url: inventory.html
+          - generic [ref=e19]: inventory_2
+          - text: Inventory
+        - link "bar_chart Insights" [ref=e20] [cursor=pointer]:
+          - /url: insights.html
+          - generic [ref=e21]: bar_chart
+          - text: Insights
+        - link "receipt_long Transactions" [ref=e22] [cursor=pointer]:
+          - /url: transactions.html
+          - generic [ref=e23]: receipt_long
+          - text: Transactions
+    - button "logout Logout" [ref=e25] [cursor=pointer]:
+      - generic [ref=e26]: logout
+      - text: Logout
+  - generic [ref=e27]:
+    - banner [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]: search
+        - textbox "Search inventory, assets, or orders..." [ref=e31]
+      - generic [ref=e32]:
+        - button "notifications" [ref=e33] [cursor=pointer]:
+          - generic [ref=e34]: notifications
+        - button "settings" [ref=e36] [cursor=pointer]:
+          - generic [ref=e37]: settings
+        - generic [ref=e40]: sidneyordonia@gmail.com
+    - main [ref=e41]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: cancel
+          - generic [ref=e45]:
+            - strong [ref=e46]: Monitor Stand
+            - text: is OUT OF STOCK
+        - generic [ref=e47]:
+          - generic [ref=e48]: cancel
+          - generic [ref=e49]:
+            - strong [ref=e50]: Keyboard
+            - text: is OUT OF STOCK
+        - generic [ref=e51]:
+          - generic [ref=e52]: cancel
+          - generic [ref=e53]:
+            - strong [ref=e54]: Webcam
+            - text: is OUT OF STOCK
+        - generic [ref=e55]:
+          - generic [ref=e56]: warning
+          - generic [ref=e57]:
+            - strong [ref=e58]: Desk Organizer
+            - text: — 4 left
+        - generic [ref=e59]:
+          - generic [ref=e60]: warning
+          - generic [ref=e61]:
+            - strong [ref=e62]: Notebook Pad
+            - text: — 3 left
+      - button "refresh Refresh" [ref=e64] [cursor=pointer]:
+        - generic [ref=e65]: refresh
+        - text: Refresh
+      - generic [ref=e66]:
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - generic [ref=e69]:
+              - text: Total Products
+              - heading "10" [level=2] [ref=e70]
+            - generic [ref=e72]: inventory_2
+          - generic [ref=e73]:
+            - generic [ref=e74]: trending_up
+            - text: +2.5% vs last month
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - generic [ref=e77]:
+              - text: Out of Stock
+              - heading "3" [level=2] [ref=e78]
+            - generic [ref=e80]: error
+          - generic [ref=e81]:
+            - generic [ref=e82]: warning
+            - text: Critical attention required
+        - generic [ref=e83]:
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - text: Low Stock
+              - heading "2" [level=2] [ref=e86]
+            - generic [ref=e88]: sort
+          - generic [ref=e89]:
+            - generic [ref=e90]: notifications_active
+            - text: Items nearing threshold
+        - generic [ref=e91]:
+          - generic [ref=e92]:
+            - generic [ref=e93]:
+              - text: Total Value
+              - heading "$50.0k" [level=2] [ref=e94]
+            - generic [ref=e96]: payments
+          - generic [ref=e97]:
+            - generic [ref=e98]: account_balance_wallet
+            - text: Net asset valuation
+      - generic [ref=e99]:
+        - generic [ref=e101]:
+          - heading "Active Inventory" [level=3] [ref=e102]
+          - paragraph [ref=e103]: Real-time status of all tracked assets and warehouse stock.
+        - table [ref=e105]:
+          - rowgroup [ref=e106]:
+            - row "Asset Name Category Qty Status" [ref=e107]:
+              - columnheader "Asset Name" [ref=e108]
+              - columnheader "Category" [ref=e109]
+              - columnheader "Qty" [ref=e110]
+              - columnheader "Status" [ref=e111]
+          - rowgroup [ref=e112]:
+            - 'row "devices Desk Organizer SKU: 56D20F9F Office Supplies 4 Low Stock" [ref=e113]':
+              - 'cell "devices Desk Organizer SKU: 56D20F9F" [ref=e114]':
+                - generic [ref=e115]:
+                  - generic [ref=e117]: devices
+                  - generic [ref=e118]:
+                    - generic [ref=e119]: Desk Organizer
+                    - generic [ref=e120]: "SKU: 56D20F9F"
+              - cell "Office Supplies" [ref=e121]
+              - cell "4" [ref=e122]
+              - cell "Low Stock" [ref=e123]
+            - 'row "devices Notebook Pad SKU: D0D74E3B Office Supplies 3 Low Stock" [ref=e124]':
+              - 'cell "devices Notebook Pad SKU: D0D74E3B" [ref=e125]':
+                - generic [ref=e126]:
+                  - generic [ref=e128]: devices
+                  - generic [ref=e129]:
+                    - generic [ref=e130]: Notebook Pad
+                    - generic [ref=e131]: "SKU: D0D74E3B"
+              - cell "Office Supplies" [ref=e132]
+              - cell "3" [ref=e133]
+              - cell "Low Stock" [ref=e134]
+            - 'row "devices Monitor Stand SKU: 169DB5EB Office Furniture 0 Out of Stock" [ref=e135]':
+              - 'cell "devices Monitor Stand SKU: 169DB5EB" [ref=e136]':
+                - generic [ref=e137]:
+                  - generic [ref=e139]: devices
+                  - generic [ref=e140]:
+                    - generic [ref=e141]: Monitor Stand
+                    - generic [ref=e142]: "SKU: 169DB5EB"
+              - cell "Office Furniture" [ref=e143]
+              - cell "0" [ref=e144]
+              - cell "Out of Stock" [ref=e145]
+            - 'row "devices Wireless Mouse SKU: 0D6A57B3 Electronics 30 In Stock" [ref=e146]':
+              - 'cell "devices Wireless Mouse SKU: 0D6A57B3" [ref=e147]':
+                - generic [ref=e148]:
+                  - generic [ref=e150]: devices
+                  - generic [ref=e151]:
+                    - generic [ref=e152]: Wireless Mouse
+                    - generic [ref=e153]: "SKU: 0D6A57B3"
+              - cell "Electronics" [ref=e154]
+              - cell "30" [ref=e155]
+              - cell "In Stock" [ref=e156]
+            - 'row "devices Keyboard SKU: 3177B1D1 Electronics 0 Out of Stock" [ref=e157]':
+              - 'cell "devices Keyboard SKU: 3177B1D1" [ref=e158]':
+                - generic [ref=e159]:
+                  - generic [ref=e161]: devices
+                  - generic [ref=e162]:
+                    - generic [ref=e163]: Keyboard
+                    - generic [ref=e164]: "SKU: 3177B1D1"
+              - cell "Electronics" [ref=e165]
+              - cell "0" [ref=e166]
+              - cell "Out of Stock" [ref=e167]
+            - 'row "devices Macbook Pro SKU: 95FBA08E Electronics 19 In Stock" [ref=e168]':
+              - 'cell "devices Macbook Pro SKU: 95FBA08E" [ref=e169]':
+                - generic [ref=e170]:
+                  - generic [ref=e172]: devices
+                  - generic [ref=e173]:
+                    - generic [ref=e174]: Macbook Pro
+                    - generic [ref=e175]: "SKU: 95FBA08E"
+              - cell "Electronics" [ref=e176]
+              - cell "19" [ref=e177]
+              - cell "In Stock" [ref=e178]
+            - 'row "devices Laptop Computer SKU: E5425CA2 Electronics 15 In Stock" [ref=e179]':
+              - 'cell "devices Laptop Computer SKU: E5425CA2" [ref=e180]':
+                - generic [ref=e181]:
+                  - generic [ref=e183]: devices
+                  - generic [ref=e184]:
+                    - generic [ref=e185]: Laptop Computer
+                    - generic [ref=e186]: "SKU: E5425CA2"
+              - cell "Electronics" [ref=e187]
+              - cell "15" [ref=e188]
+              - cell "In Stock" [ref=e189]
+            - 'row "devices Desk Lamp SKU: B6FC2A75 Office Supplies 12 In Stock" [ref=e190]':
+              - 'cell "devices Desk Lamp SKU: B6FC2A75" [ref=e191]':
+                - generic [ref=e192]:
+                  - generic [ref=e194]: devices
+                  - generic [ref=e195]:
+                    - generic [ref=e196]: Desk Lamp
+                    - generic [ref=e197]: "SKU: B6FC2A75"
+              - cell "Office Supplies" [ref=e198]
+              - cell "12" [ref=e199]
+              - cell "In Stock" [ref=e200]
+            - 'row "devices Webcam SKU: AB6C9E10 Electronics 0 Out of Stock" [ref=e201]':
+              - 'cell "devices Webcam SKU: AB6C9E10" [ref=e202]':
+                - generic [ref=e203]:
+                  - generic [ref=e205]: devices
+                  - generic [ref=e206]:
+                    - generic [ref=e207]: Webcam
+                    - generic [ref=e208]: "SKU: AB6C9E10"
+              - cell "Electronics" [ref=e209]
+              - cell "0" [ref=e210]
+              - cell "Out of Stock" [ref=e211]
+            - 'row "devices USB-C Cable SKU: D27EE4C4 Accessories 50 In Stock" [ref=e212]':
+              - 'cell "devices USB-C Cable SKU: D27EE4C4" [ref=e213]':
+                - generic [ref=e214]:
+                  - generic [ref=e216]: devices
+                  - generic [ref=e217]:
+                    - generic [ref=e218]: USB-C Cable
+                    - generic [ref=e219]: "SKU: D27EE4C4"
+              - cell "Accessories" [ref=e220]
+              - cell "50" [ref=e221]
+              - cell "In Stock" [ref=e222]
+        - generic [ref=e223]:
+          - generic [ref=e224]: Showing 10 of 10 assets
+          - generic [ref=e225]:
+            - button "chevron_left" [ref=e226] [cursor=pointer]:
+              - generic [ref=e227]: chevron_left
+            - button "1" [ref=e228] [cursor=pointer]
+            - button "chevron_right" [ref=e229] [cursor=pointer]:
+              - generic [ref=e230]: chevron_right

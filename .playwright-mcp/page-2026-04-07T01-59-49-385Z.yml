@@ -1,0 +1,37 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e5]
+      - img [ref=e9]
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - heading "Create Account" [level=1] [ref=e47]
+        - paragraph [ref=e16]: Start managing your inventory today
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - generic [ref=e50]: Email address
+          - generic [ref=e51]:
+            - generic [ref=e52]: mail
+            - textbox "name@company.com" [ref=e53]: inventory.test@example.com
+        - generic [ref=e54]:
+          - generic [ref=e55]: Password
+          - generic [ref=e56]:
+            - generic [ref=e57]: lock
+            - textbox "Create password" [ref=e58]: Test123!@
+        - button "Create Account person_add" [active] [ref=e59] [cursor=pointer]:
+          - text: Create Account
+          - generic [ref=e60]: person_add
+        - generic [ref=e62]: Account created!
+        - generic [ref=e61]: Already have an account? Log In
+  - contentinfo [ref=e37]:
+    - generic [ref=e38]:
+      - generic [ref=e39]: InventoryIQ
+      - generic [ref=e40]: "|"
+      - generic [ref=e41]: © 2024 InventoryIQ. All rights reserved.
+    - generic [ref=e42]:
+      - link "Privacy Policy" [ref=e43] [cursor=pointer]:
+        - /url: "#"
+      - link "Terms of Service" [ref=e44] [cursor=pointer]:
+        - /url: "#"
+      - link "Help Center" [ref=e45] [cursor=pointer]:
+        - /url: "#"

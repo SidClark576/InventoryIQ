@@ -1,0 +1,64 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e12]:
+          - generic [ref=e13]: InventoryIQ
+          - generic [ref=e14]: Management Portal
+      - navigation [ref=e15]:
+        - link "grid_view Dashboard" [ref=e16] [cursor=pointer]:
+          - /url: dashboard.html
+          - generic [ref=e17]: grid_view
+          - text: Dashboard
+        - link "inventory_2 Inventory" [ref=e18] [cursor=pointer]:
+          - /url: inventory.html
+          - generic [ref=e19]: inventory_2
+          - text: Inventory
+        - link "bar_chart Insights" [ref=e20] [cursor=pointer]:
+          - /url: insights.html
+          - generic [ref=e21]: bar_chart
+          - text: Insights
+        - link "receipt_long Transactions" [ref=e22] [cursor=pointer]:
+          - /url: transactions.html
+          - generic [ref=e23]: receipt_long
+          - text: Transactions
+    - button "logout Logout" [ref=e25] [cursor=pointer]:
+      - generic [ref=e26]: logout
+      - text: Logout
+  - generic [ref=e27]:
+    - banner [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]: search
+        - textbox "Search inventory, assets, or orders..." [ref=e31]
+      - generic [ref=e32]:
+        - button "notifications" [ref=e33] [cursor=pointer]:
+          - generic [ref=e34]: notifications
+        - button "settings" [ref=e36] [cursor=pointer]:
+          - generic [ref=e37]: settings
+        - generic [ref=e40]: sidneyordonia@gmail.com
+    - main [ref=e41]:
+      - heading "Edit Item" [level=1] [ref=e43]
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]: Product Name *
+            - textbox "e.g. Pro Studio Display" [ref=e48]: Webcam
+          - generic [ref=e49]:
+            - generic [ref=e50]: Category
+            - textbox "e.g. Electronics" [ref=e51]: Electronics
+          - generic [ref=e52]:
+            - generic [ref=e53]: Price ($)
+            - spinbutton [ref=e54]: "95"
+          - generic [ref=e55]:
+            - generic [ref=e56]: Quantity
+            - spinbutton [ref=e57]: "10"
+          - generic [ref=e58]:
+            - generic [ref=e59]: Low Stock Threshold
+            - spinbutton [ref=e60]: "2"
+          - generic [ref=e61]:
+            - generic [ref=e62]: Description
+            - textbox "Optional details..." [ref=e63]: 4K webcam for video conferencing
+        - generic [ref=e64]:
+          - button "Save Asset" [ref=e65] [cursor=pointer]
+          - button "Cancel" [ref=e66] [cursor=pointer]

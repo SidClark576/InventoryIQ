@@ -205,17 +205,6 @@
               <p class="text-[13px] font-medium text-gray-500 mt-1">Real-time status of all tracked assets and warehouse
                 stock.</p>
             </div>
-            <div class="flex items-center gap-4">
-              <button
-                class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
-                onclick="exportCSV()">
-                <span class="material-symbols-outlined text-[16px]">download</span> Export CSV
-              </button>
-              <a href="add-item.html"
-                class="px-6 py-2.5 bg-[#005ab4] hover:bg-[#00458d] text-white rounded-xl text-[13px] font-bold flex items-center gap-2 cursor-pointer shadow-sm transition">
-                <span class="material-symbols-outlined text-[18px]">add</span> Add New Items
-              </a>
-            </div>
           </div>
 
           <div class="overflow-x-auto">
@@ -227,12 +216,11 @@
                   <th class="px-6 py-4">Category</th>
                   <th class="px-6 py-4">Qty</th>
                   <th class="px-6 py-4">Status</th>
-                  <th class="px-8 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody id="inventory-body" class="divide-y divide-gray-100">
                 <tr>
-                  <td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td>
+                  <td colspan="4" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td>
                 </tr>
               </tbody>
             </table>
@@ -301,16 +289,16 @@
     let allItems = [];
     async function loadInventory() {
       const tb = document.getElementById('inventory-body');
-      tb.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>';
+      tb.innerHTML = '<tr><td colspan="4" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>';
 
       try {
         allItems = await getAllItems();
       } catch (e) {
-        tb.innerHTML = `<tr><td colspan="5" class="px-8 py-10 text-center text-sm font-medium text-red-500">${e.message}</td></tr>`;
+        tb.innerHTML = `<tr><td colspan="4" class="px-8 py-10 text-center text-sm font-medium text-red-500">${e.message}</td></tr>`;
         return;
       }
       if (!allItems.length) {
-        tb.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">No items found.</td></tr>';
+        tb.innerHTML = '<tr><td colspan="4" class="px-8 py-12 text-center text-sm font-medium text-gray-500">No items found.</td></tr>';
         document.getElementById('pagination-text').textContent = 'Showing 0 of 0 assets';
         return;
       }
@@ -337,49 +325,10 @@
           <td class="px-6 py-4 text-gray-500 text-[13px] font-medium">${c.category || '—'}</td>
           <td class="px-6 py-4 font-bold text-gray-900 text-[13px]">${qty}</td>
           <td class="px-6 py-4">${badge}</td>
-          <td class="px-8 py-4 text-right relative">
-            <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#005ab4] hover:bg-[#e8f0fe] rounded-lg cursor-pointer transition p-0" onclick="editItem('${c.itemID}')"><span class="material-symbols-outlined text-[18px]">edit</span></button>
-              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition p-0" onclick="handleDelete('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"><span class="material-symbols-outlined text-[18px]">delete</span></button>
-            </div>
-            <span class="material-symbols-outlined text-gray-400 absolute right-8 top-1/2 -translate-y-1/2 group-hover:hidden transition">more_vert</span>
-          </td>
         </tr>`;
       }).join('');
 
       document.getElementById('pagination-text').textContent = `Showing ${allItems.length} of ${allItems.length} assets`;
-    }
-
-    function editItem(id) {
-      const it = allItems.find(i => i.itemID === id);
-      if (!it) return;
-      sessionStorage.setItem('iq_editItem', JSON.stringify(it));
-      window.location.href = 'add-item.html';
-    }
-
-    async function handleDelete(id, name) {
-      if (!confirm(`Delete "${name}"?`)) return;
-      try {
-        await deleteItem(id);
-      } catch (e) {
-        console.error('Delete failed:', e);
-        if (e.message.includes("Failed to fetch")) {
-          alert(`Failed to delete item: Network or CORS Error.\n\nMake sure the OPTIONS method is enabled and deployed for the /items/{itemID} endpoint in API Gateway.`);
-        } else {
-          alert(`Failed to delete item: ${e.message}`);
-        }
-      }
-      loadInventory();
-    }
-
-    function exportCSV() {
-      if (!allItems.length) { alert('No items'); return; }
-      const headers = ['itemID', 'name', 'category', 'quantity', 'price', 'lowStockThreshold', 'description'];
-      const rows = allItems.map(i => headers.map(h => `"${(i[h] ?? '').toString().replace(/"/g, '""')}"`).join(','));
-      const a = document.createElement('a');
-      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent([headers.join(','), ...rows].join('\n'));
-      a.download = `inventoryiq_${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
     }
 
     loadDashboard();

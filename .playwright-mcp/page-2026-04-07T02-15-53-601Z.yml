@@ -1,0 +1,293 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e12]:
+          - generic [ref=e13]: InventoryIQ
+          - generic [ref=e14]: Management Portal
+      - navigation [ref=e15]:
+        - link "grid_view Dashboard" [ref=e16] [cursor=pointer]:
+          - /url: dashboard.html
+          - generic [ref=e17]: grid_view
+          - text: Dashboard
+        - link "inventory_2 Inventory" [ref=e18] [cursor=pointer]:
+          - /url: inventory.html
+          - generic [ref=e19]: inventory_2
+          - text: Inventory
+        - link "bar_chart Insights" [ref=e20] [cursor=pointer]:
+          - /url: insights.html
+          - generic [ref=e21]: bar_chart
+          - text: Insights
+        - link "receipt_long Transactions" [ref=e22] [cursor=pointer]:
+          - /url: transactions.html
+          - generic [ref=e23]: receipt_long
+          - text: Transactions
+    - button "logout Logout" [ref=e25] [cursor=pointer]:
+      - generic [ref=e26]: logout
+      - text: Logout
+  - generic [ref=e27]:
+    - banner [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]: search
+        - textbox "Search inventory, assets, or orders..." [ref=e31]
+      - generic [ref=e32]:
+        - button "notifications" [ref=e33] [cursor=pointer]:
+          - generic [ref=e34]: notifications
+        - button "settings" [ref=e36] [cursor=pointer]:
+          - generic [ref=e37]: settings
+        - generic [ref=e40]: sidneyordonia@gmail.com
+    - main [ref=e41]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - heading "Full Inventory" [level=1] [ref=e44]
+          - paragraph [ref=e45]: Manage and track all your assets.
+        - button "refresh Refresh" [ref=e46] [cursor=pointer]:
+          - generic [ref=e47]: refresh
+          - text: Refresh
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - heading "Active Inventory" [level=3] [ref=e51]
+            - paragraph [ref=e52]: Real-time status of all tracked assets and warehouse stock.
+          - generic [ref=e53]:
+            - button "print Print Report" [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: print
+              - text: Print Report
+            - button "download Export CSV" [ref=e56] [cursor=pointer]:
+              - generic [ref=e57]: download
+              - text: Export CSV
+            - button "category Manage Categories" [ref=e58] [cursor=pointer]:
+              - generic [ref=e59]: category
+              - text: Manage Categories
+            - link "add Add New Items" [ref=e60] [cursor=pointer]:
+              - /url: add-item.html
+              - generic [ref=e61]: add
+              - text: Add New Items
+        - table [ref=e63]:
+          - rowgroup [ref=e64]:
+            - row "Asset Name Category Qty Status Actions" [ref=e65]:
+              - columnheader "Asset Name" [ref=e66]
+              - columnheader "Category" [ref=e67]
+              - columnheader "Qty" [ref=e68]
+              - columnheader "Status" [ref=e69]
+              - columnheader "Actions" [ref=e70]
+          - rowgroup [ref=e71]:
+            - 'row "devices Desk Organizer SKU: 56D20F9F Office Supplies 4 Low Stock add remove edit delete more_vert" [ref=e72]':
+              - 'cell "devices Desk Organizer SKU: 56D20F9F" [ref=e73]':
+                - generic [ref=e74]:
+                  - generic [ref=e76]: devices
+                  - generic [ref=e77]:
+                    - generic [ref=e78]: Desk Organizer
+                    - generic [ref=e79]: "SKU: 56D20F9F"
+              - cell "Office Supplies" [ref=e80]
+              - cell "4" [ref=e81]
+              - cell "Low Stock" [ref=e82]
+              - cell "add remove edit delete more_vert" [ref=e83]:
+                - generic [ref=e84]:
+                  - button "add" [ref=e85] [cursor=pointer]:
+                    - generic [ref=e86]: add
+                  - button "remove" [ref=e87] [cursor=pointer]:
+                    - generic [ref=e88]: remove
+                  - button "edit" [ref=e89] [cursor=pointer]:
+                    - generic [ref=e90]: edit
+                  - button "delete" [ref=e91] [cursor=pointer]:
+                    - generic [ref=e92]: delete
+                - generic [ref=e93]: more_vert
+            - 'row "devices Notebook Pad SKU: D0D74E3B Office Supplies 3 Low Stock add remove edit delete more_vert" [ref=e94]':
+              - 'cell "devices Notebook Pad SKU: D0D74E3B" [ref=e95]':
+                - generic [ref=e96]:
+                  - generic [ref=e98]: devices
+                  - generic [ref=e99]:
+                    - generic [ref=e100]: Notebook Pad
+                    - generic [ref=e101]: "SKU: D0D74E3B"
+              - cell "Office Supplies" [ref=e102]
+              - cell "3" [ref=e103]
+              - cell "Low Stock" [ref=e104]
+              - cell "add remove edit delete more_vert" [ref=e105]:
+                - generic [ref=e106]:
+                  - button "add" [ref=e107] [cursor=pointer]:
+                    - generic [ref=e108]: add
+                  - button "remove" [ref=e109] [cursor=pointer]:
+                    - generic [ref=e110]: remove
+                  - button "edit" [ref=e111] [cursor=pointer]:
+                    - generic [ref=e112]: edit
+                  - button "delete" [ref=e113] [cursor=pointer]:
+                    - generic [ref=e114]: delete
+                - generic [ref=e115]: more_vert
+            - 'row "devices Monitor Stand SKU: 169DB5EB Office Furniture 0 Out of Stock add remove edit delete more_vert" [ref=e116]':
+              - 'cell "devices Monitor Stand SKU: 169DB5EB" [ref=e117]':
+                - generic [ref=e118]:
+                  - generic [ref=e120]: devices
+                  - generic [ref=e121]:
+                    - generic [ref=e122]: Monitor Stand
+                    - generic [ref=e123]: "SKU: 169DB5EB"
+              - cell "Office Furniture" [ref=e124]
+              - cell "0" [ref=e125]
+              - cell "Out of Stock" [ref=e126]
+              - cell "add remove edit delete more_vert" [ref=e127]:
+                - generic [ref=e128]:
+                  - button "add" [ref=e129] [cursor=pointer]:
+                    - generic [ref=e130]: add
+                  - button "remove" [ref=e131] [cursor=pointer]:
+                    - generic [ref=e132]: remove
+                  - button "edit" [ref=e133] [cursor=pointer]:
+                    - generic [ref=e134]: edit
+                  - button "delete" [ref=e135] [cursor=pointer]:
+                    - generic [ref=e136]: delete
+                - generic [ref=e137]: more_vert
+            - 'row "devices Wireless Mouse SKU: 0D6A57B3 Electronics 30 In Stock add remove edit delete more_vert" [ref=e138]':
+              - 'cell "devices Wireless Mouse SKU: 0D6A57B3" [ref=e139]':
+                - generic [ref=e140]:
+                  - generic [ref=e142]: devices
+                  - generic [ref=e143]:
+                    - generic [ref=e144]: Wireless Mouse
+                    - generic [ref=e145]: "SKU: 0D6A57B3"
+              - cell "Electronics" [ref=e146]
+              - cell "30" [ref=e147]
+              - cell "In Stock" [ref=e148]
+              - cell "add remove edit delete more_vert" [ref=e149]:
+                - generic [ref=e150]:
+                  - button "add" [ref=e151] [cursor=pointer]:
+                    - generic [ref=e152]: add
+                  - button "remove" [ref=e153] [cursor=pointer]:
+                    - generic [ref=e154]: remove
+                  - button "edit" [ref=e155] [cursor=pointer]:
+                    - generic [ref=e156]: edit
+                  - button "delete" [ref=e157] [cursor=pointer]:
+                    - generic [ref=e158]: delete
+                - generic [ref=e159]: more_vert
+            - 'row "devices Keyboard SKU: 3177B1D1 Electronics 20 In Stock add remove edit delete more_vert" [ref=e160]':
+              - 'cell "devices Keyboard SKU: 3177B1D1" [ref=e161]':
+                - generic [ref=e162]:
+                  - generic [ref=e164]: devices
+                  - generic [ref=e165]:
+                    - generic [ref=e166]: Keyboard
+                    - generic [ref=e167]: "SKU: 3177B1D1"
+              - cell "Electronics" [ref=e168]
+              - cell "20" [ref=e169]
+              - cell "In Stock" [ref=e170]
+              - cell "add remove edit delete more_vert" [ref=e171]:
+                - generic [ref=e172]:
+                  - button "add" [ref=e173] [cursor=pointer]:
+                    - generic [ref=e174]: add
+                  - button "remove" [ref=e175] [cursor=pointer]:
+                    - generic [ref=e176]: remove
+                  - button "edit" [ref=e177] [cursor=pointer]:
+                    - generic [ref=e178]: edit
+                  - button "delete" [ref=e179] [cursor=pointer]:
+                    - generic [ref=e180]: delete
+                - generic [ref=e181]: more_vert
+            - 'row "devices Macbook Pro SKU: 95FBA08E Electronics 19 In Stock add remove edit delete more_vert" [ref=e182]':
+              - 'cell "devices Macbook Pro SKU: 95FBA08E" [ref=e183]':
+                - generic [ref=e184]:
+                  - generic [ref=e186]: devices
+                  - generic [ref=e187]:
+                    - generic [ref=e188]: Macbook Pro
+                    - generic [ref=e189]: "SKU: 95FBA08E"
+              - cell "Electronics" [ref=e190]
+              - cell "19" [ref=e191]
+              - cell "In Stock" [ref=e192]
+              - cell "add remove edit delete more_vert" [ref=e193]:
+                - generic [ref=e194]:
+                  - button "add" [ref=e195] [cursor=pointer]:
+                    - generic [ref=e196]: add
+                  - button "remove" [ref=e197] [cursor=pointer]:
+                    - generic [ref=e198]: remove
+                  - button "edit" [ref=e199] [cursor=pointer]:
+                    - generic [ref=e200]: edit
+                  - button "delete" [ref=e201] [cursor=pointer]:
+                    - generic [ref=e202]: delete
+                - generic [ref=e203]: more_vert
+            - 'row "devices Laptop Computer SKU: E5425CA2 Electronics 15 In Stock add remove edit delete more_vert" [ref=e204]':
+              - 'cell "devices Laptop Computer SKU: E5425CA2" [ref=e205]':
+                - generic [ref=e206]:
+                  - generic [ref=e208]: devices
+                  - generic [ref=e209]:
+                    - generic [ref=e210]: Laptop Computer
+                    - generic [ref=e211]: "SKU: E5425CA2"
+              - cell "Electronics" [ref=e212]
+              - cell "15" [ref=e213]
+              - cell "In Stock" [ref=e214]
+              - cell "add remove edit delete more_vert" [ref=e215]:
+                - generic [ref=e216]:
+                  - button "add" [ref=e217] [cursor=pointer]:
+                    - generic [ref=e218]: add
+                  - button "remove" [ref=e219] [cursor=pointer]:
+                    - generic [ref=e220]: remove
+                  - button "edit" [ref=e221] [cursor=pointer]:
+                    - generic [ref=e222]: edit
+                  - button "delete" [ref=e223] [cursor=pointer]:
+                    - generic [ref=e224]: delete
+                - generic [ref=e225]: more_vert
+            - 'row "devices Desk Lamp SKU: B6FC2A75 Office Supplies 12 In Stock add remove edit delete more_vert" [ref=e226]':
+              - 'cell "devices Desk Lamp SKU: B6FC2A75" [ref=e227]':
+                - generic [ref=e228]:
+                  - generic [ref=e230]: devices
+                  - generic [ref=e231]:
+                    - generic [ref=e232]: Desk Lamp
+                    - generic [ref=e233]: "SKU: B6FC2A75"
+              - cell "Office Supplies" [ref=e234]
+              - cell "12" [ref=e235]
+              - cell "In Stock" [ref=e236]
+              - cell "add remove edit delete more_vert" [ref=e237]:
+                - generic [ref=e238]:
+                  - button "add" [ref=e239] [cursor=pointer]:
+                    - generic [ref=e240]: add
+                  - button "remove" [ref=e241] [cursor=pointer]:
+                    - generic [ref=e242]: remove
+                  - button "edit" [ref=e243] [cursor=pointer]:
+                    - generic [ref=e244]: edit
+                  - button "delete" [ref=e245] [cursor=pointer]:
+                    - generic [ref=e246]: delete
+                - generic [ref=e247]: more_vert
+            - 'row "devices Webcam SKU: AB6C9E10 Electronics 10 In Stock add remove edit delete more_vert" [ref=e248]':
+              - 'cell "devices Webcam SKU: AB6C9E10" [ref=e249]':
+                - generic [ref=e250]:
+                  - generic [ref=e252]: devices
+                  - generic [ref=e253]:
+                    - generic [ref=e254]: Webcam
+                    - generic [ref=e255]: "SKU: AB6C9E10"
+              - cell "Electronics" [ref=e256]
+              - cell "10" [ref=e257]
+              - cell "In Stock" [ref=e258]
+              - cell "add remove edit delete more_vert" [ref=e259]:
+                - generic [ref=e260]:
+                  - button "add" [ref=e261] [cursor=pointer]:
+                    - generic [ref=e262]: add
+                  - button "remove" [ref=e263] [cursor=pointer]:
+                    - generic [ref=e264]: remove
+                  - button "edit" [ref=e265] [cursor=pointer]:
+                    - generic [ref=e266]: edit
+                  - button "delete" [ref=e267] [cursor=pointer]:
+                    - generic [ref=e268]: delete
+                - generic [ref=e269]: more_vert
+            - 'row "devices USB-C Cable SKU: D27EE4C4 Accessories 50 In Stock add remove edit delete more_vert" [ref=e270]':
+              - 'cell "devices USB-C Cable SKU: D27EE4C4" [ref=e271]':
+                - generic [ref=e272]:
+                  - generic [ref=e274]: devices
+                  - generic [ref=e275]:
+                    - generic [ref=e276]: USB-C Cable
+                    - generic [ref=e277]: "SKU: D27EE4C4"
+              - cell "Accessories" [ref=e278]
+              - cell "50" [ref=e279]
+              - cell "In Stock" [ref=e280]
+              - cell "add remove edit delete more_vert" [ref=e281]:
+                - generic [ref=e282]:
+                  - button "add" [ref=e283] [cursor=pointer]:
+                    - generic [ref=e284]: add
+                  - button "remove" [ref=e285] [cursor=pointer]:
+                    - generic [ref=e286]: remove
+                  - button "edit" [ref=e287] [cursor=pointer]:
+                    - generic [ref=e288]: edit
+                  - button "delete" [ref=e289] [cursor=pointer]:
+                    - generic [ref=e290]: delete
+                - generic [ref=e291]: more_vert
+        - generic [ref=e292]:
+          - generic [ref=e293]: Showing 10 of 10 assets
+          - generic [ref=e294]:
+            - button "chevron_left" [ref=e295] [cursor=pointer]:
+              - generic [ref=e296]: chevron_left
+            - button "1" [ref=e297] [cursor=pointer]
+            - button "chevron_right" [ref=e298] [cursor=pointer]:
+              - generic [ref=e299]: chevron_right

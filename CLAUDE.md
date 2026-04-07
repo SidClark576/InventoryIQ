@@ -50,8 +50,14 @@ InventoryTransactions
 | DELETE | `/items/{itemID}` | `DeleteItem.py` |
 | GET | `/insights` | `LowItemInsight.py` |
 | GET | `/transactions` | `GetTransactions.py` |
+| GET | `/categories` | `GetCategories.py` |
+| POST | `/categories` | `DeleteCategory.py` |
 
 All routes require **Lambda Proxy Integration** enabled in API Gateway.
+
+**Category Management:**
+- `GET /categories?userID=<email>` returns array of unique category strings (always includes "Uncategorized")
+- `POST /categories` with body `{ userID, categoryName }` deletes category by moving all items to "Uncategorized" (idempotent, prevents deletion of "Uncategorized" itself)
 
 ## Key Conventions
 
@@ -91,8 +97,8 @@ Tailwind CSS via CDN (no build step). Inter font via Google Fonts CDN. Primary c
 
 The app is a multi-page app (MPA) with real browser navigation:
 - `login.html` — login + register
-- `dashboard.html` — stat cards + inventory table preview
-- `inventory.html` — full inventory table; Export CSV + Print Report buttons
+- `dashboard.html` — stat cards + read-only inventory table preview (no edit/delete actions)
+- `inventory.html` — full inventory table with stock management; Export CSV, Print Report, Manage Categories buttons
 - `add-item.html` — add/edit form (edit data passed via `sessionStorage` key `iq_editItem`)
 - `insights.html` — AI-driven low-stock analytics
 - `transactions.html` — running log of all stock mutations with type filter + search
@@ -103,6 +109,24 @@ The sidebar navigation has 4 items: Dashboard, Inventory, Insights, Transactions
 
 ### Print Report
 `inventory.html` has a hidden `#print-section` div populated by `printReport()` before calling `window.print()`. `style.css` contains `@media print` rules that hide the sidebar/header and show only `#print-section`.
+
+### Stock Management & Categories
+**inventory.html** provides quick stock adjustments and category management:
+
+**Stock Adjustments (row-level modals on hover):**
+- **Plus (+, green)** — opens "Add Stock" modal to increase quantity; logs `stock_in` transaction
+- **Minus (−, orange)** — opens "Deduct Stock" modal to decrease quantity; validates against current stock; logs `stock_out` transaction
+- Both modals validate positive amounts and update via existing `updateItem()` API (no new backend endpoints)
+
+**Category Management:**
+- **"Manage Categories" button** in card header opens modal showing:
+  - List of existing categories as chips with delete buttons (× icon)
+  - "Uncategorized" shown as read-only "(Default)" category — cannot be deleted
+  - Input field + "Create" button to add new categories (no backend call needed; persists when item created)
+  - Delete confirmation shows item count being reassigned: "Moving X items to 'Uncategorized'. Continue?"
+- Deleting a category calls `deleteCategory()` API which calls `DeleteCategory.py` Lambda
+- `DeleteCategory.py` scans items with the category, updates all to "Uncategorized", returns count
+- On success, modal refreshes and inventory table reloads
 
 ## Error Handling
 

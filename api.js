@@ -143,3 +143,33 @@ async function getTransactions() {
   if (!res.ok) throw new Error(data.error || "Failed to fetch transactions");
   return Array.isArray(data) ? data : [];
 }
+
+async function getCategories() {
+  const userID = getCurrentUserID();
+  const url = userID
+    ? `${CONFIG.API_ENDPOINT}/categories?userID=${encodeURIComponent(userID)}`
+    : `${CONFIG.API_ENDPOINT}/categories`;
+  const res = await fetch(url, {
+    headers: { "x-api-key": CONFIG.API_KEY }
+  });
+  checkQuota(res);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to fetch categories");
+  return Array.isArray(data) ? data : [];
+}
+
+async function deleteCategory(categoryName) {
+  const userID = getCurrentUserID();
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/categories`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": CONFIG.API_KEY
+    },
+    body: JSON.stringify({ userID, categoryName })
+  });
+  checkQuota(res);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to delete category");
+  return data;
+}

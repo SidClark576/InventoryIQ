@@ -1,0 +1,85 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e12]:
+          - generic [ref=e13]: InventoryIQ
+          - generic [ref=e14]: Management Portal
+      - navigation [ref=e15]:
+        - link "grid_view Dashboard" [ref=e16] [cursor=pointer]:
+          - /url: dashboard.html
+          - generic [ref=e17]: grid_view
+          - text: Dashboard
+        - link "inventory_2 Inventory" [ref=e18] [cursor=pointer]:
+          - /url: inventory.html
+          - generic [ref=e19]: inventory_2
+          - text: Inventory
+        - link "bar_chart Insights" [ref=e20] [cursor=pointer]:
+          - /url: insights.html
+          - generic [ref=e21]: bar_chart
+          - text: Insights
+        - link "receipt_long Transactions" [ref=e22] [cursor=pointer]:
+          - /url: transactions.html
+          - generic [ref=e23]: receipt_long
+          - text: Transactions
+    - button "logout Logout" [ref=e25] [cursor=pointer]:
+      - generic [ref=e26]: logout
+      - text: Logout
+  - generic [ref=e27]:
+    - banner [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]: search
+        - textbox "Search inventory, assets, or orders..." [ref=e31]
+      - generic [ref=e32]:
+        - button "notifications" [ref=e33] [cursor=pointer]:
+          - generic [ref=e34]: notifications
+        - button "settings" [ref=e36] [cursor=pointer]:
+          - generic [ref=e37]: settings
+        - generic [ref=e40]: inventory.test@example.com
+    - main [ref=e41]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - heading "Full Inventory" [level=1] [ref=e44]
+          - paragraph [ref=e45]: Manage and track all your assets.
+        - button "refresh Refresh" [ref=e46] [cursor=pointer]:
+          - generic [ref=e47]: refresh
+          - text: Refresh
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - heading "Active Inventory" [level=3] [ref=e51]
+            - paragraph [ref=e52]: Real-time status of all tracked assets and warehouse stock.
+          - generic [ref=e53]:
+            - button "print Print Report" [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: print
+              - text: Print Report
+            - button "download Export CSV" [ref=e56] [cursor=pointer]:
+              - generic [ref=e57]: download
+              - text: Export CSV
+            - button "category Manage Categories" [ref=e58] [cursor=pointer]:
+              - generic [ref=e59]: category
+              - text: Manage Categories
+            - link "add Add New Items" [ref=e60] [cursor=pointer]:
+              - /url: add-item.html
+              - generic [ref=e61]: add
+              - text: Add New Items
+        - table [ref=e63]:
+          - rowgroup [ref=e64]:
+            - row "Asset Name Category Qty Status Actions" [ref=e65]:
+              - columnheader "Asset Name" [ref=e66]
+              - columnheader "Category" [ref=e67]
+              - columnheader "Qty" [ref=e68]
+              - columnheader "Status" [ref=e69]
+              - columnheader "Actions" [ref=e70]
+          - rowgroup [ref=e71]:
+            - row "No items found." [ref=e72]:
+              - cell "No items found." [ref=e73]
+        - generic [ref=e74]:
+          - generic [ref=e75]: Showing 0 of 0 assets
+          - generic [ref=e76]:
+            - button "chevron_left" [ref=e77] [cursor=pointer]:
+              - generic [ref=e78]: chevron_left
+            - button "1" [ref=e79] [cursor=pointer]
+            - button "chevron_right" [ref=e80] [cursor=pointer]:
+              - generic [ref=e81]: chevron_right

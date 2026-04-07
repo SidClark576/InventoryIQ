@@ -154,6 +154,11 @@
         const totalProducts = Number.isFinite(Number(s.totalProducts)) ? Number(s.totalProducts) : 0;
         const estValue = Number.isFinite(Number(s.estimatedInventoryValue)) ? Number(s.estimatedInventoryValue) : 0;
 
+        // Format large inventory values to prevent card overflow (M for millions, k for thousands)
+        let estValueStr = estValue.toFixed(2);
+        if (estValue >= 1000000) estValueStr = (estValue / 1000000).toFixed(2) + 'M';
+        else if (estValue >= 1000) estValueStr = (estValue / 1000).toFixed(1) + 'k';
+
         const recs = (d.recommendations || []).map(r => `<li class="py-2 border-b border-outline-variant/30 last:border-0">${r}</li>`).join('') || '<li>No recommendations yet.</li>';
         const reorder = (d.topReorderPriorities || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0"><strong>${i.name}</strong> (${i.category}) — Qty ${i.currentQuantity}, reorder ~${i.suggestedOrderQuantity} <span class="uppercase text-xs ml-2 ${i.urgency === 'critical' ? 'text-error' : i.urgency === 'high' ? 'text-secondary' : 'text-tertiary'}">${i.urgency}</span></li>`).join('') || '<li>None</li>';
         const risk = (d.categoryRiskBreakdown || []).map(c => `<li class="py-2 border-b border-outline-variant/30 last:border-0"><strong>${c.category}</strong>: ${c.atRiskItems}/${c.totalItems} at risk (${c.riskPercent}%)</li>`).join('') || '<li>No data</li>';
@@ -165,7 +170,7 @@
             <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Health Score</div><div class="text-3xl font-black ${healthScore < 50 ? 'text-error' : healthScore < 80 ? 'text-secondary' : 'text-tertiary'}">${healthScore}/100</div></div>
             <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">At Risk</div><div class="text-3xl font-black text-on-surface">${atRiskCount}</div></div>
             <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Products</div><div class="text-3xl font-black text-on-surface">${totalProducts}</div></div>
-            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Inventory Value</div><div class="text-3xl font-black text-on-surface">$${estValue.toFixed(2)}</div></div>
+            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Inventory Value</div><div class="text-3xl font-black text-on-surface">$${estValueStr}</div></div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-outline-variant/50">Recommendations</h3><ul>${recs}</ul></div>

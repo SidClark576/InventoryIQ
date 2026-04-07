@@ -1,0 +1,44 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e5]
+      - img [ref=e9]
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - heading "Welcome back" [level=1] [ref=e15]
+        - paragraph [ref=e16]: Manage your inventory with precision
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic [ref=e19]: Email address
+          - generic [ref=e20]:
+            - generic [ref=e21]: mail
+            - textbox "name@company.com" [ref=e22]: test@example.com
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e25]: Password
+            - link "Forgot Password?" [ref=e26] [cursor=pointer]:
+              - /url: "#"
+          - generic [ref=e27]:
+            - generic [ref=e28]: lock
+            - textbox "••••••••" [ref=e29]: Test123!
+            - button "visibility" [ref=e30] [cursor=pointer]
+        - generic [ref=e31]:
+          - checkbox "Remember this device" [ref=e32]
+          - generic [ref=e33]: Remember this device
+        - button "Login arrow_forward" [ref=e34] [cursor=pointer]:
+          - text: Login
+          - generic [ref=e35]: arrow_forward
+        - generic [ref=e46]: Invalid email or password.
+        - generic [ref=e36]: Don't have an account? Sign Up
+  - contentinfo [ref=e37]:
+    - generic [ref=e38]:
+      - generic [ref=e39]: InventoryIQ
+      - generic [ref=e40]: "|"
+      - generic [ref=e41]: © 2024 InventoryIQ. All rights reserved.
+    - generic [ref=e42]:
+      - link "Privacy Policy" [ref=e43] [cursor=pointer]:
+        - /url: "#"
+      - link "Terms of Service" [ref=e44] [cursor=pointer]:
+        - /url: "#"
+      - link "Help Center" [ref=e45] [cursor=pointer]:
+        - /url: "#"

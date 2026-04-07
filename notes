@@ -11,3 +11,6 @@ I therefore deleted it
 
 Implementing EventBridge:
 I have created a new file DailyAlert.py that will be triggered by EventBridge on a daily basis. It will scan the DynamoDB table and send an email to the user if there are any items that are out of stock or low in stock.
+
+Email: inventory.test@example.com                                     
+Password: Test123!@

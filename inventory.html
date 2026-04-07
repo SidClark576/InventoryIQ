@@ -147,6 +147,11 @@
                 onclick="exportCSV()">
                 <span class="material-symbols-outlined text-[16px]">download</span> Export CSV
               </button>
+              <button
+                class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
+                onclick="openManageCategoriesModal()">
+                <span class="material-symbols-outlined text-[16px]">category</span> Manage Categories
+              </button>
               <a href="add-item.html"
                 class="px-6 py-2.5 bg-[#005ab4] hover:bg-[#00458d] text-white rounded-xl text-[13px] font-bold flex items-center gap-2 cursor-pointer shadow-sm transition">
                 <span class="material-symbols-outlined text-[18px]">add</span> Add New Items
@@ -203,6 +208,95 @@
     </div>
   </div>
 
+  <!-- Deduct Stock Modal -->
+  <div id="deduct-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-[380px]">
+      <h2 class="text-lg font-black text-gray-900 mb-1">Deduct Stock</h2>
+      <p class="text-sm text-gray-500 mb-6" id="deduct-item-label">Item name</p>
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Units to Deduct</label>
+      <input type="number" id="deduct-amount" min="1" value="1"
+        class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-100 mb-2" />
+      <p class="text-xs text-gray-400 mb-6" id="deduct-current-qty"></p>
+      <div class="flex gap-3 justify-end">
+        <button onclick="closeDeductModal()"
+          class="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Cancel</button>
+        <button onclick="confirmDeduct()"
+          class="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#005ab4] text-white hover:bg-blue-700 transition">Confirm</button>
+      </div>
+      <p class="text-xs text-red-500 mt-3 hidden" id="deduct-error"></p>
+    </div>
+  </div>
+
+  <!-- Add Stock Modal -->
+  <div id="add-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-[380px]">
+      <h2 class="text-lg font-black text-gray-900 mb-1">Add Stock</h2>
+      <p class="text-sm text-gray-500 mb-6" id="add-item-label">Item name</p>
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Units to Add</label>
+      <input type="number" id="add-amount" min="1" value="1"
+        class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-100 mb-2" />
+      <p class="text-xs text-gray-400 mb-6" id="add-current-qty"></p>
+      <div class="flex gap-3 justify-end">
+        <button onclick="closeAddModal()"
+          class="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Cancel</button>
+        <button onclick="confirmAdd()"
+          class="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#005ab4] text-white hover:bg-blue-700 transition">Confirm</button>
+      </div>
+      <p class="text-xs text-red-500 mt-3 hidden" id="add-error"></p>
+    </div>
+  </div>
+
+  <!-- Manage Categories Modal -->
+  <div id="manage-categories-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-[500px]">
+      <h2 class="text-lg font-black text-gray-900 mb-1">Manage Categories</h2>
+      <p class="text-sm text-gray-500 mb-6">Add, edit, or delete categories for your inventory.</p>
+
+      <!-- Categories list -->
+      <div class="mb-6">
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Existing Categories</label>
+        <div id="categories-list" class="flex flex-wrap gap-2 min-h-8">
+          <!-- Chips populated here -->
+        </div>
+        <p id="no-categories" class="text-xs text-gray-400 hidden">No categories yet. Create one below.</p>
+      </div>
+
+      <!-- Add new category -->
+      <div class="mb-6">
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Add New Category</label>
+        <div class="flex gap-2">
+          <input type="text" id="new-category-input" placeholder="Enter category name..."
+            class="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+          <button onclick="addCategoryToList()"
+            class="px-5 py-3 rounded-xl text-sm font-bold bg-[#005ab4] text-white hover:bg-blue-700 transition">Create</button>
+        </div>
+        <p class="text-xs text-red-500 mt-2 hidden" id="category-error"></p>
+      </div>
+
+      <!-- Modal actions -->
+      <div class="flex gap-3 justify-end">
+        <button onclick="closeManageCategoriesModal()"
+          class="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Category Confirmation Modal -->
+  <div id="delete-category-confirm-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-[400px]">
+      <h2 class="text-lg font-black text-gray-900 mb-2">Delete Category?</h2>
+      <p class="text-sm text-gray-600 mb-4" id="delete-confirm-message">
+        Are you sure? This will move <strong id="delete-item-count">0</strong> items to "Uncategorized".
+      </p>
+      <div class="flex gap-3 justify-end">
+        <button onclick="closeDeleteConfirmModal()"
+          class="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Cancel</button>
+        <button onclick="confirmDeleteCategory()"
+          class="px-5 py-2.5 rounded-xl text-sm font-bold bg-red-600 text-white hover:bg-red-700 transition">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <script src="config.js"></script>
   <script src="utils.js"></script>
   <script src="api.js"></script>
@@ -252,6 +346,8 @@
           <td class="px-6 py-4">${badge}</td>
           <td class="px-8 py-4 text-right relative">
             <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg cursor-pointer transition p-0" title="Add Stock" onclick="openAddModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty})"><span class="material-symbols-outlined text-[18px]">add</span></button>
+              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg cursor-pointer transition p-0" title="Deduct Stock" onclick="openDeductModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty})"><span class="material-symbols-outlined text-[18px]">remove</span></button>
               <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#005ab4] hover:bg-[#e8f0fe] rounded-lg cursor-pointer transition p-0" onclick="editItem('${c.itemID}')"><span class="material-symbols-outlined text-[18px]">edit</span></button>
               <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition p-0" onclick="handleDelete('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"><span class="material-symbols-outlined text-[18px]">delete</span></button>
             </div>
@@ -340,6 +436,198 @@
     }
 
     loadInventory();
+
+    // Deduct stock modal logic
+    let deductTarget = null; // { itemID, currentQty }
+
+    function openDeductModal(itemID, itemName, currentQty) {
+      deductTarget = { itemID, currentQty };
+      document.getElementById('deduct-item-label').textContent = itemName;
+      document.getElementById('deduct-current-qty').textContent = `Current stock: ${currentQty} units`;
+      document.getElementById('deduct-amount').value = 1;
+      document.getElementById('deduct-error').classList.add('hidden');
+      document.getElementById('deduct-modal').classList.remove('hidden');
+    }
+
+    function closeDeductModal() {
+      document.getElementById('deduct-modal').classList.add('hidden');
+      deductTarget = null;
+    }
+
+    async function confirmDeduct() {
+      const amount = parseInt(document.getElementById('deduct-amount').value) || 0;
+      const errEl = document.getElementById('deduct-error');
+      errEl.classList.add('hidden');
+
+      if (amount <= 0) {
+        errEl.textContent = 'Enter a number greater than 0.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      if (amount > deductTarget.currentQty) {
+        errEl.textContent = `Cannot deduct more than current stock (${deductTarget.currentQty}).`;
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      const newQty = deductTarget.currentQty - amount;
+      const userID = sessionStorage.getItem('userEmail') || '';
+      try {
+        await updateItem(deductTarget.itemID, { quantity: newQty, userID });
+        closeDeductModal();
+        loadInventory(); // refresh the table
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    // Add stock modal logic
+    let addTarget = null; // { itemID, currentQty }
+
+    function openAddModal(itemID, itemName, currentQty) {
+      addTarget = { itemID, currentQty };
+      document.getElementById('add-item-label').textContent = itemName;
+      document.getElementById('add-current-qty').textContent = `Current stock: ${currentQty} units`;
+      document.getElementById('add-amount').value = 1;
+      document.getElementById('add-error').classList.add('hidden');
+      document.getElementById('add-modal').classList.remove('hidden');
+    }
+
+    function closeAddModal() {
+      document.getElementById('add-modal').classList.add('hidden');
+      addTarget = null;
+    }
+
+    async function confirmAdd() {
+      const amount = parseInt(document.getElementById('add-amount').value) || 0;
+      const errEl = document.getElementById('add-error');
+      errEl.classList.add('hidden');
+
+      if (amount <= 0) {
+        errEl.textContent = 'Enter a number greater than 0.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      const newQty = addTarget.currentQty + amount;
+      const userID = sessionStorage.getItem('userEmail') || '';
+      try {
+        await updateItem(addTarget.itemID, { quantity: newQty, userID });
+        closeAddModal();
+        loadInventory(); // refresh the table
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    // Manage Categories modal logic
+    let allCategories = [];
+    let pendingCategories = [];
+    let deletingCategory = null;
+
+    async function openManageCategoriesModal() {
+      try {
+        allCategories = await getCategories();
+        pendingCategories = [...allCategories];
+        renderCategoryChips();
+        document.getElementById('manage-categories-modal').classList.remove('hidden');
+      } catch (e) {
+        alert('Failed to load categories: ' + e.message);
+      }
+    }
+
+    function closeManageCategoriesModal() {
+      document.getElementById('manage-categories-modal').classList.add('hidden');
+      pendingCategories = [];
+    }
+
+    function renderCategoryChips() {
+      const listEl = document.getElementById('categories-list');
+      const noCategoriesEl = document.getElementById('no-categories');
+
+      if (!pendingCategories.length) {
+        listEl.innerHTML = '';
+        noCategoriesEl.classList.remove('hidden');
+        return;
+      }
+
+      noCategoriesEl.classList.add('hidden');
+      listEl.innerHTML = pendingCategories.map(cat => `
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold">
+          ${cat}
+          ${cat.toLowerCase() === 'uncategorized'
+            ? '<span class="text-xs text-blue-500">(Default)</span>'
+            : `<button onclick="initDeleteCategory('${cat}')" class="ml-1 text-blue-500 hover:text-blue-900 font-bold">×</button>`
+          }
+        </div>
+      `).join('');
+    }
+
+    function addCategoryToList() {
+      const input = document.getElementById('new-category-input');
+      const catName = input.value.trim();
+      const errEl = document.getElementById('category-error');
+      errEl.classList.add('hidden');
+
+      if (!catName) {
+        errEl.textContent = 'Enter a category name.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      if (catName.length > 50) {
+        errEl.textContent = 'Category name must be 50 characters or less.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      if (!/^[a-zA-Z0-9\s\-]+$/.test(catName)) {
+        errEl.textContent = 'Category can only contain letters, numbers, spaces, and hyphens.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      const exists = pendingCategories.some(c => c.toLowerCase() === catName.toLowerCase());
+      if (exists) {
+        errEl.textContent = 'This category already exists.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      pendingCategories.push(catName);
+      pendingCategories.sort();
+      input.value = '';
+      renderCategoryChips();
+    }
+
+    async function initDeleteCategory(categoryName) {
+      deletingCategory = categoryName;
+      const itemCount = allItems.filter(i => i.category === categoryName).length;
+      document.getElementById('delete-item-count').textContent = itemCount;
+      document.getElementById('delete-category-confirm-modal').classList.remove('hidden');
+    }
+
+    function closeDeleteConfirmModal() {
+      document.getElementById('delete-category-confirm-modal').classList.add('hidden');
+      deletingCategory = null;
+    }
+
+    async function confirmDeleteCategory() {
+      if (!deletingCategory) return;
+
+      try {
+        await deleteCategory(deletingCategory);
+        pendingCategories = pendingCategories.filter(c => c !== deletingCategory);
+        renderCategoryChips();
+        closeDeleteConfirmModal();
+        loadInventory(); // Refresh table to show updated categories
+      } catch (e) {
+        alert('Failed to delete category: ' + e.message);
+        closeDeleteConfirmModal();
+      }
+    }
   </script>
 </body>
 

@@ -1,0 +1,102 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e12]:
+          - generic [ref=e13]: InventoryIQ
+          - generic [ref=e14]: Management Portal
+      - navigation [ref=e15]:
+        - link "grid_view Dashboard" [ref=e16] [cursor=pointer]:
+          - /url: dashboard.html
+          - generic [ref=e17]: grid_view
+          - text: Dashboard
+        - link "inventory_2 Inventory" [ref=e18] [cursor=pointer]:
+          - /url: inventory.html
+          - generic [ref=e19]: inventory_2
+          - text: Inventory
+        - link "bar_chart Insights" [ref=e20] [cursor=pointer]:
+          - /url: insights.html
+          - generic [ref=e21]: bar_chart
+          - text: Insights
+        - link "receipt_long Transactions" [ref=e22] [cursor=pointer]:
+          - /url: transactions.html
+          - generic [ref=e23]: receipt_long
+          - text: Transactions
+    - button "logout Logout" [ref=e25] [cursor=pointer]:
+      - generic [ref=e26]: logout
+      - text: Logout
+  - generic [ref=e27]:
+    - banner [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]: search
+        - textbox "Search inventory, assets, or orders..." [ref=e31]
+      - generic [ref=e32]:
+        - button "notifications" [ref=e33] [cursor=pointer]:
+          - generic [ref=e34]: notifications
+        - button "settings" [ref=e36] [cursor=pointer]:
+          - generic [ref=e37]: settings
+        - generic [ref=e40]: sidneyordonia@gmail.com
+    - main [ref=e41]:
+      - button "refresh Refresh" [ref=e43] [cursor=pointer]:
+        - generic [ref=e44]: refresh
+        - text: Refresh
+      - generic [ref=e45]:
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - generic [ref=e48]:
+              - text: Total Products
+              - heading "—" [level=2] [ref=e49]
+            - generic [ref=e51]: inventory_2
+          - generic [ref=e52]:
+            - generic [ref=e53]: trending_up
+            - text: +2.5% vs last month
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - text: Out of Stock
+              - heading "—" [level=2] [ref=e57]
+            - generic [ref=e59]: error
+          - generic [ref=e60]:
+            - generic [ref=e61]: warning
+            - text: Critical attention required
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - text: Low Stock
+              - heading "—" [level=2] [ref=e65]
+            - generic [ref=e67]: sort
+          - generic [ref=e68]:
+            - generic [ref=e69]: notifications_active
+            - text: Items nearing threshold
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - text: Total Value
+              - heading "—" [level=2] [ref=e73]
+            - generic [ref=e75]: payments
+          - generic [ref=e76]:
+            - generic [ref=e77]: account_balance_wallet
+            - text: Net asset valuation
+      - generic [ref=e78]:
+        - generic [ref=e80]:
+          - heading "Active Inventory" [level=3] [ref=e81]
+          - paragraph [ref=e82]: Real-time status of all tracked assets and warehouse stock.
+        - table [ref=e84]:
+          - rowgroup [ref=e85]:
+            - row "Asset Name Category Qty Status" [ref=e86]:
+              - columnheader "Asset Name" [ref=e87]
+              - columnheader "Category" [ref=e88]
+              - columnheader "Qty" [ref=e89]
+              - columnheader "Status" [ref=e90]
+          - rowgroup [ref=e91]:
+            - row "Loading Items..." [ref=e92]:
+              - cell "Loading Items..." [ref=e93]
+        - generic [ref=e94]:
+          - generic [ref=e95]: Showing 0 of 0 assets
+          - generic [ref=e96]:
+            - button "chevron_left" [ref=e97] [cursor=pointer]:
+              - generic [ref=e98]: chevron_left
+            - button "1" [ref=e99] [cursor=pointer]
+            - button "chevron_right" [ref=e100] [cursor=pointer]:
+              - generic [ref=e101]: chevron_right
