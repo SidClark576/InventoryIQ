@@ -22,7 +22,10 @@ zip function.zip AddItem.py && aws lambda update-function-code --function-name A
 
 No package manager, no build tool, no test suite exists in this repo.
 
-**Files NOT deployed:** `notes`, `stitch_design.html`, `update_css.py`. The `notes` file contains live API keys and ARNs — do not modify or commit it.
+**Files NOT deployed (do not commit):**
+- **`notes`** — Contains live API keys, table names, and ARNs. **NEVER commit or modify.** This is the source of truth for environment setup but must stay local.
+- `stitch_design.html` — Design artifact (old UI mockup)
+- `update_css.py` — One-off utility script (not part of app)
 
 ## Architecture
 
@@ -51,7 +54,7 @@ InventoryTransactions
 | GET | `/insights` | `LowItemInsight.py` |
 | GET | `/transactions` | `GetTransactions.py` |
 | GET | `/categories` | `GetCategories.py` |
-| POST | `/categories` | `DeleteCategory.py` |
+| DELETE | `/categories/{categoryName}` | `DeleteCategory.py` |
 
 All routes require **Lambda Proxy Integration** enabled in API Gateway.
 
@@ -91,7 +94,52 @@ Python Lambdas read these from `os.environ`:
 `index.mjs` reads:
 - `USERS_TABLE` — defaults to `"Users"`
 
-## Frontend Design System
+## Lambda Function Patterns
+
+All Python Lambda functions follow a consistent structure with **detailed inline comments** explaining:
+1. The data flow (request → processing → response)
+2. Key implementation details (pagination, filtering, transaction logging)
+3. Edge cases (multi-tenancy checks, Decimal type handling, DynamoDB reserved words)
+
+Key Lambdas:
+- **`AddItem.py`** — Creates item, generates UUID, logs "create" transaction
+- **`UpdateItem.py`** — Updates item, classifies change type (stock_in/stock_out/update), logs transaction
+- **`DeleteItem.py`** — Deletes item, logs "delete" transaction with negative quantity delta
+- **`GetAllItems.py`** — Scans user items with pagination (handles 1MB limit)
+- **`GetCategories.py`** — Returns unique categories for user, always includes "Uncategorized"
+- **`DeleteCategory.py`** — Reassigns items to "Uncategorized" instead of deleting (prevents orphaned items)
+- **`GetTransactions.py`** — Returns user's audit log, sorted newest-first, capped at 200 items
+- **`LowItemInsight.py`** — Analyzes inventory health (health score, risk assessment, reorder recommendations), publishes SNS alerts + SQS events
+- **`DailyAlert.py`** — Scheduled function that generates formatted email report (ASCII art, no HTML) and publishes via SNS
+
+## Frontend Architecture
+
+### Script Loading Order
+Every protected page loads scripts in this order (critical for dependencies):
+1. `config.js` — API endpoint and key configuration
+2. `utils.js` — Auth check + nav initialization (must run before page-specific JS)
+3. `api.js` — HTTP helpers (`fetch` wrappers, `checkQuota()` error handler)
+4. Page-specific `<script>` block — uses all three above
+
+**Auth Flow:**
+- `requireAuth()` redirects to `login.html` if no session token in `sessionStorage`
+- After login, `index.mjs` returns a UUID token stored in `sessionStorage.userEmail`
+- `sessionStorage` persists across page navigation but clears on browser close (security)
+
+### Data Fetching Pattern
+Pages use `loadXxx()` function that:
+1. Shows "Loading..." state
+2. Calls API via `api.js` wrapper
+3. Catches errors and displays in-page (red text, no alerts)
+4. Renders table with results or error message
+
+Example: `inventory.html` calls `loadInventory()` which:
+- Fetches items via `getAllItems()` + categories via `getCategories()` in parallel
+- Updates `allItems` and `allCategories` state
+- Calls `renderTable()` which generates table HTML from cached data
+- Search/filter functions re-render without re-fetching
+
+### Frontend Design System
 
 Tailwind CSS via CDN (no build step). Inter font via Google Fonts CDN. Primary color `#005ab4`. Status badges: emerald = In Stock, yellow = Low Stock, red = Out of Stock.
 
@@ -118,15 +166,34 @@ The sidebar navigation has 4 items: Dashboard, Inventory, Insights, Transactions
 - **Minus (−, orange)** — opens "Deduct Stock" modal to decrease quantity; validates against current stock; logs `stock_out` transaction
 - Both modals validate positive amounts and update via existing `updateItem()` API (no new backend endpoints)
 
-**Category Management:**
-- **"Manage Categories" button** in card header opens modal showing:
-  - List of existing categories as chips with delete buttons (× icon)
-  - "Uncategorized" shown as read-only "(Default)" category — cannot be deleted
-  - Input field + "Create" button to add new categories (no backend call needed; persists when item created)
-  - Delete confirmation shows item count being reassigned: "Moving X items to 'Uncategorized'. Continue?"
-- Deleting a category calls `deleteCategory()` API which calls `DeleteCategory.py` Lambda
-- `DeleteCategory.py` scans items with the category, updates all to "Uncategorized", returns count
-- On success, modal refreshes and inventory table reloads
+**Inline Category Dropdown:**
+- **Category column in inventory table** displays a `<select>` dropdown for each item
+- Changing the dropdown calls `updateItemCategory()`, which PUTs the new category to `UpdateItem.py`
+- The local `allItems` cache updates immediately (no table re-render) with a brief checkmark confirmation
+- On error, dropdown reverts and shows error message for 3 seconds
+- Dropdown options populate from `allCategories` (fetched server-side) + the item's current category
+
+**Manage Categories Modal:**
+- **"Manage Categories" button** opens modal to view and modify categories
+- Shows existing categories as chips with delete buttons (× icon)
+- "Uncategorized" is read-only "(Default)" category — cannot be deleted
+- **Create new category:** Input field + "Create" button adds category to `allCategories` in memory
+  - New categories immediately appear in all row dropdowns without page reload
+  - Categories persist permanently only when assigned to an item (else disappear on refresh)
+- **Delete category:** Calls `deleteCategory()` API (DELETE `/categories/{name}?userID=`)
+  - `DeleteCategory.py` reassigns all items in that category to "Uncategorized" (no data loss)
+  - Shows confirmation dialog: "Moving X items to 'Uncategorized'. Continue?"
+  - On success, modal refreshes and table reloads
+
+### Search & Filter Features
+- **`inventory.html`** — Search input filters items by name or category (case-insensitive)
+  - `applyFilters()` function searches `allItems` and renders matching rows
+  - Pagination text updates to show "Showing X of Y assets" (filtered vs total)
+  - Refresh button clears search and reloads all items
+- **`transactions.html`** — Search + type filter to find specific transactions
+  - Search matches transaction item names (case-insensitive)
+  - Type dropdown filters by `changeType` (stock_in, stock_out, create, update, delete)
+  - Filters work together: search narrows by name, type narrows by change classification
 
 ## Error Handling
 
@@ -136,6 +203,29 @@ All frontend pages that fetch data (`dashboard.html`, `inventory.html`, `transac
 - Errors render inline in tables or panels (e.g., "API quota exceeded — please wait a moment...")
 
 This prevents users from seeing blank/stuck loading states when the API is unavailable or quota is exhausted.
+
+## Common Implementation Patterns
+
+### Adding a New Modal Dialog
+1. HTML template: Add hidden `<div id="my-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">`
+2. Open function: `function openMyModal() { document.getElementById('my-modal').classList.remove('hidden'); }`
+3. Close function: `function closeMyModal() { document.getElementById('my-modal').classList.add('hidden'); }`
+4. Action function: Call API, then close modal and refresh table: `closeMyModal(); loadInventory();`
+
+### Adding an Inline Edit Control (e.g., category dropdown)
+1. In `renderTable()`, generate a `<select>` for each row with `data-item-id="${c.itemID}"` and `onchange="updateField(...)"`
+2. Create `updateField(itemID, newValue, selectEl)` function that:
+   - Disables the control during the request
+   - Calls `updateItem(itemID, { fieldName: newValue, userID })` from `api.js`
+   - Updates `allItems` cache on success (avoid re-rendering entire table)
+   - Shows success/error feedback inline (checkmark or error text)
+3. Return to original value on error and re-enable the control
+
+### State Management
+- `allItems` — cached array of inventory items, updated after mutations
+- `allCategories` — cached array of user categories, merged from server + local additions
+- Filter/search state lives in DOM (input value), not in JS variables
+- On page load (via `loadXxx()`), both caches refetch from server; on local mutations, only mutated item updates
 
 ## Troubleshooting
 
