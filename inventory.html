@@ -305,17 +305,39 @@
     initNav('inventory');
 
     let allItems = [];
+    let allCategories = [];
+
+    function mergeCategories(serverCats, localCats) {
+      const combined = [...serverCats];
+      localCats.forEach(cat => {
+        if (!combined.some(s => s.toLowerCase() === cat.toLowerCase())) combined.push(cat);
+      });
+      return combined.sort();
+    }
 
     async function loadInventory() {
       const tb = document.getElementById('inventory-body');
       tb.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>';
 
       try {
-        allItems = await getAllItems();
+        const [itemsResult, catsResult] = await Promise.allSettled([getAllItems(), getCategories()]);
+        if (catsResult.status === 'fulfilled') {
+          allCategories = mergeCategories(catsResult.value, allCategories);
+        }
+        if (itemsResult.status === 'rejected') {
+          tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${itemsResult.reason.message}</td></tr>`;
+          return;
+        }
+        allItems = itemsResult.value;
       } catch (e) {
         tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${e.message}</td></tr>`;
         return;
       }
+      renderTable();
+    }
+
+    function renderTable() {
+      const tb = document.getElementById('inventory-body');
       if (!allItems.length) {
         tb.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">No items found.</td></tr>';
         document.getElementById('pagination-text').textContent = 'Showing 0 of 0 assets';
@@ -331,6 +353,9 @@
           : qty <= thr
             ? '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#fffbeb] text-[#d97706]">Low Stock</span>'
             : '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#ecfdf5] text-[#059669]">In Stock</span>';
+        const currentCat = c.category || 'Uncategorized';
+        const catSet = Array.from(new Set([...(allCategories.length ? allCategories : ['Uncategorized']), currentCat])).sort();
+        const catOpts = catSet.map(cat => `<option value="${cat}" ${cat === currentCat ? 'selected' : ''}>${cat}</option>`).join('');
         return `<tr class="hover:bg-gray-50/80 transition-colors group">
           <td class="px-8 py-4">
             <div class="flex items-center">
@@ -341,7 +366,13 @@
               </div>
             </div>
           </td>
-          <td class="px-6 py-4 text-gray-500 text-[13px] font-medium">${c.category || '—'}</td>
+          <td class="px-6 py-4">
+            <select data-item-id="${c.itemID}" onchange="updateItemCategory('${c.itemID}', this.value, this)"
+              class="bg-transparent border border-transparent hover:border-gray-200 focus:border-gray-300 rounded-lg px-2 py-1 text-gray-500 text-[13px] font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all min-w-[120px]">
+              ${catOpts}
+            </select>
+            <span id="cat-status-${c.itemID}" class="ml-1 text-[11px] hidden"></span>
+          </td>
           <td class="px-6 py-4 font-bold text-gray-900 text-[13px]">${qty}</td>
           <td class="px-6 py-4">${badge}</td>
           <td class="px-8 py-4 text-right relative">
@@ -379,6 +410,51 @@
         }
       }
       loadInventory();
+    }
+
+    async function updateItemCategory(itemID, newCategory, selectEl) {
+      const userID = sessionStorage.getItem('userEmail') || '';
+      const statusEl = document.getElementById(`cat-status-${itemID}`);
+      const originalValue = allItems.find(i => i.itemID === itemID)?.category || 'Uncategorized';
+      if (newCategory === originalValue) return;
+
+      selectEl.disabled = true;
+      if (statusEl) {
+        statusEl.textContent = '⏳';
+        statusEl.classList.remove('hidden', 'text-red-500', 'text-green-600');
+        statusEl.classList.add('text-gray-400');
+      }
+
+      try {
+        await updateItem(itemID, { category: newCategory, userID });
+        const item = allItems.find(i => i.itemID === itemID);
+        if (item) item.category = newCategory;
+        if (statusEl) {
+          statusEl.textContent = '✓';
+          statusEl.classList.remove('text-gray-400');
+          statusEl.classList.add('text-green-600');
+          setTimeout(() => statusEl.classList.add('hidden'), 1500);
+        }
+      } catch (e) {
+        selectEl.value = originalValue;
+        if (statusEl) {
+          statusEl.textContent = '✗ ' + e.message;
+          statusEl.classList.remove('text-gray-400');
+          statusEl.classList.add('text-red-500');
+          setTimeout(() => statusEl.classList.add('hidden'), 3000);
+        }
+      } finally {
+        selectEl.disabled = false;
+      }
+    }
+
+    function refreshDropdownOptions() {
+      document.querySelectorAll('select[data-item-id]').forEach(sel => {
+        const item = allItems.find(i => i.itemID === sel.dataset.itemId);
+        const currentCat = item?.category || 'Uncategorized';
+        const opts = Array.from(new Set([...allCategories, currentCat])).sort();
+        sel.innerHTML = opts.map(cat => `<option value="${cat}" ${cat === currentCat ? 'selected' : ''}>${cat}</option>`).join('');
+      });
     }
 
     function printReport() {
@@ -523,13 +599,13 @@
     }
 
     // Manage Categories modal logic
-    let allCategories = [];
     let pendingCategories = [];
     let deletingCategory = null;
 
     async function openManageCategoriesModal() {
       try {
-        allCategories = await getCategories();
+        const serverCats = await getCategories();
+        allCategories = mergeCategories(serverCats, allCategories);
         pendingCategories = [...allCategories];
         renderCategoryChips();
         document.getElementById('manage-categories-modal').classList.remove('hidden');
@@ -600,6 +676,12 @@
       pendingCategories.sort();
       input.value = '';
       renderCategoryChips();
+
+      if (!allCategories.some(c => c.toLowerCase() === catName.toLowerCase())) {
+        allCategories.push(catName);
+        allCategories.sort();
+        refreshDropdownOptions();
+      }
     }
 
     async function initDeleteCategory(categoryName) {

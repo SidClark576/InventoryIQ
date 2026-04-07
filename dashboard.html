@@ -121,7 +121,10 @@
         <div id="dashboard-alerts" class="flex flex-col gap-3 empty:hidden"></div>
 
         <!-- Stat Cards -->
-        <div class="flex justify-end -mb-4 shrink-0">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Dashboard</h1>
+          </div>
           <button
             class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
             onclick="loadDashboard(); loadInventory()">
@@ -201,7 +204,7 @@
         <div class="bg-white rounded-[1.25rem] shadow-sm border border-gray-200 overflow-hidden shrink-0">
           <div class="p-6 pb-5 flex items-start justify-between">
             <div>
-              <h3 class="text-xl font-bold text-gray-900">Active Inventory</h3>
+              <h3 class="text-xl font-bold text-gray-900">Inventory</h3>
               <p class="text-[13px] font-medium text-gray-500 mt-1">Real-time status of all tracked assets and warehouse
                 stock.</p>
             </div>

@@ -131,9 +131,10 @@
             </div>
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Category</label>
-              <input type="text" id="f-category"
+              <input type="text" id="f-category" list="category-suggestions"
                 class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
-                placeholder="e.g. Electronics" />
+                placeholder="e.g. Electronics" autocomplete="off" />
+              <datalist id="category-suggestions"></datalist>
             </div>
             <div>
               <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Price ($)</label>
@@ -182,6 +183,14 @@
   <script>
     requireAuth();
     initNav('');
+
+    (async function() {
+      try {
+        const cats = await getCategories();
+        const dl = document.getElementById('category-suggestions');
+        if (dl) dl.innerHTML = cats.map(c => `<option value="${c}"></option>`).join('');
+      } catch { /* silently fail — text input still works without suggestions */ }
+    })();
 
     function clearForm() {
       document.getElementById('edit-id').value = '';

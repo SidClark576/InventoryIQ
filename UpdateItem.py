@@ -5,13 +5,10 @@ import os
 from datetime import datetime
 from decimal import Decimal
 
-# Initialize DynamoDB and SNS clients
-# SNS is used to publish alerts when stock changes occur
+# Initialize DynamoDB tables at module level so they are reused across warm Lambda invocations
 dynamodb = boto3.resource('dynamodb')
-sns = boto3.client('sns')
 table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
 tx_table = dynamodb.Table(os.environ.get('TRANSACTIONS_TABLE', 'InventoryTransactions'))
-SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN', '')
 
 def lambda_handler(event, context):
     """
