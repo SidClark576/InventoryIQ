@@ -12,7 +12,7 @@ CORS = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-    'Access-Control-Allow-Methods': 'OPTIONS,POST'
+    'Access-Control-Allow-Methods': 'OPTIONS,DELETE'
 }
 
 def lambda_handler(event, _context):
@@ -40,15 +40,11 @@ def lambda_handler(event, _context):
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'body': ''}
 
-    # Parse request body with error handling
-    try:
-        body = json.loads(event.get('body', '{}'))
-    except:
-        body = {}
-
-    # Extract required parameters
-    user_id = body.get('userID', '')
-    category_name = body.get('categoryName', '')
+    # Extract userID from query parameters and categoryName from URL path
+    # DELETE /categories/{categoryName}?userID=<email>
+    params = event.get('queryStringParameters') or {}
+    user_id = params.get('userID', '')
+    category_name = (event.get('pathParameters') or {}).get('categoryName', '')
 
     # Validate required fields
     if not user_id or not category_name:

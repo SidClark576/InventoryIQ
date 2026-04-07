@@ -160,14 +160,13 @@ async function getCategories() {
 
 async function deleteCategory(categoryName) {
   const userID = getCurrentUserID();
-  const res = await fetch(`${CONFIG.API_ENDPOINT}/categories`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": CONFIG.API_KEY
-    },
-    body: JSON.stringify({ userID, categoryName })
-  });
+  const res = await fetch(
+    `${CONFIG.API_ENDPOINT}/categories/${encodeURIComponent(categoryName)}?userID=${encodeURIComponent(userID)}`,
+    {
+      method: "DELETE",
+      headers: { "x-api-key": CONFIG.API_KEY }
+    }
+  );
   checkQuota(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to delete category");
