@@ -55,7 +55,6 @@
             </div>
             <div class="flex flex-col">
               <span class="text-[17px] font-bold text-gray-900 leading-tight">InventoryIQ</span>
-              <span class="text-[10px] font-bold text-gray-400 tracking-wider uppercase mt-0.5">Management Portal</span>
             </div>
           </div>
         </div>
@@ -92,26 +91,8 @@
     <!-- Main Content -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
       <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
-        <div class="relative w-[480px]">
-          <span
-            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
-          <input type="text" placeholder="Search inventory, assets, or orders..."
-            class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium" />
-        </div>
-        <div class="flex items-center gap-6">
-          <button
-            class="text-gray-400 hover:text-gray-700 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
-          <button
-            class="text-gray-400 hover:text-gray-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
-            <span class="material-symbols-outlined">settings</span>
-          </button>
-          <div class="h-10 w-px bg-gray-200 ml-2 mr-2"></div>
-          <div class="flex items-center gap-3 pr-2">
-            <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
-          </div>
+        <div class="ml-auto flex items-center gap-3">
+          <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
         </div>
       </header>
 
@@ -119,7 +100,7 @@
 
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Full Inventory</h1>
+            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Inventory</h1>
             <p class="text-gray-500 mt-2 font-medium">Manage and track all your assets.</p>
           </div>
           <button
@@ -159,16 +140,26 @@
             </div>
           </div>
 
+          <div class="p-6 pb-5 flex items-start justify-between">
+            <div class="relative w-[300px] mb-3">
+              <span
+                class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+              <input type="text" placeholder="Search by name or category..." id="inv-search"
+                class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium"
+                oninput="applyFilters()" />
+            </div>
+          </div>
+
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr
                   class="border-y border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50/50">
-                  <th class="px-8 py-4">Asset Name</th>
-                  <th class="px-6 py-4">Category</th>
-                  <th class="px-6 py-4">Qty</th>
-                  <th class="px-6 py-4">Status</th>
-                  <th class="px-8 py-4 text-right">Actions</th>
+                  <th class="px-8 py-4 text-center">Asset Name</th>
+                  <th class="px-6 py-4 text-center">Category</th>
+                  <th class="px-6 py-4 text-center">Qty</th>
+                  <th class="px-6 py-4 text-center">Status</th>
+                  <th class="px-8 py-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody id="inventory-body" class="divide-y divide-gray-100">
@@ -282,7 +273,8 @@
   </div>
 
   <!-- Delete Category Confirmation Modal -->
-  <div id="delete-category-confirm-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+  <div id="delete-category-confirm-modal"
+    class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
     <div class="bg-white rounded-2xl shadow-xl p-8 w-[400px]">
       <h2 class="text-lg font-black text-gray-900 mb-2">Delete Category?</h2>
       <p class="text-sm text-gray-600 mb-4" id="delete-confirm-message">
@@ -333,18 +325,31 @@
         tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${e.message}</td></tr>`;
         return;
       }
+      document.getElementById('inv-search').value = '';
       renderTable();
     }
 
-    function renderTable() {
+    function applyFilters() {
+      const query = document.getElementById('inv-search').value.toLowerCase().trim();
+      const filtered = query
+        ? allItems.filter(i =>
+          (i.name || '').toLowerCase().includes(query) ||
+          (i.category || '').toLowerCase().includes(query)
+        )
+        : allItems;
+      renderTable(filtered);
+    }
+
+    function renderTable(items = allItems) {
       const tb = document.getElementById('inventory-body');
-      if (!allItems.length) {
-        tb.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">No items found.</td></tr>';
+      if (!items.length) {
+        const msg = allItems.length ? 'No items match your search.' : 'No items found.';
+        tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">${msg}</td></tr>`;
         document.getElementById('pagination-text').textContent = 'Showing 0 of 0 assets';
         return;
       }
 
-      tb.innerHTML = allItems.map(c => {
+      tb.innerHTML = items.map(c => {
         const qty = c.quantity ?? 0, thr = c.lowStockThreshold ?? 10;
         const iconDiv = `<div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 mr-4 border border-gray-100"><span class="material-symbols-outlined text-xl">devices</span></div>`;
         const sku = `SKU: ${c.itemID.substring(0, 8).toUpperCase()}`;
@@ -357,7 +362,7 @@
         const catSet = Array.from(new Set([...(allCategories.length ? allCategories : ['Uncategorized']), currentCat])).sort();
         const catOpts = catSet.map(cat => `<option value="${cat}" ${cat === currentCat ? 'selected' : ''}>${cat}</option>`).join('');
         return `<tr class="hover:bg-gray-50/80 transition-colors group">
-          <td class="px-8 py-4">
+          <td class="px-8 py-4 text-center">
             <div class="flex items-center">
               ${iconDiv}
               <div>
@@ -366,17 +371,17 @@
               </div>
             </div>
           </td>
-          <td class="px-6 py-4">
+          <td class="px-6 py-4 text-center">
             <select data-item-id="${c.itemID}" onchange="updateItemCategory('${c.itemID}', this.value, this)"
-              class="bg-transparent border border-transparent hover:border-gray-200 focus:border-gray-300 rounded-lg px-2 py-1 text-gray-500 text-[13px] font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all min-w-[120px]">
+              class="bg-transparent border border-transparent hover:border-gray-200 focus:border-gray-300 rounded-lg text-gray-500 text-[13px] font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all min-w-[120px]">
               ${catOpts}
             </select>
             <span id="cat-status-${c.itemID}" class="ml-1 text-[11px] hidden"></span>
           </td>
-          <td class="px-6 py-4 font-bold text-gray-900 text-[13px]">${qty}</td>
-          <td class="px-6 py-4">${badge}</td>
-          <td class="px-8 py-4 text-right relative">
-            <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <td class="px-6 py-4 text-center font-bold text-gray-900 text-[13px]">${qty}</td>
+          <td class="px-6 py-4 text-center">${badge}</td>
+          <td class="px-8 py-4 text-center relative">
+            <div class="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg cursor-pointer transition p-0" title="Add Stock" onclick="openAddModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty})"><span class="material-symbols-outlined text-[18px]">add</span></button>
               <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg cursor-pointer transition p-0" title="Deduct Stock" onclick="openDeductModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty})"><span class="material-symbols-outlined text-[18px]">remove</span></button>
               <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#005ab4] hover:bg-[#e8f0fe] rounded-lg cursor-pointer transition p-0" onclick="editItem('${c.itemID}')"><span class="material-symbols-outlined text-[18px]">edit</span></button>
@@ -387,7 +392,7 @@
         </tr>`;
       }).join('');
 
-      document.getElementById('pagination-text').textContent = `Showing ${allItems.length} of ${allItems.length} assets`;
+      document.getElementById('pagination-text').textContent = `Showing ${items.length} of ${allItems.length} assets`;
     }
 
     function editItem(id) {
@@ -634,9 +639,9 @@
         <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold">
           ${cat}
           ${cat.toLowerCase() === 'uncategorized'
-            ? '<span class="text-xs text-blue-500">(Default)</span>'
-            : `<button onclick="initDeleteCategory('${cat}')" class="ml-1 text-blue-500 hover:text-blue-900 font-bold">×</button>`
-          }
+          ? '<span class="text-xs text-blue-500">(Default)</span>'
+          : `<button onclick="initDeleteCategory('${cat}')" class="ml-1 text-blue-500 hover:text-blue-900 font-bold">×</button>`
+        }
         </div>
       `).join('');
     }

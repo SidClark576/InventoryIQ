@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>InventoryIQ | Transactions</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
   <script>
     tailwind.config = {
       darkMode: "class",
@@ -53,7 +55,6 @@
             </div>
             <div class="flex flex-col">
               <span class="text-[17px] font-bold text-gray-900 leading-tight">InventoryIQ</span>
-              <span class="text-[10px] font-bold text-gray-400 tracking-wider uppercase mt-0.5">Management Portal</span>
             </div>
           </div>
         </div>
@@ -79,9 +80,6 @@
       </div>
 
       <div class="p-4 space-y-1 mb-2 border-t border-gray-100 pt-6">
-        <button class="flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl font-medium text-sm transition-colors">
-          <span class="material-symbols-outlined text-xl">help</span> Help Center
-        </button>
         <button
           class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer"
           onclick="handleLogout()">
@@ -93,25 +91,8 @@
     <!-- Main Content -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
       <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
-        <div class="relative w-[480px]">
-          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
-          <input type="text" placeholder="Search transactions..." id="tx-search"
-            class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium"
-            oninput="applyFilters()" />
-        </div>
-        <div class="flex items-center gap-6">
-          <button class="text-gray-400 hover:text-gray-700 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
-          <button class="text-gray-400 hover:text-gray-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
-            <span class="material-symbols-outlined">settings</span>
-          </button>
-          <div class="h-10 w-px bg-gray-200 ml-2 mr-2"></div>
-          <div class="flex items-center gap-3 pr-2">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#005ab4] to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm opacity-90" id="nav-avatar">A</div>
-            <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
-          </div>
+        <div class="ml-auto flex items-center gap-3">
+          <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
         </div>
       </header>
 
@@ -119,7 +100,7 @@
         <div class="flex items-center justify-between">
           <div>
             <h1 class="text-3xl font-black text-gray-900 tracking-tight">Transaction Log</h1>
-            <p class="text-gray-500 mt-2 font-medium">Running history of all stock-in, stock-out, and item changes.</p>
+            <p class="text-gray-500 mt-2 font-medium">Running history of all changes.</p>
           </div>
           <button
             class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
@@ -130,8 +111,15 @@
 
         <!-- Filters -->
         <div class="flex items-center gap-4">
+          <div class="relative w-[300px]">
+            <span
+              class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+            <input type="text" placeholder="Search transactions..." id="tx-search"
+              class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium"
+              oninput="applyFilters()" />
+          </div>
           <select id="tx-filter"
-            class="rounded-xl px-4 py-2.5 bg-white border border-gray-200 text-[13px] font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-100 cursor-pointer"
+            class="rounded-xl px-6.5 py-2 bg-white border border-gray-200 text-[13px] font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-100 cursor-pointer"
             onchange="applyFilters()">
             <option value="">All Types</option>
             <option value="stock_in">Stock In</option>
@@ -147,13 +135,14 @@
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
-                <tr class="border-y border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50/50">
+                <tr
+                  class="border-y border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50/50">
                   <th class="px-6 py-4">Date / Time</th>
                   <th class="px-6 py-4">Item</th>
                   <th class="px-6 py-4">Type</th>
-                  <th class="px-6 py-4 text-right">Before</th>
-                  <th class="px-6 py-4 text-right">After</th>
-                  <th class="px-6 py-4 text-right">Delta</th>
+                  <th class="px-6 py-4">Before</th>
+                  <th class="px-6 py-4">After</th>
+                  <th class="px-6 py-4">Delta</th>
                   <th class="px-6 py-4">Notes</th>
                 </tr>
               </thead>
@@ -179,11 +168,11 @@
     let allTx = [];
 
     const BADGE = {
-      stock_in:  'bg-emerald-50 text-emerald-700',
+      stock_in: 'bg-emerald-50 text-emerald-700',
       stock_out: 'bg-red-50 text-red-700',
-      create:    'bg-blue-50 text-blue-700',
-      delete:    'bg-gray-100 text-gray-600',
-      update:    'bg-yellow-50 text-yellow-700'
+      create: 'bg-blue-50 text-blue-700',
+      delete: 'bg-gray-100 text-gray-600',
+      update: 'bg-yellow-50 text-yellow-700'
     };
 
     async function loadTransactions() {
@@ -228,9 +217,9 @@
           <td class="px-6 py-3 text-[12px] text-gray-500 whitespace-nowrap">${dt}</td>
           <td class="px-6 py-3 font-bold text-[13px] text-gray-900">${t.itemName || '—'}</td>
           <td class="px-6 py-3">${badge}</td>
-          <td class="px-6 py-3 text-[13px] text-gray-600 text-right">${t.quantityBefore ?? '—'}</td>
-          <td class="px-6 py-3 text-[13px] text-gray-600 text-right">${t.quantityAfter ?? '—'}</td>
-          <td class="px-6 py-3 text-right">${deltaStr}</td>
+          <td class="px-6 py-3 text-[13px] text-gray-600">${t.quantityBefore ?? '—'}</td>
+          <td class="px-6 py-3 text-[13px] text-gray-600">${t.quantityAfter ?? '—'}</td>
+          <td class="px-6 py-3">${deltaStr}</td>
           <td class="px-6 py-3 text-[12px] text-gray-400">${t.notes || '—'}</td>
         </tr>`;
       }).join('');
@@ -239,4 +228,5 @@
     loadTransactions();
   </script>
 </body>
+
 </html>
