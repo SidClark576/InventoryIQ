@@ -19,6 +19,48 @@ table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
 SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN', '')  # Alert notifications
 SQS_QUEUE_URL = os.environ.get('SQS_QUEUE_URL', '')  # Stock event queue
 
+# Cooldown window: SNS alert fires at most once per N hours per user (default 24h)
+ALERT_COOLDOWN_HOURS = int(os.environ.get('ALERT_COOLDOWN_HOURS', '24'))
+
+def _should_send_alert(user_id, table):
+    """
+    Check and update the per-user SNS alert cooldown.
+
+    Uses a sentinel item in the InventoryIQ table with itemID='alert_meta#<userID>'
+    to record when the last alert was sent. The sentinel uses userID='__system__'
+    so it is never returned by normal inventory scans (which filter by real user email).
+
+    Returns True if the alert should fire (cooldown elapsed or first ever alert).
+    Returns False if an alert was already sent within ALERT_COOLDOWN_HOURS.
+    """
+    sentinel_key = f"alert_meta#{user_id}"
+    now_utc = datetime.now(timezone.utc)
+
+    response = table.get_item(Key={'itemID': sentinel_key})
+    item = response.get('Item')
+
+    if item:
+        last_sent_str = item.get('lastAlertSentAt', '')
+        if last_sent_str:
+            try:
+                last_sent = datetime.fromisoformat(last_sent_str)
+                if last_sent.tzinfo is None:
+                    last_sent = last_sent.replace(tzinfo=timezone.utc)
+                elapsed_hours = (now_utc - last_sent).total_seconds() / 3600
+                if elapsed_hours < ALERT_COOLDOWN_HOURS:
+                    return False  # Still within cooldown window — suppress alert
+            except ValueError:
+                pass  # Malformed timestamp — treat as expired, allow alert
+
+    # Cooldown elapsed (or first ever alert): write/update the sentinel timestamp
+    table.put_item(Item={
+        'itemID': sentinel_key,
+        'userID': '__system__',
+        'lastAlertSentAt': now_utc.isoformat(),
+        'updatedAt': now_utc.isoformat()
+    })
+    return True
+
 def lambda_handler(event, context):
     """
     Generates comprehensive inventory insights including stock analysis, risk assessment, and reorder recommendations.
@@ -227,7 +269,7 @@ def lambda_handler(event, context):
         # Publish alerts via SNS if there are items needing attention
         # This sends email/SMS notifications to configured recipients
         alert_items = out_of_stock + low_stock
-        if alert_items and SNS_TOPIC_ARN:
+        if alert_items and SNS_TOPIC_ARN and _should_send_alert(user_id, table):
             lines = [f"InventoryIQ Stock Alert — {len(alert_items)} item(s) need attention:\n"]
             for a in out_of_stock:
                 lines.append(f"🚨 OUT OF STOCK: {a['name']} ({a['category']})")
