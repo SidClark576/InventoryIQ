@@ -1,3 +1,5 @@
+Refer to @CLAUDE.md for more information.
+
 # InventoryIQ — Codebase Reference
 
 ## Overview

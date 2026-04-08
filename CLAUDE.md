@@ -15,7 +15,7 @@ utils.js    api.js          config.js       style.css
 index.html  (redirect shim → login.html)
 ```
 
-**Backend** — each `.py` file and `index.mjs` is a standalone Lambda function. Deploy individually via the AWS console or CLI:
+**Backend** — each `.py` file and `Authentication.mjs` is a standalone Lambda function. Deploy individually via the AWS console or CLI:
 ```bash
 zip function.zip AddItem.py && aws lambda update-function-code --function-name AddItem --zip-file fileb://function.zip
 ```
@@ -26,6 +26,7 @@ No package manager, no build tool, no test suite exists in this repo.
 - **`notes`** — Contains live API keys, table names, and ARNs. **NEVER commit or modify.** This is the source of truth for environment setup but must stay local.
 - `stitch_design.html` — Design artifact (old UI mockup)
 - `update_css.py` — One-off utility script (not part of app)
+- `AGENTS.md` — Outdated architecture reference (predates multi-page refactor and recent Lambda additions; do not rely on it)
 
 ## Architecture
 
@@ -46,7 +47,7 @@ InventoryTransactions
 ### API Routes → Lambda mapping
 | Method | Path | Lambda |
 |--------|------|--------|
-| POST | `/auth/register`, `/auth/login` | `index.mjs` (Node.js ESM) |
+| POST | `/auth/register`, `/auth/login` | `Authentication.mjs` (Node.js ESM) |
 | GET | `/items` | `GetAllItems.py` |
 | POST | `/items` | `AddItem.py` |
 | PUT | `/items/{itemID}` | `UpdateItem.py` |
@@ -65,10 +66,11 @@ All routes require **Lambda Proxy Integration** enabled in API Gateway.
 ## Key Conventions
 
 - **Auth:** Passwords hashed with `crypto.scryptSync` (Node.js) + random salt. Login returns a UUID session token stored in `sessionStorage` — there is no server-side token validation after login. All inventory endpoints require `x-api-key` header; auth endpoints do not.
+- **SNS subscription on auth:** On `/register`, `Authentication.mjs` immediately calls `SNS.Subscribe` with the user's email. On `/login`, it paginates through `ListSubscriptionsByTopic` and only re-subscribes if the email has no confirmed or pending subscription. New users see the message: "Please check your email to confirm your alert subscription."
 - **Multi-user isolation:** Items are scoped by `userID` (the user's email) stored on each DynamoDB item. `GET /items`, `GET /insights`, and `GET /transactions` require `?userID=` — if omitted, they return an empty result or 400. `userID` is trusted from the client request body (no server-side ownership check on writes).
 - **Decimal handling:** DynamoDB returns `Decimal` types — all Python Lambdas convert to `float` before `json.dumps`.
 - **CORS:** All Lambdas return `Access-Control-Allow-Origin: *`. The frontend `deleteItem` call appends `?_cb=<timestamp>` with `cache: "no-store"` to avoid stale CORS preflight caches.
-- **Low stock logic:** An item is "low stock" when `quantity <= lowStockThreshold`. Out-of-stock is `quantity == 0`. `LowItemInsight.py` publishes SNS + SQS on every GET.
+- **Low stock logic:** An item is "low stock" when `quantity <= lowStockThreshold`. Out-of-stock is `quantity == 0`. `LowItemInsight.py` publishes SNS + SQS on GET, but only once per user per `ALERT_COOLDOWN_HOURS` (default 24h). Cooldown state is stored as a sentinel DynamoDB item with `itemID='alert_meta#<userID>'` and `userID='__system__'` — these are never returned by normal inventory scans (which filter by real user email).
 - **`name` is a DynamoDB reserved word** — `UpdateItem.py` uses the `#nm` expression alias when updating it.
 - **Transaction logging:** `AddItem.py`, `UpdateItem.py`, and `DeleteItem.py` all write a record to `InventoryTransactions` after every mutation. `UpdateItem.py` reads the item first to capture `quantityBefore`, then classifies the change as `stock_in`, `stock_out`, or `update`.
 
@@ -91,8 +93,12 @@ Python Lambdas read these from `os.environ`:
 - `SNS_TOPIC_ARN` — ARN for stock alerts
 - `SQS_QUEUE_URL` — URL for stock event queue
 
-`index.mjs` reads:
+`Authentication.mjs` reads:
 - `USERS_TABLE` — defaults to `"Users"`
+- `SNS_TOPIC_ARN` — same as Python Lambdas; used for email subscription on register/login
+
+`LowItemInsight.py` also reads:
+- `ALERT_COOLDOWN_HOURS` — defaults to `24`; controls per-user SNS alert frequency
 
 ## Lambda Function Patterns
 
@@ -111,6 +117,7 @@ Key Lambdas:
 - **`GetTransactions.py`** — Returns user's audit log, sorted newest-first, capped at 200 items
 - **`LowItemInsight.py`** — Analyzes inventory health (health score, risk assessment, reorder recommendations), publishes SNS alerts + SQS events
 - **`DailyAlert.py`** — Scheduled function that generates formatted email report (ASCII art, no HTML) and publishes via SNS
+- **`Authentication.mjs`** — Node.js ESM Lambda handling `/auth/register` and `/auth/login`; subscribes user emails to SNS on registration and re-checks subscription on login
 
 ## Frontend Architecture
 
@@ -123,7 +130,7 @@ Every protected page loads scripts in this order (critical for dependencies):
 
 **Auth Flow:**
 - `requireAuth()` redirects to `login.html` if no session token in `sessionStorage`
-- After login, `index.mjs` returns a UUID token stored in `sessionStorage.userEmail`
+- After login, `Authentication.mjs` returns a UUID token stored in `sessionStorage.userEmail`
 - `sessionStorage` persists across page navigation but clears on browser close (security)
 
 ### Data Fetching Pattern
