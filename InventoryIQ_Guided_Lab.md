@@ -255,7 +255,7 @@ import {
     PutCommand,
     GetCommand
 } from "@aws-sdk/lib-dynamodb";
-import { SNSClient, SubscribeCommand } from "@aws-sdk/client-sns";
+import { SNSClient, SubscribeCommand, ListSubscriptionsByTopicCommand } from "@aws-sdk/client-sns";
 import crypto from "crypto";
 
 const client = new DynamoDBClient({});
@@ -834,6 +834,70 @@ Answer these questions to check your understanding:
 
 ---
 
+## 🔔 SNS Auto-Subscribe on Login
+
+By default, users are subscribed to SNS alerts when they **register**. However, users often miss or ignore the confirmation email at that point. This enhancement re-subscribes the user on every **successful login**, but only if they are not already confirmed — preventing duplicate emails.
+
+### What Changes in `Authentication.mjs`
+
+**Step 1 — Update the SNS import** to include `ListSubscriptionsByTopicCommand`:
+
+```javascript
+import { SNSClient, SubscribeCommand, ListSubscriptionsByTopicCommand } from "@aws-sdk/client-sns";
+```
+
+**Step 2 — Add this block inside the `/login` route**, after the password validation passes and before `crypto.randomUUID()`:
+
+```javascript
+// Only subscribe if not already confirmed — avoids duplicate emails
+if (SNS_TOPIC_ARN) {
+    let isAlreadySubscribed = false;
+    let nextToken = undefined;
+
+    do {
+        const listResult = await snsClient.send(new ListSubscriptionsByTopicCommand({
+            TopicArn: SNS_TOPIC_ARN,
+            NextToken: nextToken
+        }));
+
+        const match = listResult.Subscriptions.find(
+            sub => sub.Endpoint === email && sub.SubscriptionArn !== "PendingConfirmation"
+        );
+
+        if (match) {
+            isAlreadySubscribed = true;
+            break;
+        }
+
+        nextToken = listResult.NextToken;
+    } while (nextToken);
+
+    if (!isAlreadySubscribed) {
+        await snsClient.send(new SubscribeCommand({
+            TopicArn: SNS_TOPIC_ARN,
+            Protocol: "email",
+            Endpoint: email,
+            ReturnSubscriptionArn: true
+        }));
+    }
+}
+```
+
+### How It Works
+
+| Subscription State | `SubscriptionArn` Value | Result |
+|---|---|---|
+| Never subscribed | Not in list | `Subscribe` called → confirmation email sent |
+| Subscribed but unconfirmed | `"PendingConfirmation"` | `Subscribe` called → re-sends confirmation email |
+| Confirmed and active | Real ARN string | **Skipped** — no action taken |
+
+> ⚠️ **Placement matters** — this block must go **after** both `401` checks (user not found and wrong password) and **before** `crypto.randomUUID()`. This ensures SNS is only called on a successful login, never on a failed attempt.
+
+> 📌 **No new AWS resources needed** — this only requires the `SNS_TOPIC_ARN` environment variable already set on the Authentication Lambda.
+
+
+---
+
 ## 📎 Appendix: Complete Source Code
 
 > Paste each block into the corresponding Lambda **Code source** editor and click **Deploy**.
@@ -852,7 +916,7 @@ import {
     PutCommand,
     GetCommand
 } from "@aws-sdk/lib-dynamodb";
-import { SNSClient, SubscribeCommand } from "@aws-sdk/client-sns";
+import { SNSClient, SubscribeCommand, ListSubscriptionsByTopicCommand } from "@aws-sdk/client-sns";
 import crypto from "crypto";
 
 const client = new DynamoDBClient({});
@@ -938,6 +1002,39 @@ export const handler = async (event) => {
             if (!isValid) {
                 return { statusCode: 401, headers, body: JSON.stringify({ message: "Invalid email or password." }) };
             }
+            // Only subscribe if not already confirmed — avoids duplicate emails
+            if (SNS_TOPIC_ARN) {
+                let isAlreadySubscribed = false;
+                let nextToken = undefined;
+
+                do {
+                    const listResult = await snsClient.send(new ListSubscriptionsByTopicCommand({
+                        TopicArn: SNS_TOPIC_ARN,
+                        NextToken: nextToken
+                    }));
+
+                    const match = listResult.Subscriptions.find(
+                        sub => sub.Endpoint === email && sub.SubscriptionArn !== "PendingConfirmation"
+                    );
+
+                    if (match) {
+                        isAlreadySubscribed = true;
+                        break;
+                    }
+
+                    nextToken = listResult.NextToken;
+                } while (nextToken);
+
+                if (!isAlreadySubscribed) {
+                    await snsClient.send(new SubscribeCommand({
+                        TopicArn: SNS_TOPIC_ARN,
+                        Protocol: "email",
+                        Endpoint: email,
+                        ReturnSubscriptionArn: true
+                    }));
+                }
+            }
+
             const sessionToken = crypto.randomUUID();
             return {
                 statusCode: 200,
