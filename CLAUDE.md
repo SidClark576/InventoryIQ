@@ -6,27 +6,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 InventoryIQ is a **serverless inventory management app** on AWS. There is no local build step — changes are deployed manually to AWS Lambda (Python/Node.js functions) and S3 (frontend).
 
+## Repository Structure
+
+```
+frontend/    # S3-deployed static assets (HTML, JS, CSS)
+lambda/      # AWS Lambda functions (Python + Node.js ESM)
+docs/        # Documentation and design artifacts (not deployed)
+CLAUDE.md    # This file (root)
+notes        # Local only — contains live keys/ARNs, never committed
+```
+
 ## Deployment
 
-**Frontend** — upload these files directly to S3:
+**Frontend** — upload all files in `frontend/` directly to S3:
 ```
-login.html  dashboard.html  inventory.html  add-item.html  insights.html  transactions.html
-utils.js    api.js          config.js       style.css
-index.html  (redirect shim → login.html)
+frontend/login.html  frontend/dashboard.html  frontend/inventory.html
+frontend/add-item.html  frontend/insights.html  frontend/transactions.html
+frontend/utils.js  frontend/api.js  frontend/config.js  frontend/style.css
+frontend/index.html  (redirect shim → login.html)
 ```
 
-**Backend** — each `.py` file and `Authentication.mjs` is a standalone Lambda function. Deploy individually via the AWS console or CLI:
+**Backend** — each file in `lambda/` is a standalone Lambda function. Deploy individually via the AWS console or CLI:
 ```bash
-zip function.zip AddItem.py && aws lambda update-function-code --function-name AddItem --zip-file fileb://function.zip
+zip function.zip lambda/AddItem.py && aws lambda update-function-code --function-name AddItem --zip-file fileb://function.zip
 ```
 
 No package manager, no build tool, no test suite exists in this repo.
 
-**Files NOT deployed (do not commit):**
-- **`notes`** — Contains live API keys, table names, and ARNs. **NEVER commit or modify.** This is the source of truth for environment setup but must stay local.
-- `stitch_design.html` — Design artifact (old UI mockup)
-- `update_css.py` — One-off utility script (not part of app)
-- `AGENTS.md` — Outdated architecture reference (predates multi-page refactor and recent Lambda additions; do not rely on it)
+**Files NOT deployed:**
+- **`notes`** — Contains live API keys, table names, and ARNs. **NEVER commit or modify.**
+- `docs/` — Design artifacts and outdated docs (`AGENTS.md` predates multi-page refactor; do not rely on it)
 
 ## Architecture
 
