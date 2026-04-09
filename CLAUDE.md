@@ -32,9 +32,13 @@ No package manager, no build tool, no test suite exists in this repo.
 
 ```
 S3 (static HTML/JS frontend)
-        │ HTTPS
+        │ HTTPS (no x-api-key in browser)
         ▼
-API Gateway (REST, x-api-key auth)
+API Gateway /prod/proxy/*  ──►  Proxy.py Lambda
+        │                        (injects x-api-key from env var,
+        │                         forwards to real API Gateway stage)
+        ▼
+API Gateway /prod/* (x-api-key auth)
         │
   ┌─────┼──────────────┐
   ▼     ▼              ▼
@@ -44,9 +48,12 @@ Users
 InventoryTransactions
 ```
 
+**API key hiding via proxy:** The frontend (`config.js`) points to the `/prod/proxy` stage. `Proxy.py` runs as a Lambda behind that stage and re-issues each request to the real `/prod` stage with the `x-api-key` header injected server-side. This means the browser never sees the API key. Auth endpoints (`/auth/*`) bypass the proxy and call the real stage directly — they do not require `x-api-key`.
+
 ### API Routes → Lambda mapping
 | Method | Path | Lambda |
 |--------|------|--------|
+| ANY | `/proxy/{proxy+}` | `Proxy.py` — forwards to real stage with injected key |
 | POST | `/auth/register`, `/auth/login` | `Authentication.mjs` (Node.js ESM) |
 | GET | `/items` | `GetAllItems.py` |
 | POST | `/items` | `AddItem.py` |
@@ -65,7 +72,7 @@ All routes require **Lambda Proxy Integration** enabled in API Gateway.
 
 ## Key Conventions
 
-- **Auth:** Passwords hashed with `crypto.scryptSync` (Node.js) + random salt. Login returns a UUID session token stored in `sessionStorage` — there is no server-side token validation after login. All inventory endpoints require `x-api-key` header; auth endpoints do not.
+- **Auth:** Passwords hashed with `crypto.scryptSync` (Node.js) + random salt. Login returns a UUID session token stored in `sessionStorage` — there is no server-side token validation after login. All inventory endpoints require `x-api-key`, which is injected by `Proxy.py` server-side — `api.js` does **not** send `x-api-key` from the browser; auth endpoints bypass the proxy entirely.
 - **SNS subscription on auth:** On `/register`, `Authentication.mjs` immediately calls `SNS.Subscribe` with the user's email. On `/login`, it paginates through `ListSubscriptionsByTopic` and only re-subscribes if the email has no confirmed or pending subscription. New users see the message: "Please check your email to confirm your alert subscription."
 - **Multi-user isolation:** Items are scoped by `userID` (the user's email) stored on each DynamoDB item. `GET /items`, `GET /insights`, and `GET /transactions` require `?userID=` — if omitted, they return an empty result or 400. `userID` is trusted from the client request body (no server-side ownership check on writes).
 - **Decimal handling:** DynamoDB returns `Decimal` types — all Python Lambdas convert to `float` before `json.dumps`.
@@ -100,6 +107,10 @@ Python Lambdas read these from `os.environ`:
 `LowItemInsight.py` also reads:
 - `ALERT_COOLDOWN_HOURS` — defaults to `24`; controls per-user SNS alert frequency
 
+`Proxy.py` reads:
+- `API_ENDPOINT` — base URL of the real API Gateway stage (e.g. `https://<id>.execute-api.us-east-1.amazonaws.com/prod`)
+- `API_KEY` — the `x-api-key` value injected into forwarded requests; never exposed to the browser
+
 ## Lambda Function Patterns
 
 All Python Lambda functions follow a consistent structure with **detailed inline comments** explaining:
@@ -118,6 +129,7 @@ Key Lambdas:
 - **`LowItemInsight.py`** — Analyzes inventory health (health score, risk assessment, reorder recommendations), publishes SNS alerts + SQS events
 - **`DailyAlert.py`** — Scheduled function that generates formatted email report (ASCII art, no HTML) and publishes via SNS
 - **`Authentication.mjs`** — Node.js ESM Lambda handling `/auth/register` and `/auth/login`; subscribes user emails to SNS on registration and re-checks subscription on login
+- **`Proxy.py`** — Reverse-proxy Lambda that sits in front of all inventory endpoints; reads `API_ENDPOINT` + `API_KEY` from env vars and re-issues the request to the real stage with the key injected. Handles path forwarding via `event['path']`, passes through method and body. **Known limitations:** does not forward query string parameters or handle CORS OPTIONS preflight — ensure the proxy API Gateway resource has `OPTIONS` method with a mock integration returning CORS headers, and that query strings (e.g. `?userID=`) are forwarded explicitly.
 
 ## Frontend Architecture
 
@@ -244,6 +256,16 @@ This prevents users from seeing blank/stuck loading states when the API is unava
   4. Under **Quota**: uncheck "Enable quota" or raise to 10,000+/day
   5. Click **Save** — takes effect immediately (no redeployment needed)
 - All inventory data will appear zero until quota is fixed
+
+**Proxy returns empty data or 400 on GET endpoints:**
+- `Proxy.py` does not forward query string parameters by default. Endpoints like `GET /items?userID=` will receive no `userID` and return empty results.
+- Fix in `Proxy.py`: append `event.get('queryStringParameters')` to the forwarded URL:
+  ```python
+  qs = event.get('queryStringParameters') or {}
+  qs_string = '&'.join(f"{k}={v}" for k, v in qs.items())
+  url = f"{API_ENDPOINT}{path}{'?' + qs_string if qs_string else ''}"
+  ```
+- Also ensure the proxy API Gateway resource has an `OPTIONS` method with a mock integration that returns CORS headers — otherwise browser preflight requests will fail.
 
 **Lambda Proxy Integration disabled:**
 - If a Lambda endpoint returns `{"statusCode": 400, "body": "..."}` in the response body (instead of just the body), you forgot to enable Lambda Proxy Integration in API Gateway
