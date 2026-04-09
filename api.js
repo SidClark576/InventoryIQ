@@ -36,7 +36,7 @@ async function getAllItems() {
     ? `${CONFIG.API_ENDPOINT}/items?userID=${encodeURIComponent(userID)}`
     : `${CONFIG.API_ENDPOINT}/items`;
   const res = await fetch(url, {
-    headers: { "x-api-key": CONFIG.API_KEY }
+    headers: { "Content-Type": "application/json" }
   });
 
   checkQuota(res);
@@ -64,8 +64,7 @@ async function addItem(item) {
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "x-api-key": CONFIG.API_KEY
+      "Content-Type": "application/json"
     },
     body: JSON.stringify(item)
   });
@@ -79,8 +78,7 @@ async function updateItem(itemID, updates) {
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
-      "x-api-key": CONFIG.API_KEY
+      "Content-Type": "application/json"
     },
     body: JSON.stringify(updates)
   });
@@ -99,8 +97,7 @@ async function deleteItem(itemID) {
   // Adding a timestamp query param bypasses any cached failed CORS preflight responses in the browser
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}?_cb=${Date.now()}`, {
     method: "DELETE",
-    headers: { 
-      "x-api-key": CONFIG.API_KEY,
+    headers: {
       "Content-Type": "application/json"
     },
     cache: "no-store",
@@ -124,7 +121,7 @@ async function getInsights() {
     : `${CONFIG.API_ENDPOINT}/insights`;
 
   const res = await fetch(url, {
-    headers: { "x-api-key": CONFIG.API_KEY }
+    headers: { "Content-Type": "application/json" }
   });
   checkQuota(res);
   const data = await res.json();
@@ -137,7 +134,7 @@ async function getTransactions() {
   const url = userID
     ? `${CONFIG.API_ENDPOINT}/transactions?userID=${encodeURIComponent(userID)}`
     : `${CONFIG.API_ENDPOINT}/transactions`;
-  const res = await fetch(url, { headers: { "x-api-key": CONFIG.API_KEY } });
+  const res = await fetch(url, { headers: { "Content-Type": "application/json" } });
   checkQuota(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch transactions");
@@ -150,7 +147,7 @@ async function getCategories() {
     ? `${CONFIG.API_ENDPOINT}/categories?userID=${encodeURIComponent(userID)}`
     : `${CONFIG.API_ENDPOINT}/categories`;
   const res = await fetch(url, {
-    headers: { "x-api-key": CONFIG.API_KEY }
+    headers: { "Content-Type": "application/json" }
   });
   checkQuota(res);
   const data = await res.json();
@@ -164,7 +161,7 @@ async function deleteCategory(categoryName) {
     `${CONFIG.API_ENDPOINT}/categories/${encodeURIComponent(categoryName)}?userID=${encodeURIComponent(userID)}`,
     {
       method: "DELETE",
-      headers: { "x-api-key": CONFIG.API_KEY }
+      headers: { "Content-Type": "application/json" }
     }
   );
   checkQuota(res);
