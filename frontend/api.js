@@ -1,5 +1,31 @@
 // ── AUTH FUNCTIONS ────────────────────────────────────────────
 
+function getAuthHeaders() {
+  /**
+   * Returns standard headers for proxied API requests.
+   * Includes JWT token from sessionStorage in Authorization header.
+   * Used by all inventory endpoints (/proxy/* routes).
+   */
+  const token = sessionStorage.getItem('iq_jwt_token') || '';
+  return {
+    "Content-Type": "application/json",
+    "Authorization": token ? `Bearer ${token}` : ''
+  };
+}
+
+function check401(res) {
+  /**
+   * Detects 401 Unauthorized responses and clears JWT token.
+   * Called on every proxied API response to handle token expiry.
+   * Redirects to login.html so user re-authenticates.
+   */
+  if (res.status === 401) {
+    sessionStorage.removeItem('iq_jwt_token');
+    sessionStorage.removeItem('userEmail');
+    window.location.href = 'login.html';
+  }
+}
+
 function checkQuota(res) {
   if (res.status === 429) {
     throw new Error('API quota exceeded — please wait a moment and try again, or contact your administrator.');
@@ -31,14 +57,11 @@ async function authLogin(email, password) {
 // ── INVENTORY FUNCTIONS ───────────────────────────────────────
 
 async function getAllItems() {
-  const userID = getCurrentUserID();
-  const url = userID
-    ? `${CONFIG.API_ENDPOINT}/items?userID=${encodeURIComponent(userID)}`
-    : `${CONFIG.API_ENDPOINT}/items`;
-  const res = await fetch(url, {
-    headers: { "Content-Type": "application/json" }
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/items`, {
+    headers: getAuthHeaders()
   });
 
+  check401(res);
   checkQuota(res);
   const raw = await res.text();
   let data = [];
@@ -63,11 +86,10 @@ async function getAllItems() {
 async function addItem(item) {
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(item)
   });
+  check401(res);
   checkQuota(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to add item");
@@ -77,11 +99,10 @@ async function addItem(item) {
 async function updateItem(itemID, updates) {
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(updates)
   });
+  check401(res);
   checkQuota(res);
   let data;
   try {
@@ -97,12 +118,11 @@ async function deleteItem(itemID) {
   // Adding a timestamp query param bypasses any cached failed CORS preflight responses in the browser
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}?_cb=${Date.now()}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: getAuthHeaders(),
     cache: "no-store",
     mode: "cors"
   });
+  check401(res);
   checkQuota(res);
   let data;
   try {
@@ -115,14 +135,10 @@ async function deleteItem(itemID) {
 }
 
 async function getInsights() {
-  const userID = getCurrentUserID();
-  const url = userID
-    ? `${CONFIG.API_ENDPOINT}/insights?userID=${encodeURIComponent(userID)}`
-    : `${CONFIG.API_ENDPOINT}/insights`;
-
-  const res = await fetch(url, {
-    headers: { "Content-Type": "application/json" }
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/insights`, {
+    headers: getAuthHeaders()
   });
+  check401(res);
   checkQuota(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch insights");
@@ -130,11 +146,10 @@ async function getInsights() {
 }
 
 async function getTransactions() {
-  const userID = getCurrentUserID();
-  const url = userID
-    ? `${CONFIG.API_ENDPOINT}/transactions?userID=${encodeURIComponent(userID)}`
-    : `${CONFIG.API_ENDPOINT}/transactions`;
-  const res = await fetch(url, { headers: { "Content-Type": "application/json" } });
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/transactions`, {
+    headers: getAuthHeaders()
+  });
+  check401(res);
   checkQuota(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch transactions");
@@ -142,13 +157,10 @@ async function getTransactions() {
 }
 
 async function getCategories() {
-  const userID = getCurrentUserID();
-  const url = userID
-    ? `${CONFIG.API_ENDPOINT}/categories?userID=${encodeURIComponent(userID)}`
-    : `${CONFIG.API_ENDPOINT}/categories`;
-  const res = await fetch(url, {
-    headers: { "Content-Type": "application/json" }
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/categories`, {
+    headers: getAuthHeaders()
   });
+  check401(res);
   checkQuota(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch categories");
@@ -156,14 +168,14 @@ async function getCategories() {
 }
 
 async function deleteCategory(categoryName) {
-  const userID = getCurrentUserID();
   const res = await fetch(
-    `${CONFIG.API_ENDPOINT}/categories/${encodeURIComponent(categoryName)}?userID=${encodeURIComponent(userID)}`,
+    `${CONFIG.API_ENDPOINT}/categories/${encodeURIComponent(categoryName)}`,
     {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" }
+      headers: getAuthHeaders()
     }
   );
+  check401(res);
   checkQuota(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to delete category");

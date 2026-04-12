@@ -177,7 +177,7 @@
         msg.textContent = 'Logging in...';
         const { status, data } = await authLogin(email, pwd);
         if (status === 200) {
-          sessionStorage.setItem('authToken', data.token);
+          sessionStorage.setItem('iq_jwt_token', data.token);
           sessionStorage.setItem('userEmail', data.email);
           window.location.href = 'dashboard.html';
         } else {
@@ -215,7 +215,7 @@
       }
 
       window.onload = function () {
-        if (sessionStorage.getItem('userEmail')) window.location.href = 'dashboard.html';
+        if (sessionStorage.getItem('iq_jwt_token')) window.location.href = 'dashboard.html';
       };
     </script>
 </body>
