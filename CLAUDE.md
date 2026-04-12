@@ -77,7 +77,7 @@ All routes require **Lambda Proxy Integration** enabled in API Gateway.
 
 **Category Management:**
 - `GET /categories?userID=<email>` returns array of unique category strings (always includes "Uncategorized")
-- `POST /categories` with body `{ userID, categoryName }` deletes category by moving all items to "Uncategorized" (idempotent, prevents deletion of "Uncategorized" itself)
+- `DELETE /categories/{categoryName}?userID=<email>` moves all items in that category to "Uncategorized" (idempotent, prevents deletion of "Uncategorized" itself)
 
 ## Key Conventions
 
@@ -137,8 +137,8 @@ Key Lambdas:
 - **`GetTransactions.py`** — Returns user's audit log, sorted newest-first, capped at 200 items
 - **`LowItemInsight.py`** — Analyzes inventory health (health score, risk assessment, reorder recommendations), publishes SNS alerts + SQS events
 - **`DailyAlert.py`** — Scheduled function that generates formatted email report (ASCII art, no HTML) and publishes via SNS
-- **`Authentication.mjs`** — Node.js ESM Lambda handling `/auth/register` and `/auth/login`; subscribes user emails to SNS on registration and re-checks subscription on login
-- **`Proxy.py`** — Reverse-proxy Lambda that sits in front of all inventory endpoints; reads `API_ENDPOINT` + `API_KEY` from env vars and re-issues the request to the real stage with the key injected. Handles path forwarding via `event['path']`, passes through method and body. **Known limitations:** does not forward query string parameters or handle CORS OPTIONS preflight — ensure the proxy API Gateway resource has `OPTIONS` method with a mock integration returning CORS headers, and that query strings (e.g. `?userID=`) are forwarded explicitly.
+- **`Authentication.mjs`** — Node.js ESM Lambda handling `/auth/register` and `/auth/login`; uses **AWS SDK v3** (`@aws-sdk/client-dynamodb`, `@aws-sdk/lib-dynamodb`, `@aws-sdk/client-sns`); subscribes user emails to SNS on registration and re-checks subscription on login (re-subscribes if no confirmed subscription exists — pending counts as not subscribed)
+- **`Proxy.py`** — Reverse-proxy Lambda that sits in front of all inventory endpoints; reads `API_ENDPOINT` + `API_KEY` from env vars and re-issues the request to the real stage with the key injected. Extracts path from `event['pathParameters']['proxy']`, forwards query strings from `event['queryStringParameters']`, passes method and body. Handles OPTIONS preflight inline (returns 200 + CORS headers without forwarding to the real stage).
 
 ## Frontend Architecture
 
@@ -265,16 +265,6 @@ This prevents users from seeing blank/stuck loading states when the API is unava
   4. Under **Quota**: uncheck "Enable quota" or raise to 10,000+/day
   5. Click **Save** — takes effect immediately (no redeployment needed)
 - All inventory data will appear zero until quota is fixed
-
-**Proxy returns empty data or 400 on GET endpoints:**
-- `Proxy.py` does not forward query string parameters by default. Endpoints like `GET /items?userID=` will receive no `userID` and return empty results.
-- Fix in `Proxy.py`: append `event.get('queryStringParameters')` to the forwarded URL:
-  ```python
-  qs = event.get('queryStringParameters') or {}
-  qs_string = '&'.join(f"{k}={v}" for k, v in qs.items())
-  url = f"{API_ENDPOINT}{path}{'?' + qs_string if qs_string else ''}"
-  ```
-- Also ensure the proxy API Gateway resource has an `OPTIONS` method with a mock integration that returns CORS headers — otherwise browser preflight requests will fail.
 
 **Lambda Proxy Integration disabled:**
 - If a Lambda endpoint returns `{"statusCode": 400, "body": "..."}` in the response body (instead of just the body), you forgot to enable Lambda Proxy Integration in API Gateway
