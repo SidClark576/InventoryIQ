@@ -1,0 +1,389 @@
+{
+  "version": 1,
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-04-12T10:59:36.760Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/GetCategories.py",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 11→17 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T10:59:36.760Z"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-04-12T10:59:54.364Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/LowItemInsight.py",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 11→17 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T10:59:54.364Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-04-12T11:00:40.082Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/DeleteItem.py",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 32→51 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T11:00:40.083Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-04-12T21:12:16.570Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/Authentication.mjs",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 22→27 lines (3 removed) | Also: const sessionToken = crypto.randomUUID();; token: sessionToken,",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-04-12T21:12:39.161Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-04-12T21:12:23.978Z",
+      "error_message": "Null/undefined access in ",
+      "file": "lambda/Authentication.mjs",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T21:12:23.978Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-04-12T21:12:51.794Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/Proxy.py",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 11→59 lines (3 removed) | Also: headers={; },",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-04-12T21:13:02.498Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-04-12T21:14:11.690Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/AddItem.py",
+      "root_cause": "15 lines replaced/restructured",
+      "fix": "Rewrote 35→66 lines (15 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T21:14:11.690Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-04-12T21:14:48.835Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/UpdateItem.py",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 31→63 lines (3 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T21:14:48.835Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-04-12T21:16:27.655Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/GetAllItems.py",
+      "root_cause": "18 lines replaced/restructured",
+      "fix": "Rewrote 35→23 lines (18 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T21:16:27.655Z"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-04-12T21:16:42.578Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/GetTransactions.py",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 18→11 lines (7 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T21:16:42.578Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-04-12T21:17:05.620Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/GetCategories.py",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 16→9 lines (7 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T21:17:05.620Z"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-04-12T21:18:41.631Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/DeleteCategory.py",
+      "root_cause": "7 lines replaced/restructured",
+      "fix": "Rewrote 11→4 lines (7 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T21:18:41.631Z"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-04-12T21:18:54.886Z",
+      "error_message": "Wrong return value",
+      "file": "lambda/DeleteCategory.py",
+      "root_cause": "Was returning: {'statusCode': 400, 'headers': CORS, 'body': json.",
+      "fix": "Now returns: response(400, {'error': 'Cannot delete Uncategoriz",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-04-12T21:18:59.506Z"
+    },
+    {
+      "id": "bug-014",
+      "timestamp": "2026-04-12T23:41:21.446Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/api.js",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 14→10 lines (6 removed) | Also: const userID = getCurrentUserID();; const url = userID",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 3,
+      "last_seen": "2026-04-12T23:41:29.824Z"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-04-12T23:41:46.172Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/login.html",
+      "root_cause": "Had 'userEmail'",
+      "fix": "Changed to 'iq_jwt_token'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T23:41:46.172Z"
+    },
+    {
+      "id": "bug-016",
+      "timestamp": "2026-04-12T23:41:52.864Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/utils.js",
+      "root_cause": "Had 'userEmail'",
+      "fix": "Changed to 'iq_jwt_token'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T23:41:52.864Z"
+    },
+    {
+      "id": "bug-017",
+      "timestamp": "2026-04-12T23:42:57.729Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/inventory.html",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→3 lines (2 removed) | Also: const userID = sessionStorage.getItem('userEmail'); await updateItem(addTarget.itemID, { quantity: new",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-04-12T23:42:59.019Z"
+    },
+    {
+      "id": "bug-018",
+      "timestamp": "2026-04-13T00:25:32.684Z",
+      "error_message": "Type error",
+      "file": "tests/pages/LoginPage.ts",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-13T00:25:32.684Z"
+    },
+    {
+      "id": "bug-019",
+      "timestamp": "2026-04-13T00:27:39.974Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/login.html",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check) | Also: console.log('[handleRegister] received status:', status, 'to; console.log('[handleRegister] token stored, redirecting to d",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-04-13T00:27:45.829Z"
+    },
+    {
+      "id": "bug-020",
+      "timestamp": "2026-04-13T00:42:21.077Z",
+      "error_message": "Missing error handling in login",
+      "file": "tests/pages/LoginPage.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-13T00:42:21.077Z"
+    },
+    {
+      "id": "bug-021",
+      "timestamp": "2026-04-13T00:46:51.891Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "lambda/Authentication.mjs",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block | Also: try { await recordFailedAttempt(email); } catch (e) { consol",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-04-13T00:46:56.248Z"
+    },
+    {
+      "id": "bug-022",
+      "timestamp": "2026-04-13T01:00:14.403Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "lambda/Authentication.mjs",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block | Also: try { await clearFailedAttempts(email); } catch (e) { consol",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-04-13T01:00:18.336Z"
+    },
+    {
+      "id": "bug-023",
+      "timestamp": "2026-04-13T01:00:23.666Z",
+      "error_message": "Incorrect value in code",
+      "file": "tests/e2e/auth/register.spec.ts",
+      "root_cause": "Had 'Short1'",
+      "fix": "Changed to 'Ab1'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-13T01:00:23.666Z"
+    },
+    {
+      "id": "bug-024",
+      "timestamp": "2026-04-13T01:08:33.951Z",
+      "error_message": "Function not marked async",
+      "file": "tests/e2e/auth/login.spec.ts",
+      "root_cause": "Function uses await but wasn't declared async",
+      "fix": "Added async modifier",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-04-13T01:08:38.395Z"
+    }
+  ]
+}

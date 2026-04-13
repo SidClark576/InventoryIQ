@@ -4,7 +4,7 @@ import os
 from decimal import Decimal
 from collections import defaultdict
 from datetime import datetime, timezone
-from boto3.dynamodb.conditions import Attr
+from boto3.dynamodb.conditions import Key
 
 # Initialize AWS services:
 # - DynamoDB for reading inventory items
@@ -18,6 +18,7 @@ sqs = boto3.client('sqs')
 table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
 SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN', '')  # Alert notifications
 SQS_QUEUE_URL = os.environ.get('SQS_QUEUE_URL', '')  # Stock event queue
+CORS_ORIGIN = os.environ.get('CORS_ORIGIN', '*')
 
 # Cooldown window: SNS alert fires at most once per N hours per user (default 24h)
 ALERT_COOLDOWN_HOURS = int(os.environ.get('ALERT_COOLDOWN_HOURS', '24'))
@@ -66,18 +67,19 @@ def lambda_handler(event, context):
     Generates comprehensive inventory insights including stock analysis, risk assessment, and reorder recommendations.
 
     Flow:
-    1. Extract userID and validate
-    2. Scan all inventory items for the user
-    3. Classify items as out-of-stock or low-stock
-    4. Calculate inventory health metrics
-    5. Identify reorder priorities based on risk scoring
-    6. Generate smart recommendations
-    7. Publish alerts via SNS (email notifications)
-    8. Queue events to SQS for background processing
-    9. Return comprehensive insights dashboard
+    1. Handle CORS preflight OPTIONS request
+    2. Extract verified userID from X-Verified-UserID header (injected by Proxy.py)
+    3. Return 401 if userID is missing (authentication requirement)
+    4. Query GSI (userID-index) for all inventory items for the user, handling pagination
+    5. Classify items as out-of-stock or low-stock
+    6. Calculate inventory health metrics
+    7. Identify reorder priorities based on risk scoring
+    8. Generate smart recommendations
+    9. Publish alerts via SNS (email notifications)
+    10. Queue events to SQS for background processing
+    11. Return comprehensive insights dashboard
 
-    Query Parameters:
-    - userID: Required. User email to analyze inventory for.
+    Auth: X-Verified-UserID header (verified by Proxy.py after JWT validation)
 
     Response: Comprehensive insights object containing:
     - summary: Overall health metrics
@@ -95,41 +97,30 @@ def lambda_handler(event, context):
     - Range: 0-100
     """
     try:
-        # Extract and validate userID
-        params = event.get('queryStringParameters') or {}
-        user_id = params.get('userID', '').strip()
+        # Handle CORS preflight request
+        if event.get('httpMethod') == 'OPTIONS':
+            return response(200, '')
 
-        # Return empty insights if no userID (no inventory to analyze)
+        # Extract verified userID from header (injected by Proxy.py after JWT validation)
+        user_id = event.get('headers', {}).get('x-verified-userid', '').strip()
         if not user_id:
-            return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-                    'Access-Control-Allow-Methods': 'OPTIONS,GET'
-                },
-                'body': json.dumps({
-                    'summary': {
-                        'totalProducts': 0, 'outOfStockCount': 0, 'lowStockCount': 0,
-                        'atRiskCount': 0, 'healthScore': 100, 'estimatedInventoryValue': 0
-                    },
-                    'outOfStockItems': [], 'lowStockItems': [], 'categoryBreakdown': {},
-                    'categoryRiskBreakdown': [], 'topReorderPriorities': [],
-                    'recommendations': ['📦 No inventory found. Start by adding products.'],
-                    'generatedAt': datetime.now(timezone.utc).isoformat()
-                })
-            }
+            return response(401, {'error': 'Missing or invalid authorization'})
 
-        # Scan all items for this user
-        result = table.scan(FilterExpression=Attr('userID').eq(user_id))
+        # Query GSI (userID-index) instead of full table scan
+        # GSI structure: partition key = userID, sort key = createdAt
+        # This scans only items belonging to this user, not entire table
+        result = table.query(
+            IndexName='userID-index',
+            KeyConditionExpression=Key('userID').eq(user_id)
+        )
         items = result.get('Items', [])
 
-        # Pagination loop: handle DynamoDB scan limit (1MB per request)
+        # Pagination loop: handle DynamoDB query limit (1MB per request)
         while 'LastEvaluatedKey' in result:
-            result = table.scan(
-                ExclusiveStartKey=result['LastEvaluatedKey'],
-                FilterExpression=Attr('userID').eq(user_id)
+            result = table.query(
+                IndexName='userID-index',
+                KeyConditionExpression=Key('userID').eq(user_id),
+                ExclusiveStartKey=result['LastEvaluatedKey']
             )
             items.extend(result.get('Items', []))
 
@@ -296,21 +287,28 @@ def lambda_handler(event, context):
             )
 
         # Return comprehensive insights to frontend dashboard
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-                'Access-Control-Allow-Methods': 'OPTIONS,GET'
-            },
-            'body': json.dumps(insights)
-        }
+        return response(200, insights)
 
     except Exception as e:
-        # Return error with CORS headers
-        return {
-            'statusCode': 500,
-            'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': str(e)})
-        }
+        return response(500, {'error': str(e)})
+
+def response(status_code, body):
+    """
+    Helper function to format Lambda response with consistent headers and CORS.
+
+    Args:
+        status_code: HTTP status code
+        body: Dictionary to be JSON-encoded (or empty string for OPTIONS)
+
+    Returns: API Gateway Lambda Proxy Integration response
+    """
+    return {
+        'statusCode': status_code,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': CORS_ORIGIN,
+            'Access-Control-Allow-Headers': 'Content-Type,x-api-key,Authorization',
+            'Access-Control-Allow-Methods': 'OPTIONS,GET'
+        },
+        'body': json.dumps(body) if body else ''
+    }

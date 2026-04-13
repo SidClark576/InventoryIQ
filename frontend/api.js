@@ -42,7 +42,9 @@ async function authRegister(email, password) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   });
-  return { status: res.status, data: await res.json() };
+  const data = await res.json();
+  console.log('[authRegister] status:', res.status, 'data:', data);
+  return { status: res.status, data };
 }
 
 async function authLogin(email, password) {
@@ -51,7 +53,9 @@ async function authLogin(email, password) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   });
-  return { status: res.status, data: await res.json() };
+  const data = await res.json();
+  console.log('[authLogin] status:', res.status, 'data:', data);
+  return { status: res.status, data };
 }
 
 // ── INVENTORY FUNCTIONS ───────────────────────────────────────

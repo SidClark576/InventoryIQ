@@ -1,8 +1,8 @@
 SNS_TOPIC_ARN: arn:aws:sns:us-east-1:753344699862:InventoryIQ-Alerts
 SQS_QUEUE_ARN: arn:aws:sqs:us-east-1:753344699862:InventoryIQ-StockQueue
 SQS_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/753344699862/InventoryIQ-StockQueue
-API_INVOKE_URL: https://xti5le6ccg.execute-api.us-east-1.amazonaws.com/prod
-API_KEY: j161VqGi743fBSf9IChk16U3RtBwqG7L1BMpGt5V
+API_INVOKE_URL: https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod
+API_KEY: isZjRmbNMh1Yzwn3YAatq1ANjAdfP0Lr8iDPNT5l
 
 
 Issues:
@@ -12,5 +12,42 @@ I therefore deleted it
 Implementing EventBridge:
 I have created a new file DailyAlert.py that will be triggered by EventBridge on a daily basis. It will scan the DynamoDB table and send an email to the user if there are any items that are out of stock or low in stock.
 
-Email: inventory.test@example.com                                     
+Email: [EMAIL_ADDRESS]                                     
 Password: Test123!@
+
+
+TESTS
+
+ Test 1: Non-existent item returns 404 (not 500)                                                                                                                       
+  curl -X PUT https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items/fake-uuid-12345 \
+    -H "Content-Type: application/json" \
+    -d '{"userID":"test@example.com"}'                                                                                                                                  
+  ✓ Expected: {"statusCode": 404, "body": "{\"error\": \"Item not found\"}"}                                                                                            
+  ✗ Broken (old): {"statusCode": 500, "body": "{\"error\": \"'dict' object is not callable\"}"}                                                                         
+                                                                                                                                                                        
+  Test 2: Cross-user ownership check returns 403                                                                                                                        
+  # First, create an item as user1                                                                                                                                      
+curl -X POST https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items \
+    -H "Content-Type: application/json" \
+    -d '{"userID":"user1@example.com", "name":"Widget", "quantity":10}'                                                                                                 
+  # Copy the itemID from response                                      
+                                                                                                                                                                        
+  # Then try to update it as user2                          
+  curl -X PUT https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items/<itemID> \
+    -H "Content-Type: application/json" \
+    -d '{"userID":"user2@example.com", "quantity":5}'                                                                                                                   
+  ✓ Expected: {"statusCode": 403, "body": "{\"error\": \"Forbidden\"}"}
+                                                                                                                                                                        
+  Test 3: Existing user flows still work
+  # Create item (should succeed)                                                                                                                                        
+  curl -X POST https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items \
+    -H "Content-Type: application/json" \
+    -d '{"userID":"test@example.com", "name":"Item1", "quantity":5}'                                                                                                    
+                                                                    
+  # List items (should return array)                                                                                                                                    
+  curl -X GET "https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items?userID=test@example.com"                                                            
+                                                                                                            
+  # Delete item (should succeed)                                                                                                                                        
+  curl -X DELETE https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items/d1646839-b8e3-4256-bbce-89d806adc497 \
+    -H "Content-Type: application/json" \
+    -d '{"userID":"test@example.com"}'        

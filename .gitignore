@@ -1,0 +1,8 @@
+node_modules
+package-lock.json
+package.json
+playwright-results.json
+playwright-report
+tests/*
+test*
+playwright.config.ts

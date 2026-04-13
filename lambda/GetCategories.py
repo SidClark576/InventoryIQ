@@ -1,19 +1,12 @@
 import json
 import os
 import boto3
-from boto3.dynamodb.conditions import Attr
+from boto3.dynamodb.conditions import Key
 
 # Initialize DynamoDB with inventory table
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
-
-# Standard CORS headers for GET requests
-CORS = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-    'Access-Control-Allow-Methods': 'OPTIONS,GET'
-}
+CORS_ORIGIN = os.environ.get('CORS_ORIGIN', '*')
 
 def lambda_handler(event, context):
     """
@@ -21,15 +14,15 @@ def lambda_handler(event, context):
 
     Flow:
     1. Handle CORS preflight OPTIONS request
-    2. Extract and validate userID from query parameters
-    3. Scan inventory items filtering by userID
-    4. Extract unique category values from all items
-    5. Sort alphabetically
-    6. Ensure "Uncategorized" is always included (even if no items have it)
-    7. Return sorted list of category strings
+    2. Extract verified userID from X-Verified-UserID header (injected by Proxy.py)
+    3. Return 401 if userID is missing (authentication requirement)
+    4. Scan inventory items filtering by userID
+    5. Extract unique category values from all items
+    6. Sort alphabetically
+    7. Ensure "Uncategorized" is always included (even if no items have it)
+    8. Return sorted list of category strings
 
-    Query Parameters:
-    - userID: Required. Email of user to get categories for.
+    Auth: X-Verified-UserID header (verified by Proxy.py after JWT validation)
 
     Response: Array of category strings, always includes "Uncategorized"
 
@@ -40,22 +33,28 @@ def lambda_handler(event, context):
     """
     # Handle CORS preflight request
     if event.get('httpMethod') == 'OPTIONS':
-        return {'statusCode': 200, 'headers': CORS, 'body': ''}
+        return response(200, '')
 
-    # Extract and validate userID
-    user_id = (event.get('queryStringParameters') or {}).get('userID', '')
+    # Extract verified userID from header (injected by Proxy.py after JWT validation)
+    user_id = event.get('headers', {}).get('x-verified-userid', '').strip()
     if not user_id:
-        return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'userID required'})}
+        return response(401, {'error': 'Missing or invalid authorization'})
 
-    # Scan all items for this user
-    result = table.scan(FilterExpression=Attr('userID').eq(user_id))
+    # Query GSI (userID-index) instead of full table scan
+    # GSI structure: partition key = userID, sort key = createdAt
+    # This scans only items belonging to this user, not entire table
+    result = table.query(
+        IndexName='userID-index',
+        KeyConditionExpression=Key('userID').eq(user_id)
+    )
     items = result.get('Items', [])
 
-    # Pagination loop: handle DynamoDB scan limit (1MB per request)
+    # Pagination loop: handle DynamoDB query limit (1MB per request)
     while 'LastEvaluatedKey' in result:
-        result = table.scan(
-            ExclusiveStartKey=result['LastEvaluatedKey'],
-            FilterExpression=Attr('userID').eq(user_id)
+        result = table.query(
+            IndexName='userID-index',
+            KeyConditionExpression=Key('userID').eq(user_id),
+            ExclusiveStartKey=result['LastEvaluatedKey']
         )
         items.extend(result.get('Items', []))
 
@@ -74,4 +73,25 @@ def lambda_handler(event, context):
         categories.append('Uncategorized')
         categories.sort()
 
-    return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(categories)}
+    return response(200, categories)
+
+def response(status_code, body):
+    """
+    Helper function to format Lambda response with consistent headers and CORS.
+
+    Args:
+        status_code: HTTP status code
+        body: Dictionary/list to be JSON-encoded (or empty string for OPTIONS)
+
+    Returns: API Gateway Lambda Proxy Integration response
+    """
+    return {
+        'statusCode': status_code,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': CORS_ORIGIN,
+            'Access-Control-Allow-Headers': 'Content-Type,x-api-key,Authorization',
+            'Access-Control-Allow-Methods': 'OPTIONS,GET'
+        },
+        'body': json.dumps(body) if body else ''
+    }

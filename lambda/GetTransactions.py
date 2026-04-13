@@ -1,21 +1,14 @@
 import json
 import os
 import boto3
-from boto3.dynamodb.conditions import Attr
+from boto3.dynamodb.conditions import Key
 from decimal import Decimal
 
 # Initialize DynamoDB with transactions table
 # This table holds the audit log of all inventory changes
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('TRANSACTIONS_TABLE', 'InventoryTransactions'))
-
-# Standard CORS headers for GET requests
-CORS = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-    'Access-Control-Allow-Methods': 'OPTIONS,GET'
-}
+CORS_ORIGIN = os.environ.get('CORS_ORIGIN', '*')
 
 def lambda_handler(event, context):
     """
@@ -23,15 +16,14 @@ def lambda_handler(event, context):
 
     Flow:
     1. Handle CORS preflight OPTIONS request
-    2. Extract and validate userID from query parameters
-    3. Scan InventoryTransactions table filtering by userID
-    4. Handle pagination (DynamoDB returns up to 1MB per scan)
-    5. Convert Decimal types to float for JSON
-    6. Sort transactions by date (newest first)
+    2. Extract verified userID from X-Verified-UserID header (injected by Proxy.py)
+    3. Return 401 if userID is missing (authentication requirement)
+    4. Query GSI (userID-index) filtering by userID, sorted by createdAt (newest first)
+    5. Handle pagination (DynamoDB returns up to 1MB per query)
+    6. Convert Decimal types to float for JSON
     7. Return up to 200 most recent transactions
 
-    Query Parameters:
-    - userID: Required. Email of user to filter transactions by.
+    Auth: X-Verified-UserID header (verified by Proxy.py after JWT validation)
 
     Response: Array of transaction objects sorted newest-first, max 200 items
 
@@ -41,26 +33,35 @@ def lambda_handler(event, context):
     - stock_out: Quantity decreased (depletion)
     - update: Other fields changed (name, price, category, etc)
     - delete: Item removed from inventory
+
+    Performance: O(user transactions) using GSI, not O(total transactions) using scan.
     """
     # Handle CORS preflight request
     if event.get('httpMethod') == 'OPTIONS':
-        return {'statusCode': 200, 'headers': CORS, 'body': ''}
+        return response(200, '')
 
-    # Extract and validate userID
-    user_id = (event.get('queryStringParameters') or {}).get('userID', '')
+    # Extract verified userID from header (injected by Proxy.py after JWT validation)
+    user_id = event.get('headers', {}).get('x-verified-userid', '').strip()
     if not user_id:
-        return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'userID required'})}
+        return response(401, {'error': 'Missing or invalid authorization'})
 
-    # Scan transactions table filtering by userID
-    # DynamoDB scan returns max 1MB per request, so handle pagination
-    result = table.scan(FilterExpression=Attr('userID').eq(user_id))
+    # Query GSI (userID-index) instead of full table scan
+    # GSI structure: partition key = userID, sort key = createdAt
+    # ScanIndexForward=False returns newest-first (reverse chronological)
+    result = table.query(
+        IndexName='userID-index',
+        KeyConditionExpression=Key('userID').eq(user_id),
+        ScanIndexForward=False  # Sort by createdAt descending (newest first)
+    )
     items = result.get('Items', [])
 
-    # Pagination loop: continue scanning if more results exist (LastEvaluatedKey present)
+    # Pagination loop: continue querying if more results exist (LastEvaluatedKey present)
     while 'LastEvaluatedKey' in result:
-        result = table.scan(
-            ExclusiveStartKey=result['LastEvaluatedKey'],
-            FilterExpression=Attr('userID').eq(user_id)
+        result = table.query(
+            IndexName='userID-index',
+            KeyConditionExpression=Key('userID').eq(user_id),
+            ScanIndexForward=False,
+            ExclusiveStartKey=result['LastEvaluatedKey']
         )
         items.extend(result.get('Items', []))
 
@@ -71,10 +72,28 @@ def lambda_handler(event, context):
             if isinstance(v, Decimal):
                 item[k] = float(v)
 
-    # Sort by creation date, newest transactions first
-    # This provides a reverse-chronological view of activity
-    items.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
-
     # Return up to 200 most recent transactions
     # This limits response size and provides the most useful data (recent changes)
-    return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(items[:200])}
+    # Note: items are already sorted newest-first from GSI query
+    return response(200, items[:200])
+
+def response(status_code, body):
+    """
+    Helper function to format Lambda response with consistent headers and CORS.
+
+    Args:
+        status_code: HTTP status code
+        body: Dictionary to be JSON-encoded (or empty string for OPTIONS)
+
+    Returns: API Gateway Lambda Proxy Integration response
+    """
+    return {
+        'statusCode': status_code,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': CORS_ORIGIN,
+            'Access-Control-Allow-Headers': 'Content-Type,x-api-key,Authorization',
+            'Access-Control-Allow-Methods': 'OPTIONS,GET'
+        },
+        'body': json.dumps(body) if body else ''
+    }
