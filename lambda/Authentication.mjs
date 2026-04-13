@@ -247,34 +247,38 @@ export const handler = async (event) => {
             });
 
             if (SNS_TOPIC_ARN) {
-                let isAlreadySubscribed = false;
-                let nextToken = undefined;
+                try {
+                    let isAlreadySubscribed = false;
+                    let nextToken = undefined;
 
-                do {
-                    const listResult = await snsClient.send(new ListSubscriptionsByTopicCommand({
-                        TopicArn: SNS_TOPIC_ARN,
-                        NextToken: nextToken
-                    }));
+                    do {
+                        const listResult = await snsClient.send(new ListSubscriptionsByTopicCommand({
+                            TopicArn: SNS_TOPIC_ARN,
+                            NextToken: nextToken
+                        }));
 
-                    const match = listResult.Subscriptions.find(
-                        sub => sub.Endpoint === email && sub.SubscriptionArn !== "PendingConfirmation"
-                    );
+                        const match = listResult.Subscriptions.find(
+                            sub => sub.Endpoint === email && sub.SubscriptionArn !== "PendingConfirmation"
+                        );
 
-                    if (match) {
-                        isAlreadySubscribed = true;
-                        break;
+                        if (match) {
+                            isAlreadySubscribed = true;
+                            break;
+                        }
+
+                        nextToken = listResult.NextToken;
+                    } while (nextToken);
+
+                    if (!isAlreadySubscribed) {
+                        await snsClient.send(new SubscribeCommand({
+                            TopicArn: SNS_TOPIC_ARN,
+                            Protocol: "email",
+                            Endpoint: email,
+                            ReturnSubscriptionArn: true
+                        }));
                     }
-
-                    nextToken = listResult.NextToken;
-                } while (nextToken);
-
-                if (!isAlreadySubscribed) {
-                    await snsClient.send(new SubscribeCommand({
-                        TopicArn: SNS_TOPIC_ARN,
-                        Protocol: "email",
-                        Endpoint: email,
-                        ReturnSubscriptionArn: true
-                    }));
+                } catch (snsErr) {
+                    console.warn("SNS subscription check skipped on login:", snsErr.message);
                 }
             }
 

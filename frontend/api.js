@@ -42,7 +42,12 @@ async function authRegister(email, password) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   });
-  const data = await res.json();
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    data = { message: "Server error. Please try again." };
+  }
   console.log('[authRegister] status:', res.status, 'data:', data);
   return { status: res.status, data };
 }
@@ -53,7 +58,12 @@ async function authLogin(email, password) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   });
-  const data = await res.json();
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    data = { message: "Server error. Please try again." };
+  }
   console.log('[authLogin] status:', res.status, 'data:', data);
   return { status: res.status, data };
 }
