@@ -15,13 +15,31 @@ function getAuthHeaders() {
 
 function check401(res) {
   /**
-   * Detects 401 Unauthorized responses and clears JWT token.
-   * Called on every proxied API response to handle token expiry.
-   * Redirects to login.html so user re-authenticates.
+   * Detects 401 Unauthorized responses and handles token expiry.
+   * If the JWT is still valid (not expired), the 401 is a config error
+   * (e.g. JWT_SECRET mismatch between Lambdas) — do NOT redirect.
+   * Only redirect to login.html when the token is actually expired or absent.
    */
   if (res.status === 401) {
+    const token = sessionStorage.getItem('iq_jwt_token');
+    if (token) {
+      try {
+        const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(b64));
+        const now = Math.floor(Date.now() / 1000);
+        if (payload.exp && payload.exp > now) {
+          // Token not expired — 401 is a server config error, not session expiry.
+          // Log it but don't redirect — page will show data loading errors instead.
+          console.error('Proxy returned 401 but token is not expired. Check JWT_SECRET in Proxy Lambda.');
+          return;
+        }
+      } catch {
+        // Can't decode token — treat as expired, fall through to redirect.
+      }
+    }
     sessionStorage.removeItem('iq_jwt_token');
     sessionStorage.removeItem('userEmail');
+    sessionStorage.setItem('auth_redirect_reason', 'session_expired');
     window.location.href = 'login.html';
   }
 }

@@ -170,6 +170,74 @@ test.describe('User Login', () => {
     expect(errorMsg!.toLowerCase()).toMatch(/error|failed|try again|server/i)
   })
 
+  test('should NOT redirect when proxy returns 401 but token is not expired (config error)', async ({ page }) => {
+    // This tests the "fresh token + broken proxy" scenario (JWT_SECRET mismatch)
+    // Expected behavior: user stays on dashboard with data errors, NOT redirected to login
+
+    // Step 1: Log in successfully — gets a fresh token with exp ~8h in the future
+    await loginPage.login(testEmail, testPassword)
+    await page.waitForURL('/dashboard.html', { timeout: 5000 })
+
+    // Step 2: Intercept all proxied API calls to return 401 (simulating JWT_SECRET mismatch)
+    await page.route('**/proxy/**', (route) => {
+      route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Missing or invalid authorization' })
+      })
+    })
+
+    // Step 3: Navigate to dashboard — triggers loadDashboard() + loadInventory() which call proxy
+    await page.goto('/dashboard.html')
+    await page.waitForTimeout(3000)
+
+    // Step 4: Should stay on dashboard — NOT redirect to login
+    expect(page.url()).toContain('dashboard.html')
+
+    // Step 5: Token should still be in sessionStorage (not cleared)
+    const token = await page.evaluate(() => sessionStorage.getItem('iq_jwt_token'))
+    expect(token).toBeTruthy()
+  })
+
+  test('should redirect to login with session-expired message when token IS expired and proxy returns 401', async ({ page }) => {
+    // This tests genuine token expiry — check401 should redirect
+
+    // Step 1: Inject an EXPIRED token into sessionStorage (exp in the past)
+    await page.goto('/dashboard.html', { waitUntil: 'commit' })
+    await page.evaluate(() => {
+      // Build a fake JWT with exp = 1 hour ago
+      const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
+      const payload = btoa(JSON.stringify({
+        sub: 'test@example.com',
+        exp: Math.floor(Date.now() / 1000) - 3600 // expired 1 hour ago
+      }))
+      const fakeToken = `${header}.${payload}.fakesignature`
+      sessionStorage.setItem('iq_jwt_token', fakeToken)
+      sessionStorage.setItem('userEmail', 'test@example.com')
+    })
+
+    // Step 2: Intercept proxy calls to return 401
+    await page.route('**/proxy/**', (route) => {
+      route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Unauthorized' })
+      })
+    })
+
+    // Step 3: Navigate to dashboard — fires API calls, check401 triggers
+    await page.goto('/dashboard.html')
+
+    // Step 4: Should redirect to login (token IS expired, so redirect is correct)
+    await page.waitForURL('/login.html', { timeout: 5000 })
+    expect(page.url()).toContain('login.html')
+
+    // Step 5: Should show session-expired message
+    const loginMsg = await page.locator('#login-msg').textContent()
+    expect(loginMsg?.trim().length).toBeGreaterThan(0)
+    expect(loginMsg?.toLowerCase()).toMatch(/expired|session|again|logged out/i)
+  })
+
   test('should maintain token across page navigation', async ({ page }) => {
     await loginPage.login(testEmail, testPassword)
     await page.waitForURL('/dashboard.html', { timeout: 5000 })
