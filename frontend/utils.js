@@ -1,5 +1,5 @@
 function requireAuth() {
-  if (!sessionStorage.getItem('iq_jwt_token')) window.location.href = 'login.html';
+  if (!sessionStorage.getItem('userEmail')) window.location.href = 'login.html';
 }
 
 function initNav(activePageId) {

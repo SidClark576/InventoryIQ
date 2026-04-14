@@ -431,7 +431,7 @@
       }
 
       try {
-        await updateItem(itemID, { category: newCategory });
+        await updateItem(itemID, { category: newCategory, userID });
         const item = allItems.find(i => i.itemID === itemID);
         if (item) item.category = newCategory;
         if (statusEl) {
@@ -552,8 +552,9 @@
       }
 
       const newQty = deductTarget.currentQty - amount;
+      const userID = sessionStorage.getItem('userEmail') || '';
       try {
-        await updateItem(deductTarget.itemID, { quantity: newQty });
+        await updateItem(deductTarget.itemID, { quantity: newQty, userID });
         closeDeductModal();
         loadInventory(); // refresh the table
       } catch (e) {
@@ -591,8 +592,9 @@
       }
 
       const newQty = addTarget.currentQty + amount;
+      const userID = sessionStorage.getItem('userEmail') || '';
       try {
-        await updateItem(addTarget.itemID, { quantity: newQty });
+        await updateItem(addTarget.itemID, { quantity: newQty, userID });
         closeAddModal();
         loadInventory(); // refresh the table
       } catch (e) {

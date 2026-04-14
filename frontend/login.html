@@ -176,11 +176,9 @@
         msg.classList.add('bg-surface-variant', 'text-on-surface', 'block');
         msg.textContent = 'Logging in...';
         const { status, data } = await authLogin(email, pwd);
-        console.log('[handleLogin] received status:', status, 'token:', data?.token);
         if (status === 200) {
-          sessionStorage.setItem('iq_jwt_token', data.token);
+          sessionStorage.setItem('authToken', data.token);
           sessionStorage.setItem('userEmail', data.email);
-          console.log('[handleLogin] token stored, redirecting to dashboard.html');
           window.location.href = 'dashboard.html';
         } else {
           msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-error-container/20 text-error";
@@ -206,12 +204,10 @@
         msg.classList.add('bg-surface-variant', 'text-on-surface', 'block');
         msg.textContent = 'Creating account...';
         const { status, data } = await authRegister(email, pwd);
-        console.log('[handleRegister] received status:', status, 'token:', data?.token);
         if (status === 200) {
-          sessionStorage.setItem('iq_jwt_token', data.token);
-          sessionStorage.setItem('userEmail', data.email);
-          console.log('[handleRegister] token stored, redirecting to dashboard.html');
-          window.location.href = 'dashboard.html';
+          msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-tertiary-container/30 text-tertiary";
+          msg.textContent = 'Account created!';
+          setTimeout(() => switchAuthTab('login'), 1500);
         } else {
           msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-error-container/20 text-error";
           msg.textContent = data.message || 'Registration failed.';
@@ -219,7 +215,7 @@
       }
 
       window.onload = function () {
-        if (sessionStorage.getItem('iq_jwt_token')) window.location.href = 'dashboard.html';
+        if (sessionStorage.getItem('userEmail')) window.location.href = 'dashboard.html';
       };
     </script>
 </body>
