@@ -37,3 +37,23 @@
 [2026-04-12T23:25:20.507Z] [INFO] Dashboard server listening on port 18791
 [2026-04-12T23:25:21.897Z] [INFO] WebSocket client connected
 [2026-04-12T23:25:22.284Z] [INFO] WebSocket client connected
+[2026-04-13T01:27:57.306Z] [INFO] WebSocket client connected
+[2026-04-13T01:34:15.093Z] [INFO] WebSocket client connected
+[2026-04-13T01:40:19.620Z] [INFO] WebSocket client connected
+[2026-04-13T01:50:10.824Z] [INFO] WebSocket client connected
+[2026-04-13T01:59:53.571Z] [INFO] WebSocket client connected
+[2026-04-13T02:07:08.891Z] [INFO] WebSocket client connected
+[2026-04-13T02:22:24.309Z] [INFO] WebSocket client connected
+[2026-04-13T02:26:06.440Z] [INFO] WebSocket client connected
+[2026-04-13T02:30:29.169Z] [INFO] WebSocket client connected
+[2026-04-13T02:58:54.409Z] [INFO] WebSocket client connected
+[2026-04-13T06:54:36.381Z] [INFO] WebSocket client connected
+[2026-04-13T07:58:09.867Z] [INFO] WebSocket client connected
+[2026-04-13T08:00:28.281Z] [INFO] WebSocket client connected
+[2026-04-13T08:07:26.840Z] [INFO] WebSocket client connected
+[2026-04-13T08:25:04.511Z] [INFO] WebSocket client connected
+[2026-04-13T09:00:13.765Z] [INFO] WebSocket client connected
+[2026-04-13T09:41:55.342Z] [INFO] WebSocket client connected
+[2026-04-13T09:51:47.589Z] [INFO] WebSocket client connected
+[2026-04-14T04:00:00.585Z] [INFO] Executing task: Full anatomy rescan
+[2026-04-14T04:00:00.757Z] [INFO] Task Full anatomy rescan completed in 170ms

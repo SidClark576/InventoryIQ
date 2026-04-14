@@ -307,3 +307,74 @@
 | 15:08 | Edited tests/e2e/auth/login.spec.ts | 12→13 lines | ~157 |
 | 15:08 | Edited tests/e2e/auth/login.spec.ts | 3→4 lines | ~75 |
 | 15:12 | Session end: 3 writes across 1 files (login.spec.ts) | 5 reads | ~9687 tok |
+
+## Session: 2026-04-13 15:33
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 15:34 | Created ../../.claude/plans/polished-dreaming-octopus.md | — | ~927 |
+| 15:35 | Edited tests/e2e/auth/login.spec.ts | expanded (+24 lines) | ~283 |
+| 15:36 | Edited tests/e2e/auth/login.spec.ts | 5→7 lines | ~106 |
+| 15:36 | Edited frontend/api.js | added error handling | ~266 |
+| 15:36 | Edited lambda/Authentication.mjs | added error handling | ~458 |
+| 15:43 | Session end: 5 writes across 4 files (polished-dreaming-octopus.md, login.spec.ts, api.js, Authentication.mjs) | 4 reads | ~9062 tok |
+
+## Session: 2026-04-13 16:03
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-13 16:03
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 16:21 | Edited tests/e2e/auth/login.spec.ts | added optional chaining | ~349 |
+| 16:21 | Edited frontend/api.js | modified check401() | ~153 |
+| 16:22 | Edited frontend/login.html | added 1 condition(s) | ~165 |
+| 16:24 | Edited lambda/Proxy.py | modified startswith() | ~368 |
+
+## Session: 2026-04-13 16:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-13 21:39
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+| 21:42 | User preference: caveman lite mode active for all conversations | .wolf/memory.md | logged | ~50 |
+
+## Session: 2026-04-13 21:44
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 22:08 | Edited ../../.claude/plans/polished-dreaming-octopus.md | reduced (-27 lines) | ~723 |
+| 22:09 | Created tests/e2e/auth/redirect-loop-debug.spec.ts | — | ~1313 |
+| 22:10 | Session end: 2 writes across 2 files (polished-dreaming-octopus.md, redirect-loop-debug.spec.ts) | 10 reads | ~17989 tok |
+| 22:24 | Edited tests/e2e/auth/login.spec.ts | expanded (+41 lines) | ~843 |
+
+## Session: 2026-04-13 22:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 22:26 | Edited frontend/api.js | added error handling | ~366 |
+| 22:30 | fix: check401 now checks JWT exp before redirecting on 401 | frontend/api.js | GREEN — 12/12 tests pass | ~800 |
+| 22:30 | Session end: 1 writes across 1 files (api.js) | 1 reads | ~1942 tok |
+| 22:41 | Session end: 1 writes across 1 files (api.js) | 3 reads | ~6532 tok |
+| 22:48 | Session end: 1 writes across 1 files (api.js) | 3 reads | ~6532 tok |
+| 22:48 | Session end: 1 writes across 1 files (api.js) | 3 reads | ~6532 tok |
+
+## Session: 2026-04-13 22:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-13 23:00
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:51 | Created ../../.claude/plans/polished-dreaming-octopus.md | — | ~880 |
+| 19:16 | Session end: 1 writes across 1 files (polished-dreaming-octopus.md) | 1 reads | ~943 tok |
+| 20:09 | Session end: 1 writes across 1 files (polished-dreaming-octopus.md) | 1 reads | ~943 tok |
+| 20:33 | Session end: 1 writes across 1 files (polished-dreaming-octopus.md) | 1 reads | ~943 tok |

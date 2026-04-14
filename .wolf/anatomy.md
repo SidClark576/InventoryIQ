@@ -1,20 +1,24 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-13T01:08:38.359Z
-> Files: 71 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T04:00:00.752Z
+> Files: 80 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
+- `.DS_Store` (~2186 tok)
+- `.gitignore` — Git ignore rules (~32 tok)
 - `AGENTS.md` — InventoryIQ — Codebase Reference (~1381 tok)
 - `CLAUDE.md` — OpenWolf (~4372 tok)
-- `notes` (~231 tok)
+- `notes` (~1278 tok)
+- `package-lock.json` — npm lock file (~6820 tok)
 - `package.json` — Node.js package manifest (~97 tok)
-- `playwright.config.ts` (~264 tok)
+- `playwright-results.json` — Declares string (~1983 tok)
+- `playwright.config.ts` — Playwright test configuration (~264 tok)
 
 ## .claude/
 
 - `settings.json` (~522 tok)
-- `settings.local.json` (~46 tok)
+- `settings.local.json` (~136 tok)
 
 ## .claude/rules/
 
@@ -63,14 +67,15 @@
 
 ## frontend/
 
+- `.DS_Store` (~1640 tok)
 - `add-item.html` — InventoryIQ | Add Asset (~3755 tok)
-- `api.js` — Returns standard headers for proxied API requests. (~1482 tok)
+- `api.js` — Returns standard headers for proxied API requests. (~1789 tok)
 - `config.js` — Declares CONFIG (~76 tok)
 - `dashboard.html` — InventoryIQ | Dashboard (~4765 tok)
 - `index.html` (~30 tok)
 - `insights.html` — InventoryIQ | Insights (~3078 tok)
 - `inventory.html` — InventoryIQ | Inventory (~9546 tok)
-- `login.html` — InventoryIQ | Login (~3250 tok)
+- `login.html` — InventoryIQ | Login (~3378 tok)
 - `style.css` — Styles: 7 rules, 1 media queries (~454 tok)
 - `transactions.html` — InventoryIQ | Transactions (~3215 tok)
 - `utils.js` — requireAuth: initNav, handleLogout (~245 tok)
@@ -83,7 +88,7 @@
 ## lambda/
 
 - `AddItem.py` — Initialize DynamoDB tables (~1681 tok)
-- `Authentication.mjs` — Exports handler (~3060 tok)
+- `Authentication.mjs` — Exports handler (~3131 tok)
 - `DailyAlert.py` — Initialize AWS service clients at module level (outside the handler) (~3370 tok)
 - `DeleteCategory.py` — Initialize DynamoDB with inventory table (~1163 tok)
 - `DeleteItem.py` — Initialize DynamoDB tables for inventory and transaction logging (~1338 tok)
@@ -91,13 +96,26 @@
 - `GetCategories.py` — Initialize DynamoDB with inventory table (~1048 tok)
 - `GetTransactions.py` — Initialize DynamoDB with transactions table (~1112 tok)
 - `LowItemInsight.py` — Initialize AWS services: (~4040 tok)
-- `Proxy.py` — base64url_decode, verify_jwt, lambda_handler (~1264 tok)
+- `Proxy.py` — base64url_decode, verify_jwt, lambda_handler (~1459 tok)
 - `UpdateItem.py` — Initialize DynamoDB tables at module level so they are reused across warm Lambda invocations (~2486 tok)
+
+## playwright-report/
+
+- `index.html` — Playwright Test Report (~140543 tok)
+
+## playwright-report/data/
+
+- `2a77052812583577e2199686f1df5a9155b0d97a.md` — Instructions (~966 tok)
+
+## test-results/
+
+- `.last-run.json` (~13 tok)
 
 ## tests/e2e/auth/
 
 - `debug-api.spec.ts` — Declares responses (~579 tok)
-- `login.spec.ts` — Declares testEmail (~1613 tok)
+- `login.spec.ts` — ', (route) => { (~2763 tok)
+- `redirect-loop-debug.spec.ts` — Declares LIVE_URL (~1313 tok)
 - `register.spec.ts` — Declares testEmail (~1234 tok)
 
 ## tests/pages/

@@ -384,6 +384,130 @@
       "related_bugs": [],
       "occurrences": 2,
       "last_seen": "2026-04-13T01:08:38.395Z"
+    },
+    {
+      "id": "bug-025",
+      "timestamp": "2026-04-13T01:35:29.995Z",
+      "error_message": "Missing await",
+      "file": "tests/e2e/auth/login.spec.ts",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-13T01:35:29.995Z"
+    },
+    {
+      "id": "bug-026",
+      "timestamp": "2026-04-13T01:36:17.088Z",
+      "error_message": "Significant refactor of ",
+      "file": "tests/e2e/auth/login.spec.ts",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 5→7 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-13T01:36:17.088Z"
+    },
+    {
+      "id": "bug-027",
+      "timestamp": "2026-04-13T01:36:48.294Z",
+      "error_message": "Missing error handling in function",
+      "file": "frontend/api.js",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-13T01:36:48.294Z"
+    },
+    {
+      "id": "bug-028",
+      "timestamp": "2026-04-13T01:36:59.494Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "lambda/Authentication.mjs",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-13T01:36:59.494Z"
+    },
+    {
+      "id": "bug-029",
+      "timestamp": "2026-04-13T02:21:13.044Z",
+      "error_message": "Null/undefined access in ",
+      "file": "tests/e2e/auth/login.spec.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-13T02:21:13.044Z"
+    },
+    {
+      "id": "bug-030",
+      "timestamp": "2026-04-13T08:24:37.894Z",
+      "error_message": "Significant refactor of ",
+      "file": "tests/e2e/auth/login.spec.ts",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 26→67 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-13T08:24:37.894Z"
+    },
+    {
+      "id": "bug-031",
+      "timestamp": "2026-04-13T08:26:39.416Z",
+      "error_message": "Missing error handling in check401",
+      "file": "frontend/api.js",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-13T08:26:39.416Z"
+    },
+    {
+      "id": "bug-032",
+      "timestamp": "2026-04-12T00:00:00.000Z",
+      "error_message": "Login → dashboard → login redirect loop: after successful login, dashboard immediately redirects back to login.html",
+      "file": "frontend/api.js",
+      "root_cause": "check401() unconditionally cleared JWT + redirected on ANY 401 response. When Proxy Lambda returns 401 due to JWT_SECRET mismatch (config error), check401() fired even though the token was still valid, creating an infinite redirect loop.",
+      "fix": "check401() now decodes JWT payload, checks exp claim (with proper base64url → base64 char replacement before atob()), and only redirects when token is genuinely expired. Non-expired token + 401 = server config error; logs warning, returns without redirecting.",
+      "tags": ["auth", "redirect-loop", "check401", "jwt", "proxy", "frontend"],
+      "related_bugs": ["bug-031"],
+      "occurrences": 1,
+      "last_seen": "2026-04-12T00:00:00.000Z"
     }
   ]
 }
