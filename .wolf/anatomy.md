@@ -1,7 +1,11 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T04:00:00.752Z
-> Files: 80 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T08:27:37.140Z
+> Files: 85 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../.claude/plans/
+
+- `eager-churning-thimble.md` — Sprint 2 — Auth Hardening (NO JWT) (~1779 tok)
 
 ## ./
 
@@ -69,35 +73,42 @@
 
 - `.DS_Store` (~1640 tok)
 - `add-item.html` — InventoryIQ | Add Asset (~3755 tok)
-- `api.js` — Returns standard headers for proxied API requests. (~1789 tok)
+- `api.js` — ── AUTH FUNCTIONS ──────────────────────────────────────────── (~1556 tok)
 - `config.js` — Declares CONFIG (~76 tok)
 - `dashboard.html` — InventoryIQ | Dashboard (~4765 tok)
 - `index.html` (~30 tok)
 - `insights.html` — InventoryIQ | Insights (~3078 tok)
 - `inventory.html` — InventoryIQ | Inventory (~9546 tok)
-- `login.html` — InventoryIQ | Login (~3378 tok)
+- `login.html` — InventoryIQ | Login (~3193 tok)
 - `style.css` — Styles: 7 rules, 1 media queries (~454 tok)
 - `transactions.html` — InventoryIQ | Transactions (~3215 tok)
-- `utils.js` — requireAuth: initNav, handleLogout (~245 tok)
+- `utils.js` — requireAuth: initNav, handleLogout (~349 tok)
 
 ## gan-harness/
 
 - `eval-rubric.md` — Evaluation Rubric: InventoryIQ 8-Week Production Hardening (~3657 tok)
+- `spec-v2.md` — InventoryIQ — Product Specification v2 (~9478 tok)
+- `spec-v3.md` — InventoryIQ — Product Specification v3 (~11489 tok)
 - `spec.md` — Product Specification: InventoryIQ Production Hardening (~11256 tok)
+
+## gan-harness/tests/
+
+- `sprint1_smoke.sh` — Sprint 1 smoke tests — Correctness & Tenancy (~935 tok)
+- `sprint2_smoke.sh` — Sprint 2 smoke tests — Auth Hardening (server-validated sessions, NO JWT) (~979 tok)
 
 ## lambda/
 
 - `AddItem.py` — Initialize DynamoDB tables (~1681 tok)
-- `Authentication.mjs` — Exports handler (~3131 tok)
+- `Authentication.mjs` — Exports handler (~2274 tok)
 - `DailyAlert.py` — Initialize AWS service clients at module level (outside the handler) (~3370 tok)
 - `DeleteCategory.py` — Initialize DynamoDB with inventory table (~1163 tok)
-- `DeleteItem.py` — Initialize DynamoDB tables for inventory and transaction logging (~1338 tok)
-- `GetAllItems.py` — Initialize DynamoDB resource and get the inventory table (~964 tok)
-- `GetCategories.py` — Initialize DynamoDB with inventory table (~1048 tok)
+- `DeleteItem.py` — Initialize DynamoDB tables for inventory and transaction logging (~1151 tok)
+- `GetAllItems.py` — Initialize DynamoDB resource and get the inventory table (~973 tok)
+- `GetCategories.py` — Initialize DynamoDB with inventory table (~856 tok)
 - `GetTransactions.py` — Initialize DynamoDB with transactions table (~1112 tok)
-- `LowItemInsight.py` — Initialize AWS services: (~4040 tok)
-- `Proxy.py` — base64url_decode, verify_jwt, lambda_handler (~1459 tok)
-- `UpdateItem.py` — Initialize DynamoDB tables at module level so they are reused across warm Lambda invocations (~2486 tok)
+- `LowItemInsight.py` — Initialize AWS services: (~4157 tok)
+- `Proxy.py` — lambda_handler (~1518 tok)
+- `UpdateItem.py` — Initialize DynamoDB tables at module level so they are reused across warm Lambda invocations (~1914 tok)
 
 ## playwright-report/
 

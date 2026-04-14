@@ -177,7 +177,7 @@
         msg.textContent = 'Logging in...';
         const { status, data } = await authLogin(email, pwd);
         if (status === 200) {
-          sessionStorage.setItem('authToken', data.token);
+          sessionStorage.setItem('sessionToken', data.token);
           sessionStorage.setItem('userEmail', data.email);
           window.location.href = 'dashboard.html';
         } else {
@@ -196,9 +196,9 @@
           msg.textContent = 'Enter email & password.';
           return;
         }
-        if (pwd.length < 6) {
+        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(pwd)) {
           msg.classList.add('bg-error-container/20', 'text-error', 'block');
-          msg.textContent = 'Password >= 6 characters.';
+          msg.textContent = 'Password must be 8+ chars with uppercase, lowercase, and a number.';
           return;
         }
         msg.classList.add('bg-surface-variant', 'text-on-surface', 'block');

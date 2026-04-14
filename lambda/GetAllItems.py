@@ -2,7 +2,7 @@ import json
 import boto3
 import os
 from decimal import Decimal
-from boto3.dynamodb.conditions import Attr
+from boto3.dynamodb.conditions import Key
 
 # Initialize DynamoDB resource and get the inventory table
 # Table name is configurable via DYNAMODB_TABLE env var, defaults to 'InventoryIQ'
@@ -43,16 +43,21 @@ def lambda_handler(event, context):
                 'body': json.dumps({'items': [], 'count': 0})
             }
 
-        # Initial scan with filter for userID
-        result = table.scan(FilterExpression=Attr('userID').eq(user_id))
+        # Query userID-index GSI instead of scanning the full table
+        # Reads only this user's items; no cross-tenant data read
+        result = table.query(
+            IndexName='userID-index',
+            KeyConditionExpression=Key('userID').eq(user_id)
+        )
         items = result.get('Items', [])
 
-        # Handle pagination: DynamoDB scan can return max 1MB at a time
+        # Handle pagination: DynamoDB query can return max 1MB at a time
         # LastEvaluatedKey indicates there are more results to fetch
         while 'LastEvaluatedKey' in result:
-            result = table.scan(
-                ExclusiveStartKey=result['LastEvaluatedKey'],
-                FilterExpression=Attr('userID').eq(user_id)
+            result = table.query(
+                IndexName='userID-index',
+                KeyConditionExpression=Key('userID').eq(user_id),
+                ExclusiveStartKey=result['LastEvaluatedKey']
             )
             items.extend(result.get('Items', []))
 

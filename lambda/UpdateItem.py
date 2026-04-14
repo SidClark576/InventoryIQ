@@ -53,7 +53,17 @@ def lambda_handler(event, context):
 
         # Read existing item BEFORE update to capture quantityBefore for transaction log
         # This is critical for accurate audit trail
-        existing = table.get_item(Key={'itemID': item_id}).get('Item', {})
+        existing_resp = table.get_item(Key={'itemID': item_id})
+        existing = existing_resp.get('Item')
+
+        # Return 404 if item does not exist
+        if not existing:
+            return response(404, {'error': 'Item not found'})
+
+        # Ownership check: prevent cross-tenant writes (Sprint 1: userID from body)
+        request_user_id = body.get('userID', '').strip()
+        if request_user_id and existing.get('userID', '') != request_user_id:
+            return response(403, {'error': 'Forbidden: item belongs to another user'})
 
         # Build dynamic UpdateExpression - only include fields that are in the request
         update_expr = "SET updatedAt = :ts"

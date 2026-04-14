@@ -19,7 +19,18 @@ function initNav(activePageId) {
   });
 }
 
-function handleLogout() {
+async function handleLogout() {
+  const token = sessionStorage.getItem('sessionToken') || '';
+  if (token) {
+    try {
+      await fetch(`${CONFIG.AUTH_ENDPOINT}/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Session-Token': token }
+      });
+    } catch (_) {
+      // Network error on logout is non-fatal — always clear local session
+    }
+  }
   sessionStorage.clear();
   window.location.href = 'login.html';
 }

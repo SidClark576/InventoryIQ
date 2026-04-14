@@ -504,10 +504,131 @@
       "file": "frontend/api.js",
       "root_cause": "check401() unconditionally cleared JWT + redirected on ANY 401 response. When Proxy Lambda returns 401 due to JWT_SECRET mismatch (config error), check401() fired even though the token was still valid, creating an infinite redirect loop.",
       "fix": "check401() now decodes JWT payload, checks exp claim (with proper base64url → base64 char replacement before atob()), and only redirects when token is genuinely expired. Non-expired token + 401 = server config error; logs warning, returns without redirecting.",
-      "tags": ["auth", "redirect-loop", "check401", "jwt", "proxy", "frontend"],
-      "related_bugs": ["bug-031"],
+      "tags": [
+        "auth",
+        "redirect-loop",
+        "check401",
+        "jwt",
+        "proxy",
+        "frontend"
+      ],
+      "related_bugs": [
+        "bug-031"
+      ],
       "occurrences": 1,
       "last_seen": "2026-04-12T00:00:00.000Z"
+    },
+    {
+      "id": "bug-033",
+      "timestamp": "2026-04-14T08:05:57.447Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/GetAllItems.py",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 12→17 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-14T08:05:57.447Z"
+    },
+    {
+      "id": "bug-034",
+      "timestamp": "2026-04-14T08:06:12.099Z",
+      "error_message": "Wrong reference: Attr should be Key",
+      "file": "lambda/LowItemInsight.py",
+      "root_cause": "Used \"Attr\" instead of \"Key\"",
+      "fix": "Changed Attr → Key",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-14T08:06:12.099Z"
+    },
+    {
+      "id": "bug-035",
+      "timestamp": "2026-04-14T08:06:19.098Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/LowItemInsight.py",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 11→17 lines (6 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-14T08:06:19.098Z"
+    },
+    {
+      "id": "bug-036",
+      "timestamp": "2026-04-14T08:25:22.206Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/Authentication.mjs",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 22→30 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-14T08:25:22.206Z"
+    },
+    {
+      "id": "bug-037",
+      "timestamp": "2026-04-14T08:25:34.613Z",
+      "error_message": "Missing await",
+      "file": "lambda/Authentication.mjs",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call | Also: email: user.Email,; expiresAt",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-04-14T08:25:41.973Z"
+    },
+    {
+      "id": "bug-038",
+      "timestamp": "2026-04-14T08:27:08.849Z",
+      "error_message": "Wrong condition in logic",
+      "file": "frontend/login.html",
+      "root_cause": "Condition was: if (pwd.length < 6)",
+      "fix": "Changed to: if (!/^(?=.*[a-z])",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-14T08:27:08.849Z"
+    },
+    {
+      "id": "bug-039",
+      "timestamp": "2026-04-14T08:27:14.919Z",
+      "error_message": "Missing error handling in function",
+      "file": "frontend/utils.js",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-14T08:27:14.919Z"
     }
   ]
 }

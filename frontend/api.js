@@ -6,8 +6,24 @@ function checkQuota(res) {
   }
 }
 
+function check401(res) {
+  if (res.status === 401) {
+    sessionStorage.clear();
+    window.location.href = 'login.html?expired=1';
+    throw new Error('Session expired. Please log in again.');
+  }
+}
+
 function getCurrentUserID() {
   return sessionStorage.getItem('userEmail') || '';
+}
+
+// Headers for all proxied requests — includes session token for server-side validation
+function authHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'X-Session-Token': sessionStorage.getItem('sessionToken') || ''
+  };
 }
 
 async function authRegister(email, password) {
@@ -36,10 +52,11 @@ async function getAllItems() {
     ? `${CONFIG.API_ENDPOINT}/items?userID=${encodeURIComponent(userID)}`
     : `${CONFIG.API_ENDPOINT}/items`;
   const res = await fetch(url, {
-    headers: { "Content-Type": "application/json" }
+    headers: authHeaders()
   });
 
   checkQuota(res);
+  check401(res);
   const raw = await res.text();
   let data = [];
   if (raw) {
@@ -63,12 +80,11 @@ async function getAllItems() {
 async function addItem(item) {
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: authHeaders(),
     body: JSON.stringify(item)
   });
   checkQuota(res);
+  check401(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to add item");
   return data;
@@ -77,12 +93,11 @@ async function addItem(item) {
 async function updateItem(itemID, updates) {
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: authHeaders(),
     body: JSON.stringify(updates)
   });
   checkQuota(res);
+  check401(res);
   let data;
   try {
     data = await res.json();
@@ -95,15 +110,16 @@ async function updateItem(itemID, updates) {
 
 async function deleteItem(itemID) {
   // Adding a timestamp query param bypasses any cached failed CORS preflight responses in the browser
-  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}?_cb=${Date.now()}`, {
+  // userID is sent for server-side ownership validation
+  const userID = getCurrentUserID();
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}?_cb=${Date.now()}&userID=${encodeURIComponent(userID)}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: authHeaders(),
     cache: "no-store",
     mode: "cors"
   });
   checkQuota(res);
+  check401(res);
   let data;
   try {
     data = await res.json();
@@ -121,9 +137,10 @@ async function getInsights() {
     : `${CONFIG.API_ENDPOINT}/insights`;
 
   const res = await fetch(url, {
-    headers: { "Content-Type": "application/json" }
+    headers: authHeaders()
   });
   checkQuota(res);
+  check401(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch insights");
   return data;
@@ -134,8 +151,9 @@ async function getTransactions() {
   const url = userID
     ? `${CONFIG.API_ENDPOINT}/transactions?userID=${encodeURIComponent(userID)}`
     : `${CONFIG.API_ENDPOINT}/transactions`;
-  const res = await fetch(url, { headers: { "Content-Type": "application/json" } });
+  const res = await fetch(url, { headers: authHeaders() });
   checkQuota(res);
+  check401(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch transactions");
   return Array.isArray(data) ? data : [];
@@ -147,9 +165,10 @@ async function getCategories() {
     ? `${CONFIG.API_ENDPOINT}/categories?userID=${encodeURIComponent(userID)}`
     : `${CONFIG.API_ENDPOINT}/categories`;
   const res = await fetch(url, {
-    headers: { "Content-Type": "application/json" }
+    headers: authHeaders()
   });
   checkQuota(res);
+  check401(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch categories");
   return Array.isArray(data) ? data : [];
@@ -161,10 +180,11 @@ async function deleteCategory(categoryName) {
     `${CONFIG.API_ENDPOINT}/categories/${encodeURIComponent(categoryName)}?userID=${encodeURIComponent(userID)}`,
     {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" }
+      headers: authHeaders()
     }
   );
   checkQuota(res);
+  check401(res);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to delete category");
   return data;

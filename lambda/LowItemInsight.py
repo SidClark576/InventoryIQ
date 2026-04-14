@@ -4,7 +4,7 @@ import os
 from decimal import Decimal
 from collections import defaultdict
 from datetime import datetime, timezone
-from boto3.dynamodb.conditions import Attr
+from boto3.dynamodb.conditions import Key
 
 # Initialize AWS services:
 # - DynamoDB for reading inventory items
@@ -121,15 +121,21 @@ def lambda_handler(event, context):
                 })
             }
 
-        # Scan all items for this user
-        result = table.scan(FilterExpression=Attr('userID').eq(user_id))
+        # Query userID-index GSI instead of scanning the full table
+        # Sentinel items (alert_meta#) have userID='__system__' so they are
+        # automatically excluded when querying by the real user's email
+        result = table.query(
+            IndexName='userID-index',
+            KeyConditionExpression=Key('userID').eq(user_id)
+        )
         items = result.get('Items', [])
 
-        # Pagination loop: handle DynamoDB scan limit (1MB per request)
+        # Pagination loop: handle DynamoDB query page limit (1MB per request)
         while 'LastEvaluatedKey' in result:
-            result = table.scan(
-                ExclusiveStartKey=result['LastEvaluatedKey'],
-                FilterExpression=Attr('userID').eq(user_id)
+            result = table.query(
+                IndexName='userID-index',
+                KeyConditionExpression=Key('userID').eq(user_id),
+                ExclusiveStartKey=result['LastEvaluatedKey']
             )
             items.extend(result.get('Items', []))
 

@@ -40,7 +40,18 @@ def lambda_handler(event, context):
         # Read existing item BEFORE deletion
         # This is critical for creating an accurate audit trail
         # We need to preserve the item name, userID, and quantity for the transaction log
-        existing = table.get_item(Key={'itemID': item_id}).get('Item', {})
+        existing_resp = table.get_item(Key={'itemID': item_id})
+        existing = existing_resp.get('Item')
+
+        # Return 404 if item does not exist
+        if not existing:
+            return response(404, {'error': 'Item not found'})
+
+        # Ownership check: prevent cross-tenant deletes (Sprint 1: userID from query param)
+        params = event.get('queryStringParameters') or {}
+        request_user_id = params.get('userID', '').strip()
+        if request_user_id and existing.get('userID', '') != request_user_id:
+            return response(403, {'error': 'Forbidden: item belongs to another user'})
 
         # Delete item from inventory table
         table.delete_item(Key={'itemID': item_id})

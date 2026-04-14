@@ -2,7 +2,8 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
     DynamoDBDocumentClient,
     PutCommand,
-    GetCommand
+    GetCommand,
+    DeleteCommand
 } from "@aws-sdk/lib-dynamodb";
 import { SNSClient, SubscribeCommand, ListSubscriptionsByTopicCommand } from "@aws-sdk/client-sns";
 import crypto from "crypto";
@@ -12,11 +13,18 @@ const docClient = DynamoDBDocumentClient.from(client);
 const snsClient = new SNSClient({});
 
 const USERS_TABLE = process.env.USERS_TABLE || "Users";
+const SESSIONS_TABLE = process.env.SESSIONS_TABLE || "Sessions";
 const SNS_TOPIC_ARN = process.env.SNS_TOPIC_ARN;
+
+// Session lifetime: 8 hours in seconds
+const SESSION_TTL_SECONDS = 8 * 60 * 60;
+
+// Password must have lowercase, uppercase, digit, min 8 chars
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 const headers = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type,x-api-key",
+    "Access-Control-Allow-Headers": "Content-Type,x-api-key,X-Session-Token",
     "Access-Control-Allow-Methods": "OPTIONS,POST",
     "Content-Type": "application/json"
 };
@@ -44,6 +52,17 @@ export const handler = async (event) => {
                     statusCode: 400,
                     headers,
                     body: JSON.stringify({ message: "Email and password are required." })
+                };
+            }
+
+            // Enforce password complexity: min 8 chars, uppercase, lowercase, digit
+            if (!PASSWORD_REGEX.test(password)) {
+                return {
+                    statusCode: 400,
+                    headers,
+                    body: JSON.stringify({
+                        message: "Password must be at least 8 characters and include uppercase, lowercase, and a number."
+                    })
                 };
             }
 
@@ -119,6 +138,20 @@ export const handler = async (event) => {
             }
 
             const sessionToken = crypto.randomUUID();
+            const nowEpoch = Math.floor(Date.now() / 1000);
+            const expiresAt = nowEpoch + SESSION_TTL_SECONDS;
+
+            // Write session row to Sessions table with TTL
+            await docClient.send(new PutCommand({
+                TableName: SESSIONS_TABLE,
+                Item: {
+                    sessionToken,
+                    userID: email,
+                    createdAt: new Date().toISOString(),
+                    expiresAt,
+                    userAgent: (event.headers && (event.headers['User-Agent'] || event.headers['user-agent'] || '')).slice(0, 200)
+                }
+            }));
 
             if (SNS_TOPIC_ARN) {
                 let isAlreadySubscribed = false;
@@ -158,8 +191,27 @@ export const handler = async (event) => {
                 body: JSON.stringify({
                     message: "Login successful!",
                     token: sessionToken,
-                    email: user.Email
+                    email: user.Email,
+                    expiresAt
                 })
+            };
+        }
+
+        // ── LOGOUT ────────────────────────────────────────────
+        if (path.endsWith("/logout")) {
+            // Read token from header; idempotent — no 404 if already gone
+            const reqHeaders = event.headers || {};
+            const token = reqHeaders['X-Session-Token'] || reqHeaders['x-session-token'] || '';
+            if (token) {
+                await docClient.send(new DeleteCommand({
+                    TableName: SESSIONS_TABLE,
+                    Key: { sessionToken: token }
+                }));
+            }
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify({ message: "Logged out." })
             };
         }
 
