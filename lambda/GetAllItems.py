@@ -2,7 +2,7 @@ import json
 import boto3
 import os
 from decimal import Decimal
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, Attr
 
 # Initialize DynamoDB resource and get the inventory table
 # Table name is configurable via DYNAMODB_TABLE env var, defaults to 'InventoryIQ'
@@ -11,14 +11,19 @@ table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
 
 def lambda_handler(event, context):
     """
-    Retrieves all inventory items for a specific user.
+    Retrieves all active (non-deleted) inventory items for a specific user.
+
+    Sprint 3 change:
+    - FilterExpression=Attr('deletedAt').not_exists() excludes soft-deleted items
+      from both the initial query page and all paginated continuation pages
 
     Flow:
     1. Extract userID from query parameters
     2. Return empty list if userID is missing (user isolation requirement)
-    3. Scan DynamoDB table filtering by userID, handling pagination
-    4. Convert Decimal types to float for JSON serialization
-    5. Return items array with count
+    3. Query userID-index GSI filtering by userID + excluding soft-deleted items
+    4. Handle pagination (DynamoDB returns max 1MB per page)
+    5. Convert Decimal types to float for JSON serialization
+    6. Return items array with count
 
     Query Parameters:
     - userID: Required. Email of the user to filter items by.
@@ -43,20 +48,23 @@ def lambda_handler(event, context):
                 'body': json.dumps({'items': [], 'count': 0})
             }
 
-        # Query userID-index GSI instead of scanning the full table
-        # Reads only this user's items; no cross-tenant data read
+        # Query userID-index GSI for this user's items, excluding soft-deleted ones
+        # FilterExpression is applied after the key condition; it does NOT reduce RCUs
+        # but it does ensure soft-deleted items are never returned to the client
         result = table.query(
             IndexName='userID-index',
-            KeyConditionExpression=Key('userID').eq(user_id)
+            KeyConditionExpression=Key('userID').eq(user_id),
+            FilterExpression=Attr('deletedAt').not_exists()
         )
         items = result.get('Items', [])
 
-        # Handle pagination: DynamoDB query can return max 1MB at a time
+        # Handle pagination: DynamoDB query returns max 1MB at a time
         # LastEvaluatedKey indicates there are more results to fetch
         while 'LastEvaluatedKey' in result:
             result = table.query(
                 IndexName='userID-index',
                 KeyConditionExpression=Key('userID').eq(user_id),
+                FilterExpression=Attr('deletedAt').not_exists(),
                 ExclusiveStartKey=result['LastEvaluatedKey']
             )
             items.extend(result.get('Items', []))

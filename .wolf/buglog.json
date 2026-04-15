@@ -725,6 +725,118 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-04-15T08:03:02.916Z"
+    },
+    {
+      "id": "bug-046",
+      "timestamp": "2026-04-15T08:22:14.371Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/Proxy.py",
+      "root_cause": "16 lines replaced/restructured",
+      "fix": "Rewrote 25→30 lines (16 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-15T08:22:14.371Z"
+    },
+    {
+      "id": "bug-047",
+      "timestamp": "2026-04-15T08:22:59.888Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/api.js",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-15T08:22:59.888Z"
+    },
+    {
+      "id": "bug-048",
+      "timestamp": "2026-04-15T08:25:44.498Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/inventory.html",
+      "root_cause": "Had ', ${qty})\"",
+      "fix": "Changed to ', ${qty}, ${c.version || 1})\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-15T08:25:44.498Z"
+    },
+    {
+      "id": "bug-049",
+      "timestamp": "2026-04-15T08:25:49.506Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/inventory.html",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-15T08:25:49.506Z"
+    },
+    {
+      "id": "bug-050",
+      "timestamp": "2026-04-15T08:25:59.782Z",
+      "error_message": "Wrong reference: closeDeductModal should be deductTarget",
+      "file": "frontend/inventory.html",
+      "root_cause": "Used \"closeDeductModal\" instead of \"deductTarget\"",
+      "fix": "Changed closeDeductModal → deductTarget",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-04-15T08:26:08.081Z"
+    },
+    {
+      "id": "bug-051",
+      "timestamp": "2026-04-15T08:26:30.738Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/add-item.html",
+      "root_cause": "Had 'form-title'",
+      "fix": "Changed to 'edit-version'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-15T08:26:30.738Z"
+    },
+    {
+      "id": "bug-052",
+      "timestamp": "2026-04-15T10:04:15.931Z",
+      "error_message": "Incorrect value in code",
+      "file": "lambda/Proxy.py",
+      "root_cause": "Had 'Content-Type,x-api-key,X-Session-Token'",
+      "fix": "Changed to 'Content-Type,x-api-key,X-Session-Token,If-Match,I",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-15T10:04:15.931Z"
     }
   ]
 }

@@ -121,6 +121,7 @@
         </div>
         <div class="bg-white rounded-3xl p-10 max-w-3xl shadow-sm border border-gray-200">
           <input type="hidden" id="edit-id" />
+          <input type="hidden" id="edit-version" />
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="col-span-full">
               <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Product Name
@@ -207,6 +208,7 @@
       sessionStorage.removeItem('iq_editItem');
       const it = JSON.parse(raw);
       document.getElementById('edit-id').value = it.itemID;
+      document.getElementById('edit-version').value = it.version || 1;
       document.getElementById('form-title').textContent = 'Edit Item';
       document.getElementById('f-name').value = it.name || '';
       document.getElementById('f-category').value = it.category || '';
@@ -220,6 +222,7 @@
 
     async function handleSaveItem() {
       const id = document.getElementById('edit-id').value;
+      const version = document.getElementById('edit-version').value || null;
       const m = document.getElementById('form-msg');
       const p = {
         name: document.getElementById('f-name').value.trim(),
@@ -233,7 +236,7 @@
       if (!p.name) { m.style.color = '#ba1a1a'; m.textContent = 'Name required.'; return; }
       m.style.color = '#005ab4'; m.textContent = 'Saving...';
       try {
-        const r = id ? await updateItem(id, p) : await addItem(p);
+        const r = id ? await updateItem(id, p, version) : await addItem(p);
         m.style.color = '#964400'; m.textContent = '✅ ' + (r.message || 'Saved!');
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
       } catch (e) {

@@ -4,106 +4,151 @@ import os
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from boto3.dynamodb.types import TypeSerializer
+from botocore.exceptions import ClientError
 
-# Initialize DynamoDB tables
-# Main inventory table and transactions table for audit logging
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
-tx_table = dynamodb.Table(os.environ.get('TRANSACTIONS_TABLE', 'InventoryTransactions'))
+# Table names from environment with defaults
+TABLE      = os.environ.get('DYNAMODB_TABLE',    'InventoryIQ')
+TX_TABLE   = os.environ.get('TRANSACTIONS_TABLE', 'InventoryTransactions')
+IDEM_TABLE = os.environ.get('IDEMPOTENCY_TABLE',  'IdempotencyKeys')
+
+# High-level resource for idempotency reads; low-level client for transactional writes
+dynamodb   = boto3.resource('dynamodb')
+ddb_client = boto3.client('dynamodb')
+idem_table = dynamodb.Table(IDEM_TABLE)
+serializer = TypeSerializer()
+
+
+def _serialize(d):
+    """Convert Python dict to DynamoDB low-level format (type descriptors)."""
+    return {k: serializer.serialize(v) for k, v in d.items()}
+
 
 def lambda_handler(event, context):
     """
-    Creates a new inventory item and logs the transaction.
+    Creates a new inventory item and logs the transaction atomically.
+
+    Sprint 3 changes:
+    - userID read from x-iq-user header (injected by Proxy.py) — body fallback removed
+    - version=1 set on every new item for optimistic locking
+    - item write + transaction log written in single TransactWriteItems call
+    - Idempotency-Key header support: replay returns original response body
 
     Flow:
     1. Parse request body and validate required fields (name)
-    2. Generate unique itemID (UUID)
-    3. Create item object with all fields (use defaults where not provided)
-    4. Insert item into InventoryIQ table
-    5. Create transaction log record with changeType='create'
-    6. Return created item with 201 status
+    2. Check Idempotency-Key header — if seen before, replay cached response
+    3. Read userID from x-iq-user header
+    4. Generate UUID itemID, build item object with version=1
+    5. TransactWriteItems: put item (condition: itemID must not exist) + put tx log
+    6. Store idempotency record (24h TTL)
+    7. Return 201 with created item
 
-    Request Body Fields:
-    - name: Required. Product name.
-    - category: Optional, defaults to 'Uncategorized'
-    - quantity: Optional, defaults to 0
-    - price: Optional, defaults to 0 (stored as Decimal in DynamoDB)
-    - lowStockThreshold: Optional, defaults to 10
-    - description: Optional, defaults to ''
-    - userID: User email for multi-tenant isolation
-
-    Response: 201 with created item object
+    Returns 409 if TransactionCanceledException (rare: UUID collision or idem conflict).
     """
     try:
-        # Parse JSON body from API Gateway event
-        body = json.loads(event.get('body', '{}'))
+        body    = json.loads(event.get('body', '{}'))
+        headers = event.get('headers') or {}
 
-        # Validate required field: product name cannot be empty
         if not body.get('name'):
             return response(400, {'error': 'Product name is required'})
 
-        # Generate unique ID and current timestamp
-        item_id = str(uuid.uuid4())
-        timestamp = datetime.utcnow().isoformat()
-        user_id = body.get('userID', '').strip()
+        # Idempotency: check for duplicate request before doing any writes
+        idem_key = (
+            headers.get('idempotency-key') or
+            headers.get('Idempotency-Key') or
+            ''
+        ).strip()
+        if idem_key:
+            idem_resp = idem_table.get_item(Key={'key': idem_key})
+            if idem_resp.get('Item'):
+                # Replay: return the original successful response unchanged
+                return response(200, json.loads(idem_resp['Item']['responseBody']))
 
-        # Build item object with all required fields
-        # Price is stored as Decimal for precision; quantity and threshold as int
+        # Sprint 3: read userID from proxy-injected header; do NOT fall back to body
+        user_id = (
+            headers.get('x-iq-user') or
+            headers.get('X-Iq-User') or
+            ''
+        ).strip()
+
+        item_id   = str(uuid.uuid4())
+        timestamp = datetime.utcnow().isoformat()
+
+        # Build item with version=1 for optimistic locking (Sprint 3)
         item = {
-            'itemID': item_id,
-            'userID': user_id,
-            'name': body.get('name'),
-            'description': body.get('description', ''),
-            'category': body.get('category', 'Uncategorized'),
-            'quantity': int(body.get('quantity', 0)),
-            'price': Decimal(str(body.get('price', 0))),  # Use Decimal for money
+            'itemID'           : item_id,
+            'userID'           : user_id,
+            'name'             : body.get('name'),
+            'description'      : body.get('description', ''),
+            'category'         : body.get('category', 'Uncategorized'),
+            'quantity'         : int(body.get('quantity', 0)),
+            'price'            : Decimal(str(body.get('price', 0))),
             'lowStockThreshold': int(body.get('lowStockThreshold', 10)),
-            'createdAt': timestamp,
-            'updatedAt': timestamp
+            'version'          : 1,
+            'createdAt'        : timestamp,
+            'updatedAt'        : timestamp,
         }
 
-        # Write item to inventory table
-        table.put_item(Item=item)
-        # Convert price back to float for JSON response
-        item['price'] = float(item['price'])
-
-        # Write transaction log: records that item was created with initial quantity
-        # This creates audit trail for inventory changes
-        tx_table.put_item(Item={
-            'transactionID': str(uuid.uuid4()),
-            'itemID': item_id,
-            'itemName': item['name'],
-            'userID': user_id,
-            'changeType': 'create',  # Type: create, stock_in, stock_out, update, delete
+        tx_item = {
+            'transactionID' : str(uuid.uuid4()),
+            'itemID'        : item_id,
+            'itemName'      : item['name'],
+            'userID'        : user_id,
+            'changeType'    : 'create',
             'quantityBefore': 0,
-            'quantityAfter': item['quantity'],
-            'quantityDelta': item['quantity'],
-            'notes': 'Item created',
-            'createdAt': timestamp
-        })
+            'quantityAfter' : item['quantity'],
+            'quantityDelta' : item['quantity'],
+            'notes'         : 'Item created',
+            'createdAt'     : timestamp,
+        }
 
+        # Atomic write: item + transaction log in a single transaction
+        # ConditionExpression prevents overwriting an existing item (UUID collision guard)
+        ddb_client.transact_write_items(TransactItems=[
+            {
+                'Put': {
+                    'TableName'          : TABLE,
+                    'Item'               : _serialize(item),
+                    'ConditionExpression': 'attribute_not_exists(itemID)',
+                }
+            },
+            {
+                'Put': {
+                    'TableName': TX_TABLE,
+                    'Item'     : _serialize(tx_item),
+                }
+            },
+        ])
+
+        # Store idempotency record after successful write (TTL = 24 hours)
+        if idem_key:
+            item_for_resp = {k: float(v) if isinstance(v, Decimal) else v for k, v in item.items()}
+            resp_body = {'message': 'Item added successfully', 'item': item_for_resp}
+            idem_table.put_item(Item={
+                'key'         : idem_key,
+                'responseBody': json.dumps(resp_body),
+                'expiresAt'   : int(datetime.utcnow().timestamp()) + 86400,
+            })
+
+        item['price'] = float(item['price'])
         return response(201, {'message': 'Item added successfully', 'item': item})
 
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'TransactionCanceledException':
+            return response(409, {'error': 'Conflict — duplicate item ID or concurrent duplicate request'})
+        raise
     except Exception as e:
         return response(500, {'error': str(e)})
 
+
 def response(status_code, body):
-    """
-    Helper function to format Lambda response with consistent headers and CORS.
-
-    Args:
-        status_code: HTTP status code (201, 400, 500, etc.)
-        body: Dictionary to be JSON-encoded in response body
-
-    Returns: API Gateway Lambda Proxy Integration response
-    """
     return {
         'statusCode': status_code,
         'headers': {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',  # Allow cross-origin requests
+            'Content-Type'                : 'application/json',
+            'Access-Control-Allow-Origin' : '*',
             'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE',
         },
-        'body': json.dumps(body)
+        'body': json.dumps(body),
     }

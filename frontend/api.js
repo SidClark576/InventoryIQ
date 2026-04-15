@@ -90,10 +90,16 @@ async function addItem(item) {
   return data;
 }
 
-async function updateItem(itemID, updates) {
+async function updateItem(itemID, updates, version) {
+  // Sprint 3: If-Match header required for optimistic locking.
+  // Pass the item's current `version` field so the server can detect concurrent edits.
+  const headers = { ...authHeaders() };
+  if (version !== undefined && version !== null) {
+    headers['If-Match'] = String(version);
+  }
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}`, {
     method: "PUT",
-    headers: authHeaders(),
+    headers,
     body: JSON.stringify(updates)
   });
   checkQuota(res);
@@ -104,7 +110,26 @@ async function updateItem(itemID, updates) {
   } catch {
     data = { message: "Update failed" };
   }
+  if (res.status === 412) throw new Error('Version conflict — item was modified elsewhere. Refresh and try again.');
+  if (res.status === 428) throw new Error('Missing version — please refresh the page and try again.');
   if (!res.ok) throw new Error(data.error || data.message || "Failed to update item");
+  return data;
+}
+
+async function restoreItem(itemID) {
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}/restore`, {
+    method: "POST",
+    headers: authHeaders()
+  });
+  checkQuota(res);
+  check401(res);
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    data = { message: "Restore failed" };
+  }
+  if (!res.ok) throw new Error(data.error || data.message || "Failed to restore item");
   return data;
 }
 

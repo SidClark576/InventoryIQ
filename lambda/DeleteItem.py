@@ -3,99 +3,127 @@ import uuid
 import boto3
 import os
 from datetime import datetime
+from boto3.dynamodb.types import TypeSerializer
+from botocore.exceptions import ClientError
 
-# Initialize DynamoDB tables for inventory and transaction logging
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
-tx_table = dynamodb.Table(os.environ.get('TRANSACTIONS_TABLE', 'InventoryTransactions'))
+# Table names from environment with defaults
+TABLE    = os.environ.get('DYNAMODB_TABLE',    'InventoryIQ')
+TX_TABLE = os.environ.get('TRANSACTIONS_TABLE', 'InventoryTransactions')
+
+# High-level resource for reads; low-level client for transactional writes
+dynamodb   = boto3.resource('dynamodb')
+table      = dynamodb.Table(TABLE)
+ddb_client = boto3.client('dynamodb')
+serializer = TypeSerializer()
+
 
 def lambda_handler(event, context):
     """
-    Deletes an inventory item and logs the transaction.
+    Soft-deletes an inventory item and logs the transaction atomically.
+
+    Sprint 3 changes:
+    - Hard delete replaced with soft delete: sets deletedAt + deletedBy on item
+    - userID read from x-iq-user header (injected by Proxy.py) — query param fallback removed
+    - Soft-delete update + transaction log written in single TransactWriteItems call
+    - ConditionExpression prevents double-deletion
+    - GetAllItems filters out items with deletedAt (they're hidden, not gone)
+    - Items can be restored within 30 days via POST /items/{id}/restore
+    - PurgeDeletedItems Lambda permanently deletes items after 30 days
 
     Flow:
-    1. Extract itemID from URL path
-    2. Read existing item BEFORE deletion for audit trail
-    3. Delete item from inventory table
-    4. Create transaction record with changeType='delete'
-       - quantityBefore = original quantity
-       - quantityAfter = 0 (item removed from inventory)
-       - quantityDelta = negative of original quantity
-    5. Return success message
+    1. Extract itemID from path
+    2. Read existing item → 404 if not found; 410 if already soft-deleted
+    3. Ownership check via x-iq-user → 403 if mismatch
+    4. TransactWriteItems: set deletedAt/deletedBy (condition: not already deleted) + put tx log
+    5. Return 200 with success message
 
-    Path Parameters:
-    - itemID: ID of item to delete
-
-    Response: 200 with success message
-
-    Note: This is a hard delete. Item is removed completely from inventory.
-    Transaction log preserves the data for audit purposes.
+    Returns 409 on TransactionCanceledException (concurrent delete race).
     """
     try:
-        # Extract itemID from URL path parameters (set by API Gateway)
         item_id = event.get('pathParameters', {}).get('itemID')
         if not item_id:
             return response(400, {'error': 'itemID is required in path'})
 
-        # Read existing item BEFORE deletion
-        # This is critical for creating an accurate audit trail
-        # We need to preserve the item name, userID, and quantity for the transaction log
+        headers = event.get('headers') or {}
+
+        # Sprint 3: read userID from proxy-injected header; do NOT fall back to query params
+        user_id = (
+            headers.get('x-iq-user') or
+            headers.get('X-Iq-User') or
+            ''
+        ).strip()
+
+        # Read existing item for ownership check and audit trail
         existing_resp = table.get_item(Key={'itemID': item_id})
         existing = existing_resp.get('Item')
-
-        # Return 404 if item does not exist
         if not existing:
             return response(404, {'error': 'Item not found'})
 
-        # Ownership check: prevent cross-tenant deletes (Sprint 1: userID from query param)
-        params = event.get('queryStringParameters') or {}
-        request_user_id = params.get('userID', '').strip()
-        if request_user_id and existing.get('userID', '') != request_user_id:
+        # Ownership check: prevent cross-tenant deletes
+        if user_id and existing.get('userID', '') != user_id:
             return response(403, {'error': 'Forbidden: item belongs to another user'})
 
-        # Delete item from inventory table
-        table.delete_item(Key={'itemID': item_id})
+        # Already soft-deleted — return 410 Gone
+        if existing.get('deletedAt'):
+            return response(410, {'error': 'Item already deleted'})
 
-        # Write transaction log entry with deletion details
-        # This creates an audit trail showing:
-        # - What item was deleted (name, ID)
-        # - Who owned it (userID)
-        # - How much quantity was lost (quantityDelta is negative)
-        tx_table.put_item(Item={
-            'transactionID': str(uuid.uuid4()),
-            'itemID': item_id,
-            'itemName': existing.get('name', ''),
-            'userID': existing.get('userID', ''),
-            'changeType': 'delete',  # Type: create, stock_in, stock_out, update, delete
-            'quantityBefore': int(existing.get('quantity', 0)),  # Original quantity
-            'quantityAfter': 0,  # Item completely removed
-            'quantityDelta': -int(existing.get('quantity', 0)),  # Negative delta for deletion
-            'notes': 'Item deleted',
-            'createdAt': datetime.utcnow().isoformat()
-        })
+        timestamp = datetime.utcnow().isoformat()
+        qty       = int(existing.get('quantity', 0))
+
+        tx_item = {
+            'transactionID' : str(uuid.uuid4()),
+            'itemID'        : item_id,
+            'itemName'      : existing.get('name', ''),
+            'userID'        : existing.get('userID', ''),
+            'changeType'    : 'delete',
+            'quantityBefore': qty,
+            'quantityAfter' : 0,
+            'quantityDelta' : -qty,  # Negative delta represents removal
+            'notes'         : 'Item soft-deleted',
+            'createdAt'     : timestamp,
+        }
+
+        # Soft delete: stamp deletedAt + deletedBy atomically with transaction log
+        # ConditionExpression prevents race where two requests both try to delete
+        ddb_client.transact_write_items(TransactItems=[
+            {
+                'Update': {
+                    'TableName'                : TABLE,
+                    'Key'                      : {'itemID': {'S': item_id}},
+                    'UpdateExpression'         : 'SET deletedAt = :da, deletedBy = :db',
+                    'ConditionExpression'      : 'attribute_not_exists(deletedAt)',
+                    'ExpressionAttributeValues': {
+                        ':da': serializer.serialize(timestamp),
+                        ':db': serializer.serialize(user_id),
+                    },
+                }
+            },
+            {
+                'Put': {
+                    'TableName': TX_TABLE,
+                    'Item'     : {k: serializer.serialize(v) for k, v in tx_item.items()},
+                }
+            },
+        ])
 
         return response(200, {'message': f'Item {item_id} deleted successfully'})
 
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'TransactionCanceledException':
+            return response(409, {'error': 'Conflict — item may have been deleted concurrently'})
+        raise
     except Exception as e:
         return response(500, {'error': str(e)})
 
+
 def response(status_code, body):
-    """
-    Helper function to format Lambda response with consistent headers and CORS.
-
-    Args:
-        status_code: HTTP status code
-        body: Dictionary to be JSON-encoded
-
-    Returns: API Gateway Lambda Proxy Integration response
-    """
     return {
         'statusCode': status_code,
         'headers': {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
+            'Content-Type'                : 'application/json',
+            'Access-Control-Allow-Origin' : '*',
             'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE',
         },
-        'body': json.dumps(body)
+        'body': json.dumps(body),
     }

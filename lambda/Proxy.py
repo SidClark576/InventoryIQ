@@ -23,7 +23,7 @@ _API_KEY_TTL   = 300  # 5 minutes
 
 _CORS_STATIC = {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Headers': 'Content-Type,x-api-key,X-Session-Token',
+    'Access-Control-Allow-Headers': 'Content-Type,x-api-key,X-Session-Token,If-Match,Idempotency-Key',
     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
 }
 
@@ -186,28 +186,41 @@ def _forward(event, path, method, user_id, origin=''):
     if user_id:
         fwd_headers['x-iq-user'] = user_id
 
-    try:
-        req = urllib.request.Request(
-            f"{API_ENDPOINT}{full_path}",
-            data=body.encode() if body else None,
-            headers=fwd_headers,
-            method=method
-        )
-        with urllib.request.urlopen(req, timeout=10) as res:
-            return {
-                'statusCode': res.status,
-                'headers': cors,
-                'body': res.read().decode()
-            }
-    except urllib.error.HTTPError as e:
-        return {
-            'statusCode': e.code,
-            'headers': cors,
-            'body': e.read().decode()
-        }
-    except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': cors,
-            'body': json.dumps({'error': str(e)})
-        }
+    # Forward selected client headers downstream
+    _PASSTHROUGH_HEADERS = ('if-match', 'idempotency-key')
+    client_headers = event.get('headers') or {}
+    for h in _PASSTHROUGH_HEADERS:
+        val = client_headers.get(h) or client_headers.get(h.title())
+        if val:
+            fwd_headers[h] = val
+
+    url = f"{API_ENDPOINT}{full_path}"
+
+    # One retry on 5xx (transient backend errors); no retry on 4xx (client errors)
+    for attempt in range(2):
+        try:
+            req = urllib.request.Request(
+                url,
+                data=body.encode() if body else None,
+                headers=fwd_headers,
+                method=method
+            )
+            with urllib.request.urlopen(req, timeout=10) as res:
+                status    = res.status
+                resp_body = res.read().decode()
+            if status >= 500 and attempt == 0:
+                continue  # Retry once on 5xx
+            return {'statusCode': status, 'headers': cors, 'body': resp_body}
+        except urllib.error.HTTPError as e:
+            err_code = e.code
+            err_body = e.read().decode()
+            if err_code >= 500 and attempt == 0:
+                continue  # Retry once on 5xx
+            return {'statusCode': err_code, 'headers': cors, 'body': err_body}
+        except Exception as e:
+            if attempt == 0:
+                continue  # Retry once on network/timeout errors
+            return {'statusCode': 500, 'headers': cors, 'body': json.dumps({'error': str(e)})}
+
+    # Safety net — should not be reached
+    return {'statusCode': 502, 'headers': cors, 'body': json.dumps({'error': 'Bad Gateway'})}

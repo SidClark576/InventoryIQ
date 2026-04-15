@@ -508,3 +508,50 @@
 | 22:03 | Edited CLAUDE.md | expanded (+15 lines) | ~193 |
 | 22:03 | Updated CLAUDE.md with Sprint 2 changes: Sessions table, server-side session validation, rate limiting, password reset flow, Secrets Manager, new env vars, Playwright testing section, frontend pages | CLAUDE.md | complete | ~800 |
 | 22:03 | Session end: 11 writes across 1 files (CLAUDE.md) | 5 reads | ~10559 tok |
+
+## Session: 2026-04-15 22:07
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 22:20 | Created lambda/AddItem.py | — | ~1714 |
+| 22:21 | Created lambda/UpdateItem.py | — | ~2614 |
+| 22:21 | Created lambda/DeleteItem.py | — | ~1462 |
+| 22:22 | Created lambda/GetAllItems.py | — | ~1097 |
+| 22:22 | Edited lambda/Proxy.py | modified range() | ~380 |
+| 22:22 | Created lambda/RestoreItem.py | — | ~1318 |
+| 22:22 | Created lambda/PurgeDeletedItems.py | — | ~614 |
+| 22:22 | Edited frontend/api.js | added 4 condition(s) | ~391 |
+
+## Session: 2026-04-15 22:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 22:25 | Edited frontend/inventory.html | 2→2 lines | ~205 |
+| 22:25 | Edited frontend/inventory.html | added optional chaining | ~42 |
+| 22:25 | Edited frontend/inventory.html | modified openDeductModal() | ~59 |
+| 22:25 | Edited frontend/inventory.html | 3→3 lines | ~37 |
+| 22:26 | Edited frontend/inventory.html | modified openAddModal() | ~56 |
+| 22:26 | Edited frontend/inventory.html | 3→3 lines | ~35 |
+| 22:26 | Edited frontend/add-item.html | 1→2 lines | ~27 |
+| 22:26 | Edited frontend/add-item.html | 2→3 lines | ~54 |
+| 22:26 | Edited frontend/add-item.html | 1→2 lines | ~36 |
+| 22:26 | Edited frontend/add-item.html | inline fix | ~20 |
+| 07:30 | Sprint 3 frontend complete: inventory.html + add-item.html pass version to updateItem | frontend/inventory.html, frontend/add-item.html | success | ~80 |
+| 22:27 | Session end: 10 writes across 2 files (inventory.html, add-item.html) | 2 reads | ~13968 tok |
+| 23:32 | Session end: 10 writes across 2 files (inventory.html, add-item.html) | 2 reads | ~13968 tok |
+| 23:32 | Session end: 10 writes across 2 files (inventory.html, add-item.html) | 2 reads | ~13968 tok |
+| 23:44 | Session end: 10 writes across 2 files (inventory.html, add-item.html) | 2 reads | ~13968 tok |
+| 00:04 | Edited lambda/Proxy.py | inline fix | ~30 |
+| 00:04 | Session end: 11 writes across 3 files (inventory.html, add-item.html, Proxy.py) | 3 reads | ~16612 tok |
+| 00:08 | Session end: 11 writes across 3 files (inventory.html, add-item.html, Proxy.py) | 3 reads | ~16612 tok |
+| 00:13 | Session end: 11 writes across 3 files (inventory.html, add-item.html, Proxy.py) | 3 reads | ~16612 tok |
+| 00:21 | Edited lambda/Proxy.py | expanded (+7 lines) | ~169 |
+| 00:21 | Session end: 12 writes across 3 files (inventory.html, add-item.html, Proxy.py) | 4 reads | ~19075 tok |
+| 00:22 | Edited lambda/Proxy.py | 6→7 lines | ~88 |
+| 00:23 | Session end: 13 writes across 3 files (inventory.html, add-item.html, Proxy.py) | 4 reads | ~19163 tok |
+| 00:26 | Session end: 13 writes across 3 files (inventory.html, add-item.html, Proxy.py) | 4 reads | ~19163 tok |
+
+## Session: 2026-04-15 00:29
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

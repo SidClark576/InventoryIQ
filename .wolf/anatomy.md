@@ -1,11 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-15T08:03:26.595Z
-> Files: 90 tracked | Anatomy hits: 0 | Misses: 0
-
-## ../../.claude/plans/
-
-- `eager-churning-thimble.md` — Debug: 500 on POST /auth/forgot-password (~1157 tok)
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-15T10:22:59.283Z
+> Files: 91 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -13,7 +9,7 @@
 - `.gitignore` — Git ignore rules (~32 tok)
 - `AGENTS.md` — InventoryIQ — Codebase Reference (~1381 tok)
 - `CLAUDE.md` — OpenWolf (~5410 tok)
-- `notes` (~1278 tok)
+- `notes` (~382 tok)
 - `package-lock.json` — npm lock file (~6820 tok)
 - `package.json` — Node.js package manifest (~97 tok)
 - `playwright-results.json` — Declares string (~1983 tok)
@@ -75,14 +71,14 @@
 ## frontend/
 
 - `.DS_Store` (~1640 tok)
-- `add-item.html` — InventoryIQ | Add Asset (~3771 tok)
-- `api.js` — ── AUTH FUNCTIONS ──────────────────────────────────────────── (~1556 tok)
+- `add-item.html` — InventoryIQ | Add Asset (~3826 tok)
+- `api.js` — ── AUTH FUNCTIONS ──────────────────────────────────────────── (~1819 tok)
 - `config.js` — Declares CONFIG (~76 tok)
 - `dashboard.html` — InventoryIQ | Dashboard (~4765 tok)
 - `forgot-password.html` — InventoryIQ | Forgot Password (~1832 tok)
 - `index.html` (~30 tok)
 - `insights.html` — InventoryIQ | Insights (~3078 tok)
-- `inventory.html` — InventoryIQ | Inventory (~9586 tok)
+- `inventory.html` — InventoryIQ | Inventory (~9626 tok)
 - `login.html` — InventoryIQ | Login (~3249 tok)
 - `reset-password.html` — InventoryIQ | Reset Password (~2693 tok)
 - `style.css` — Styles: 7 rules, 1 media queries (~454 tok)
@@ -103,17 +99,19 @@
 
 ## lambda/
 
-- `AddItem.py` — Initialize DynamoDB tables (~1191 tok)
+- `AddItem.py` — Table names from environment with defaults (~1714 tok)
 - `Authentication.mjs` — Exports handler (~4625 tok)
 - `DailyAlert.py` — Initialize AWS service clients at module level (outside the handler) (~3370 tok)
 - `DeleteCategory.py` — Initialize DynamoDB with inventory table (~999 tok)
-- `DeleteItem.py` — Initialize DynamoDB tables for inventory and transaction logging (~1151 tok)
-- `GetAllItems.py` — Initialize DynamoDB resource and get the inventory table (~973 tok)
+- `DeleteItem.py` — Table names from environment with defaults (~1462 tok)
+- `GetAllItems.py` — Initialize DynamoDB resource and get the inventory table (~1097 tok)
 - `GetCategories.py` — Initialize DynamoDB with inventory table (~856 tok)
 - `GetTransactions.py` — Initialize DynamoDB with transactions table (~889 tok)
 - `LowItemInsight.py` — Initialize AWS services: (~4157 tok)
-- `Proxy.py` — lambda_handler (~2122 tok)
-- `UpdateItem.py` — Initialize DynamoDB tables at module level so they are reused across warm Lambda invocations (~1914 tok)
+- `Proxy.py` — lambda_handler (~2382 tok)
+- `PurgeDeletedItems.py` — Table name from environment with default (~614 tok)
+- `RestoreItem.py` — Table name from environment with default (~1318 tok)
+- `UpdateItem.py` — Table names from environment with defaults (~2614 tok)
 
 ## playwright-report/
 

@@ -382,8 +382,8 @@
           <td class="px-6 py-4 text-center">${badge}</td>
           <td class="px-8 py-4 text-center relative">
             <div class="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg cursor-pointer transition p-0" title="Add Stock" onclick="openAddModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty})"><span class="material-symbols-outlined text-[18px]">add</span></button>
-              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg cursor-pointer transition p-0" title="Deduct Stock" onclick="openDeductModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty})"><span class="material-symbols-outlined text-[18px]">remove</span></button>
+              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg cursor-pointer transition p-0" title="Add Stock" onclick="openAddModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty}, ${c.version || 1})"><span class="material-symbols-outlined text-[18px]">add</span></button>
+              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg cursor-pointer transition p-0" title="Deduct Stock" onclick="openDeductModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty}, ${c.version || 1})"><span class="material-symbols-outlined text-[18px]">remove</span></button>
               <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#005ab4] hover:bg-[#e8f0fe] rounded-lg cursor-pointer transition p-0" onclick="editItem('${c.itemID}')"><span class="material-symbols-outlined text-[18px]">edit</span></button>
               <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition p-0" onclick="handleDelete('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"><span class="material-symbols-outlined text-[18px]">delete</span></button>
             </div>
@@ -431,8 +431,8 @@
       }
 
       try {
-        await updateItem(itemID, { category: newCategory, userID });
         const item = allItems.find(i => i.itemID === itemID);
+        await updateItem(itemID, { category: newCategory, userID }, item?.version);
         if (item) item.category = newCategory;
         if (statusEl) {
           statusEl.textContent = '✓';
@@ -519,10 +519,10 @@
     loadInventory();
 
     // Deduct stock modal logic
-    let deductTarget = null; // { itemID, currentQty }
+    let deductTarget = null; // { itemID, currentQty, version }
 
-    function openDeductModal(itemID, itemName, currentQty) {
-      deductTarget = { itemID, currentQty };
+    function openDeductModal(itemID, itemName, currentQty, version) {
+      deductTarget = { itemID, currentQty, version };
       document.getElementById('deduct-item-label').textContent = itemName;
       document.getElementById('deduct-current-qty').textContent = `Current stock: ${currentQty} units`;
       document.getElementById('deduct-amount').value = 1;
@@ -554,7 +554,7 @@
       const newQty = deductTarget.currentQty - amount;
       const userID = sessionStorage.getItem('userEmail') || '';
       try {
-        await updateItem(deductTarget.itemID, { quantity: newQty, userID });
+        await updateItem(deductTarget.itemID, { quantity: newQty, userID }, deductTarget.version);
         closeDeductModal();
         loadInventory(); // refresh the table
       } catch (e) {
@@ -564,10 +564,10 @@
     }
 
     // Add stock modal logic
-    let addTarget = null; // { itemID, currentQty }
+    let addTarget = null; // { itemID, currentQty, version }
 
-    function openAddModal(itemID, itemName, currentQty) {
-      addTarget = { itemID, currentQty };
+    function openAddModal(itemID, itemName, currentQty, version) {
+      addTarget = { itemID, currentQty, version };
       document.getElementById('add-item-label').textContent = itemName;
       document.getElementById('add-current-qty').textContent = `Current stock: ${currentQty} units`;
       document.getElementById('add-amount').value = 1;
@@ -594,7 +594,7 @@
       const newQty = addTarget.currentQty + amount;
       const userID = sessionStorage.getItem('userEmail') || '';
       try {
-        await updateItem(addTarget.itemID, { quantity: newQty, userID });
+        await updateItem(addTarget.itemID, { quantity: newQty, userID }, addTarget.version);
         closeAddModal();
         loadInventory(); // refresh the table
       } catch (e) {
