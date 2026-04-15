@@ -434,3 +434,77 @@
 | 22:28 | Session end: 19 writes across 7 files (eager-churning-thimble.md, Authentication.mjs, Proxy.py, api.js, login.html) | 5 reads | ~25569 tok |
 | 23:18 | Session end: 19 writes across 7 files (eager-churning-thimble.md, Authentication.mjs, Proxy.py, api.js, login.html) | 5 reads | ~25569 tok |
 | 23:55 | Session end: 19 writes across 7 files (eager-churning-thimble.md, Authentication.mjs, Proxy.py, api.js, login.html) | 5 reads | ~25569 tok |
+| 23:57 | Edited lambda/Authentication.mjs | added 2 condition(s) | ~860 |
+| 23:57 | Edited lambda/Authentication.mjs | added 1 condition(s) | ~370 |
+| 23:58 | Edited lambda/Authentication.mjs | added 8 condition(s) | ~1492 |
+
+## Session: 2026-04-14 23:59
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 00:00 | Edited lambda/Proxy.py | modified _cors_headers() | ~794 |
+| 00:00 | Edited lambda/Proxy.py | modified lambda_handler() | ~381 |
+| 00:00 | Edited lambda/Proxy.py | modified _forward() | ~455 |
+| 00:01 | Created frontend/forgot-password.html | — | ~1832 |
+| 00:02 | Created frontend/reset-password.html | — | ~2693 |
+| 13:55 | Edited frontend/login.html | 5→8 lines | ~143 |
+
+## Session: 2026-04-14 (Chunk B complete)
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:00 | Sprint 2 Chunk B — Auth.mjs: rate limit helpers + /forgot-password + /reset-password | lambda/Authentication.mjs | complete |
+| 14:00 | Proxy.py Chunk B: Secrets Manager API_KEY cache + CORS allow-list | lambda/Proxy.py | complete |
+| 14:00 | Created forgot-password.html + reset-password.html | frontend/ | complete |
+| 14:00 | Added "Forgot password?" link to login.html | frontend/login.html | complete |
+| 14:00 | Updated cerebrum.md with Sprint 2 auth learnings | .wolf/cerebrum.md | complete |
+| 13:56 | Session end: 6 writes across 4 files (Proxy.py, forgot-password.html, reset-password.html, login.html) | 2 reads | ~11343 tok |
+| 17:07 | Session end: 6 writes across 4 files (Proxy.py, forgot-password.html, reset-password.html, login.html) | 2 reads | ~11343 tok |
+| 17:10 | Session end: 6 writes across 4 files (Proxy.py, forgot-password.html, reset-password.html, login.html) | 2 reads | ~11343 tok |
+| 17:13 | Session end: 6 writes across 4 files (Proxy.py, forgot-password.html, reset-password.html, login.html) | 2 reads | ~11343 tok |
+| 17:47 | Session end: 6 writes across 4 files (Proxy.py, forgot-password.html, reset-password.html, login.html) | 2 reads | ~11343 tok |
+| 17:49 | Session end: 6 writes across 4 files (Proxy.py, forgot-password.html, reset-password.html, login.html) | 2 reads | ~11343 tok |
+| 17:50 | Session end: 6 writes across 4 files (Proxy.py, forgot-password.html, reset-password.html, login.html) | 2 reads | ~11343 tok |
+
+## Session: 2026-04-15 17:59
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 18:12 | Created ../../.claude/plans/eager-churning-thimble.md | — | ~1234 |
+| 18:16 | Session end: 1 writes across 1 files (eager-churning-thimble.md) | 3 reads | ~7670 tok |
+| 18:16 | Session end: 1 writes across 1 files (eager-churning-thimble.md) | 3 reads | ~7670 tok |
+| 18:17 | Session end: 1 writes across 1 files (eager-churning-thimble.md) | 3 reads | ~7670 tok |
+| 18:22 | Edited lambda/Authentication.mjs | added error handling | ~519 |
+
+## Session: 2026-04-15 18:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-15 19:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-15 20:04
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-15 20:04
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 20:04 | Edited CLAUDE.md | 14→17 lines | ~246 |
+| 20:04 | Edited CLAUDE.md | 7→12 lines | ~209 |
+| 20:05 | Edited CLAUDE.md | 2→4 lines | ~97 |
+| 20:05 | Edited CLAUDE.md | 1→3 lines | ~303 |
+| 20:05 | Edited CLAUDE.md | expanded (+9 lines) | ~243 |
+| 20:05 | Edited CLAUDE.md | expanded (+9 lines) | ~228 |
+| 22:02 | Edited CLAUDE.md | 6→7 lines | ~122 |
+| 22:03 | Edited CLAUDE.md | 2→2 lines | ~248 |
+| 22:03 | Edited CLAUDE.md | 4→6 lines | ~166 |
+| 22:03 | Edited CLAUDE.md | 7→9 lines | ~190 |
+| 22:03 | Edited CLAUDE.md | expanded (+15 lines) | ~193 |
+| 22:03 | Updated CLAUDE.md with Sprint 2 changes: Sessions table, server-side session validation, rate limiting, password reset flow, Secrets Manager, new env vars, Playwright testing section, frontend pages | CLAUDE.md | complete | ~800 |
+| 22:03 | Session end: 11 writes across 1 files (CLAUDE.md) | 5 reads | ~10559 tok |

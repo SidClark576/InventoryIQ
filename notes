@@ -18,36 +18,8 @@ Password: Test123!@
 
 TESTS
 
- Test 1: Non-existent item returns 404 (not 500)                                                                                                                       
-  curl -X PUT https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items/fake-uuid-12345 \
-    -H "Content-Type: application/json" \
-    -d '{"userID":"test@example.com"}'                                                                                                                                  
-  ✓ Expected: {"statusCode": 404, "body": "{\"error\": \"Item not found\"}"}                                                                                            
-  ✗ Broken (old): {"statusCode": 500, "body": "{\"error\": \"'dict' object is not callable\"}"}                                                                         
-                                                                                                                                                                        
-  Test 2: Cross-user ownership check returns 403                                                                                                                        
-  # First, create an item as user1                                                                                                                                      
-curl -X POST https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items \
-    -H "Content-Type: application/json" \
-    -d '{"userID":"user1@example.com", "name":"Widget", "quantity":10}'                                                                                                 
-  # Copy the itemID from response                                      
-                                                                                                                                                                        
-  # Then try to update it as user2                          
-  curl -X PUT https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items/<itemID> \
-    -H "Content-Type: application/json" \
-    -d '{"userID":"user2@example.com", "quantity":5}'                                                                                                                   
-  ✓ Expected: {"statusCode": 403, "body": "{\"error\": \"Forbidden\"}"}
-                                                                                                                                                                        
-  Test 3: Existing user flows still work
-  # Create item (should succeed)                                                                                                                                        
-  curl -X POST https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items \
-    -H "Content-Type: application/json" \
-    -d '{"userID":"test@example.com", "name":"Item1", "quantity":5}'                                                                                                    
-                                                                    
-  # List items (should return array)                                                                                                                                    
-  curl -X GET "https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items?userID=test@example.com"                                                            
-                                                                                                            
-  # Delete item (should succeed)                                                                                                                                        
-  curl -X DELETE https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/items/d1646839-b8e3-4256-bbce-89d806adc497 \
-    -H "Content-Type: application/json" \
-    -d '{"userID":"test@example.com"}'        
+  BASE_URL=https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy \                                                                                         
+  AUTH_URL=https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/auth \                             
+  TEST_EMAIL=smoke+$(date +%s)@example.com \                                                                             
+  TEST_PASS=Smoke1Pass! \                                                                                                
+  ./gan-harness/tests/sprint2_smoke.sh 

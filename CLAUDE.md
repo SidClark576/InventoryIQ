@@ -31,6 +31,7 @@ frontend/login.html  frontend/dashboard.html  frontend/inventory.html
 frontend/add-item.html  frontend/insights.html  frontend/transactions.html
 frontend/utils.js  frontend/api.js  frontend/config.js  frontend/style.css
 frontend/index.html  (redirect shim → login.html)
+frontend/forgot-password.html  frontend/reset-password.html
 ```
 
 **Backend** — each file in `lambda/` is a standalone Lambda function. Deploy individually via the AWS console or CLI:
@@ -38,7 +39,9 @@ frontend/index.html  (redirect shim → login.html)
 zip function.zip lambda/AddItem.py && aws lambda update-function-code --function-name AddItem --zip-file fileb://function.zip
 ```
 
-No package manager, no build tool, no test suite exists in this repo.
+**IMPORTANT: Never deploy Lambda functions automatically.** Always provide the zip/deploy commands for the user to run themselves.
+
+No package manager, no build tool for the app itself. Playwright E2E tests exist in `tests/e2e/` — run with `npx playwright test`.
 
 **Files NOT deployed:**
 - **`notes`** — Contains live API keys, table names, and ARNs. **NEVER commit or modify.**
@@ -62,15 +65,22 @@ DynamoDB  SNS Topic   SQS Queue
 InventoryIQ  Alerts   StockQueue
 Users
 InventoryTransactions
+Sessions
+AuthAttempts
+PasswordResets
 ```
 
 **API key hiding via proxy:** The frontend (`config.js`) points to the `/prod/proxy` stage. `Proxy.py` runs as a Lambda behind that stage and re-issues each request to the real `/prod` stage with the `x-api-key` header injected server-side. This means the browser never sees the API key. Auth endpoints (`/auth/*`) bypass the proxy and call the real stage directly — they do not require `x-api-key`.
 
+**Session validation at proxy edge:** `Proxy.py` validates every non-`/auth/` request against the `Sessions` DynamoDB table before forwarding. Invalid/missing token → 401. Module-level 60-second cache prevents a DynamoDB lookup on every request.
+
 ### API Routes → Lambda mapping
 | Method | Path | Lambda |
 |--------|------|--------|
-| ANY | `/proxy/{proxy+}` | `Proxy.py` — forwards to real stage with injected key |
+| ANY | `/proxy/{proxy+}` | `Proxy.py` — validates session, forwards to real stage with injected key |
 | POST | `/auth/register`, `/auth/login` | `Authentication.mjs` (Node.js ESM) |
+| POST | `/auth/forgot-password` | `Authentication.mjs` — sends SES reset email |
+| POST | `/auth/reset-password` | `Authentication.mjs` — consumes reset token, updates password |
 | GET | `/items` | `GetAllItems.py` |
 | POST | `/items` | `AddItem.py` |
 | PUT | `/items/{itemID}` | `UpdateItem.py` |
@@ -88,7 +98,9 @@ All routes require **Lambda Proxy Integration** enabled in API Gateway.
 
 ## Key Conventions
 
-- **Auth:** Passwords hashed with `crypto.scryptSync` (Node.js) + random salt. Login returns a UUID session token stored in `sessionStorage` — there is no server-side token validation after login. All inventory endpoints require `x-api-key`, which is injected by `Proxy.py` server-side — `api.js` does **not** send `x-api-key` from the browser; auth endpoints bypass the proxy entirely.
+- **Auth:** Passwords hashed with `crypto.scryptSync` (Node.js) + random salt. Login creates a UUID opaque session token stored in the `Sessions` DynamoDB table (TTL-based expiry) and returned to the client as `sessionStorage.sessionToken`. **JWT is banned — do not introduce it.** Proxy.py validates the session token on every proxied request (60s module-level cache). All inventory endpoints require `x-api-key`, injected by `Proxy.py` server-side — `api.js` never sends `x-api-key` from the browser; auth endpoints bypass the proxy entirely.
+- **Rate limiting:** `Authentication.mjs` tracks failed login attempts per email in `AuthAttempts` DynamoDB table using atomic `ADD + if_not_exists` counter with TTL. Helpers: `_isRateLimited()`, `_recordFailedAttempt()`, `_clearAttempts()`.
+- **Password reset:** `POST /auth/forgot-password` creates a time-limited UUID token in `PasswordResets` table (TTL = `expiresAt`) and sends a SES email with link `${APP_URL}/reset-password.html?token=...`. `POST /auth/reset-password` validates the token, updates password, then bulk-invalidates all user sessions via `Sessions` GSI `userID-index`.
 - **SNS subscription on auth:** On `/register`, `Authentication.mjs` immediately calls `SNS.Subscribe` with the user's email. On `/login`, it paginates through `ListSubscriptionsByTopic` and only re-subscribes if the email has no confirmed or pending subscription. New users see the message: "Please check your email to confirm your alert subscription."
 - **Multi-user isolation:** Items are scoped by `userID` (the user's email) stored on each DynamoDB item. `GET /items`, `GET /insights`, and `GET /transactions` require `?userID=` — if omitted, they return an empty result or 400. `userID` is trusted from the client request body (no server-side ownership check on writes).
 - **Decimal handling:** DynamoDB returns `Decimal` types — all Python Lambdas convert to `float` before `json.dumps`.
@@ -105,6 +117,15 @@ Fields: `name`, `description`, `category`, `quantity`, `price`, `lowStockThresho
 **`Users`** — partition key: `Email` (capital E, string)  
 Fields: `passwordHash`, `salt`, `createdAt`
 
+**`Sessions`** — partition key: `sessionToken` (UUID string)  
+Fields: `userID` (email), `createdAt`, `expiresAt` (TTL). GSI: `userID-index` (PK `userID`, SK `createdAt`) — used for bulk session invalidation on password reset.
+
+**`AuthAttempts`** — partition key: `email` (string)  
+Fields: `attempts` (atomic counter), `ttl` (TTL). Tracks failed logins per email for rate limiting.
+
+**`PasswordResets`** — partition key: `resetToken` (UUID string)  
+Fields: `userID` (email), `expiresAt` (TTL). Single-use; consumed and deleted on successful reset.
+
 **`InventoryTransactions`** — partition key: `transactionID` (UUID string)  
 Fields: `itemID`, `itemName`, `userID`, `changeType` (`create`/`stock_in`/`stock_out`/`update`/`delete`), `quantityBefore`, `quantityAfter`, `quantityDelta`, `notes`, `createdAt`
 
@@ -118,14 +139,24 @@ Python Lambdas read these from `os.environ`:
 
 `Authentication.mjs` reads:
 - `USERS_TABLE` — defaults to `"Users"`
+- `SESSIONS_TABLE` — defaults to `"Sessions"`
+- `RATE_LIMIT_TABLE` — defaults to `"AuthAttempts"`
+- `PASSWORD_RESETS_TABLE` — defaults to `"PasswordResets"`
 - `SNS_TOPIC_ARN` — same as Python Lambdas; used for email subscription on register/login
+- `APP_URL` — base URL of the app (e.g. `https://your-bucket.s3-website-us-east-1.amazonaws.com`); used in password reset email links
+- `SES_FROM_EMAIL` — verified SES sender address for reset emails
 
-`LowItemInsight.py` also reads:
-- `ALERT_COOLDOWN_HOURS` — defaults to `24`; controls per-user SNS alert frequency
+`Proxy.py` also reads:
+- `SESSIONS_TABLE` — defaults to `"Sessions"`; used for server-side session validation
+- `SECRETS_MANAGER_SECRET_NAME` — optional; if set, API key is fetched from Secrets Manager (JSON `{"api_key": "..."}` or raw string) with 5-min module-level cache; falls back to `API_KEY` env var
 
 `Proxy.py` reads:
 - `API_ENDPOINT` — base URL of the real API Gateway stage (e.g. `https://<id>.execute-api.us-east-1.amazonaws.com/prod`)
-- `API_KEY` — the `x-api-key` value injected into forwarded requests; never exposed to the browser
+- `API_KEY` — fallback x-api-key value; preferred path is Secrets Manager via `SECRETS_MANAGER_SECRET_NAME`
+- `CORS_ORIGIN` — comma-separated allowed origins; echoes back matching origin or `*` if unset
+
+`LowItemInsight.py` also reads:
+- `ALERT_COOLDOWN_HOURS` — defaults to `24`; controls per-user SNS alert frequency
 
 ## Lambda Function Patterns
 
@@ -144,8 +175,8 @@ Key Lambdas:
 - **`GetTransactions.py`** — Returns user's audit log, sorted newest-first, capped at 200 items
 - **`LowItemInsight.py`** — Analyzes inventory health (health score, risk assessment, reorder recommendations), publishes SNS alerts + SQS events
 - **`DailyAlert.py`** — Scheduled function that generates formatted email report (ASCII art, no HTML) and publishes via SNS
-- **`Authentication.mjs`** — Node.js ESM Lambda handling `/auth/register` and `/auth/login`; uses **AWS SDK v3** (`@aws-sdk/client-dynamodb`, `@aws-sdk/lib-dynamodb`, `@aws-sdk/client-sns`); subscribes user emails to SNS on registration and re-checks subscription on login (re-subscribes if no confirmed subscription exists — pending counts as not subscribed)
-- **`Proxy.py`** — Reverse-proxy Lambda that sits in front of all inventory endpoints; reads `API_ENDPOINT` + `API_KEY` from env vars and re-issues the request to the real stage with the key injected. Extracts path from `event['pathParameters']['proxy']`, forwards query strings from `event['queryStringParameters']`, passes method and body. Handles OPTIONS preflight inline (returns 200 + CORS headers without forwarding to the real stage).
+- **`Authentication.mjs`** — Node.js ESM Lambda; handles `/auth/register`, `/auth/login`, `/auth/forgot-password`, `/auth/reset-password`. Uses **AWS SDK v3** (`@aws-sdk/client-dynamodb`, `@aws-sdk/lib-dynamodb`, `@aws-sdk/client-sns`, `@aws-sdk/client-ses`). On register: hashes password (scryptSync), creates session token, subscribes email to SNS. On login: verifies password, creates session, re-subscribes to SNS if needed, rate-limits via AuthAttempts. On forgot-password: generates reset token, sends SES email. On reset-password: validates token, updates password, bulk-invalidates all sessions via `userID-index` GSI.
+- **`Proxy.py`** — Reverse-proxy Lambda; validates session token against Sessions table (60s cache) before forwarding. Fetches API key from Secrets Manager with 5-min cache (fallback to `API_KEY` env var). Reads `CORS_ORIGIN` to construct allow-list. Handles OPTIONS preflight inline without forwarding.
 
 ## Frontend Architecture
 
@@ -158,8 +189,10 @@ Every protected page loads scripts in this order (critical for dependencies):
 
 **Auth Flow:**
 - `requireAuth()` redirects to `login.html` if no session token in `sessionStorage`
-- After login, `Authentication.mjs` returns a UUID token stored in `sessionStorage.userEmail`
+- After login, `Authentication.mjs` returns a UUID session token stored as `sessionStorage.sessionToken` (and `sessionStorage.userEmail` for the user's email)
+- Token is sent as `Authorization: Bearer <token>` header on every proxied request; `Proxy.py` validates it server-side
 - `sessionStorage` persists across page navigation but clears on browser close (security)
+- Forgot-password flow: `forgot-password.html` → `POST /auth/forgot-password` → SES email → `reset-password.html?token=...` → `POST /auth/reset-password`
 
 ### Data Fetching Pattern
 Pages use `loadXxx()` function that:
@@ -179,7 +212,9 @@ Example: `inventory.html` calls `loadInventory()` which:
 Tailwind CSS via CDN (no build step). Inter font via Google Fonts CDN. Primary color `#005ab4`. Status badges: emerald = In Stock, yellow = Low Stock, red = Out of Stock.
 
 The app is a multi-page app (MPA) with real browser navigation:
-- `login.html` — login + register
+- `login.html` — login + register tabs
+- `forgot-password.html` — email input → triggers reset email (no auth required)
+- `reset-password.html` — new password form; reads `?token=` from URL (no auth required)
 - `dashboard.html` — stat cards + read-only inventory table preview (no edit/delete actions)
 - `inventory.html` — full inventory table with stock management; Export CSV, Print Report, Manage Categories buttons
 - `add-item.html` — add/edit form (edit data passed via `sessionStorage` key `iq_editItem`)
@@ -261,6 +296,21 @@ This prevents users from seeing blank/stuck loading states when the API is unava
 - `allCategories` — cached array of user categories, merged from server + local additions
 - Filter/search state lives in DOM (input value), not in JS variables
 - On page load (via `loadXxx()`), both caches refetch from server; on local mutations, only mutated item updates
+
+## Testing
+
+Playwright E2E tests live in `tests/e2e/` with page objects in `tests/pages/`.
+
+```bash
+npx playwright test                        # run all tests
+npx playwright test tests/e2e/auth/        # auth suite only
+npx playwright test --headed               # with browser visible
+npx playwright show-report                 # open last HTML report
+```
+
+Config: `playwright.config.ts` at root. Tests hit the live AWS endpoints (not localhost) — requires a deployed environment. `tests/e2e/auth/login.spec.ts` and `register.spec.ts` are the primary auth coverage.
+
+Smoke tests for sprint verification: `gan-harness/tests/sprint1_smoke.sh` and `sprint2_smoke.sh` — run against the live API using curl.
 
 ## Troubleshooting
 

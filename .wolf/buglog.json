@@ -629,6 +629,102 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-04-14T08:27:14.919Z"
+    },
+    {
+      "id": "bug-040",
+      "timestamp": "2026-04-14T09:57:42.807Z",
+      "error_message": "Missing guard clause",
+      "file": "lambda/Authentication.mjs",
+      "root_cause": "No early return/throw for edge case: !item",
+      "fix": "Added guard clause: if (!item)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-14T09:57:42.807Z"
+    },
+    {
+      "id": "bug-041",
+      "timestamp": "2026-04-14T09:58:11.535Z",
+      "error_message": "Missing await",
+      "file": "lambda/Authentication.mjs",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-14T09:58:11.535Z"
+    },
+    {
+      "id": "bug-042",
+      "timestamp": "2026-04-14T10:00:17.764Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/Proxy.py",
+      "root_cause": "10 lines replaced/restructured",
+      "fix": "Rewrote 23→67 lines (10 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-14T10:00:17.764Z"
+    },
+    {
+      "id": "bug-043",
+      "timestamp": "2026-04-15T04:22:34.489Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "lambda/Authentication.mjs",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "mjs"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-15T04:22:34.489Z"
+    },
+    {
+      "id": "bug-044",
+      "timestamp": "2026-04-15T06:05:17.299Z",
+      "error_message": "Incorrect value in code",
+      "file": "CLAUDE.md",
+      "root_cause": "Had `sessionStorage`",
+      "fix": "Changed to `Sessions`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-15T06:05:17.299Z"
+    },
+    {
+      "id": "bug-045",
+      "timestamp": "2026-04-15T08:03:02.916Z",
+      "error_message": "Incorrect value in code",
+      "file": "CLAUDE.md",
+      "root_cause": "Had `@aws-sdk/client-dynamodb`",
+      "fix": "Changed to `/auth/forgot-password`",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-15T08:03:02.916Z"
     }
   ]
 }

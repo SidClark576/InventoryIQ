@@ -1,18 +1,18 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T08:27:37.140Z
-> Files: 85 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-15T08:03:26.595Z
+> Files: 90 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
-- `eager-churning-thimble.md` — Sprint 2 — Auth Hardening (NO JWT) (~1779 tok)
+- `eager-churning-thimble.md` — Debug: 500 on POST /auth/forgot-password (~1157 tok)
 
 ## ./
 
 - `.DS_Store` (~2186 tok)
 - `.gitignore` — Git ignore rules (~32 tok)
 - `AGENTS.md` — InventoryIQ — Codebase Reference (~1381 tok)
-- `CLAUDE.md` — OpenWolf (~4372 tok)
+- `CLAUDE.md` — OpenWolf (~5410 tok)
 - `notes` (~1278 tok)
 - `package-lock.json` — npm lock file (~6820 tok)
 - `package.json` — Node.js package manifest (~97 tok)
@@ -22,7 +22,7 @@
 ## .claude/
 
 - `settings.json` (~522 tok)
-- `settings.local.json` (~136 tok)
+- `settings.local.json` (~253 tok)
 
 ## .claude/rules/
 
@@ -33,6 +33,7 @@
 - `console-2026-04-07T01-57-12-180Z.log` (~920 tok)
 - `console-2026-04-07T02-01-53-684Z.log` (~3362 tok)
 - `console-2026-04-07T02-10-56-332Z.log` (~5338 tok)
+- `console-2026-04-14T07-24-11-262Z.log` (~670 tok)
 - `page-2026-04-07T01-57-13-293Z.yml` (~471 tok)
 - `page-2026-04-07T01-58-48-380Z.yml` (~498 tok)
 - `page-2026-04-07T01-59-23-975Z.yml` (~495 tok)
@@ -63,6 +64,8 @@
 - `page-2026-04-07T02-16-12-698Z.yml` (~4344 tok)
 - `page-2026-04-07T02-16-18-255Z.yml` (~742 tok)
 - `page-2026-04-07T02-16-26-416Z.yml` (~2933 tok)
+- `page-2026-04-14T07-24-12-674Z.yml` (~250 tok)
+- `page-2026-04-14T07-24-50-942Z.yml` (~278 tok)
 
 ## docs/
 
@@ -72,14 +75,16 @@
 ## frontend/
 
 - `.DS_Store` (~1640 tok)
-- `add-item.html` — InventoryIQ | Add Asset (~3755 tok)
+- `add-item.html` — InventoryIQ | Add Asset (~3771 tok)
 - `api.js` — ── AUTH FUNCTIONS ──────────────────────────────────────────── (~1556 tok)
 - `config.js` — Declares CONFIG (~76 tok)
 - `dashboard.html` — InventoryIQ | Dashboard (~4765 tok)
+- `forgot-password.html` — InventoryIQ | Forgot Password (~1832 tok)
 - `index.html` (~30 tok)
 - `insights.html` — InventoryIQ | Insights (~3078 tok)
-- `inventory.html` — InventoryIQ | Inventory (~9546 tok)
-- `login.html` — InventoryIQ | Login (~3193 tok)
+- `inventory.html` — InventoryIQ | Inventory (~9586 tok)
+- `login.html` — InventoryIQ | Login (~3249 tok)
+- `reset-password.html` — InventoryIQ | Reset Password (~2693 tok)
 - `style.css` — Styles: 7 rules, 1 media queries (~454 tok)
 - `transactions.html` — InventoryIQ | Transactions (~3215 tok)
 - `utils.js` — requireAuth: initNav, handleLogout (~349 tok)
@@ -93,21 +98,21 @@
 
 ## gan-harness/tests/
 
-- `sprint1_smoke.sh` — Sprint 1 smoke tests — Correctness & Tenancy (~935 tok)
-- `sprint2_smoke.sh` — Sprint 2 smoke tests — Auth Hardening (server-validated sessions, NO JWT) (~979 tok)
+- `sprint1_smoke.sh` — Sprint 1 smoke tests — Correctness & Tenancy (~1002 tok)
+- `sprint2_smoke.sh` — Sprint 2 smoke tests — Auth Hardening (server-validated sessions, NO JWT) (~1048 tok)
 
 ## lambda/
 
-- `AddItem.py` — Initialize DynamoDB tables (~1681 tok)
-- `Authentication.mjs` — Exports handler (~2274 tok)
+- `AddItem.py` — Initialize DynamoDB tables (~1191 tok)
+- `Authentication.mjs` — Exports handler (~4625 tok)
 - `DailyAlert.py` — Initialize AWS service clients at module level (outside the handler) (~3370 tok)
-- `DeleteCategory.py` — Initialize DynamoDB with inventory table (~1163 tok)
+- `DeleteCategory.py` — Initialize DynamoDB with inventory table (~999 tok)
 - `DeleteItem.py` — Initialize DynamoDB tables for inventory and transaction logging (~1151 tok)
 - `GetAllItems.py` — Initialize DynamoDB resource and get the inventory table (~973 tok)
 - `GetCategories.py` — Initialize DynamoDB with inventory table (~856 tok)
-- `GetTransactions.py` — Initialize DynamoDB with transactions table (~1112 tok)
+- `GetTransactions.py` — Initialize DynamoDB with transactions table (~889 tok)
 - `LowItemInsight.py` — Initialize AWS services: (~4157 tok)
-- `Proxy.py` — lambda_handler (~1518 tok)
+- `Proxy.py` — lambda_handler (~2122 tok)
 - `UpdateItem.py` — Initialize DynamoDB tables at module level so they are reused across warm Lambda invocations (~1914 tok)
 
 ## playwright-report/
