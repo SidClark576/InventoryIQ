@@ -10,7 +10,7 @@
 - User wants production-hardening specs to be exhaustive: specific files, exact line numbers for bugs, effort estimates, and clear separation of "manual AWS tasks" vs "code changes"
 - Priority ordering for roadmaps: security first, then features, then enterprise polish
 - User prefers GAN-style multi-agent workflow: Planner writes spec + rubric, Generator implements, Evaluator scores
-- ALWAYS run `/caveman` (full mode) at session start. Every session, every conversation. Non-negotiable.
+- ALWAYS activate caveman mode at session start: invoke Skill tool with skill=`caveman:caveman` and args=`full`. Every session, every conversation. Non-negotiable. Do not skip even if startup hook activates it — explicit invocation required.
 
 ## Key Learnings
 

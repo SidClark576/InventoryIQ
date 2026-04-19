@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-12T10:53:39.421Z",
   "lifetime": {
-    "total_tokens_estimated": 732976,
-    "total_reads": 213,
-    "total_writes": 288,
-    "total_sessions": 58,
-    "anatomy_hits": 199,
-    "anatomy_misses": 14,
+    "total_tokens_estimated": 745505,
+    "total_reads": 216,
+    "total_writes": 291,
+    "total_sessions": 66,
+    "anatomy_hits": 201,
+    "anatomy_misses": 15,
     "repeated_reads_blocked": 47,
-    "estimated_savings_vs_bare_cli": 400887
+    "estimated_savings_vs_bare_cli": 401287
   },
   "sessions": [
     {
@@ -4028,12 +4028,192 @@
         "repeated_reads_blocked": 1,
         "anatomy_lookups": 4
       }
+    },
+    {
+      "id": "session-2026-04-15-0029",
+      "started": "2026-04-15T10:29:09.467Z",
+      "ended": "2026-04-15T10:30:20.450Z",
+      "reads": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/gan-harness/spec-v3.md",
+          "tokens_estimated": 11489,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 11489,
+        "output_tokens_estimated": 0,
+        "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-04-19-2224",
+      "started": "2026-04-19T08:24:10.065Z",
+      "ended": "2026-04-19T09:12:57.920Z",
+      "reads": [
+        {
+          "file": "/private/tmp/claude-501/-Users-sidneyordonia-Documents-InventoryIQ/8e76379b-b245-45da-8519-6592e975e0c2/tasks/b8rkpqnh3.output",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 0,
+        "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-04-19-0918",
+      "started": "2026-04-19T19:18:23.591Z",
+      "ended": "2026-04-19T19:52:06.537Z",
+      "reads": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/_logging.py",
+          "tokens_estimated": 720,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/_logging.py",
+          "tokens_estimated": 220,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/_logging.py",
+          "tokens_estimated": 42,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/Proxy.py",
+          "tokens_estimated": 58,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 720,
+        "output_tokens_estimated": 320,
+        "reads_count": 1,
+        "writes_count": 3,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
     }
   ],
   "daemon_usage": [],
-  "waste_flags": [],
+  "waste_flags": [
+    {
+      "pattern": "memory_bloat",
+      "description": "memory.md is ~6982 tokens",
+      "tokens_wasted": 1982,
+      "suggestion": "memory.md is growing large. Consolidation should run more frequently.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    },
+    {
+      "pattern": "anatomy_miss_rate",
+      "description": "100% of file lookups missed anatomy in session session-2026-04-13-2300",
+      "tokens_wasted": 0,
+      "suggestion": "Run openwolf scan to refresh anatomy.md.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    },
+    {
+      "pattern": "anatomy_miss_rate",
+      "description": "100% of file lookups missed anatomy in session session-2026-04-13-2300",
+      "tokens_wasted": 0,
+      "suggestion": "Run openwolf scan to refresh anatomy.md.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    },
+    {
+      "pattern": "anatomy_miss_rate",
+      "description": "100% of file lookups missed anatomy in session session-2026-04-13-2300",
+      "tokens_wasted": 0,
+      "suggestion": "Run openwolf scan to refresh anatomy.md.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    },
+    {
+      "pattern": "anatomy_miss_rate",
+      "description": "100% of file lookups missed anatomy in session session-2026-04-13-2300",
+      "tokens_wasted": 0,
+      "suggestion": "Run openwolf scan to refresh anatomy.md.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    },
+    {
+      "pattern": "anatomy_miss_rate",
+      "description": "100% of file lookups missed anatomy in session session-2026-04-13-2300",
+      "tokens_wasted": 0,
+      "suggestion": "Run openwolf scan to refresh anatomy.md.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    },
+    {
+      "pattern": "anatomy_miss_rate",
+      "description": "100% of file lookups missed anatomy in session session-2026-04-13-2300",
+      "tokens_wasted": 0,
+      "suggestion": "Run openwolf scan to refresh anatomy.md.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    },
+    {
+      "pattern": "anatomy_miss_rate",
+      "description": "100% of file lookups missed anatomy in session session-2026-04-13-2300",
+      "tokens_wasted": 0,
+      "suggestion": "Run openwolf scan to refresh anatomy.md.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    },
+    {
+      "pattern": "anatomy_miss_rate",
+      "description": "50% of file lookups missed anatomy in session session-2026-04-13-2300",
+      "tokens_wasted": 0,
+      "suggestion": "Run openwolf scan to refresh anatomy.md.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    },
+    {
+      "pattern": "anatomy_miss_rate",
+      "description": "33% of file lookups missed anatomy in session session-2026-04-15-1759",
+      "tokens_wasted": 0,
+      "suggestion": "Run openwolf scan to refresh anatomy.md.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    },
+    {
+      "pattern": "anatomy_miss_rate",
+      "description": "33% of file lookups missed anatomy in session session-2026-04-15-1759",
+      "tokens_wasted": 0,
+      "suggestion": "Run openwolf scan to refresh anatomy.md.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    },
+    {
+      "pattern": "anatomy_miss_rate",
+      "description": "33% of file lookups missed anatomy in session session-2026-04-15-1759",
+      "tokens_wasted": 0,
+      "suggestion": "Run openwolf scan to refresh anatomy.md.",
+      "detected_at": "2026-04-15T10:33:41.518Z"
+    }
+  ],
   "optimization_report": {
-    "last_generated": null,
-    "patterns": []
+    "last_generated": "2026-04-15T10:33:41.536Z",
+    "patterns": [
+      "memory_bloat",
+      "anatomy_miss_rate",
+      "anatomy_miss_rate",
+      "anatomy_miss_rate",
+      "anatomy_miss_rate",
+      "anatomy_miss_rate",
+      "anatomy_miss_rate",
+      "anatomy_miss_rate",
+      "anatomy_miss_rate",
+      "anatomy_miss_rate",
+      "anatomy_miss_rate",
+      "anatomy_miss_rate"
+    ]
   }
 }

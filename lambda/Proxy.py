@@ -1,4 +1,7 @@
 import json, boto3, urllib.request, urllib.parse, os, time
+import _logging
+
+FUNCTION_NAME = 'Proxy'
 
 API_ENDPOINT     = os.environ['API_ENDPOINT']
 SESSIONS_TABLE   = os.environ.get('SESSIONS_TABLE', 'Sessions')
@@ -125,6 +128,19 @@ def _slide_expiry(token, expires_at):
 
 
 def lambda_handler(event, context):
+    t0 = time.time()
+    res = _handle(event, context)
+    _logging.log_json(
+        event=event,
+        function=FUNCTION_NAME,
+        latency_ms=(time.time() - t0) * 1000,
+        status=res.get('statusCode'),
+        is_error=res.get('statusCode', 200) >= 500,
+    )
+    return res
+
+
+def _handle(event, context):
     method = event.get('httpMethod', 'GET')
     raw_headers = event.get('headers') or {}
     origin = raw_headers.get('origin') or raw_headers.get('Origin') or ''
@@ -149,10 +165,16 @@ def lambda_handler(event, context):
     ).strip()
 
     if not token:
+        _logging.log_json(event=event, function=FUNCTION_NAME,
+                          level='WARN', count_request=False,
+                          extra_metric=('iq.auth.invalid_session', 'Count'))
         return _unauthorized('Missing X-Session-Token header', origin)
 
     user_id, expires_at = _validate_session(token)
     if not user_id:
+        _logging.log_json(event=event, function=FUNCTION_NAME,
+                          level='WARN', count_request=False,
+                          extra_metric=('iq.auth.invalid_session', 'Count'))
         return _unauthorized('Invalid or expired session', origin)
 
     # Slide expiry in background (best-effort)

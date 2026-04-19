@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-15T10:22:59.283Z
-> Files: 91 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-19T19:48:41.175Z
+> Files: 92 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -17,7 +17,7 @@
 
 ## .claude/
 
-- `settings.json` (~522 tok)
+- `settings.json` (~531 tok)
 - `settings.local.json` (~253 tok)
 
 ## .claude/rules/
@@ -99,19 +99,20 @@
 
 ## lambda/
 
-- `AddItem.py` — Table names from environment with defaults (~1714 tok)
-- `Authentication.mjs` — Exports handler (~4625 tok)
-- `DailyAlert.py` — Initialize AWS service clients at module level (outside the handler) (~3370 tok)
-- `DeleteCategory.py` — Initialize DynamoDB with inventory table (~999 tok)
-- `DeleteItem.py` — Table names from environment with defaults (~1462 tok)
-- `GetAllItems.py` — Initialize DynamoDB resource and get the inventory table (~1097 tok)
-- `GetCategories.py` — Initialize DynamoDB with inventory table (~856 tok)
-- `GetTransactions.py` — Initialize DynamoDB with transactions table (~889 tok)
-- `LowItemInsight.py` — Initialize AWS services: (~4157 tok)
-- `Proxy.py` — lambda_handler (~2382 tok)
-- `PurgeDeletedItems.py` — Table name from environment with default (~614 tok)
-- `RestoreItem.py` — Table name from environment with default (~1318 tok)
-- `UpdateItem.py` — Table names from environment with defaults (~2614 tok)
+- `_logging.py` — log_json, hash_user (~755 tok)
+- `AddItem.py` — lambda_handler, response (~1824 tok)
+- `Authentication.mjs` — Exports handler (~4938 tok)
+- `DailyAlert.py` — lambda_handler (~3481 tok)
+- `DeleteCategory.py` — lambda_handler (~1111 tok)
+- `DeleteItem.py` — lambda_handler, response (~1573 tok)
+- `GetAllItems.py` — lambda_handler (~1208 tok)
+- `GetCategories.py` — lambda_handler (~968 tok)
+- `GetTransactions.py` — lambda_handler (~1002 tok)
+- `LowItemInsight.py` — lambda_handler (~4269 tok)
+- `Proxy.py` — lambda_handler (~2600 tok)
+- `PurgeDeletedItems.py` — lambda_handler (~727 tok)
+- `RestoreItem.py` — lambda_handler, response (~1429 tok)
+- `UpdateItem.py` — lambda_handler, response (~2724 tok)
 
 ## playwright-report/
 

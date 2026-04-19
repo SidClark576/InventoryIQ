@@ -3,6 +3,10 @@ import boto3
 import os
 from decimal import Decimal
 from boto3.dynamodb.conditions import Key, Attr
+import time as _time
+import _logging
+
+FUNCTION_NAME = 'GetAllItems'
 
 # Initialize DynamoDB resource and get the inventory table
 # Table name is configurable via DYNAMODB_TABLE env var, defaults to 'InventoryIQ'
@@ -10,6 +14,19 @@ dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
 
 def lambda_handler(event, context):
+    t0 = _time.time()
+    res = _handle(event, context)
+    _logging.log_json(
+        event=event,
+        function=FUNCTION_NAME,
+        latency_ms=(_time.time() - t0) * 1000,
+        status=res.get('statusCode'),
+        is_error=res.get('statusCode', 200) >= 500,
+    )
+    return res
+
+
+def _handle(event, context):
     """
     Retrieves all active (non-deleted) inventory items for a specific user.
 

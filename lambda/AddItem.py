@@ -6,6 +6,10 @@ from datetime import datetime
 from decimal import Decimal
 from boto3.dynamodb.types import TypeSerializer
 from botocore.exceptions import ClientError
+import time as _time
+import _logging
+
+FUNCTION_NAME = 'AddItem'
 
 # Table names from environment with defaults
 TABLE      = os.environ.get('DYNAMODB_TABLE',    'InventoryIQ')
@@ -25,6 +29,19 @@ def _serialize(d):
 
 
 def lambda_handler(event, context):
+    t0 = _time.time()
+    res = _handle(event, context)
+    _logging.log_json(
+        event=event,
+        function=FUNCTION_NAME,
+        latency_ms=(_time.time() - t0) * 1000,
+        status=res.get('statusCode'),
+        is_error=res.get('statusCode', 200) >= 500,
+    )
+    return res
+
+
+def _handle(event, context):
     """
     Creates a new inventory item and logs the transaction atomically.
 

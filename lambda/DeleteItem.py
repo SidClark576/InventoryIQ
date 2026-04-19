@@ -5,6 +5,10 @@ import os
 from datetime import datetime
 from boto3.dynamodb.types import TypeSerializer
 from botocore.exceptions import ClientError
+import time as _time
+import _logging
+
+FUNCTION_NAME = 'DeleteItem'
 
 # Table names from environment with defaults
 TABLE    = os.environ.get('DYNAMODB_TABLE',    'InventoryIQ')
@@ -18,6 +22,19 @@ serializer = TypeSerializer()
 
 
 def lambda_handler(event, context):
+    t0 = _time.time()
+    res = _handle(event, context)
+    _logging.log_json(
+        event=event,
+        function=FUNCTION_NAME,
+        latency_ms=(_time.time() - t0) * 1000,
+        status=res.get('statusCode'),
+        is_error=res.get('statusCode', 200) >= 500,
+    )
+    return res
+
+
+def _handle(event, context):
     """
     Soft-deletes an inventory item and logs the transaction atomically.
 

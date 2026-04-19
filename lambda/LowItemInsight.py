@@ -5,6 +5,10 @@ from decimal import Decimal
 from collections import defaultdict
 from datetime import datetime, timezone
 from boto3.dynamodb.conditions import Key
+import time as _time
+import _logging
+
+FUNCTION_NAME = 'LowItemInsight'
 
 # Initialize AWS services:
 # - DynamoDB for reading inventory items
@@ -62,6 +66,19 @@ def _should_send_alert(user_id, table):
     return True
 
 def lambda_handler(event, context):
+    t0 = _time.time()
+    res = _handle(event, context)
+    _logging.log_json(
+        event=event,
+        function=FUNCTION_NAME,
+        latency_ms=(_time.time() - t0) * 1000,
+        status=res.get('statusCode'),
+        is_error=res.get('statusCode', 200) >= 500,
+    )
+    return res
+
+
+def _handle(event, context):
     """
     Generates comprehensive inventory insights including stock analysis, risk assessment, and reorder recommendations.
 

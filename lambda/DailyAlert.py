@@ -4,6 +4,10 @@ import os
 from decimal import Decimal
 from datetime import datetime, timezone
 from boto3.dynamodb.conditions import Attr
+import time as _time
+import _logging
+
+FUNCTION_NAME = 'DailyAlert'
 
 # Initialize AWS service clients at module level (outside the handler)
 # This is a Lambda best practice: clients are reused across warm invocations,
@@ -21,6 +25,19 @@ table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
 SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN', '')
 
 def lambda_handler(event, context):
+    t0 = _time.time()
+    res = _handle(event, context)
+    _logging.log_json(
+        event=event,
+        function=FUNCTION_NAME,
+        latency_ms=(_time.time() - t0) * 1000,
+        status=res.get('statusCode'),
+        is_error=res.get('statusCode', 200) >= 500,
+    )
+    return res
+
+
+def _handle(event, context):
     """
     Generates and sends a daily inventory stock report via SNS (email/SMS).
 

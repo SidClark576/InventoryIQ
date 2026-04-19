@@ -2,6 +2,10 @@ import json
 import os
 import boto3
 from boto3.dynamodb.conditions import Attr
+import time as _time
+import _logging
+
+FUNCTION_NAME = 'DeleteCategory'
 
 # Initialize DynamoDB with inventory table
 dynamodb = boto3.resource('dynamodb')
@@ -15,7 +19,20 @@ CORS = {
     'Access-Control-Allow-Methods': 'OPTIONS,DELETE'
 }
 
-def lambda_handler(event, _context):
+def lambda_handler(event, context):
+    t0 = _time.time()
+    res = _handle(event, context)
+    _logging.log_json(
+        event=event,
+        function=FUNCTION_NAME,
+        latency_ms=(_time.time() - t0) * 1000,
+        status=res.get('statusCode'),
+        is_error=res.get('statusCode', 200) >= 500,
+    )
+    return res
+
+
+def _handle(event, _context):
     """
     Deletes a category by reassigning all items in that category to "Uncategorized".
 

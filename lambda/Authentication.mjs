@@ -11,6 +11,31 @@ import { SNSClient, SubscribeCommand, ListSubscriptionsByTopicCommand } from "@a
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import crypto from "crypto";
 
+// ── Inline EMF metric helper ──────────────────────────────────
+// Prints a single CloudWatch Embedded Metric Format JSON line.
+// CloudWatch auto-extracts Namespace/InventoryIQ metrics from the _aws envelope.
+function emitAuthMetric(metricName, path, email) {
+    const userHash = email
+        ? crypto.createHash('sha256').update(email).digest('hex').slice(0, 12)
+        : undefined;
+    const record = {
+        _aws: {
+            Timestamp: Date.now(),
+            CloudWatchMetrics: [{
+                Namespace: "InventoryIQ",
+                Dimensions: [["function"]],
+                Metrics: [{ Name: metricName, Unit: "Count" }]
+            }]
+        },
+        level: "INFO",
+        function: "Authentication",
+        [metricName]: 1,
+        path,
+        ...(userHash ? { userID_hash: userHash } : {})
+    };
+    console.log(JSON.stringify(record));
+}
+
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 const snsClient = new SNSClient({});
@@ -161,6 +186,7 @@ export const handler = async (event) => {
 
             // Rate limit: reject if >= 5 failures in last 15 min
             if (await _isRateLimited(email)) {
+                emitAuthMetric("iq.auth.rate_limited", path, email);
                 return {
                     statusCode: 429,
                     headers: { ...headers, 'Retry-After': String(LOCKOUT_SECONDS) },
@@ -177,6 +203,7 @@ export const handler = async (event) => {
 
             if (!user) {
                 await _recordFailedAttempt(email);
+                emitAuthMetric("iq.auth.login_fail", path, email);
                 return {
                     statusCode: 401,
                     headers,
@@ -188,6 +215,7 @@ export const handler = async (event) => {
 
             if (!isValid) {
                 await _recordFailedAttempt(email);
+                emitAuthMetric("iq.auth.login_fail", path, email);
                 return {
                     statusCode: 401,
                     headers,
@@ -246,6 +274,7 @@ export const handler = async (event) => {
                 }
             }
 
+            emitAuthMetric("iq.auth.login_success", path, email);
             return {
                 statusCode: 200,
                 headers,

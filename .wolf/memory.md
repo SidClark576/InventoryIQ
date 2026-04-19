@@ -4,215 +4,82 @@
 > Old sessions are consolidated by the daemon weekly.
 
 ## Session: 2026-04-12 00:54
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 00:54
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 00:58
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 00:59
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 00:59 | Edited lambda/GetAllItems.py | modified lambda_handler() | ~994 |
-| 00:59 | Edited lambda/GetTransactions.py | modified lambda_handler() | ~958 |
-| 00:59 | Edited lambda/GetCategories.py | expanded (+6 lines) | ~216 |
-| 00:59 | Edited lambda/GetCategories.py | 8→8 lines | ~66 |
-| 00:59 | Edited lambda/GetCategories.py | 17→17 lines | ~202 |
-| 00:59 | Session end: 5 writes across 3 files (GetAllItems.py, GetTransactions.py, GetCategories.py) | 0 reads | ~2436 tok |
-| 00:59 | Edited lambda/LowItemInsight.py | 15→15 lines | ~119 |
-| 00:59 | Edited lambda/LowItemInsight.py | expanded (+6 lines) | ~220 |
-| 01:00 | Edited lambda/UpdateItem.py | modified get() | ~191 |
+> Consolidated session (9 actions)
 
 ## Session: 2026-04-12 01:00
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 01:00 | Edited lambda/DeleteItem.py | modified lambda_handler() | ~579 |
-| 01:00 | Session end: 1 writes across 1 files (DeleteItem.py) | 1 reads | ~1572 tok |
+> Consolidated session (2 actions)
 
 ## Session: 2026-04-12 01:07
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 01:12 | Created gan-harness/spec.md | — | ~7361 |
+> Consolidated session (1 actions)
 
 ## Session: 2026-04-12 01:13
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 02:12 | Created gan-harness/spec.md | — | ~12007 |
+> Consolidated session (1 actions)
 
 ## Session: 2026-04-12 02:13
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 02:15 | Created gan-harness/eval-rubric.md | — | ~3901 |
+> Consolidated session (1 actions)
 
 ## Session: 2026-04-12 02:16
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 02:16 | Updated .wolf/cerebrum.md | Added User Preferences, Key Learnings, Do-Not-Repeat (shadowing bug), Decision Log (4 entries) | ~1200 |
-| 02:16 | Updated .wolf/memory.md | Added session log entries | ~200 |
-| 02:16 | Session end: OpenWolf housekeeping complete. Both deliverables (spec.md, eval-rubric.md) confirmed aligned and ready. | — | ~0 |
+> Consolidated session (3 actions)
 
 ## Session: 2026-04-12 02:18
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 03:00
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 10:33
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 10:33 | Edited lambda/UpdateItem.py | 4→4 lines | ~68 |
+> Consolidated session (1 actions)
 
 ## Session: 2026-04-12 03:05
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|---------|
-| 03:05 | Fixed UpdateItem.py line 56 shadowing bug | UpdateItem.py | renamed `response = table.get_item(...)` to `result = table.get_item(...)` | ~380 |
-| 03:05 | Verified Sprint 1 code readiness | All 6 Lambdas | All using GSI queries, DeleteItem/UpdateItem fixed | ~0 |
-| 10:34 | Session end: 1 writes across 1 files (UpdateItem.py) | 2 reads | ~2996 tok |
-| 10:50 | Session end: 1 writes across 1 files (UpdateItem.py) | 2 reads | ~2996 tok |
-| 10:50 | Session end: 1 writes across 1 files (UpdateItem.py) | 2 reads | ~2996 tok |
-| 11:05 | Session end: 1 writes across 1 files (UpdateItem.py) | 2 reads | ~2996 tok |
-| 11:06 | Session end: 1 writes across 1 files (UpdateItem.py) | 2 reads | ~2996 tok |
+> Consolidated session (7 actions)
 
 ## Session: 2026-04-12 11:11
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 11:12 | Edited lambda/Authentication.mjs | 22→27 lines | ~261 |
-| 11:12 | Edited lambda/Authentication.mjs | added optional chaining | ~698 |
-| 11:12 | Edited lambda/Authentication.mjs | added 1 condition(s) | ~240 |
-| 11:12 | Edited lambda/Authentication.mjs | added 1 condition(s) | ~978 |
-| 11:12 | Edited lambda/Proxy.py | modified base64url_decode() | ~583 |
-| 11:13 | Edited lambda/Proxy.py | modified lambda_handler() | ~680 |
-| 11:13 | Edited lambda/AddItem.py | added 1 import(s) | ~131 |
+> Consolidated session (7 actions)
 
 ## Session: 2026-04-12 11:13
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 11:14 | Edited lambda/AddItem.py | modified lambda_handler() | ~857 |
-| 11:14 | Edited lambda/AddItem.py | 14→14 lines | ~177 |
-| 11:14 | Edited lambda/AddItem.py | modified response() | ~201 |
-| 11:14 | Edited lambda/UpdateItem.py | 11→12 lines | ~128 |
-| 11:14 | Edited lambda/UpdateItem.py | modified lambda_handler() | ~737 |
-| 11:14 | Edited lambda/UpdateItem.py | modified except() | ~847 |
-| 11:14 | Edited lambda/UpdateItem.py | 13→13 lines | ~172 |
-| 11:15 | Edited lambda/UpdateItem.py | modified response() | ~190 |
-| 11:15 | Edited lambda/DeleteItem.py | 10→11 lines | ~112 |
-| 11:15 | Edited lambda/DeleteItem.py | modified lambda_handler() | ~664 |
-| 11:15 | Edited lambda/DeleteItem.py | 17→17 lines | ~267 |
-| 11:15 | Edited lambda/DeleteItem.py | modified response() | ~190 |
+> Consolidated session (12 actions)
 
 ## Session: 2026-04-12 11:16
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 11:16 | Edited lambda/GetAllItems.py | 10→11 lines | ~116 |
-| 11:16 | Edited lambda/GetAllItems.py | modified lambda_handler() | ~267 |
-| 11:16 | Edited lambda/GetAllItems.py | modified response() | ~315 |
-| 11:16 | Edited lambda/GetTransactions.py | reduced (-7 lines) | ~110 |
-| 11:16 | Edited lambda/GetTransactions.py | modified lambda_handler() | ~417 |
-| 11:16 | Edited lambda/GetTransactions.py | modified response() | ~342 |
-| 11:17 | Edited lambda/GetCategories.py | reduced (-7 lines) | ~80 |
-| 11:17 | Edited lambda/GetCategories.py | modified lambda_handler() | ~378 |
-| 11:17 | Edited lambda/GetCategories.py | modified response() | ~305 |
-| 11:17 | Edited lambda/LowItemInsight.py | 7→8 lines | ~141 |
+> Consolidated session (10 actions)
 
 ## Session: 2026-04-12 11:18
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 11:18 | Edited lambda/LowItemInsight.py | modified lambda_handler() | ~530 |
-| 11:18 | Edited lambda/LowItemInsight.py | modified response() | ~249 |
-| 11:18 | Edited lambda/DeleteCategory.py | reduced (-7 lines) | ~58 |
-| 11:18 | Edited lambda/DeleteCategory.py | modified lambda_handler() | ~466 |
-| 11:18 | Edited lambda/DeleteCategory.py | dumps() → response() | ~70 |
-| 11:18 | Edited lambda/DeleteCategory.py | modified response() | ~245 |
-| 11:19 | Session end: 6 writes across 2 files (LowItemInsight.py, DeleteCategory.py) | 1 reads | ~2617 tok |
+> Consolidated session (7 actions)
 
 ## Session: 2026-04-12 13:24
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 13:24
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 13:27
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 13:27
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 13:29
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 13:30
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 13:39
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 13:40 | Edited frontend/api.js | added 1 condition(s) | ~316 |
+> Consolidated session (1 actions)
 
 ## Session: 2026-04-12 13:40
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 13:41 | Edited frontend/api.js | modified getAllItems() | ~164 |
-| 13:41 | Edited frontend/api.js | modified addItem() | ~95 |
-| 13:41 | Edited frontend/api.js | modified updateItem() | ~129 |
-| 13:41 | Edited frontend/api.js | modified deleteItem() | ~164 |
-| 13:41 | Edited frontend/api.js | modified getInsights() | ~83 |
-| 13:41 | Edited frontend/api.js | modified getTransactions() | ~94 |
-| 13:41 | Edited frontend/api.js | modified getCategories() | ~92 |
-| 13:41 | Edited frontend/api.js | modified deleteCategory() | ~110 |
-| 13:41 | Edited frontend/login.html | modified if() | ~71 |
-| 13:41 | Edited frontend/login.html | modified function() | ~37 |
-| 13:41 | Edited frontend/utils.js | modified requireAuth() | ~32 |
+> Consolidated session (11 actions)
 
 ## Session: 2026-04-12 13:42
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 13:42 | Edited frontend/add-item.html | 9→8 lines | ~127 |
-| 13:42 | Edited frontend/inventory.html | 2→2 lines | ~20 |
-| 13:42 | Edited frontend/inventory.html | 4→3 lines | ~36 |
-| 13:42 | Edited frontend/inventory.html | 4→3 lines | ~35 |
-| 13:44 | Session end: 4 writes across 2 files (add-item.html, inventory.html) | 4 reads | ~13897 tok |
-| 13:46 | Session end: 4 writes across 2 files (add-item.html, inventory.html) | 4 reads | ~13897 tok |
-| 13:59 | Created package.json | — | ~88 |
-| 13:59 | Created playwright.config.ts | — | ~203 |
+> Consolidated session (8 actions)
 
 ## Session: 2026-04-13 14:00
 
@@ -555,3 +422,91 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+
+## Session: 2026-04-15 00:35
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 00:35 | Created lambda/_logging.py | — | ~608 |
+| 00:36 | Edited lambda/AddItem.py | 3→7 lines | ~44 |
+| 00:36 | Edited lambda/GetAllItems.py | 3→7 lines | ~50 |
+| 00:36 | Edited lambda/UpdateItem.py | 3→7 lines | ~45 |
+| 00:36 | Edited lambda/DeleteItem.py | 3→7 lines | ~45 |
+| 00:36 | Edited lambda/GetCategories.py | 3→7 lines | ~45 |
+| 00:36 | Edited lambda/GetTransactions.py | 3→7 lines | ~42 |
+| 00:36 | Edited lambda/DeleteCategory.py | 3→7 lines | ~45 |
+| 00:36 | Edited lambda/LowItemInsight.py | 3→7 lines | ~40 |
+| 00:36 | Edited lambda/DailyAlert.py | 3→7 lines | ~46 |
+| 00:37 | Edited lambda/PurgeDeletedItems.py | 3→7 lines | ~46 |
+| 00:37 | Edited lambda/RestoreItem.py | 3→7 lines | ~45 |
+| 00:37 | Edited lambda/Proxy.py | 1→4 lines | ~29 |
+| 00:37 | Edited lambda/AddItem.py | modified lambda_handler() | ~124 |
+| 00:37 | Edited lambda/GetAllItems.py | modified lambda_handler() | ~126 |
+| 00:37 | Edited lambda/UpdateItem.py | modified lambda_handler() | ~126 |
+| 00:37 | Edited lambda/DeleteItem.py | modified lambda_handler() | ~125 |
+| 00:37 | Edited lambda/GetCategories.py | modified lambda_handler() | ~123 |
+| 00:37 | Edited lambda/GetTransactions.py | modified lambda_handler() | ~124 |
+| 00:37 | Edited lambda/DeleteCategory.py | modified lambda_handler() | ~129 |
+| 00:37 | Edited lambda/LowItemInsight.py | modified lambda_handler() | ~138 |
+| 00:37 | Edited lambda/DailyAlert.py | modified lambda_handler() | ~126 |
+| 00:37 | Edited lambda/PurgeDeletedItems.py | modified lambda_handler() | ~126 |
+| 00:37 | Edited lambda/RestoreItem.py | modified lambda_handler() | ~126 |
+| 00:37 | Edited lambda/Proxy.py | modified lambda_handler() | ~114 |
+| 00:37 | Edited lambda/Authentication.mjs | modified emitAuthMetric() | ~252 |
+| 00:38 | Edited lambda/Authentication.mjs | 8→9 lines | ~131 |
+| 00:38 | Edited lambda/Authentication.mjs | modified if() | ~240 |
+| 00:38 | Edited lambda/Authentication.mjs | 13→14 lines | ~122 |
+| 00:38 | Edited lambda/Proxy.py | 6→10 lines | ~144 |
+| 00:38 | Edited lambda/_logging.py | modified log_json() | ~42 |
+
+## Session: 2026-04-15 00:40
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 00:40 | Edited lambda/_logging.py | expanded (+6 lines) | ~122 |
+| 00:40 | Edited lambda/_logging.py | 3→5 lines | ~53 |
+| 00:40 | Edited lambda/Proxy.py | 2→2 lines | ~44 |
+
+## Session: 2026-04-17 20:20
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-19 22:21
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-19 22:23
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-19 22:24
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-18
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 00:00 | Created EMF shared logging module | lambda/_logging.py | NEW — log_json + hash_user | ~780 |
+| 00:05 | Wrapped all 12 Python Lambdas with timing+EMF | AddItem, GetAllItems, UpdateItem, DeleteItem, GetCategories, GetTransactions, DeleteCategory, LowItemInsight, DailyAlert, PurgeDeletedItems, RestoreItem, Proxy | lambda_handler→_handle pattern applied | ~8000 |
+| 00:10 | Added inline emitAuthMetric + auth metric calls | Authentication.mjs | iq.auth.login_success/fail/rate_limited emitted | ~500 |
+| 00:15 | Added iq.auth.invalid_session metric to Proxy | Proxy.py | extra_metric param used for EMF envelope compliance | ~200 |
+| 00:20 | Fixed extra_metric EMF implementation | _logging.py | extra_metric tuple (name,unit[,val]) properly registered in CW envelope | ~100 |
+
+## Session: 2026-04-19 09:18
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-19 09:18
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 09:48 | Edited lambda/_logging.py | modified log_json() | ~220 |
+| 09:48 | Edited lambda/_logging.py | 4→4 lines | ~42 |
+| 09:48 | Edited lambda/Proxy.py | 2→3 lines | ~58 |
+| 09:52 | Session end: 3 writes across 2 files (_logging.py, Proxy.py) | 1 reads | ~1040 tok |

@@ -837,6 +837,22 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-04-15T10:04:15.931Z"
+    },
+    {
+      "id": "bug-053",
+      "timestamp": "2026-04-15T10:38:43.840Z",
+      "error_message": "Wrong reference: kwargs should be extra_metric",
+      "file": "lambda/_logging.py",
+      "root_cause": "Used \"kwargs\" instead of \"extra_metric\"",
+      "fix": "Changed kwargs → extra_metric",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-15T10:38:43.840Z"
     }
   ]
 }
