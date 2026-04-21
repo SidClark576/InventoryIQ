@@ -1,0 +1,38 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e13]: InventoryIQ
+      - navigation [ref=e14]:
+        - link "grid_view Dashboard" [ref=e15] [cursor=pointer]:
+          - /url: dashboard.html
+          - generic [ref=e16]: grid_view
+          - text: Dashboard
+        - link "inventory_2 Inventory" [ref=e17] [cursor=pointer]:
+          - /url: inventory.html
+          - generic [ref=e18]: inventory_2
+          - text: Inventory
+        - link "bar_chart Insights" [ref=e19] [cursor=pointer]:
+          - /url: insights.html
+          - generic [ref=e20]: bar_chart
+          - text: Insights
+        - link "receipt_long Transactions" [ref=e21] [cursor=pointer]:
+          - /url: transactions.html
+          - generic [ref=e22]: receipt_long
+          - text: Transactions
+    - button "logout Logout" [ref=e24] [cursor=pointer]:
+      - generic [ref=e25]: logout
+      - text: Logout
+  - generic [ref=e26]:
+    - banner [ref=e27]:
+      - generic [ref=e29]: sidneyordonia@gmail.com
+    - main [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - heading "Insights" [level=1] [ref=e33]
+          - paragraph [ref=e34]: AI-driven curation and tracking analysis
+        - button "refresh Refresh" [ref=e35] [cursor=pointer]:
+          - generic [ref=e36]: refresh
+          - text: Refresh
+      - paragraph [ref=e38]: Analyzing...

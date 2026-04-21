@@ -1,7 +1,12 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-19T19:48:41.175Z
-> Files: 92 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-21T06:32:50.321Z
+> Files: 108 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../.claude/plans/
+
+- `purrfect-wondering-spark-agent-a937d24c8b92cea6c.md` — Sprint 4 Evaluation Plan — InventoryIQ (~1101 tok)
+- `purrfect-wondering-spark.md` — Sprint 4 Live Evaluation — InventoryIQ (~505 tok)
 
 ## ./
 
@@ -17,8 +22,8 @@
 
 ## .claude/
 
-- `settings.json` (~531 tok)
-- `settings.local.json` (~253 tok)
+- `settings.json` (~542 tok)
+- `settings.local.json` (~465 tok)
 
 ## .claude/rules/
 
@@ -71,7 +76,7 @@
 ## frontend/
 
 - `.DS_Store` (~1640 tok)
-- `add-item.html` — InventoryIQ | Add Asset (~3826 tok)
+- `add-item.html` — InventoryIQ | Add Asset (~3827 tok)
 - `api.js` — ── AUTH FUNCTIONS ──────────────────────────────────────────── (~1819 tok)
 - `config.js` — Declares CONFIG (~76 tok)
 - `dashboard.html` — InventoryIQ | Dashboard (~4765 tok)
@@ -82,7 +87,7 @@
 - `login.html` — InventoryIQ | Login (~3249 tok)
 - `reset-password.html` — InventoryIQ | Reset Password (~2693 tok)
 - `style.css` — Styles: 7 rules, 1 media queries (~454 tok)
-- `transactions.html` — InventoryIQ | Transactions (~3215 tok)
+- `transactions.html` — InventoryIQ | Transactions (~3277 tok)
 - `utils.js` — requireAuth: initNav, handleLogout (~349 tok)
 
 ## gan-harness/
@@ -92,6 +97,14 @@
 - `spec-v3.md` — InventoryIQ — Product Specification v3 (~11489 tok)
 - `spec.md` — Product Specification: InventoryIQ Production Hardening (~11256 tok)
 
+## gan-harness/eval-artifacts/
+
+- `sprint4_eval.spec.ts` — BASE: login (~1723 tok)
+
+## gan-harness/eval-artifacts/sprint4/
+
+- `feedback.md` — Sprint 4 Evaluation — InventoryIQ (~2063 tok)
+
 ## gan-harness/tests/
 
 - `sprint1_smoke.sh` — Sprint 1 smoke tests — Correctness & Tenancy (~1002 tok)
@@ -100,7 +113,7 @@
 ## lambda/
 
 - `_logging.py` — log_json, hash_user (~755 tok)
-- `AddItem.py` — lambda_handler, response (~1824 tok)
+- `AddItem.py` — lambda_handler, response (~1823 tok)
 - `Authentication.mjs` — Exports handler (~4938 tok)
 - `DailyAlert.py` — lambda_handler (~3481 tok)
 - `DeleteCategory.py` — lambda_handler (~1111 tok)
@@ -124,7 +137,49 @@
 
 ## test-results/
 
-- `.last-run.json` (~13 tok)
+- `.last-run.json` (~140 tok)
+
+## test-results/sprint4_eval-Sprint-4-eval-070d1--inventory-page-loads-items-chromium/
+
+- `error-context.md` — Instructions (~1968 tok)
+
+## test-results/sprint4_eval-Sprint-4-eval-0c222-ventory-search-filter-works-chromium/
+
+- `error-context.md` — Instructions (~1968 tok)
+
+## test-results/sprint4_eval-Sprint-4-eval-6568f-ogin-redirects-to-dashboard-chromium/
+
+- `error-context.md` — Instructions (~1968 tok)
+
+## test-results/sprint4_eval-Sprint-4-eval-719db--add-item-page-renders-form-chromium/
+
+- `error-context.md` — Instructions (~1968 tok)
+
+## test-results/sprint4_eval-Sprint-4-eval-cd852-nage-categories-modal-opens-chromium/
+
+- `error-context.md` — Instructions (~1968 tok)
+
+## test-results/sprint4_eval-Sprint-4-eval-facf5-dashboard-stat-cards-render-chromium/
+
+- `error-context.md` — Instructions (~1968 tok)
+
+## test-results/sprint4_eval-Sprint-4-evaluation-10-logout-returns-to-login-chromium/
+
+- `error-context.md` — Instructions (~1967 tok)
+
+## test-results/sprint4_eval-Sprint-4-evaluation-7-insights-page-loads-chromium/
+
+- `error-context.md` — Instructions (~1966 tok)
+
+## test-results/sprint4_eval-Sprint-4-evaluation-8-transactions-page-loads-chromium/
+
+- `error-context.md` — Instructions (~1967 tok)
+
+## tests/e2e/
+
+- `sprint4_deep.spec.ts` — BASE: login (~2636 tok)
+- `sprint4_eval.spec.ts` — BASE: login (~1723 tok)
+- `sprint4_fixes.spec.ts` — BASE: login (~1687 tok)
 
 ## tests/e2e/auth/
 

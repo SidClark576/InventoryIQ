@@ -1,0 +1,26 @@
+- generic [ref=e3]:
+  - img [ref=e7]
+  - generic [ref=e11]:
+    - heading "Welcome to InventoryIQ" [level=1] [ref=e13]
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]: Email address
+        - generic [ref=e17]:
+          - generic [ref=e18]: mail
+          - textbox "name@company.com" [ref=e19]
+      - generic [ref=e20]:
+        - generic [ref=e22]: Password
+        - generic [ref=e23]:
+          - generic [ref=e24]: lock
+          - textbox "••••••••" [ref=e25]
+          - button "visibility" [ref=e26] [cursor=pointer]
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - checkbox "Remember this device" [ref=e29]
+          - generic [ref=e30]: Remember this device
+        - link "Forgot password?" [ref=e31] [cursor=pointer]:
+          - /url: forgot-password.html
+      - button "Login arrow_forward" [ref=e32] [cursor=pointer]:
+        - text: Login
+        - generic [ref=e33]: arrow_forward
+      - generic [ref=e34]: Don't have an account? Sign Up

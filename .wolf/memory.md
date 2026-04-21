@@ -13,22 +13,22 @@
 > Consolidated session (0 actions)
 
 ## Session: 2026-04-12 00:59
-> Consolidated session (9 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 01:00
-> Consolidated session (2 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 01:07
-> Consolidated session (1 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 01:13
-> Consolidated session (1 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 02:13
-> Consolidated session (1 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 02:16
-> Consolidated session (3 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 02:18
 > Consolidated session (0 actions)
@@ -37,22 +37,22 @@
 > Consolidated session (0 actions)
 
 ## Session: 2026-04-12 10:33
-> Consolidated session (1 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 03:05
-> Consolidated session (7 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 11:11
-> Consolidated session (7 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 11:13
-> Consolidated session (12 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 11:16
-> Consolidated session (10 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 11:18
-> Consolidated session (7 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 13:24
 > Consolidated session (0 actions)
@@ -73,183 +73,76 @@
 > Consolidated session (0 actions)
 
 ## Session: 2026-04-12 13:39
-> Consolidated session (1 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 13:40
-> Consolidated session (11 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-12 13:42
-> Consolidated session (8 actions)
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-13 14:00
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-13 14:00
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 14:00 | Created tests/pages/LoginPage.ts | — | ~694 |
-| 14:01 | Created tests/e2e/auth/register.spec.ts | — | ~1355 |
-| 14:01 | Created tests/e2e/auth/login.spec.ts | — | ~1672 |
-| 14:01 | Edited playwright.config.ts | expanded (+6 lines) | ~252 |
-| 14:01 | Edited package.json | 13→14 lines | ~97 |
+> Consolidated session (5 actions)
 
 ## Session: 2026-04-13 14:03
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 14:04 | Edited tests/pages/LoginPage.ts | modified constructor() | ~772 |
-| 14:05 | Edited tests/e2e/auth/register.spec.ts | getElementById() → text() | ~1234 |
-| 14:05 | Edited tests/e2e/auth/login.spec.ts | reduced (-18 lines) | ~1513 |
+> Consolidated session (3 actions)
 
 ## Session: 2026-04-13 14:06
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 14:07 | Edited lambda/Authentication.mjs | modified if() | ~276 |
-| 14:07 | Edited frontend/login.html | modified if() | ~162 |
+> Consolidated session (2 actions)
 
 ## Session: 2026-04-13 14:09
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-13 14:12
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 14:12 | Fixed JWT registration flow | lambda/Authentication.mjs, frontend/login.html | Added token generation to registration endpoint; handleRegister now stores token + redirects | ~500 |
-| 14:13 | Updated cerebrum.md | User Preferences | Added NO AUTO-DEPLOYMENT preference note | ~100 |
-| 14:13 | Providing deployment instructions | — | User must manually deploy lambda/Authentication.mjs to AWS Lambda via CLI | ~0 |
-| 14:14 | User deployed Authentication.mjs | — | User confirmed: "I already deployed my Authentication.mjs to AWS. You don't need to upload/deploy it by yourself" | ~0 |
-| 14:14 | Updated cerebrum + memory | User Preferences, memory.md | Confirmed user handles AWS deployments; will NOT execute deployment commands | ~100 |
-| 14:14 | Running E2E tests | — | Creating account and logging in using Playwright tests | ~0 |
+> Consolidated session (6 actions)
 
 ## Session: 2026-04-13 14:20
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-13 14:23
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 14:25 | Edited playwright.config.ts | 8→11 lines | ~77 |
-| 14:25 | Edited tests/pages/LoginPage.ts | modified getRegisterErrorText() | ~74 |
+> Consolidated session (2 actions)
 
 ## Session: 2026-04-13 14:26
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 14:27 | Edited frontend/api.js | modified authRegister() | ~214 |
-| 14:27 | Edited frontend/login.html | added optional chaining | ~341 |
-| 14:27 | Edited frontend/login.html | added optional chaining | ~397 |
-| 14:27 | Edited tests/pages/LoginPage.ts | modified captureNetworkLogs() | ~100 |
+> Consolidated session (4 actions)
 
 ## Session: 2026-04-13 14:29
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 14:30 | Created tests/e2e/auth/debug-api.spec.ts | — | ~579 |
+> Consolidated session (1 actions)
 
 ## Session: 2026-04-13 14:31
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 14:42 | Edited tests/pages/LoginPage.ts | added error handling | ~405 |
-| 14:46 | Edited lambda/Authentication.mjs | added error handling | ~179 |
-| 14:46 | Edited lambda/Authentication.mjs | added error handling | ~72 |
-| 15:00 | Edited lambda/Authentication.mjs | added error handling | ~60 |
-| 15:00 | Edited lambda/Authentication.mjs | added error handling | ~49 |
-| 15:00 | Edited tests/e2e/auth/register.spec.ts | "Short1" → "Ab1" | ~9 |
-| 15:00 | Session end: 6 writes across 3 files (LoginPage.ts, Authentication.mjs, register.spec.ts) | 12 reads | ~12477 tok |
+> Consolidated session (7 actions)
 
 ## Session: 2026-04-13 15:03
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 15:08 | Edited tests/e2e/auth/login.spec.ts | 19→19 lines | ~186 |
-| 15:08 | Edited tests/e2e/auth/login.spec.ts | 12→13 lines | ~157 |
-| 15:08 | Edited tests/e2e/auth/login.spec.ts | 3→4 lines | ~75 |
-| 15:12 | Session end: 3 writes across 1 files (login.spec.ts) | 5 reads | ~9687 tok |
+> Consolidated session (4 actions)
 
 ## Session: 2026-04-13 15:33
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 15:34 | Created ../../.claude/plans/polished-dreaming-octopus.md | — | ~927 |
-| 15:35 | Edited tests/e2e/auth/login.spec.ts | expanded (+24 lines) | ~283 |
-| 15:36 | Edited tests/e2e/auth/login.spec.ts | 5→7 lines | ~106 |
-| 15:36 | Edited frontend/api.js | added error handling | ~266 |
-| 15:36 | Edited lambda/Authentication.mjs | added error handling | ~458 |
-| 15:43 | Session end: 5 writes across 4 files (polished-dreaming-octopus.md, login.spec.ts, api.js, Authentication.mjs) | 4 reads | ~9062 tok |
+> Consolidated session (6 actions)
 
 ## Session: 2026-04-13 16:03
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-13 16:03
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 16:21 | Edited tests/e2e/auth/login.spec.ts | added optional chaining | ~349 |
-| 16:21 | Edited frontend/api.js | modified check401() | ~153 |
-| 16:22 | Edited frontend/login.html | added 1 condition(s) | ~165 |
-| 16:24 | Edited lambda/Proxy.py | modified startswith() | ~368 |
+> Consolidated session (4 actions)
 
 ## Session: 2026-04-13 16:25
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-13 21:39
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-
-| 21:42 | User preference: caveman lite mode active for all conversations | .wolf/memory.md | logged | ~50 |
+> Consolidated session (1 actions)
 
 ## Session: 2026-04-13 21:44
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 22:08 | Edited ../../.claude/plans/polished-dreaming-octopus.md | reduced (-27 lines) | ~723 |
-| 22:09 | Created tests/e2e/auth/redirect-loop-debug.spec.ts | — | ~1313 |
-| 22:10 | Session end: 2 writes across 2 files (polished-dreaming-octopus.md, redirect-loop-debug.spec.ts) | 10 reads | ~17989 tok |
-| 22:24 | Edited tests/e2e/auth/login.spec.ts | expanded (+41 lines) | ~843 |
+> Consolidated session (4 actions)
 
 ## Session: 2026-04-13 22:25
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 22:26 | Edited frontend/api.js | added error handling | ~366 |
-| 22:30 | fix: check401 now checks JWT exp before redirecting on 401 | frontend/api.js | GREEN — 12/12 tests pass | ~800 |
-| 22:30 | Session end: 1 writes across 1 files (api.js) | 1 reads | ~1942 tok |
-| 22:41 | Session end: 1 writes across 1 files (api.js) | 3 reads | ~6532 tok |
-| 22:48 | Session end: 1 writes across 1 files (api.js) | 3 reads | ~6532 tok |
-| 22:48 | Session end: 1 writes across 1 files (api.js) | 3 reads | ~6532 tok |
+> Consolidated session (6 actions)
 
 ## Session: 2026-04-13 22:52
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
+> Consolidated session (0 actions)
 
 ## Session: 2026-04-13 23:00
-
-| Time | Action | File(s) | Outcome | ~Tokens |
-|------|--------|---------|---------|--------|
-| 17:51 | Created ../../.claude/plans/polished-dreaming-octopus.md | — | ~880 |
-| 19:16 | Session end: 1 writes across 1 files (polished-dreaming-octopus.md) | 1 reads | ~943 tok |
-| 20:09 | Session end: 1 writes across 1 files (polished-dreaming-octopus.md) | 1 reads | ~943 tok |
-| 20:33 | Session end: 1 writes across 1 files (polished-dreaming-octopus.md) | 1 reads | ~943 tok |
-| 20:57 | Session end: 1 writes across 1 files (polished-dreaming-octopus.md) | 1 reads | ~943 tok |
-| 20:57 | Session end: 1 writes across 1 files (polished-dreaming-octopus.md) | 1 reads | ~943 tok |
-| 21:01 | Session end: 1 writes across 1 files (polished-dreaming-octopus.md) | 1 reads | ~943 tok |
-| 21:19 | Session end: 1 writes across 1 files (polished-dreaming-octopus.md) | 1 reads | ~943 tok |
-| 21:25 | Session end: 1 writes across 1 files (polished-dreaming-octopus.md) | 2 reads | ~4074 tok |
+> Consolidated session (9 actions)
 
 ## Session: 2026-04-14 21:28
 
@@ -510,3 +403,164 @@
 | 09:48 | Edited lambda/_logging.py | 4→4 lines | ~42 |
 | 09:48 | Edited lambda/Proxy.py | 2→3 lines | ~58 |
 | 09:52 | Session end: 3 writes across 2 files (_logging.py, Proxy.py) | 1 reads | ~1040 tok |
+
+## Session: 2026-04-19 09:55
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-19 09:59
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:03 | Created ../../.claude/plans/eager-churning-thimble.md | — | ~2318 |
+| 12:48 | Created lambda/BarcodeLookup.py | — | ~1475 |
+| 12:48 | Edited lambda/AddItem.py | 4→7 lines | ~70 |
+| 12:48 | Edited frontend/api.js | added 1 condition(s) | ~104 |
+| 12:48 | Edited lambda/UpdateItem.py | expanded (+10 lines) | ~188 |
+
+## Session: 2026-04-19 12:49
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-19 12:50
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:51 | Edited lambda/UpdateItem.py | 3→8 lines | ~102 |
+| 12:52 | Edited frontend/add-item.html | expanded (+12 lines) | ~294 |
+| 12:52 | Edited frontend/add-item.html | 4→5 lines | ~56 |
+| 12:53 | Edited frontend/add-item.html | inline fix | ~31 |
+| 12:53 | Edited frontend/add-item.html | added 4 condition(s) | ~368 |
+| 12:53 | Edited frontend/add-item.html | 9→10 lines | ~161 |
+| 12:53 | Edited frontend/add-item.html | added error handling | ~1550 |
+| 12:54 | Edited frontend/inventory.html | 6→11 lines | ~215 |
+| 12:55 | Edited frontend/inventory.html | expanded (+31 lines) | ~639 |
+| 12:55 | Edited frontend/inventory.html | added 11 condition(s) | ~1148 |
+| 12:56 | Session end: 10 writes across 3 files (UpdateItem.py, add-item.html, inventory.html) | 2 reads | ~18334 tok |
+| 13:00 | Session end: 10 writes across 3 files (UpdateItem.py, add-item.html, inventory.html) | 2 reads | ~18334 tok |
+| 13:02 | Edited lambda/AddItem.py | removed 5 lines | ~5 |
+| 13:02 | Edited lambda/UpdateItem.py | reduced (-10 lines) | ~42 |
+| 13:02 | Edited lambda/UpdateItem.py | 8→3 lines | ~51 |
+| 13:02 | Edited frontend/api.js | removed 12 lines | ~13 |
+| 13:03 | Created frontend/add-item.html | — | ~3827 |
+
+## Session: 2026-04-19 13:05
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:05 | Edited frontend/inventory.html | removed 6 lines | ~10 |
+| 13:05 | Edited frontend/inventory.html | removed 32 lines | ~7 |
+| 13:06 | Edited frontend/inventory.html | removed 91 lines | ~3 |
+| 13:06 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 13:09 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 17:51 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 17:58 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 18:06 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 18:13 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 18:18 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 18:20 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 18:33 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 18:34 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 18:43 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 18:50 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 18:54 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+| 18:58 | Session end: 3 writes across 1 files (inventory.html) | 1 reads | ~11358 tok |
+
+## Session: 2026-04-20 19:39
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-20 19:42
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 20:26 | Created gan-harness/eval-artifacts/sprint4_eval.spec.ts | — | ~1723 |
+
+## Session: 2026-04-20 21:10
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 00:09 | Created tests/e2e/sprint4_deep.spec.ts | — | ~2636 |
+| 00:19 | Created tests/e2e/sprint4_fixes.spec.ts | — | ~1687 |
+
+## Session: 2026-04-20 00:51
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-20 01:02
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-20 01:06
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-20 01:14
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-20 01:14
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-20 01:33
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-20 01:34
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-20 01:35
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 01:42 | Created ../../.claude/plans/purrfect-wondering-spark-agent-a937d24c8b92cea6c.md | — | ~1174 |
+
+## Session: 2026-04-20 01:44
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 01:45 | Created ../../.claude/plans/purrfect-wondering-spark.md | — | ~539 |
+| 01:46 | Session end: 1 writes across 1 files (purrfect-wondering-spark.md) | 0 reads | ~577 tok |
+
+## Session: 2026-04-20 01:47
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-20 01:52
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-20 02:00
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 20:05 | Created gan-harness/eval-artifacts/sprint4/feedback.md | — | ~2200 |
+| 20:05 | Session end: 1 writes across 1 files (feedback.md) | 5 reads | ~6945 tok |
+| 20:06 | Session end: 1 writes across 1 files (feedback.md) | 5 reads | ~6945 tok |
+
+## Session: 2026-04-21 20:07
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 20:32 | Edited frontend/transactions.html | added 1 condition(s) | ~125 |
+| 20:32 | Session end: 1 writes across 1 files (transactions.html) | 1 reads | ~3349 tok |
+| 20:36 | Session end: 1 writes across 1 files (transactions.html) | 1 reads | ~3349 tok |
+
+## Session: 2026-04-21 20:42
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|

@@ -179,7 +179,11 @@
       const tb = document.getElementById('tx-body');
       tb.innerHTML = '<tr><td colspan="7" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading...</td></tr>';
       try {
-        allTx = await getTransactions();
+        const data = await getTransactions();
+        if (!Array.isArray(data) || (data.length > 0 && typeof data[0] !== 'object')) {
+          throw new Error('Unable to load transactions — unexpected server response. Please try again.');
+        }
+        allTx = data;
         applyFilters();
       } catch (e) {
         tb.innerHTML = `<tr><td colspan="7" class="px-8 py-12 text-center text-sm font-medium text-red-500">${e.message}</td></tr>`;

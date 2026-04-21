@@ -103,10 +103,3 @@ The UI uses a **Clean Light Mode Sidebar** design:
 3. **CORS:** All Lambdas return `Access-Control-Allow-Origin: *`. The frontend `deleteItem` function appends a cache-busting timestamp (`?_cb=...`) and uses `cache: "no-store"` to bypass browser-cached CORS preflight failures.
 4. **Error handling:** `api.js` wraps `updateItem` and `deleteItem` responses in try/catch to handle empty response bodies gracefully.
 5. **No build step:** The frontend is plain HTML/JS loaded via CDN — just upload the 3 frontend files to S3.
-
-<!-- lean-ctx -->
-## lean-ctx
-
-Prefer lean-ctx MCP tools over native equivalents for token savings.
-Full rules: @LEAN-CTX.md
-<!-- /lean-ctx -->

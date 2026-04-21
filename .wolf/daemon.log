@@ -86,3 +86,16 @@
 [2026-04-19T10:00:01.080Z] [INFO] Task Full anatomy rescan completed in 250ms
 [2026-04-19T12:00:00.928Z] [INFO] Executing task: Consolidate old memory
 [2026-04-19T12:00:01.103Z] [INFO] Task Consolidate old memory completed in 164ms
+[2026-04-20T04:00:00.755Z] [INFO] Executing task: Full anatomy rescan
+[2026-04-20T04:00:01.198Z] [INFO] Task Full anatomy rescan completed in 441ms
+[2026-04-20T10:00:00.468Z] [INFO] Executing task: Token audit report
+[2026-04-20T10:00:00.507Z] [INFO] Task Token audit report completed in 37ms
+[2026-04-20T10:00:00.865Z] [INFO] Executing task: Full anatomy rescan
+[2026-04-20T10:00:01.067Z] [INFO] Task Full anatomy rescan completed in 202ms
+[2026-04-20T11:47:22.934Z] [INFO] WebSocket client connected
+[2026-04-20T11:47:48.132Z] [INFO] Executing task: Cerebrum reflection
+[2026-04-20T11:47:54.640Z] [ERROR] Task Cerebrum reflection failed (attempt 1): claude -p failed: Exit code 1: Not logged in · Please run /login
+[2026-04-20T12:00:00.567Z] [INFO] Executing task: Consolidate old memory
+[2026-04-20T12:00:00.574Z] [INFO] Task Consolidate old memory completed in 6ms
+[2026-04-20T12:02:20.075Z] [INFO] WebSocket client connected
+[2026-04-21T05:50:01.995Z] [INFO] Config changed — hot-reload not fully implemented yet

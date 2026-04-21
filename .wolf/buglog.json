@@ -853,6 +853,103 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-04-15T10:38:43.840Z"
+    },
+    {
+      "id": "bug-054",
+      "timestamp": "2026-04-19T00:00:00.000Z",
+      "error_message": "Double-count iq.requests on invalid-session paths: every invalid session request emitted iq.requests twice",
+      "file": "lambda/Proxy.py",
+      "root_cause": "lambda_handler wrapper always calls log_json (emitting iq.requests); auth-failure branches inside _handle also called log_json before returning, producing a second iq.requests emission per invalid-session request",
+      "fix": "Added count_request=True default param to log_json in _logging.py; auth-warning calls in Proxy.py pass count_request=False to suppress the duplicate metric emission",
+      "tags": [
+        "double-count",
+        "emf",
+        "metrics",
+        "proxy",
+        "observability",
+        "sprint4"
+      ],
+      "related_bugs": [
+        "bug-053"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-04-19T00:00:00.000Z"
+    },
+    {
+      "id": "bug-055",
+      "timestamp": "2026-04-19T22:48:32.071Z",
+      "error_message": "Missing guard clause",
+      "file": "frontend/api.js",
+      "root_cause": "No early return/throw for edge case: !res.ok",
+      "fix": "Added guard clause: if (!res.ok)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-19T22:48:32.071Z"
+    },
+    {
+      "id": "bug-056",
+      "timestamp": "2026-04-19T22:53:00.167Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/add-item.html",
+      "root_cause": "Had 'f-price'",
+      "fix": "Changed to 'f-barcode'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-19T22:53:00.167Z"
+    },
+    {
+      "id": "bug-057",
+      "timestamp": "2026-04-19T22:53:44.423Z",
+      "error_message": "Missing error handling in openScanModal",
+      "file": "frontend/add-item.html",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-19T22:53:44.423Z"
+    },
+    {
+      "id": "bug-058",
+      "timestamp": "2026-04-19T23:02:39.933Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/UpdateItem.py",
+      "root_cause": "5 lines replaced/restructured",
+      "fix": "Rewrote 8→3 lines (5 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-19T23:02:39.933Z"
+    },
+    {
+      "id": "bug-059",
+      "timestamp": "2026-04-21T05:50:00.000Z",
+      "error_message": "Runtime.ImportModuleError: Unable to import module 'lambda_function': No module named 'lambda_function' — all 10 Python Lambdas returning 502/500",
+      "file": "lambda/Proxy.py, lambda/GetAllItems.py, lambda/GetCategories.py, lambda/GetTransactions.py, lambda/LowItemInsight.py, lambda/AddItem.py, lambda/UpdateItem.py, lambda/DeleteItem.py, lambda/DeleteCategory.py, lambda/DailyAlert.py",
+      "root_cause": "All 10 Python Lambdas had handler 'lambda_function.lambda_handler' (AWS console default) instead of '<Filename>.lambda_handler'. Files named GetAllItems.py need GetAllItems.lambda_handler.",
+      "fix": "Batch fixed all 10: aws lambda update-function-configuration --function-name <Name> --handler <Name>.lambda_handler",
+      "tags": ["handler", "importerror", "502", "python", "lambda", "all-functions", "sprint4"],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-21T05:50:00.000Z"
     }
   ]
 }

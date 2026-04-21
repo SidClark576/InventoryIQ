@@ -1,0 +1,94 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e13]: InventoryIQ
+      - navigation [ref=e14]:
+        - link "grid_view Dashboard" [ref=e15] [cursor=pointer]:
+          - /url: dashboard.html
+          - generic [ref=e16]: grid_view
+          - text: Dashboard
+        - link "inventory_2 Inventory" [ref=e17] [cursor=pointer]:
+          - /url: inventory.html
+          - generic [ref=e18]: inventory_2
+          - text: Inventory
+        - link "bar_chart Insights" [ref=e19] [cursor=pointer]:
+          - /url: insights.html
+          - generic [ref=e20]: bar_chart
+          - text: Insights
+        - link "receipt_long Transactions" [ref=e21] [cursor=pointer]:
+          - /url: transactions.html
+          - generic [ref=e22]: receipt_long
+          - text: Transactions
+    - button "logout Logout" [ref=e24] [cursor=pointer]:
+      - generic [ref=e25]: logout
+      - text: Logout
+  - generic [ref=e26]:
+    - banner [ref=e27]:
+      - generic [ref=e29]: sidneyordonia@gmail.com
+    - main [ref=e30]:
+      - generic [ref=e31]:
+        - heading "Dashboard" [level=1] [ref=e33]
+        - button "refresh Refresh" [ref=e34] [cursor=pointer]:
+          - generic [ref=e35]: refresh
+          - text: Refresh
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - generic [ref=e39]:
+              - text: Total Products
+              - heading "—" [level=2] [ref=e40]
+            - generic [ref=e42]: inventory_2
+          - generic [ref=e43]:
+            - generic [ref=e44]: trending_up
+            - text: +2.5% vs last month
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - text: Out of Stock
+              - heading "—" [level=2] [ref=e48]
+            - generic [ref=e50]: error
+          - generic [ref=e51]:
+            - generic [ref=e52]: warning
+            - text: Critical attention required
+        - generic [ref=e53]:
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - text: Low Stock
+              - heading "—" [level=2] [ref=e56]
+            - generic [ref=e58]: sort
+          - generic [ref=e59]:
+            - generic [ref=e60]: notifications_active
+            - text: Items nearing threshold
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - text: Total Value
+              - heading "—" [level=2] [ref=e64]
+            - generic [ref=e66]: payments
+          - generic [ref=e67]:
+            - generic [ref=e68]: account_balance_wallet
+            - text: Net asset valuation
+      - generic [ref=e69]:
+        - generic [ref=e71]:
+          - heading "Inventory" [level=3] [ref=e72]
+          - paragraph [ref=e73]: Real-time status of all tracked assets and warehouse stock.
+        - table [ref=e75]:
+          - rowgroup [ref=e76]:
+            - row "Asset Name Category Qty Status" [ref=e77]:
+              - columnheader "Asset Name" [ref=e78]
+              - columnheader "Category" [ref=e79]
+              - columnheader "Qty" [ref=e80]
+              - columnheader "Status" [ref=e81]
+          - rowgroup [ref=e82]:
+            - row "Loading Items..." [ref=e83]:
+              - cell "Loading Items..." [ref=e84]
+        - generic [ref=e85]:
+          - generic [ref=e86]: Showing 0 of 0 assets
+          - generic [ref=e87]:
+            - button "chevron_left" [ref=e88] [cursor=pointer]:
+              - generic [ref=e89]: chevron_left
+            - button "1" [ref=e90] [cursor=pointer]
+            - button "chevron_right" [ref=e91] [cursor=pointer]:
+              - generic [ref=e92]: chevron_right

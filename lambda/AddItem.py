@@ -105,7 +105,6 @@ def _handle(event, context):
             'createdAt'        : timestamp,
             'updatedAt'        : timestamp,
         }
-
         tx_item = {
             'transactionID' : str(uuid.uuid4()),
             'itemID'        : item_id,

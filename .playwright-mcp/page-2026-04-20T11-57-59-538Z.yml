@@ -1,0 +1,62 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e13]: InventoryIQ
+      - navigation [ref=e14]:
+        - link "grid_view Dashboard" [ref=e15] [cursor=pointer]:
+          - /url: dashboard.html
+          - generic [ref=e16]: grid_view
+          - text: Dashboard
+        - link "inventory_2 Inventory" [ref=e17] [cursor=pointer]:
+          - /url: inventory.html
+          - generic [ref=e18]: inventory_2
+          - text: Inventory
+        - link "bar_chart Insights" [ref=e19] [cursor=pointer]:
+          - /url: insights.html
+          - generic [ref=e20]: bar_chart
+          - text: Insights
+        - link "receipt_long Transactions" [ref=e21] [cursor=pointer]:
+          - /url: transactions.html
+          - generic [ref=e22]: receipt_long
+          - text: Transactions
+    - button "logout Logout" [ref=e24] [cursor=pointer]:
+      - generic [ref=e25]: logout
+      - text: Logout
+  - generic [ref=e26]:
+    - banner [ref=e27]:
+      - generic [ref=e29]: sidneyordonia@gmail.com
+    - main [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - heading "Transaction Log" [level=1] [ref=e33]
+          - paragraph [ref=e34]: Running history of all changes.
+        - button "refresh Refresh" [ref=e35] [cursor=pointer]:
+          - generic [ref=e36]: refresh
+          - text: Refresh
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]: search
+          - textbox "Search transactions..." [ref=e40]
+        - combobox [ref=e41] [cursor=pointer]:
+          - option "All Types" [selected]
+          - option "Stock In"
+          - option "Stock Out"
+          - option "Create"
+          - option "Update"
+          - option "Delete"
+        - generic [ref=e42]: 0 transactions
+      - table [ref=e45]:
+        - rowgroup [ref=e46]:
+          - row "Date / Time Item Type Before After Delta Notes" [ref=e47]:
+            - columnheader "Date / Time" [ref=e48]
+            - columnheader "Item" [ref=e49]
+            - columnheader "Type" [ref=e50]
+            - columnheader "Before" [ref=e51]
+            - columnheader "After" [ref=e52]
+            - columnheader "Delta" [ref=e53]
+            - columnheader "Notes" [ref=e54]
+        - rowgroup [ref=e55]:
+          - row "Loading..." [ref=e56]:
+            - cell "Loading..." [ref=e57]

@@ -1,0 +1,19 @@
+- generic [ref=e3]:
+  - img [ref=e7]
+  - generic [ref=e11]:
+    - generic [ref=e12]:
+      - heading "Forgot Password" [level=1] [ref=e13]
+      - paragraph [ref=e14]: Enter your email and we'll send a reset link.
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]: Email address
+        - generic [ref=e18]:
+          - generic [ref=e19]: mail
+          - textbox "name@company.com" [ref=e20]
+      - button "Send Reset Link send" [ref=e21] [cursor=pointer]:
+        - text: Send Reset Link
+        - generic [ref=e22]: send
+      - generic [ref=e23]:
+        - text: Remember your password?
+        - link "Log In" [ref=e24] [cursor=pointer]:
+          - /url: login.html

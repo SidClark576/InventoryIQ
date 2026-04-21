@@ -77,7 +77,7 @@
   "enabledPlugins": {
     "ecc@ecc": true,
     "skill-codex@skill-codex": true,
-    "aws-serverless@claude-plugins-official": true,
-    "codex@openai-codex": true
+    "codex@openai-codex": true,
+    "everything-claude-code@ecc": true
   }
 }
