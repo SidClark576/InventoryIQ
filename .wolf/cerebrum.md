@@ -28,6 +28,7 @@
 
 ## Do-Not-Repeat
 
+- [2026-04-21] **Fact-Forcing Gate fires on EVERY Edit/Write** — including wolf/ files and new files. Pattern to unblock: present 4 facts in text turn BEFORE retrying the same tool call: (1) all files that import target, (2) public functions/classes affected, (3) data fields/structure with synthetic values, (4) user's current instruction verbatim. All retries succeed after facts presented. Gate is active in standard,strict mode on all edits in this project.
 - [2026-04-12] Never name a variable the same as a helper function in Python Lambda handlers. UpdateItem.py line 56 used `response = table.get_item(...)` shadowing the `response()` helper at line 146, causing TypeError on error paths. Fix: use `result` instead (matching DeleteItem.py). Always check for shadowing when naming variables.
 
 ## Decision Log
@@ -37,3 +38,4 @@
 - [2026-04-12] Barcode scanning uses QuaggaJS via CDN (not npm install), consistent with the no-build-step frontend pattern (Tailwind CDN, Inter font CDN).
 - [2026-04-12] Multi-location support intentionally excluded from 8-week plan due to schema complexity. Deferred to post-launch.
 - [2026-04-12] Demand forecasting uses weighted moving average of stock_out transactions rather than ML/SageMaker, appropriate for data volume and dependency constraints.
+- [2026-04-21] **Sprint 5 — Barcode scanning:** `BarcodeLookup.py` hits `BarcodeCache` DynamoDB (PK=`code`, TTL=`ttl`) → Open Food Facts (`/api/v0/product/{code}.json`) → UPC Item DB (`/prod/trial/lookup?upc={code}`). Returns `{name, category, brand, imageUrl, source}`. 30-day TTL. QuaggaJS loaded lazily via CDN (`@ericblade/quagga2`) only when scan modal opens — avoids blocking page load. `add-item.html` and `inventory.html` have separate Quagga instances (separate page contexts, no conflict). `barcode` field added to `AddItem.py` item dict and `UpdateItem.py` updatable fields. `lookupBarcode(code)` added to `api.js`.

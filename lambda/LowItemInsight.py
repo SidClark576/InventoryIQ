@@ -4,7 +4,7 @@ import os
 from decimal import Decimal
 from collections import defaultdict
 from datetime import datetime, timezone
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, Attr
 import time as _time
 import _logging
 
@@ -140,10 +140,13 @@ def _handle(event, context):
 
         # Query userID-index GSI instead of scanning the full table
         # Sentinel items (alert_meta#) have userID='__system__' so they are
-        # automatically excluded when querying by the real user's email
+        # automatically excluded when querying by the real user's email.
+        # FilterExpression excludes soft-deleted items so dashboard counts
+        # (totalProducts, outOfStockCount, etc.) match what Inventory shows.
         result = table.query(
             IndexName='userID-index',
-            KeyConditionExpression=Key('userID').eq(user_id)
+            KeyConditionExpression=Key('userID').eq(user_id),
+            FilterExpression=Attr('deletedAt').not_exists()
         )
         items = result.get('Items', [])
 
@@ -152,6 +155,7 @@ def _handle(event, context):
             result = table.query(
                 IndexName='userID-index',
                 KeyConditionExpression=Key('userID').eq(user_id),
+                FilterExpression=Attr('deletedAt').not_exists(),
                 ExclusiveStartKey=result['LastEvaluatedKey']
             )
             items.extend(result.get('Items', []))

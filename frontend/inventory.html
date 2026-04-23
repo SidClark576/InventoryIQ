@@ -128,12 +128,23 @@
                 onclick="exportCSV()">
                 <span class="material-symbols-outlined text-[16px]">download</span> Export CSV
               </button>
-              <button
+              <button id="btn-manage-categories"
                 class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
                 onclick="openManageCategoriesModal()">
                 <span class="material-symbols-outlined text-[16px]">category</span> Manage Categories
               </button>
-              <a href="add-item.html"
+              <button id="btn-show-deleted"
+                class="hidden px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-500 flex items-center gap-2 cursor-pointer transition"
+                onclick="toggleDeletedView()">
+                <span class="material-symbols-outlined text-[16px]">restore_from_trash</span>
+                <span id="btn-show-deleted-label">Show Deleted</span>
+              </button>
+              <button id="btn-scan"
+                class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
+                onclick="openInvScanModal()">
+                <span class="material-symbols-outlined text-[16px]">qr_code_scanner</span> Scan
+              </button>
+              <a id="btn-add-new" href="add-item.html"
                 class="px-6 py-2.5 bg-[#005ab4] hover:bg-[#00458d] text-white rounded-xl text-[13px] font-bold flex items-center gap-2 cursor-pointer shadow-sm transition">
                 <span class="material-symbols-outlined text-[18px]">add</span> Add New Items
               </a>
@@ -298,6 +309,8 @@
 
     let allItems = [];
     let allCategories = [];
+    let deletedItems = [];
+    let viewMode = 'active'; // 'active' | 'deleted'
 
     function mergeCategories(serverCats, localCats) {
       const combined = [...serverCats];
@@ -312,9 +325,12 @@
       tb.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>';
 
       try {
-        const [itemsResult, catsResult] = await Promise.allSettled([getAllItems(), getCategories()]);
+        const [itemsResult, catsResult, deletedResult] = await Promise.allSettled([getAllItems(), getCategories(), getDeletedItems()]);
         if (catsResult.status === 'fulfilled') {
           allCategories = mergeCategories(catsResult.value, allCategories);
+        }
+        if (deletedResult.status === 'fulfilled') {
+          deletedItems = deletedResult.value;
         }
         if (itemsResult.status === 'rejected') {
           tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${itemsResult.reason.message}</td></tr>`;
@@ -326,6 +342,8 @@
         return;
       }
       document.getElementById('inv-search').value = '';
+      viewMode = 'active';
+      updateDeletedToggle();
       renderTable();
     }
 
@@ -342,6 +360,61 @@
 
     function renderTable(items = allItems) {
       const tb = document.getElementById('inventory-body');
+
+      if (viewMode === 'deleted') {
+        const thead = document.querySelector('#inventory-body').closest('table').querySelector('thead tr');
+        thead.innerHTML = `
+          <th class="px-8 py-4 text-center">Asset Name</th>
+          <th class="px-6 py-4 text-center">Category</th>
+          <th class="px-6 py-4 text-center">Qty</th>
+          <th class="px-6 py-4 text-center">Deleted On</th>
+          <th class="px-8 py-4 text-center">Actions</th>`;
+        if (!deletedItems.length) {
+          tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">No deleted items found.</td></tr>`;
+          document.getElementById('pagination-text').textContent = 'Showing 0 deleted items';
+          return;
+        }
+        tb.innerHTML = deletedItems.map(c => {
+          const qty = c.quantity ?? 0;
+          const iconDiv = `<div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 mr-4 border border-gray-100"><span class="material-symbols-outlined text-xl">devices</span></div>`;
+          const sku = `SKU: ${c.itemID.substring(0, 8).toUpperCase()}`;
+          const deletedOn = c.deletedAt ? new Date(c.deletedAt).toLocaleDateString() : '—';
+          const safeName = c.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          return `<tr class="hover:bg-red-50/30 transition-colors group">
+            <td class="px-8 py-4 text-center">
+              <div class="flex items-center">
+                ${iconDiv}
+                <div>
+                  <div class="font-bold text-gray-400 text-[13px] line-through">${c.name}</div>
+                  <div class="text-[11px] font-medium text-gray-300 mt-0.5">${sku}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-center text-[13px] text-gray-400">${c.category || 'Uncategorized'}</td>
+            <td class="px-6 py-4 text-center font-bold text-gray-400 text-[13px]">${qty}</td>
+            <td class="px-6 py-4 text-center text-[13px] text-gray-400">${deletedOn}</td>
+            <td class="px-8 py-4 text-center">
+              <button class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[12px] font-bold flex items-center gap-1 mx-auto cursor-pointer transition"
+                onclick="handleRestore('${c.itemID}', '${safeName}')">
+                <span class="material-symbols-outlined text-[15px]">restore</span> Restore
+              </button>
+              <span id="restore-status-${c.itemID}" class="text-[11px] text-red-500 hidden block mt-1"></span>
+            </td>
+          </tr>`;
+        }).join('');
+        document.getElementById('pagination-text').textContent = `Showing ${deletedItems.length} deleted item${deletedItems.length !== 1 ? 's' : ''}`;
+        return;
+      }
+
+      // Active view — restore original headers
+      const thead = document.querySelector('#inventory-body').closest('table').querySelector('thead tr');
+      thead.innerHTML = `
+        <th class="px-8 py-4 text-center">Asset Name</th>
+        <th class="px-6 py-4 text-center">Category</th>
+        <th class="px-6 py-4 text-center">Qty</th>
+        <th class="px-6 py-4 text-center">Status</th>
+        <th class="px-8 py-4 text-center">Actions</th>`;
+
       if (!items.length) {
         const msg = allItems.length ? 'No items match your search.' : 'No items found.';
         tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">${msg}</td></tr>`;
@@ -361,7 +434,7 @@
         const currentCat = c.category || 'Uncategorized';
         const catSet = Array.from(new Set([...(allCategories.length ? allCategories : ['Uncategorized']), currentCat])).sort();
         const catOpts = catSet.map(cat => `<option value="${cat}" ${cat === currentCat ? 'selected' : ''}>${cat}</option>`).join('');
-        return `<tr class="hover:bg-gray-50/80 transition-colors group">
+        return `<tr class="hover:bg-gray-50/80 transition-colors group" data-item-id="${c.itemID}">
           <td class="px-8 py-4 text-center">
             <div class="flex items-center">
               ${iconDiv}
@@ -415,6 +488,71 @@
         }
       }
       loadInventory();
+    }
+
+    function updateDeletedToggle() {
+      const btn = document.getElementById('btn-show-deleted');
+      const label = document.getElementById('btn-show-deleted-label');
+      const addBtn = document.getElementById('btn-add-new');
+      const manageCatBtn = document.getElementById('btn-manage-categories');
+      if (viewMode === 'deleted') {
+        btn.classList.remove('hidden');
+        label.textContent = 'Show Active';
+        btn.classList.add('bg-red-50', 'text-red-700', 'border-red-200');
+        btn.classList.remove('bg-gray-50', 'text-gray-500', 'border-gray-200');
+        addBtn.classList.add('hidden');
+        manageCatBtn.classList.add('hidden');
+      } else {
+        if (deletedItems.length > 0) {
+          btn.classList.remove('hidden');
+          label.textContent = `Show Deleted (${deletedItems.length})`;
+        } else {
+          btn.classList.add('hidden');
+        }
+        btn.classList.remove('bg-red-50', 'text-red-700', 'border-red-200');
+        btn.classList.add('bg-gray-50', 'text-gray-500', 'border-gray-200');
+        addBtn.classList.remove('hidden');
+        manageCatBtn.classList.remove('hidden');
+      }
+    }
+
+    async function toggleDeletedView() {
+      if (viewMode === 'deleted') {
+        viewMode = 'active';
+        updateDeletedToggle();
+        renderTable();
+        return;
+      }
+      const btn = document.getElementById('btn-show-deleted');
+      btn.disabled = true;
+      try {
+        if (!deletedItems.length) {
+          deletedItems = await getDeletedItems();
+        }
+        viewMode = 'deleted';
+        updateDeletedToggle();
+        renderTable();
+      } catch (e) {
+        const tb = document.getElementById('inventory-body');
+        tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${e.message}</td></tr>`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function handleRestore(itemID, name) {
+      const statusEl = document.getElementById(`restore-status-${itemID}`);
+      try {
+        await restoreItem(itemID);
+        deletedItems = deletedItems.filter(i => i.itemID !== itemID);
+        await loadInventory();
+      } catch (e) {
+        if (statusEl) {
+          statusEl.textContent = e.message;
+          statusEl.classList.remove('hidden');
+          setTimeout(() => statusEl.classList.add('hidden'), 3000);
+        }
+      }
     }
 
     async function updateItemCategory(itemID, newCategory, selectEl) {
@@ -716,7 +854,139 @@
       }
     }
 
+    // ── Inventory page barcode scan ───────────────────────────────
+    let _invQuaggaLoaded = false;
+    let _invScanActive = false;
+
+    function openInvScanModal() {
+      document.getElementById('inv-scan-modal').classList.remove('hidden');
+      document.getElementById('inv-scan-status').textContent = 'Starting camera...';
+      document.getElementById('inv-scan-fallback').classList.add('hidden');
+      document.getElementById('inv-scan-camera-view').classList.remove('hidden');
+      _loadInvQuagga().then(startInvCamera).catch(() => showInvFallback());
+    }
+
+    function closeInvScanModal() {
+      stopInvCamera();
+      document.getElementById('inv-scan-modal').classList.add('hidden');
+      document.getElementById('inv-scan-status').textContent = '';
+    }
+
+    function showInvFallback() {
+      stopInvCamera();
+      document.getElementById('inv-scan-camera-view').classList.add('hidden');
+      document.getElementById('inv-scan-fallback').classList.remove('hidden');
+      document.getElementById('inv-scan-status').textContent = '';
+    }
+
+    function _loadInvQuagga() {
+      if (_invQuaggaLoaded) return Promise.resolve();
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js';
+        s.onload = () => { _invQuaggaLoaded = true; resolve(); };
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    function startInvCamera() {
+      Quagga.init({
+        inputStream: {
+          type: 'LiveStream',
+          target: document.getElementById('inv-scan-quagga-target'),
+          constraints: { facingMode: 'environment' }
+        },
+        decoder: { readers: ['ean_reader', 'upc_reader', 'code_128_reader'] },
+        locate: true
+      }, function(err) {
+        if (err) { showInvFallback(); return; }
+        Quagga.start();
+        _invScanActive = true;
+        document.getElementById('inv-scan-status').textContent = 'Point camera at barcode...';
+        Quagga.onDetected(onInvBarcodeDetected);
+      });
+    }
+
+    function stopInvCamera() {
+      if (_invScanActive) {
+        try { Quagga.stop(); } catch (_) {}
+        _invScanActive = false;
+      }
+    }
+
+    async function onInvBarcodeDetected(result) {
+      const code = result && result.codeResult && result.codeResult.code;
+      if (!code) return;
+      stopInvCamera();
+      document.getElementById('inv-scan-status').textContent = `Found: ${code} — searching...`;
+      await applyInvBarcodeLookup(code);
+    }
+
+    async function invLookupManual() {
+      const code = document.getElementById('inv-scan-manual-input').value.trim();
+      if (!code) return;
+      document.getElementById('inv-scan-status').textContent = `Looking up ${code}...`;
+      await applyInvBarcodeLookup(code);
+    }
+
+    async function applyInvBarcodeLookup(code) {
+      // Check if any existing item has this barcode (client-side match)
+      const match = allItems.find(i => i.barcode === code);
+      if (match) {
+        closeInvScanModal();
+        const row = document.querySelector(`tr[data-item-id="${match.itemID}"]`);
+        if (row) {
+          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          row.classList.add('ring-2', 'ring-[#005ab4]', 'bg-blue-50');
+          setTimeout(() => row.classList.remove('ring-2', 'ring-[#005ab4]', 'bg-blue-50'), 2500);
+        }
+        return;
+      }
+
+      // No match — look up product metadata and prefill add-item form
+      try {
+        document.getElementById('inv-scan-status').textContent = `Looking up product...`;
+        const product = await lookupBarcode(code);
+        closeInvScanModal();
+        const prefill = product
+          ? { name: product.name || '', category: product.category || '', barcode: code }
+          : { barcode: code };
+        sessionStorage.setItem('iq_editItem', JSON.stringify(prefill));
+        window.location.href = 'add-item.html';
+      } catch (e) {
+        document.getElementById('inv-scan-status').textContent = `Error: ${e.message}`;
+      }
+    }
+
   </script>
+
+  <!-- Inventory scan modal -->
+  <div id="inv-scan-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-sm mx-4 overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <h2 class="font-bold text-gray-900">Scan Barcode</h2>
+        <button onclick="closeInvScanModal()" class="text-gray-400 hover:text-gray-700 transition">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="inv-scan-camera-view" class="relative bg-black" style="height:260px">
+        <div id="inv-scan-quagga-target" style="width:100%;height:100%"></div>
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div class="border-2 border-white/70 rounded-lg w-56 h-28"></div>
+        </div>
+      </div>
+      <div id="inv-scan-fallback" class="hidden px-6 py-4 space-y-3">
+        <p class="text-xs text-gray-500">Camera unavailable. Enter barcode manually.</p>
+        <input type="text" id="inv-scan-manual-input" placeholder="e.g. 737628064502"
+          class="w-full rounded-xl px-4 py-3 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-medium text-gray-900" />
+        <button onclick="invLookupManual()"
+          class="w-full bg-[#005ab4] hover:bg-[#00458d] text-white px-4 py-3 rounded-xl font-bold text-sm transition-all">Search / Add</button>
+      </div>
+      <div id="inv-scan-status" class="px-6 py-3 text-sm text-center text-gray-500 min-h-[2.5rem]"></div>
+    </div>
+  </div>
+
 </body>
 
 </html>

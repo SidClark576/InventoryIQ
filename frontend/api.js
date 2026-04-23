@@ -77,6 +77,28 @@ async function getAllItems() {
   return [];
 }
 
+async function getDeletedItems() {
+  const userID = getCurrentUserID();
+  const url = userID
+    ? `${CONFIG.API_ENDPOINT}/items?userID=${encodeURIComponent(userID)}&deleted=true`
+    : `${CONFIG.API_ENDPOINT}/items?deleted=true`;
+  const res = await fetch(url, { headers: authHeaders() });
+  checkQuota(res);
+  check401(res);
+  const raw = await res.text();
+  let data = [];
+  if (raw) {
+    try { data = JSON.parse(raw); } catch { data = []; }
+  }
+  if (!res.ok) {
+    const errMsg = data && typeof data === 'object' ? data.error : null;
+    throw new Error(errMsg || 'Failed to fetch deleted items');
+  }
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.items)) return data.items;
+  return [];
+}
+
 async function addItem(item) {
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items`, {
     method: "POST",
@@ -197,6 +219,18 @@ async function getCategories() {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch categories");
   return Array.isArray(data) ? data : [];
+}
+
+async function lookupBarcode(code) {
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/barcode/${encodeURIComponent(code)}`, {
+    headers: authHeaders()
+  });
+  checkQuota(res);
+  check401(res);
+  if (res.status === 404) return null;
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Barcode lookup failed');
+  return data;
 }
 
 async function deleteCategory(categoryName) {

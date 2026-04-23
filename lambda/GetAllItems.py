@@ -44,6 +44,7 @@ def _handle(event, context):
 
     Query Parameters:
     - userID: Required. Email of the user to filter items by.
+    - deleted: Optional. Pass "true" to return only soft-deleted items instead of active ones.
 
     Response: {'items': [...], 'count': N}
     """
@@ -51,6 +52,7 @@ def _handle(event, context):
         # Extract and validate userID from query parameters
         params = event.get('queryStringParameters') or {}
         user_id = params.get('userID', '').strip()
+        show_deleted = params.get('deleted', '').lower() == 'true'
 
         # Return empty result if userID is not provided (prevents returning all items)
         if not user_id:
@@ -65,13 +67,14 @@ def _handle(event, context):
                 'body': json.dumps({'items': [], 'count': 0})
             }
 
-        # Query userID-index GSI for this user's items, excluding soft-deleted ones
-        # FilterExpression is applied after the key condition; it does NOT reduce RCUs
-        # but it does ensure soft-deleted items are never returned to the client
+        # Query userID-index GSI for this user's items.
+        # When ?deleted=true, return only soft-deleted items (deletedAt exists).
+        # Otherwise return only active items (deletedAt not exists).
+        filter_expr = Attr('deletedAt').exists() if show_deleted else Attr('deletedAt').not_exists()
         result = table.query(
             IndexName='userID-index',
             KeyConditionExpression=Key('userID').eq(user_id),
-            FilterExpression=Attr('deletedAt').not_exists()
+            FilterExpression=filter_expr
         )
         items = result.get('Items', [])
 
@@ -81,7 +84,7 @@ def _handle(event, context):
             result = table.query(
                 IndexName='userID-index',
                 KeyConditionExpression=Key('userID').eq(user_id),
-                FilterExpression=Attr('deletedAt').not_exists(),
+                FilterExpression=filter_expr,
                 ExclusiveStartKey=result['LastEvaluatedKey']
             )
             items.extend(result.get('Items', []))

@@ -564,3 +564,107 @@
 
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
+| 20:57 | Created ../../.claude/plans/luminous-napping-lark.md | — | ~1231 |
+
+## Session: 2026-04-21 20:59
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 21:15 | Edited lambda/LowItemInsight.py | 17→21 lines | ~304 |
+| 21:16 | Edited lambda/GetAllItems.py | 9→11 lines | ~136 |
+| 21:16 | Edited lambda/GetAllItems.py | 20→21 lines | ~293 |
+| 21:16 | Edited frontend/api.js | added error handling | ~216 |
+| 21:17 | Edited frontend/inventory.html | expanded (+6 lines) | ~327 |
+| 21:17 | Edited frontend/inventory.html | 2→4 lines | ~35 |
+| 21:17 | Edited frontend/inventory.html | 2→5 lines | ~42 |
+| 21:17 | Edited frontend/inventory.html | added 2 condition(s) | ~2127 |
+| 21:18 | Edited frontend/inventory.html | added error handling | ~661 |
+| 21:18 | Edited frontend/inventory.html | inline fix | ~36 |
+| 21:18 | Edited frontend/inventory.html | added 1 condition(s) | ~100 |
+| 21:18 | Session end: 11 writes across 4 files (LowItemInsight.py, GetAllItems.py, api.js, inventory.html) | 4 reads | ~21437 tok |
+
+## Session: 2026-04-21 21:36
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 21:36 | Edited frontend/inventory.html | 5→4 lines | ~36 |
+| 21:37 | Session end: 1 writes across 1 files (inventory.html) | 0 reads | ~38 tok |
+
+## Session: 2026-04-21 Sprint 5 — Barcode Scanning
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 00:00 | Created lambda/BarcodeLookup.py | — | Sprint 5 new Lambda: DynamoDB cache → OFF → UPC Item DB | ~1508 |
+| 00:10 | Edited lambda/AddItem.py | +barcode field in item dict | success | ~70 |
+| 00:15 | Edited lambda/UpdateItem.py | +barcode to updatable fields + response reconstruction | success | ~250 |
+| 00:20 | Edited frontend/api.js | +lookupBarcode(code) function | success | ~104 |
+| 00:25 | Edited frontend/add-item.html | +hidden barcode input + Scan button + scan modal HTML + JS | success | ~4000 |
+| 00:30 | Edited frontend/inventory.html | +Scan toolbar button + data-item-id on tr + inv scan modal HTML + JS | success | ~2000 |
+| 00:35 | Created gan-harness/tests/sprint5_smoke.sh | — | 3 curl tests for /barcode/{code} endpoint | ~588 |
+| 00:40 | Sprint 5 code complete — all 7 tasks done; manual AWS setup pending | all Sprint 5 files | success | — |
+
+## Session: 2026-04-21 21:39
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-21 23:42
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-21 00:47
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 00:49 | Created ../../.claude/plans/plan-out-sprint-5-shimmering-horizon.md | — | ~1846 |
+| 00:51 | Created lambda/BarcodeLookup.py | — | ~1508 |
+
+## Session: 2026-04-21 00:53
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 00:53 | Edited lambda/AddItem.py | 2→3 lines | ~48 |
+| 00:54 | Edited lambda/UpdateItem.py | 3→6 lines | ~87 |
+| 00:54 | Edited lambda/UpdateItem.py | 1→2 lines | ~55 |
+| 00:54 | Edited frontend/api.js | added 2 condition(s) | ~115 |
+| 00:55 | Edited frontend/add-item.html | expanded (+6 lines) | ~295 |
+| 00:55 | Edited frontend/add-item.html | expanded (+31 lines) | ~559 |
+| 00:56 | Edited frontend/add-item.html | added 10 condition(s) | ~1725 |
+| 00:57 | Edited frontend/inventory.html | 4→9 lines | ~194 |
+| 00:58 | Edited frontend/inventory.html | added 7 condition(s) | ~1690 |
+| 00:58 | Edited frontend/inventory.html | inline fix | ~27 |
+| 00:59 | Created gan-harness/tests/sprint5_smoke.sh | — | ~588 |
+
+## Session: 2026-04-21 01:00
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-23 20:10
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-23 20:10
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-23 20:10
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-23 20:11
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-04-23 20:14
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 20:16 | Edited lambda/BarcodeLookup.py | 4→8 lines | ~102 |
+| 20:16 | Session end: 1 writes across 1 files (BarcodeLookup.py) | 1 reads | ~1610 tok |
+| 20:20 | Session end: 1 writes across 1 files (BarcodeLookup.py) | 1 reads | ~1610 tok |

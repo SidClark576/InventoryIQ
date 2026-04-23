@@ -136,6 +136,9 @@ def _handle(event, context):
         if 'lowStockThreshold' in body:
             update_parts.append('lowStockThreshold = :lst')
             expr_values[':lst'] = int(body['lowStockThreshold'])
+        if 'barcode' in body:
+            update_parts.append('barcode = :barcode')
+            expr_values[':barcode'] = body['barcode']
 
         update_expr     = 'SET ' + ', '.join(update_parts)
         ddb_expr_values = {k: serializer.serialize(v) for k, v in expr_values.items()}
@@ -193,6 +196,7 @@ def _handle(event, context):
         if 'category'          in body: updated['category']           = body['category']
         if 'description'       in body: updated['description']        = body['description']
         if 'lowStockThreshold' in body: updated['lowStockThreshold']  = int(body['lowStockThreshold'])
+        if 'barcode'           in body: updated['barcode']            = body['barcode']
 
         return response(200, {'message': 'Item updated', 'item': updated},
                         extra_headers={'ETag': str(new_version)})

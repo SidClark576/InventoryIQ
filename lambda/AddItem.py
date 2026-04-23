@@ -101,6 +101,7 @@ def _handle(event, context):
             'quantity'         : int(body.get('quantity', 0)),
             'price'            : Decimal(str(body.get('price', 0))),
             'lowStockThreshold': int(body.get('lowStockThreshold', 10)),
+            'barcode'          : body.get('barcode', ''),
             'version'          : 1,
             'createdAt'        : timestamp,
             'updatedAt'        : timestamp,

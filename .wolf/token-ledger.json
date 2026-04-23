@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-04-12T10:53:39.421Z",
   "lifetime": {
-    "total_tokens_estimated": 1024362,
-    "total_reads": 276,
-    "total_writes": 358,
-    "total_sessions": 88,
-    "anatomy_hits": 251,
+    "total_tokens_estimated": 1056759,
+    "total_reads": 285,
+    "total_writes": 372,
+    "total_sessions": 100,
+    "anatomy_hits": 260,
     "anatomy_misses": 25,
-    "repeated_reads_blocked": 112,
-    "estimated_savings_vs_bare_cli": 1134544
+    "repeated_reads_blocked": 117,
+    "estimated_savings_vs_bare_cli": 1171195
   },
   "sessions": [
     {
@@ -5252,6 +5252,229 @@
       "totals": {
         "input_tokens_estimated": 3215,
         "output_tokens_estimated": 134,
+        "reads_count": 1,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-04-21-2042",
+      "started": "2026-04-21T06:42:58.485Z",
+      "ended": "2026-04-21T06:48:47.092Z",
+      "reads": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/dashboard.html",
+          "tokens_estimated": 4765,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/RestoreItem.py",
+          "tokens_estimated": 1429,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 6194,
+        "output_tokens_estimated": 0,
+        "reads_count": 2,
+        "writes_count": 0,
+        "repeated_reads_blocked": 1,
+        "anatomy_lookups": 2
+      }
+    },
+    {
+      "id": "session-2026-04-21-2059",
+      "started": "2026-04-21T06:59:03.311Z",
+      "ended": "2026-04-21T07:18:23.786Z",
+      "reads": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/LowItemInsight.py",
+          "tokens_estimated": 4269,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/GetAllItems.py",
+          "tokens_estimated": 1208,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/api.js",
+          "tokens_estimated": 1819,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/inventory.html",
+          "tokens_estimated": 9626,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/LowItemInsight.py",
+          "tokens_estimated": 304,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/GetAllItems.py",
+          "tokens_estimated": 136,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/GetAllItems.py",
+          "tokens_estimated": 293,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/api.js",
+          "tokens_estimated": 216,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/inventory.html",
+          "tokens_estimated": 350,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/inventory.html",
+          "tokens_estimated": 38,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/inventory.html",
+          "tokens_estimated": 45,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/inventory.html",
+          "tokens_estimated": 2279,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/inventory.html",
+          "tokens_estimated": 708,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/inventory.html",
+          "tokens_estimated": 39,
+          "action": "edit"
+        },
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/inventory.html",
+          "tokens_estimated": 107,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 16922,
+        "output_tokens_estimated": 4515,
+        "reads_count": 4,
+        "writes_count": 11,
+        "repeated_reads_blocked": 4,
+        "anatomy_lookups": 4
+      }
+    },
+    {
+      "id": "session-2026-04-21-2136",
+      "started": "2026-04-21T07:36:21.196Z",
+      "ended": "2026-04-21T07:37:00.156Z",
+      "reads": [],
+      "writes": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/frontend/inventory.html",
+          "tokens_estimated": 38,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 0,
+        "output_tokens_estimated": 38,
+        "reads_count": 0,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 0
+      }
+    },
+    {
+      "id": "session-2026-04-23-2011",
+      "started": "2026-04-23T06:11:00.679Z",
+      "ended": "2026-04-23T06:11:37.402Z",
+      "reads": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/BarcodeLookup.py",
+          "tokens_estimated": 1508,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [],
+      "totals": {
+        "input_tokens_estimated": 1508,
+        "output_tokens_estimated": 0,
+        "reads_count": 1,
+        "writes_count": 0,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-04-23-2014",
+      "started": "2026-04-23T06:14:49.559Z",
+      "ended": "2026-04-23T06:16:14.608Z",
+      "reads": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/BarcodeLookup.py",
+          "tokens_estimated": 1508,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/BarcodeLookup.py",
+          "tokens_estimated": 102,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 1508,
+        "output_tokens_estimated": 102,
+        "reads_count": 1,
+        "writes_count": 1,
+        "repeated_reads_blocked": 0,
+        "anatomy_lookups": 1
+      }
+    },
+    {
+      "id": "session-2026-04-23-2014",
+      "started": "2026-04-23T06:14:49.559Z",
+      "ended": "2026-04-23T06:20:21.427Z",
+      "reads": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/BarcodeLookup.py",
+          "tokens_estimated": 1508,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/BarcodeLookup.py",
+          "tokens_estimated": 102,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 1508,
+        "output_tokens_estimated": 102,
         "reads_count": 1,
         "writes_count": 1,
         "repeated_reads_blocked": 0,

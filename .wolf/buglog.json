@@ -946,10 +946,178 @@
       "file": "lambda/Proxy.py, lambda/GetAllItems.py, lambda/GetCategories.py, lambda/GetTransactions.py, lambda/LowItemInsight.py, lambda/AddItem.py, lambda/UpdateItem.py, lambda/DeleteItem.py, lambda/DeleteCategory.py, lambda/DailyAlert.py",
       "root_cause": "All 10 Python Lambdas had handler 'lambda_function.lambda_handler' (AWS console default) instead of '<Filename>.lambda_handler'. Files named GetAllItems.py need GetAllItems.lambda_handler.",
       "fix": "Batch fixed all 10: aws lambda update-function-configuration --function-name <Name> --handler <Name>.lambda_handler",
-      "tags": ["handler", "importerror", "502", "python", "lambda", "all-functions", "sprint4"],
+      "tags": [
+        "handler",
+        "importerror",
+        "502",
+        "python",
+        "lambda",
+        "all-functions",
+        "sprint4"
+      ],
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-04-21T05:50:00.000Z"
+    },
+    {
+      "id": "bug-060",
+      "timestamp": "2026-04-21T07:15:43.640Z",
+      "error_message": "Significant refactor of ",
+      "file": "lambda/LowItemInsight.py",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 17→21 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-21T07:15:43.640Z"
+    },
+    {
+      "id": "bug-061",
+      "timestamp": "2026-04-21T07:16:30.556Z",
+      "error_message": "Missing error handling in function",
+      "file": "frontend/api.js",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-21T07:16:30.556Z"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-04-21T07:17:00.017Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/inventory.html",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 9→15 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-21T07:17:00.017Z"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-04-21T07:18:01.100Z",
+      "error_message": "Missing error handling in updateDeletedToggle",
+      "file": "frontend/inventory.html",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-21T07:18:01.100Z"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-04-21T07:18:13.814Z",
+      "error_message": "Wrong condition in logic",
+      "file": "frontend/inventory.html",
+      "root_cause": "Condition was: if (itemsResult.status === 'rejected')",
+      "fix": "Changed to: if (deletedResult.status === 'fulfilled')",
+      "tags": [
+        "auto-detected",
+        "logic-fix",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-21T07:18:13.814Z"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-04-21T10:53:41.127Z",
+      "error_message": "Incorrect value in code",
+      "file": "lambda/AddItem.py",
+      "root_cause": "Had 'version'",
+      "fix": "Changed to 'barcode'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "py"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-21T10:53:41.127Z"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-04-21T10:54:33.405Z",
+      "error_message": "Missing guard clause",
+      "file": "frontend/api.js",
+      "root_cause": "No early return/throw for edge case: res.status === 404",
+      "fix": "Added guard clause: if (res.status === 404)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "js"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-21T10:54:33.405Z"
+    },
+    {
+      "id": "bug-067",
+      "timestamp": "2026-04-21T10:55:23.126Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/add-item.html",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 10→16 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-21T10:55:23.126Z"
+    },
+    {
+      "id": "bug-068",
+      "timestamp": "2026-04-21T10:56:20.098Z",
+      "error_message": "Missing guard clause",
+      "file": "frontend/add-item.html",
+      "root_cause": "No early return/throw for edge case: raw",
+      "fix": "Added guard clause: if (raw)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-21T10:56:20.098Z"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-04-21T10:58:22.110Z",
+      "error_message": "Wrong return value",
+      "file": "frontend/inventory.html",
+      "root_cause": "Was returning: `<tr class=\"hover:bg-gray-50/80 transition-colors ",
+      "fix": "Now returns: `<tr class=\"hover:bg-gray-50/80 transition-colors ",
+      "tags": [
+        "auto-detected",
+        "return-value",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-21T10:58:22.111Z"
     }
   ]
 }
