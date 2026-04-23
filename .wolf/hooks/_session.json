@@ -1,27 +1,12 @@
 {
-  "session_id": "session-2026-04-23-2014",
-  "started": "2026-04-23T06:14:49.559Z",
-  "files_read": {
-    "/Users/sidneyordonia/Documents/InventoryIQ/lambda/BarcodeLookup.py": {
-      "count": 1,
-      "tokens": 1508,
-      "first_read": "2026-04-23T06:15:07.698Z"
-    }
-  },
-  "files_written": [
-    {
-      "file": "/Users/sidneyordonia/Documents/InventoryIQ/lambda/BarcodeLookup.py",
-      "action": "edit",
-      "tokens": 102,
-      "at": "2026-04-23T06:16:08.130Z"
-    }
-  ],
-  "edit_counts": {
-    "lambda/BarcodeLookup.py": 1
-  },
-  "anatomy_hits": 1,
+  "session_id": "session-2026-04-23-2100",
+  "started": "2026-04-23T07:00:49.760Z",
+  "files_read": {},
+  "files_written": [],
+  "edit_counts": {},
+  "anatomy_hits": 0,
   "anatomy_misses": 0,
   "repeated_reads_warned": 0,
   "cerebrum_warnings": 0,
-  "stop_count": 2
+  "stop_count": 1
 }

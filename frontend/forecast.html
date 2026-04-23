@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InventoryIQ | Forecast</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: { brand: '#005ab4' }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-900 antialiased flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white border-r border-gray-100 flex flex-col flex-shrink-0 h-full overflow-y-auto">
+    <div class="px-6 pt-8 pb-4">
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-9 h-9 rounded-xl bg-[#005ab4] flex items-center justify-center shadow-sm">
+          <span class="material-symbols-outlined text-white text-lg">inventory_2</span>
+        </div>
+        <div>
+          <div class="font-black text-[15px] text-gray-900 tracking-tight">InventoryIQ</div>
+          <div class="text-[11px] text-gray-400 font-medium">Asset Management</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="p-4 space-y-1.5 mt-2">
+      <a href="dashboard.html" data-page="dashboard"
+        class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+        <span class="material-symbols-outlined text-xl">grid_view</span> Dashboard
+      </a>
+      <a href="inventory.html" data-page="inventory"
+        class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+        <span class="material-symbols-outlined text-xl">inventory_2</span> Inventory
+      </a>
+      <a href="insights.html" data-page="insights"
+        class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+        <span class="material-symbols-outlined text-xl">bar_chart</span> Insights
+      </a>
+      <a href="transactions.html" data-page="transactions"
+        class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+        <span class="material-symbols-outlined text-xl">receipt_long</span> Transactions
+      </a>
+      <a href="forecast.html" data-page="forecast"
+        class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+        <span class="material-symbols-outlined text-xl">trending_up</span> Forecast
+      </a>
+    </nav>
+
+    <div class="p-4 space-y-1 mb-2 border-t border-gray-100 pt-6 mt-auto">
+      <button
+        class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer"
+        onclick="handleLogout()">
+        <span class="material-symbols-outlined text-xl">logout</span> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col h-screen overflow-hidden">
+    <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
+      <div class="ml-auto flex items-center gap-3">
+        <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-auto p-10 space-y-10">
+
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-black text-gray-900 tracking-tight">Demand Forecast</h1>
+          <p class="text-gray-500 mt-2 font-medium">Weighted moving average of stock-out transactions over 90 days.</p>
+        </div>
+        <button
+          class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
+          onclick="loadForecast()">
+          <span class="material-symbols-outlined font-bold text-[18px]">refresh</span> Refresh
+        </button>
+      </div>
+
+      <!-- Legend -->
+      <div class="flex items-center gap-6 text-[13px] font-medium text-gray-500">
+        <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> &lt;7 days (critical)</span>
+        <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-400 inline-block"></span> 7–30 days (watch)</span>
+        <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> &gt;30 days (healthy)</span>
+      </div>
+
+      <!-- Forecast cards -->
+      <div id="forecast-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div class="col-span-full text-center py-16 text-gray-400 font-medium">
+          <span class="material-symbols-outlined text-4xl block mb-3">autorenew</span>
+          Loading forecast…
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="utils.js"></script>
+  <script src="api.js"></script>
+  <script>
+    requireAuth();
+    initNav('forecast');
+    document.getElementById('nav-email').textContent = sessionStorage.getItem('userEmail') || '';
+
+    let forecastItems = [];
+
+    async function loadForecast() {
+      const grid = document.getElementById('forecast-grid');
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-16 text-gray-400 font-medium">
+          <span class="material-symbols-outlined text-4xl block mb-3">autorenew</span>
+          Loading forecast…
+        </div>`;
+
+      try {
+        const data = await getForecast();
+        forecastItems = data.forecasts || [];
+        renderForecast();
+      } catch (e) {
+        grid.innerHTML = `<div class="col-span-full text-center py-16 text-red-500 font-medium">${e.message}</div>`;
+      }
+    }
+
+    function urgencyClass(days) {
+      if (days < 7) return { border: 'border-red-200', badge: 'bg-red-100 text-red-700', dot: 'bg-red-500' };
+      if (days < 30) return { border: 'border-yellow-200', badge: 'bg-yellow-100 text-yellow-700', dot: 'bg-yellow-400' };
+      return { border: 'border-emerald-200', badge: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' };
+    }
+
+    function escHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function renderForecast() {
+      const grid = document.getElementById('forecast-grid');
+      if (!forecastItems.length) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-16 text-gray-400 font-medium">
+            <span class="material-symbols-outlined text-5xl block mb-4">trending_flat</span>
+            <p class="text-lg font-bold text-gray-600">No forecast data yet</p>
+            <p class="text-sm mt-2">Record at least 3 stock-out transactions per item over 90 days to generate predictions.</p>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = forecastItems.map((f, idx) => {
+        const u = urgencyClass(f.daysUntilStockout);
+        const confPct = Math.round(f.confidence * 100);
+        const daysLabel = f.daysUntilStockout >= 9999 ? '∞' : f.daysUntilStockout.toFixed(1);
+        return `
+          <div class="bg-white rounded-[1.25rem] shadow-sm border ${u.border} p-6 flex flex-col gap-4">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="w-3 h-3 rounded-full ${u.dot} flex-shrink-0 mt-0.5"></span>
+                <h3 class="font-bold text-gray-900 text-base leading-tight truncate">${escHtml(f.name)}</h3>
+              </div>
+              <span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${u.badge} whitespace-nowrap flex-shrink-0">${daysLabel}d left</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div class="bg-gray-50 rounded-xl p-3">
+                <div class="text-[11px] text-gray-400 font-medium mb-1">Daily Burn</div>
+                <div class="font-bold text-gray-900">${f.dailyBurn.toFixed(2)} <span class="text-gray-400 font-medium">units/day</span></div>
+              </div>
+              <div class="bg-gray-50 rounded-xl p-3">
+                <div class="text-[11px] text-gray-400 font-medium mb-1">Suggested Threshold</div>
+                <div class="font-bold text-gray-900">${f.suggestedThreshold} <span class="text-gray-400 font-medium">units</span></div>
+              </div>
+              <div class="bg-gray-50 rounded-xl p-3">
+                <div class="text-[11px] text-gray-400 font-medium mb-1">Confidence</div>
+                <div class="font-bold text-gray-900">${confPct}% <span class="text-[11px] font-medium text-gray-400">(${f.sampleSize} txns)</span></div>
+              </div>
+              <div class="bg-gray-50 rounded-xl p-3">
+                <div class="text-[11px] text-gray-400 font-medium mb-1">Method</div>
+                <div class="font-bold text-gray-900">${f.method} <span class="text-gray-400 font-medium">· ${f.windowDays}d</span></div>
+              </div>
+            </div>
+            <button
+              id="apply-btn-${idx}"
+              onclick="applyThreshold('${escHtml(f.itemID)}', ${f.suggestedThreshold}, ${idx})"
+              class="w-full mt-auto bg-gray-50 hover:bg-[#005ab4] hover:text-white border border-gray-200 hover:border-[#005ab4] text-gray-700 rounded-xl py-2.5 text-[13px] font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer">
+              <span class="material-symbols-outlined text-[16px]">tune</span> Apply Threshold
+            </button>
+            <div id="apply-msg-${idx}" class="text-xs text-center text-gray-400 hidden"></div>
+          </div>`;
+      }).join('');
+    }
+
+    async function applyThreshold(itemID, threshold, idx) {
+      const btn = document.getElementById(`apply-btn-${idx}`);
+      const msg = document.getElementById(`apply-msg-${idx}`);
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">hourglass_top</span> Saving…';
+      msg.classList.add('hidden');
+      try {
+        const userID = sessionStorage.getItem('userEmail') || '';
+        await updateItem(itemID, { lowStockThreshold: threshold, userID });
+        btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span> Applied';
+        btn.classList.add('text-emerald-600', 'bg-emerald-50', 'border-emerald-200');
+        msg.textContent = `Threshold set to ${threshold} units`;
+        msg.classList.remove('hidden', 'text-red-500');
+        msg.classList.add('text-emerald-600');
+      } catch (e) {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">tune</span> Apply Threshold';
+        msg.textContent = e.message;
+        msg.classList.remove('hidden', 'text-emerald-600');
+        msg.classList.add('text-red-500');
+      }
+    }
+
+    loadForecast();
+  </script>
+
+</body>
+
+</html>

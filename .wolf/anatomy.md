@@ -1,12 +1,12 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-23T06:16:08.059Z
-> Files: 112 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-23T06:47:19.801Z
+> Files: 116 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
 - `luminous-napping-lark.md` — Plan — Visible Deleted Items + Dashboard Count Fix (~1154 tok)
-- `plan-out-sprint-5-shimmering-horizon.md` — Sprint 5 — Barcode Scanning (~1731 tok)
+- `plan-out-sprint-5-shimmering-horizon.md` — Sprint 6 — Bulk CSV Import + Demand Forecasting (~1888 tok)
 - `purrfect-wondering-spark-agent-a937d24c8b92cea6c.md` — Sprint 4 Evaluation Plan — InventoryIQ (~1101 tok)
 - `purrfect-wondering-spark.md` — Sprint 4 Live Evaluation — InventoryIQ (~505 tok)
 
@@ -79,13 +79,14 @@
 
 - `.DS_Store` (~1640 tok)
 - `add-item.html` — InventoryIQ | Add Asset (~5652 tok)
-- `api.js` — ── AUTH FUNCTIONS ──────────────────────────────────────────── (~2128 tok)
+- `api.js` — ── AUTH FUNCTIONS ──────────────────────────────────────────── (~2640 tok)
 - `config.js` — Declares CONFIG (~76 tok)
 - `dashboard.html` — InventoryIQ | Dashboard (~4765 tok)
+- `forecast.html` — InventoryIQ | Forecast (~3158 tok)
 - `forgot-password.html` — InventoryIQ | Forgot Password (~1832 tok)
 - `index.html` (~30 tok)
 - `insights.html` — InventoryIQ | Insights (~3078 tok)
-- `inventory.html` — InventoryIQ | Inventory (~13022 tok)
+- `inventory.html` — InventoryIQ | Inventory (~15177 tok)
 - `login.html` — InventoryIQ | Login (~3249 tok)
 - `reset-password.html` — InventoryIQ | Reset Password (~2693 tok)
 - `style.css` — Styles: 7 rules, 1 media queries (~454 tok)
@@ -119,9 +120,12 @@
 - `AddItem.py` — lambda_handler, response (~1840 tok)
 - `Authentication.mjs` — Exports handler (~4938 tok)
 - `BarcodeLookup.py` — lambda_handler (~1577 tok)
+- `BulkImport.py` — lambda_handler (~2788 tok)
+- `BulkImportAsync.py` — lambda_handler (~2589 tok)
 - `DailyAlert.py` — lambda_handler (~3481 tok)
 - `DeleteCategory.py` — lambda_handler (~1111 tok)
 - `DeleteItem.py` — lambda_handler, response (~1573 tok)
+- `Forecast.py` — lambda_handler (~1951 tok)
 - `GetAllItems.py` — lambda_handler (~1259 tok)
 - `GetCategories.py` — lambda_handler (~968 tok)
 - `GetTransactions.py` — lambda_handler (~1002 tok)

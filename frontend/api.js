@@ -248,3 +248,63 @@ async function deleteCategory(categoryName) {
   if (!res.ok) throw new Error(data.error || "Failed to delete category");
   return data;
 }
+
+// ── BULK IMPORT + FORECAST FUNCTIONS ─────────────────────────
+
+async function bulkImport(rows, idemKey) {
+  const headers = { ...authHeaders() };
+  if (idemKey) headers['X-Idempotency-Key'] = idemKey;
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/import`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ rows })
+  });
+  checkQuota(res);
+  check401(res);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Bulk import failed');
+  return data;
+}
+
+async function uploadImportCSV(file) {
+  const presignRes = await fetch(
+    `${CONFIG.API_ENDPOINT}/import/presign?filename=${encodeURIComponent(file.name)}`,
+    { headers: authHeaders() }
+  );
+  checkQuota(presignRes);
+  check401(presignRes);
+  const { presignedUrl, jobId } = await presignRes.json();
+  if (!presignedUrl) throw new Error('Failed to get upload URL');
+
+  // PUT directly to S3 — presigned URL is self-authenticating, no auth headers needed
+  const s3Res = await fetch(presignedUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'text/csv' },
+    body: file
+  });
+  if (!s3Res.ok) throw new Error(`S3 upload failed: ${s3Res.status}`);
+
+  return jobId;
+}
+
+async function getImportJob(jobId) {
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/import/${encodeURIComponent(jobId)}`, {
+    headers: authHeaders()
+  });
+  checkQuota(res);
+  check401(res);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to fetch import job');
+  return data;
+}
+
+async function getForecast() {
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/forecast`, {
+    headers: authHeaders()
+  });
+  checkQuota(res);
+  check401(res);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to fetch forecast');
+  return data;
+}

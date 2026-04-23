@@ -76,6 +76,10 @@
             class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
             <span class="material-symbols-outlined text-xl">receipt_long</span> Transactions
           </a>
+          <a href="forecast.html" data-page="forecast"
+            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            <span class="material-symbols-outlined text-xl">trending_up</span> Forecast
+          </a>
         </nav>
       </div>
 
@@ -132,6 +136,11 @@
                 class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
                 onclick="openManageCategoriesModal()">
                 <span class="material-symbols-outlined text-[16px]">category</span> Manage Categories
+              </button>
+              <button id="btn-bulk-import"
+                class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
+                onclick="openImportModal()">
+                <span class="material-symbols-outlined text-[16px]">upload_file</span> Bulk Import
               </button>
               <button id="btn-show-deleted"
                 class="hidden px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-500 flex items-center gap-2 cursor-pointer transition"
@@ -959,6 +968,159 @@
       }
     }
 
+  </script>
+
+  <!-- Bulk Import modal -->
+  <div id="import-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <h2 class="font-bold text-gray-900">Bulk Import Items</h2>
+        <button onclick="closeImportModal()" class="text-gray-400 hover:text-gray-700 transition">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <p class="text-sm text-gray-500">Upload a CSV file to import multiple items at once. Files ≤100 rows process instantly; larger files upload in the background.</p>
+        <a href="import-template.csv" download
+          class="inline-flex items-center gap-2 text-[13px] font-bold text-[#005ab4] hover:underline">
+          <span class="material-symbols-outlined text-[16px]">download</span> Download template
+        </a>
+        <div id="import-drop-zone"
+          class="border-2 border-dashed border-gray-200 rounded-2xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-[#005ab4] transition"
+          onclick="document.getElementById('import-file-input').click()"
+          ondragover="event.preventDefault()"
+          ondrop="event.preventDefault(); handleImportFile(event.dataTransfer.files[0])">
+          <span class="material-symbols-outlined text-4xl text-gray-300">upload_file</span>
+          <p class="text-sm text-gray-500 font-medium">Drag & drop a CSV or <span class="text-[#005ab4] font-bold">browse</span></p>
+          <input type="file" id="import-file-input" accept=".csv" class="hidden"
+            onchange="handleImportFile(this.files[0])">
+        </div>
+        <div id="import-status" class="hidden space-y-2">
+          <div class="flex items-center justify-between text-sm font-medium text-gray-700">
+            <span id="import-status-text">Processing…</span>
+            <span id="import-status-count"></span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-2">
+            <div id="import-progress-bar" class="bg-[#005ab4] h-2 rounded-full transition-all" style="width:0%"></div>
+          </div>
+        </div>
+        <div id="import-errors" class="hidden text-xs text-red-600 space-y-1 max-h-32 overflow-y-auto"></div>
+        <div id="import-success" class="hidden text-sm font-bold text-emerald-600"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Bulk Import Modal ──────────────────────────────────────
+    function openImportModal() {
+      document.getElementById('import-modal').classList.remove('hidden');
+      document.getElementById('import-status').classList.add('hidden');
+      document.getElementById('import-errors').classList.add('hidden');
+      document.getElementById('import-success').classList.add('hidden');
+      document.getElementById('import-file-input').value = '';
+    }
+
+    function closeImportModal() {
+      document.getElementById('import-modal').classList.add('hidden');
+    }
+
+    async function handleImportFile(file) {
+      if (!file) return;
+      const statusEl = document.getElementById('import-status');
+      const statusText = document.getElementById('import-status-text');
+      const statusCount = document.getElementById('import-status-count');
+      const progressBar = document.getElementById('import-progress-bar');
+      const errorsEl = document.getElementById('import-errors');
+      const successEl = document.getElementById('import-success');
+
+      statusEl.classList.remove('hidden');
+      errorsEl.classList.add('hidden');
+      successEl.classList.add('hidden');
+      progressBar.style.width = '0%';
+
+      const text = await file.text();
+      const lines = text.trim().split('\n');
+      const rowCount = lines.length - 1; // subtract header
+
+      if (rowCount <= 0) {
+        statusText.textContent = 'CSV is empty.';
+        return;
+      }
+
+      if (rowCount <= 100) {
+        // Sync path — parse CSV client-side and POST rows
+        statusText.textContent = 'Importing…';
+        statusCount.textContent = `${rowCount} rows`;
+        progressBar.style.width = '50%';
+
+        const header = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        const rows = lines.slice(1).map(line => {
+          const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+          const row = {};
+          header.forEach((h, i) => { row[h] = vals[i] || ''; });
+          return row;
+        });
+
+        try {
+          const result = await bulkImport(rows, null);
+          progressBar.style.width = '100%';
+          statusText.textContent = 'Done';
+          statusCount.textContent = '';
+          successEl.textContent = `Imported ${result.inserted} item${result.inserted !== 1 ? 's' : ''}${result.failed > 0 ? `, ${result.failed} failed` : ''}.`;
+          successEl.classList.remove('hidden');
+          if (result.errors && result.errors.length) {
+            errorsEl.innerHTML = result.errors.map(e => `Row ${e.row} — ${e.field}: ${e.message}`).join('<br>');
+            errorsEl.classList.remove('hidden');
+          }
+          setTimeout(() => { closeImportModal(); loadInventory(); }, 1500);
+        } catch (e) {
+          statusText.textContent = `Error: ${e.message}`;
+          progressBar.style.width = '0%';
+        }
+      } else {
+        // Async path — upload to S3 then poll
+        statusText.textContent = 'Uploading…';
+        statusCount.textContent = `${rowCount} rows`;
+        progressBar.style.width = '10%';
+
+        try {
+          const jobId = await uploadImportCSV(file);
+          statusText.textContent = 'Processing in background…';
+          progressBar.style.width = '20%';
+          await pollImportJob(jobId, rowCount, progressBar, statusText, statusCount, successEl, errorsEl);
+        } catch (e) {
+          statusText.textContent = `Error: ${e.message}`;
+          progressBar.style.width = '0%';
+        }
+      }
+    }
+
+    async function pollImportJob(jobId, total, progressBar, statusText, statusCount, successEl, errorsEl) {
+      const poll = async () => {
+        const job = await getImportJob(jobId);
+        const done = job.done || 0;
+        const failed = job.failed || 0;
+        const pct = total > 0 ? Math.round(((done + failed) / total) * 80) + 20 : 20;
+        progressBar.style.width = `${Math.min(pct, 99)}%`;
+        statusCount.textContent = `${done + failed} / ${job.total || total}`;
+
+        if (job.status === 'completed' || job.status === 'failed') {
+          progressBar.style.width = '100%';
+          statusText.textContent = 'Done';
+          statusCount.textContent = '';
+          successEl.textContent = `Imported ${done} item${done !== 1 ? 's' : ''}${failed > 0 ? `, ${failed} failed` : ''}.`;
+          successEl.classList.remove('hidden');
+          if (job.errors && job.errors.length) {
+            errorsEl.innerHTML = job.errors.slice(0, 20).map(e => `Row ${e.row} — ${e.field}: ${e.message}`).join('<br>');
+            errorsEl.classList.remove('hidden');
+          }
+          setTimeout(() => { closeImportModal(); loadInventory(); }, 2000);
+        } else {
+          setTimeout(poll, 3000);
+        }
+      };
+      await poll();
+    }
   </script>
 
   <!-- Inventory scan modal -->

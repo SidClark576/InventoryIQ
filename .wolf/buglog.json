@@ -1118,6 +1118,22 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-04-21T10:58:22.111Z"
+    },
+    {
+      "id": "bug-070",
+      "timestamp": "2026-04-23T06:44:48.463Z",
+      "error_message": "Missing error handling in openImportModal",
+      "file": "frontend/inventory.html",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "html"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-04-23T06:44:48.463Z"
     }
   ]
 }
