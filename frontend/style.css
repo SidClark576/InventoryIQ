@@ -1,34 +1,508 @@
+/* ============================================================
+   InventoryIQ — Dark Luxury Operations Terminal
+   Design system: deep navy base, brand-blue accent, warm gold
+   for monetary metrics. Bloomberg Terminal x Linear.
+   ============================================================ */
+
+:root {
+  --bg-base: #0a0e1a;
+  --bg-surface: #11182b;
+  --bg-surface-2: #161f36;
+  --bg-surface-3: #1d2942;
+  --border-subtle: #243352;
+  --border-strong: #33476f;
+  --text-primary: #eef2fb;
+  --text-secondary: #9fb0d0;
+  --text-muted: #5d6f96;
+  --accent: #005ab4;
+  --accent-bright: #3b8df0;
+  --gold: #e2b65c;
+  --gold-dim: #9c7d3a;
+  --emerald: #34d399;
+  --amber: #fbbf24;
+  --red: #f87171;
+
+  --duration-fast: 150ms;
+  --duration-normal: 280ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---- Base / atmosphere ------------------------------------ */
 body {
-  background-color: #f9f9ff;
-  background-image: radial-gradient(at 0% 0%, rgba(0, 90, 180, 0.1) 0px, transparent 50%),
-                    radial-gradient(at 100% 100%, rgba(70, 95, 137, 0.1) 0px, transparent 50%);
-  min-height: 100vh; color: #181c22; font-family: 'Inter', sans-serif;
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(900px circle at 0% -5%, rgba(0, 90, 180, 0.22), transparent 55%),
+    radial-gradient(1100px circle at 105% 110%, rgba(226, 182, 92, 0.12), transparent 55%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
 }
-.glass-panel { background: rgba(242, 243, 253, 0.6); backdrop-filter: blur(24px); outline: 1px solid rgba(193, 198, 213, 0.5); }
-.ghost-border { outline: 0.5px solid rgba(193, 198, 213, 0.8); }
-.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
 
-
-.auth-tab.active { color: #005ab4; border-bottom: 2px solid #005ab4; }
-.auth-form { display: none; }
-.auth-form.active { display: block; }
-
-input, select, textarea {
-  background: rgba(236, 237, 247, 0.5); border: 1px solid rgba(193, 198, 213, 0.6); color: #181c22;
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
-input:focus { border-color: #005ab4; outline: none; box-shadow: 0 0 0 2px rgba(0, 90, 180, 0.2); }
 
+/* Tabular numerals utility for any metric number */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+
+/* ---- Scrollbars ------------------------------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+  background-clip: padding-box;
+}
+
+/* ---- Auth tabs / forms (login) ---------------------------- */
+.auth-tab.active {
+  color: var(--accent-bright);
+  border-bottom: 2px solid var(--accent-bright);
+}
+
+.auth-form {
+  display: none;
+}
+
+.auth-form.active {
+  display: block;
+  animation: authFade var(--duration-normal) var(--ease-out-expo);
+}
+
+@keyframes authFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Form controls (dark wells) --------------------------- */
+input,
+select,
+textarea {
+  background: var(--bg-surface-3);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent-bright);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 141, 240, 0.22);
+}
+
+select option {
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent-bright);
+}
+
+/* Focus-visible ring for keyboard users on all interactive elements */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ---- App shell: sidebar nav active state ------------------ */
+/* utils.js toggles light-mode utility classes on [data-page] links.
+   These rules override them so the active state reads dark-luxury. */
+.nav-link {
+  position: relative;
+  color: var(--text-secondary);
+  border-left: 3px solid transparent;
+  transition: color var(--duration-fast) ease,
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-normal) var(--ease-out-expo);
+}
+
+.nav-link .material-symbols-outlined {
+  transition: color var(--duration-fast) ease;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background-color: rgba(59, 141, 240, 0.06) !important;
+  border-left-color: var(--border-strong);
+}
+
+/* Active: utils.js adds font-bold + bg-[#e8f0fe] + text-[#005ab4].
+   We neutralize the light bg/text and apply our own treatment. */
+.nav-link.font-bold {
+  color: var(--text-primary) !important;
+  background-color: rgba(0, 90, 180, 0.16) !important;
+  border-left-color: var(--accent-bright) !important;
+  box-shadow: inset 0 0 22px -6px rgba(59, 141, 240, 0.45);
+}
+
+.nav-link.font-bold .material-symbols-outlined {
+  color: var(--accent-bright);
+}
+
+/* ---- Surface cards ---------------------------------------- */
+.surface-card {
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Signature element: gradient top hairline on stat cards */
+.stat-card {
+  position: relative;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+  transition: transform var(--duration-normal) var(--ease-out-expo),
+    box-shadow var(--duration-normal) var(--ease-out-expo),
+    border-color var(--duration-normal) ease;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.25rem;
+  right: 1.25rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-bright), transparent);
+  opacity: 0.55;
+}
+
+.stat-card.is-gold::before {
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0.6;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    0 12px 32px -12px rgba(0, 90, 180, 0.45);
+}
+
+.stat-card.is-gold:hover {
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    0 12px 32px -12px rgba(226, 182, 92, 0.4);
+}
+
+/* Signature hairline under page H1 */
+.title-rule {
+  height: 2px;
+  width: 64px;
+  margin-top: 14px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent-bright), transparent);
+}
+
+/* ---- Buttons / interactive -------------------------------- */
+.btn-press {
+  transition: transform var(--duration-fast) var(--ease-out-expo), filter var(--duration-fast) ease, background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.btn-press:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.btn-press:active {
+  transform: translateY(0);
+}
+
+/* ---- Tables ----------------------------------------------- */
+.iq-table tbody tr {
+  transition: background-color var(--duration-fast) ease;
+}
+
+.iq-table tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.012);
+}
+
+.iq-table tbody tr:hover {
+  background-color: rgba(59, 141, 240, 0.07);
+}
+
+/* Status dot pulse for out-of-stock */
+@keyframes dotPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.5);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px rgba(248, 113, 113, 0);
+  }
+}
+
+.dot-pulse {
+  animation: dotPulse 1.8s ease-in-out infinite;
+}
+
+/* ---- Skeleton shimmer ------------------------------------- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-surface-3);
+  border-radius: 8px;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(159, 176, 208, 0.13), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ---- Toast ------------------------------------------------ */
+#iq-toast-stack {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.iq-toast {
+  pointer-events: auto;
+  min-width: 240px;
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.7);
+  animation: toastIn var(--duration-normal) var(--ease-out-expo);
+}
+
+.iq-toast.leaving {
+  animation: toastOut 200ms var(--ease-out-expo) forwards;
+}
+
+.iq-toast .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.iq-toast.ok {
+  border-left: 3px solid var(--emerald);
+}
+
+.iq-toast.ok .material-symbols-outlined {
+  color: var(--emerald);
+}
+
+.iq-toast.err {
+  border-left: 3px solid var(--red);
+}
+
+.iq-toast.err .material-symbols-outlined {
+  color: var(--red);
+}
+
+.iq-toast.info {
+  border-left: 3px solid var(--accent-bright);
+}
+
+.iq-toast.info .material-symbols-outlined {
+  color: var(--accent-bright);
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toastOut {
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+/* ---- Page enter stagger ----------------------------------- */
+main>* {
+  animation: pageEnter 420ms var(--ease-out-expo) both;
+}
+
+main>*:nth-child(1) {
+  animation-delay: 20ms;
+}
+
+main>*:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+main>*:nth-child(3) {
+  animation-delay: 100ms;
+}
+
+main>*:nth-child(4) {
+  animation-delay: 140ms;
+}
+
+main>*:nth-child(5) {
+  animation-delay: 180ms;
+}
+
+main>*:nth-child(6) {
+  animation-delay: 220ms;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Reduced motion --------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  main>* {
+    animation: none;
+  }
+
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+/* ============================================================
+   PRINT — force a clean light report. The app is dark on
+   screen, but #print-section must be legible on paper.
+   ============================================================ */
 @media print {
-  body > div { display: block !important; height: auto !important; overflow: visible !important; }
-  aside, header, nav { display: none !important; }
-  main { padding: 0 !important; overflow: visible !important; }
-  .bg-white.rounded-\[1\.25rem\] { display: none !important; }
-  .flex.items-center.justify-between { display: none !important; }
-  #pagination-text { display: none !important; }
-  #print-section { display: block !important; }
+  body {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #111 !important;
+  }
+
+  body>div {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  aside,
+  header,
+  nav {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  main>* {
+    animation: none !important;
+  }
+
+  /* Hide everything in main except the print section */
+  main>*:not(#print-section) {
+    display: none !important;
+  }
+
+  #pagination-text {
+    display: none !important;
+  }
+
+  #print-section {
+    display: block !important;
+    color: #111 !important;
+    background: #fff !important;
+  }
+
+  #print-section * {
+    color: #111 !important;
+  }
+
   /* Modals must never appear in print output */
   #deduct-modal,
   #add-modal,
   #manage-categories-modal,
-  #delete-category-confirm-modal { display: none !important; }
+  #delete-category-confirm-modal,
+  #import-modal,
+  #inv-scan-modal {
+    display: none !important;
+  }
 }

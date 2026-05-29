@@ -5,48 +5,28 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>InventoryIQ | Inventory</title>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { brand: '#005ab4' } } }
+    }
+  </script>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "background": "#f9f9ff", "error": "#ba1a1a", "error-container": "#ffdad6", "inverse-on-surface": "#eff0fa",
-            "inverse-primary": "#aac7ff", "inverse-surface": "#2d3038", "on-background": "#181c22", "on-error": "#ffffff",
-            "on-error-container": "#93000a", "on-primary": "#ffffff", "on-primary-container": "#fefcff", "on-primary-fixed": "#001b3e",
-            "on-primary-fixed-variant": "#00458d", "on-secondary": "#ffffff", "on-secondary-container": "#405882", "on-secondary-fixed": "#001b3e",
-            "on-secondary-fixed-variant": "#2e4770", "on-surface": "#181c22", "on-surface-variant": "#414753", "on-tertiary": "#ffffff",
-            "on-tertiary-container": "#fffbff", "on-tertiary-fixed": "#321200", "on-tertiary-fixed-variant": "#763400", "outline": "#717785",
-            "outline-variant": "#c1c6d5", "primary": "#005ab4", "primary-container": "#0873df", "primary-fixed": "#d6e3ff",
-            "primary-fixed-dim": "#aac7ff", "secondary": "#465f89", "secondary-container": "#b7cfff", "secondary-fixed": "#d6e3ff",
-            "secondary-fixed-dim": "#afc7f7", "surface": "#f9f9ff", "surface-bright": "#f9f9ff", "surface-container": "#ecedf7",
-            "surface-container-high": "#e6e8f1", "surface-container-highest": "#e0e2ec", "surface-container-low": "#f2f3fd", "surface-container-lowest": "#ffffff",
-            "surface-dim": "#d8dae3", "surface-tint": "#005db8", "surface-variant": "#e0e2ec", "tertiary": "#964400",
-            "tertiary-container": "#bd5700", "tertiary-fixed": "#ffdbc9", "tertiary-fixed-dim": "#ffb68c",
-            "primary-dim": "#00458d", "secondary-dim": "#2e4770", "tertiary-dim": "#763400", "error-dim": "#93000a",
-            "slate-950": "#f9f9ff", "slate-400": "#414753", "slate-500": "#717785", "slate-200": "#181c22"
-          },
-          fontFamily: { "body": ["Inter"], "headline": ["Inter"] },
-        },
-      },
-    }
-  </script>
   <link rel="stylesheet" href="style.css" />
 </head>
 
-<body class="selection:bg-primary/30 antialiased">
-  <div class="h-screen overflow-hidden flex bg-[#f5f6fa]">
+<body class="antialiased text-[#eef2fb]">
+  <div class="h-screen overflow-hidden flex">
 
     <!-- Sidebar -->
-    <aside class="w-[260px] bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
+    <aside class="w-[260px] bg-[#11182b] border-r border-[#243352] flex flex-col justify-between shrink-0">
       <div>
-        <div class="h-24 flex items-center px-6 border-b border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-[#060e20] rounded-xl flex items-center justify-center p-2 shadow-sm">
+        <div class="h-20 flex items-center px-6 border-b border-[#243352]">
+          <div class="flex items-center gap-3.5">
+            <div
+              class="w-10 h-10 bg-[#0a0e1a] rounded-xl border border-[#243352] flex items-center justify-center p-1.5 shadow-[0_0_20px_-6px_rgba(226,182,92,0.4)]">
               <svg viewBox="0 0 100 100" class="w-full h-full">
                 <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
                 <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
@@ -54,38 +34,39 @@
               </svg>
             </div>
             <div class="flex flex-col">
-              <span class="text-[17px] font-bold text-gray-900 leading-tight">InventoryIQ</span>
+              <span class="text-[16px] font-black text-[#eef2fb] leading-tight tracking-tight">InventoryIQ</span>
+              <span class="text-[10px] font-bold text-[#5d6f96] tracking-[0.12em] uppercase">Ops Terminal</span>
             </div>
           </div>
         </div>
 
-        <nav class="p-4 space-y-1.5 mt-2">
+        <nav class="p-3 space-y-1 mt-3">
           <a href="dashboard.html" data-page="dashboard"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">grid_view</span> Dashboard
           </a>
           <a href="inventory.html" data-page="inventory"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">inventory_2</span> Inventory
           </a>
           <a href="insights.html" data-page="insights"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">bar_chart</span> Insights
           </a>
           <a href="transactions.html" data-page="transactions"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">receipt_long</span> Transactions
           </a>
           <a href="forecast.html" data-page="forecast"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">trending_up</span> Forecast
           </a>
         </nav>
       </div>
 
-      <div class="p-4 space-y-1 mb-2 border-t border-gray-100 pt-6">
+      <div class="p-3 border-t border-[#243352] pt-4">
         <button
-          class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer"
+          class="btn-press flex items-center gap-3 w-full px-4 py-3 text-[#f87171] hover:bg-[#f87171]/10 rounded-xl font-semibold text-sm cursor-pointer"
           onclick="handleLogout()">
           <span class="material-symbols-outlined text-xl">logout</span> Logout
         </button>
@@ -94,117 +75,101 @@
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
-      <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
+      <header
+        class="h-20 bg-[#11182b]/80 backdrop-blur border-b border-[#243352] flex items-center justify-between px-10 shrink-0">
         <div class="ml-auto flex items-center gap-3">
-          <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
+          <span class="w-2 h-2 rounded-full bg-[#34d399]"></span>
+          <span class="text-sm font-semibold text-[#9fb0d0]" id="nav-email"></span>
         </div>
       </header>
 
-      <main class="flex-1 overflow-auto p-10 space-y-10">
+      <main class="flex-1 overflow-auto p-10 space-y-8">
 
-        <div class="flex items-center justify-between">
+        <div class="flex items-end justify-between">
           <div>
-            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Inventory</h1>
-            <p class="text-gray-500 mt-2 font-medium">Manage and track all your assets.</p>
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Asset Management</p>
+            <h1 class="text-3xl font-black text-[#eef2fb] tracking-tight">Inventory</h1>
+            <div class="title-rule"></div>
           </div>
           <button
-            class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
+            class="btn-press bg-[#161f36] border border-[#243352] px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#9fb0d0] hover:text-[#eef2fb] hover:border-[#33476f] flex items-center gap-2 cursor-pointer"
             onclick="loadInventory()">
             <span class="material-symbols-outlined font-bold text-[18px]">refresh</span> Refresh
           </button>
         </div>
 
-        <div class="bg-white rounded-[1.25rem] shadow-sm border border-gray-200 overflow-hidden">
-          <div class="p-6 pb-5 flex items-start justify-between">
-            <div>
-              <h3 class="text-xl font-bold text-gray-900">Active Inventory</h3>
-              <p class="text-[13px] font-medium text-gray-500 mt-1">Real-time status of all tracked assets and warehouse
-                stock.</p>
+        <div class="surface-card overflow-hidden">
+          <!-- Toolbar -->
+          <div
+            class="p-6 pb-5 flex flex-col xl:flex-row xl:items-center gap-4 xl:justify-between border-b border-[#243352]">
+            <div class="relative w-full xl:w-[320px]">
+              <span
+                class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#5d6f96] text-lg">search</span>
+              <input type="text" placeholder="Search by name or category..." id="inv-search"
+                class="w-full pl-12 pr-4 py-2.5 rounded-xl text-sm font-medium bg-[#1d2942] border border-[#243352] text-[#eef2fb] placeholder-[#5d6f96] focus:outline-none focus:ring-2 focus:ring-[#005ab4]" oninput="applyFilters()" />
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex flex-wrap items-center gap-2.5">
               <button
-                class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
+                class="btn-press px-4 py-2.5 bg-[#1d2942] hover:bg-[#243352] border border-[#243352] rounded-xl text-[13px] font-bold text-[#9fb0d0] hover:text-[#eef2fb] flex items-center gap-2 cursor-pointer"
                 onclick="printReport()">
-                <span class="material-symbols-outlined text-[16px]">print</span> Print Report
+                <span class="material-symbols-outlined text-[16px]">print</span> Print
               </button>
               <button
-                class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
+                class="btn-press px-4 py-2.5 bg-[#1d2942] hover:bg-[#243352] border border-[#243352] rounded-xl text-[13px] font-bold text-[#9fb0d0] hover:text-[#eef2fb] flex items-center gap-2 cursor-pointer"
                 onclick="exportCSV()">
-                <span class="material-symbols-outlined text-[16px]">download</span> Export CSV
+                <span class="material-symbols-outlined text-[16px]">download</span> Export
               </button>
               <button id="btn-manage-categories"
-                class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
+                class="btn-press px-4 py-2.5 bg-[#1d2942] hover:bg-[#243352] border border-[#243352] rounded-xl text-[13px] font-bold text-[#9fb0d0] hover:text-[#eef2fb] flex items-center gap-2 cursor-pointer"
                 onclick="openManageCategoriesModal()">
-                <span class="material-symbols-outlined text-[16px]">category</span> Manage Categories
+                <span class="material-symbols-outlined text-[16px]">category</span> Categories
               </button>
               <button id="btn-bulk-import"
-                class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
+                class="btn-press px-4 py-2.5 bg-[#1d2942] hover:bg-[#243352] border border-[#243352] rounded-xl text-[13px] font-bold text-[#9fb0d0] hover:text-[#eef2fb] flex items-center gap-2 cursor-pointer"
                 onclick="openImportModal()">
-                <span class="material-symbols-outlined text-[16px]">upload_file</span> Bulk Import
+                <span class="material-symbols-outlined text-[16px]">upload_file</span> Import
               </button>
               <button id="btn-show-deleted"
-                class="hidden px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-500 flex items-center gap-2 cursor-pointer transition"
+                class="hidden btn-press px-4 py-2.5 bg-[#1d2942] hover:bg-[#243352] border border-[#243352] rounded-xl text-[13px] font-bold text-[#9fb0d0] flex items-center gap-2 cursor-pointer"
                 onclick="toggleDeletedView()">
                 <span class="material-symbols-outlined text-[16px]">restore_from_trash</span>
                 <span id="btn-show-deleted-label">Show Deleted</span>
               </button>
               <button id="btn-scan"
-                class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-[13px] font-bold text-gray-700 flex items-center gap-2 cursor-pointer transition"
+                class="btn-press px-4 py-2.5 bg-[#1d2942] hover:bg-[#243352] border border-[#243352] rounded-xl text-[13px] font-bold text-[#9fb0d0] hover:text-[#eef2fb] flex items-center gap-2 cursor-pointer"
                 onclick="openInvScanModal()">
                 <span class="material-symbols-outlined text-[16px]">qr_code_scanner</span> Scan
               </button>
               <a id="btn-add-new" href="add-item.html"
-                class="px-6 py-2.5 bg-[#005ab4] hover:bg-[#00458d] text-white rounded-xl text-[13px] font-bold flex items-center gap-2 cursor-pointer shadow-sm transition">
-                <span class="material-symbols-outlined text-[18px]">add</span> Add New Items
+                class="btn-press px-5 py-2.5 bg-[#005ab4] hover:bg-[#0a6fd6] text-white rounded-xl text-[13px] font-bold flex items-center gap-2 cursor-pointer shadow-[0_8px_24px_-10px_rgba(0,90,180,0.9)]">
+                <span class="material-symbols-outlined text-[18px]">add</span> Add Item
               </a>
             </div>
           </div>
 
-          <div class="p-6 pb-5 flex items-start justify-between">
-            <div class="relative w-[300px] mb-3">
-              <span
-                class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
-              <input type="text" placeholder="Search by name or category..." id="inv-search"
-                class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium"
-                oninput="applyFilters()" />
-            </div>
-          </div>
-
           <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="iq-table w-full text-left border-collapse">
               <thead>
                 <tr
-                  class="border-y border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50/50">
-                  <th class="px-8 py-4 text-center">Asset Name</th>
-                  <th class="px-6 py-4 text-center">Category</th>
-                  <th class="px-6 py-4 text-center">Qty</th>
-                  <th class="px-6 py-4 text-center">Status</th>
-                  <th class="px-8 py-4 text-center">Actions</th>
+                  class="text-[#5d6f96] text-[10px] font-black uppercase tracking-[0.12em] bg-[#0a0e1a]/40 border-b border-[#243352]">
+                  <th class="px-8 py-3.5 text-center">Asset Name</th>
+                  <th class="px-6 py-3.5 text-center">Category</th>
+                  <th class="px-6 py-3.5 text-center">Qty</th>
+                  <th class="px-6 py-3.5 text-center">Status</th>
+                  <th class="px-8 py-3.5 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody id="inventory-body" class="divide-y divide-gray-100">
+              <tbody id="inventory-body" class="divide-y divide-[#243352]">
                 <tr>
-                  <td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td>
+                  <td colspan="5" class="px-8 py-12 text-center text-sm text-[#5d6f96]"></td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <div
-            class="p-6 flex items-center justify-between text-[13px] font-medium text-gray-500 border-t border-gray-100">
+            class="p-5 px-8 flex items-center justify-between text-[12px] font-medium text-[#5d6f96] border-t border-[#243352]">
             <span id="pagination-text">Showing 0 of 0 assets</span>
-            <div class="flex items-center gap-1">
-              <button
-                class="w-8 h-8 rounded-lg border border-transparent hover:bg-gray-100 flex items-center justify-center text-gray-400">
-                <span class="material-symbols-outlined text-sm">chevron_left</span>
-              </button>
-              <button
-                class="w-8 h-8 rounded-lg bg-[#005ab4] text-white font-bold flex items-center justify-center">1</button>
-              <button
-                class="w-8 h-8 rounded-lg border border-transparent hover:bg-gray-100 flex items-center justify-center text-gray-400">
-                <span class="material-symbols-outlined text-sm">chevron_right</span>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -220,91 +185,96 @@
   </div>
 
   <!-- Deduct Stock Modal -->
-  <div id="deduct-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-xl p-8 w-[380px]">
-      <h2 class="text-lg font-black text-gray-900 mb-1">Deduct Stock</h2>
-      <p class="text-sm text-gray-500 mb-6" id="deduct-item-label">Item name</p>
-      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Units to Deduct</label>
+  <div id="deduct-modal"
+    class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-[#161f36] border border-[#243352] rounded-2xl shadow-xl p-8 w-[380px]">
+      <h2 class="text-lg font-black text-[#eef2fb] mb-1">Deduct Stock</h2>
+      <p class="text-sm text-[#9fb0d0] mb-6" id="deduct-item-label">Item name</p>
+      <label class="block text-[11px] font-bold text-[#5d6f96] uppercase tracking-[0.12em] mb-2">Units to Deduct</label>
       <input type="number" id="deduct-amount" min="1" value="1"
-        class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-100 mb-2" />
-      <p class="text-xs text-gray-400 mb-6" id="deduct-current-qty"></p>
+        class="w-full bg-[#1d2942] border border-[#243352] rounded-xl px-4 py-3 text-sm font-semibold text-[#eef2fb] focus:outline-none focus:ring-2 focus:ring-[#005ab4] mb-2" />
+      <p class="text-xs text-[#5d6f96] mb-6" id="deduct-current-qty"></p>
       <div class="flex gap-3 justify-end">
         <button onclick="closeDeductModal()"
-          class="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Cancel</button>
+          class="px-5 py-2.5 rounded-xl text-sm font-bold text-[#9fb0d0] bg-[#1d2942] border border-[#243352] hover:text-[#eef2fb] hover:border-[#33476f] transition">Cancel</button>
         <button onclick="confirmDeduct()"
-          class="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#005ab4] text-white hover:bg-blue-700 transition">Confirm</button>
+          class="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#005ab4] text-white hover:bg-[#0a6ed4] shadow-[0_8px_24px_-10px_rgba(0,90,180,0.9)] transition">Confirm</button>
       </div>
-      <p class="text-xs text-red-500 mt-3 hidden" id="deduct-error"></p>
+      <p class="text-xs text-[#f87171] mt-3 hidden" id="deduct-error"></p>
     </div>
   </div>
 
   <!-- Add Stock Modal -->
-  <div id="add-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-xl p-8 w-[380px]">
-      <h2 class="text-lg font-black text-gray-900 mb-1">Add Stock</h2>
-      <p class="text-sm text-gray-500 mb-6" id="add-item-label">Item name</p>
-      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Units to Add</label>
+  <div id="add-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-[#161f36] border border-[#243352] rounded-2xl shadow-xl p-8 w-[380px]">
+      <h2 class="text-lg font-black text-[#eef2fb] mb-1">Add Stock</h2>
+      <p class="text-sm text-[#9fb0d0] mb-6" id="add-item-label">Item name</p>
+      <label class="block text-[11px] font-bold text-[#5d6f96] uppercase tracking-[0.12em] mb-2">Units to Add</label>
       <input type="number" id="add-amount" min="1" value="1"
-        class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-100 mb-2" />
-      <p class="text-xs text-gray-400 mb-6" id="add-current-qty"></p>
+        class="w-full bg-[#1d2942] border border-[#243352] rounded-xl px-4 py-3 text-sm font-semibold text-[#eef2fb] focus:outline-none focus:ring-2 focus:ring-[#005ab4] mb-2" />
+      <p class="text-xs text-[#5d6f96] mb-6" id="add-current-qty"></p>
       <div class="flex gap-3 justify-end">
         <button onclick="closeAddModal()"
-          class="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Cancel</button>
+          class="px-5 py-2.5 rounded-xl text-sm font-bold text-[#9fb0d0] bg-[#1d2942] border border-[#243352] hover:text-[#eef2fb] hover:border-[#33476f] transition">Cancel</button>
         <button onclick="confirmAdd()"
-          class="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#005ab4] text-white hover:bg-blue-700 transition">Confirm</button>
+          class="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#005ab4] text-white hover:bg-[#0a6ed4] shadow-[0_8px_24px_-10px_rgba(0,90,180,0.9)] transition">Confirm</button>
       </div>
-      <p class="text-xs text-red-500 mt-3 hidden" id="add-error"></p>
+      <p class="text-xs text-[#f87171] mt-3 hidden" id="add-error"></p>
     </div>
   </div>
 
   <!-- Manage Categories Modal -->
-  <div id="manage-categories-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-xl p-8 w-[500px]">
-      <h2 class="text-lg font-black text-gray-900 mb-1">Manage Categories</h2>
-      <p class="text-sm text-gray-500 mb-6">Add, edit, or delete categories for your inventory.</p>
+  <div id="manage-categories-modal"
+    class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-[#161f36] border border-[#243352] rounded-2xl shadow-xl p-8 w-[500px]">
+      <h2 class="text-lg font-black text-[#eef2fb] mb-1">Manage Categories</h2>
+      <p class="text-sm text-[#9fb0d0] mb-6">Add, edit, or delete categories for your inventory.</p>
 
       <!-- Categories list -->
       <div class="mb-6">
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Existing Categories</label>
+        <label class="block text-[11px] font-bold text-[#5d6f96] uppercase tracking-[0.12em] mb-3">Existing
+          Categories</label>
         <div id="categories-list" class="flex flex-wrap gap-2 min-h-8">
           <!-- Chips populated here -->
         </div>
-        <p id="no-categories" class="text-xs text-gray-400 hidden">No categories yet. Create one below.</p>
+        <p id="no-categories" class="text-xs text-[#5d6f96] hidden">No categories yet. Create one below.</p>
       </div>
 
       <!-- Add new category -->
       <div class="mb-6">
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Add New Category</label>
+        <label class="block text-[11px] font-bold text-[#5d6f96] uppercase tracking-[0.12em] mb-2">Add New
+          Category</label>
         <div class="flex gap-2">
           <input type="text" id="new-category-input" placeholder="Enter category name..."
-            class="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+            class="flex-1 bg-[#1d2942] border border-[#243352] rounded-xl px-4 py-3 text-sm font-semibold text-[#eef2fb] focus:outline-none focus:ring-2 focus:ring-[#005ab4]" />
           <button onclick="addCategoryToList()"
-            class="px-5 py-3 rounded-xl text-sm font-bold bg-[#005ab4] text-white hover:bg-blue-700 transition">Create</button>
+            class="px-5 py-3 rounded-xl text-sm font-bold bg-[#005ab4] text-white hover:bg-[#0a6ed4] shadow-[0_8px_24px_-10px_rgba(0,90,180,0.9)] transition">Create</button>
         </div>
-        <p class="text-xs text-red-500 mt-2 hidden" id="category-error"></p>
+        <p class="text-xs text-[#f87171] mt-2 hidden" id="category-error"></p>
       </div>
 
       <!-- Modal actions -->
       <div class="flex gap-3 justify-end">
         <button onclick="closeManageCategoriesModal()"
-          class="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Close</button>
+          class="px-5 py-2.5 rounded-xl text-sm font-bold text-[#9fb0d0] bg-[#1d2942] border border-[#243352] hover:text-[#eef2fb] hover:border-[#33476f] transition">Close</button>
       </div>
     </div>
   </div>
 
   <!-- Delete Category Confirmation Modal -->
   <div id="delete-category-confirm-modal"
-    class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-xl p-8 w-[400px]">
-      <h2 class="text-lg font-black text-gray-900 mb-2">Delete Category?</h2>
-      <p class="text-sm text-gray-600 mb-4" id="delete-confirm-message">
-        Are you sure? This will move <strong id="delete-item-count">0</strong> items to "Uncategorized".
+    class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-[#161f36] border border-[#243352] rounded-2xl shadow-xl p-8 w-[400px]">
+      <h2 class="text-lg font-black text-[#eef2fb] mb-2">Delete Category?</h2>
+      <p class="text-sm text-[#9fb0d0] mb-4" id="delete-confirm-message">
+        Are you sure? This will move <strong id="delete-item-count" class="text-[#eef2fb]">0</strong> items to
+        "Uncategorized".
       </p>
       <div class="flex gap-3 justify-end">
         <button onclick="closeDeleteConfirmModal()"
-          class="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-100 transition">Cancel</button>
+          class="px-5 py-2.5 rounded-xl text-sm font-bold text-[#9fb0d0] bg-[#1d2942] border border-[#243352] hover:text-[#eef2fb] hover:border-[#33476f] transition">Cancel</button>
         <button onclick="confirmDeleteCategory()"
-          class="px-5 py-2.5 rounded-xl text-sm font-bold bg-red-600 text-white hover:bg-red-700 transition">Delete</button>
+          class="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#f87171] text-white hover:bg-[#ef4444] shadow-[0_8px_24px_-10px_rgba(248,113,113,0.4)] transition">Delete</button>
       </div>
     </div>
   </div>
@@ -315,6 +285,20 @@
   <script>
     requireAuth();
     initNav('inventory');
+
+    function tableSkeleton(rows) {
+      let out = '';
+      for (let i = 0; i < rows; i++) {
+        out += `<tr>
+          <td class="px-8 py-3.5"><div class="flex items-center gap-4"><span class="skeleton w-10 h-10 rounded-lg"></span><div class="space-y-2"><span class="skeleton block h-3 w-32"></span><span class="skeleton block h-2.5 w-20"></span></div></div></td>
+          <td class="px-6 py-3.5"><span class="skeleton block h-3 w-24 mx-auto"></span></td>
+          <td class="px-6 py-3.5 text-center"><span class="skeleton inline-block h-3 w-8"></span></td>
+          <td class="px-6 py-3.5 text-center"><span class="skeleton block h-5 w-20 rounded-md mx-auto"></span></td>
+          <td class="px-8 py-3.5 text-center"><span class="skeleton block h-8 w-16 rounded-md mx-auto"></span></td>
+        </tr>`;
+      }
+      return out;
+    }
 
     let allItems = [];
     let allCategories = [];
@@ -331,7 +315,7 @@
 
     async function loadInventory() {
       const tb = document.getElementById('inventory-body');
-      tb.innerHTML = '<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading Items...</td></tr>';
+      tb.innerHTML = tableSkeleton(5);
 
       try {
         const [itemsResult, catsResult, deletedResult] = await Promise.allSettled([getAllItems(), getCategories(), getDeletedItems()]);
@@ -342,12 +326,12 @@
           deletedItems = deletedResult.value;
         }
         if (itemsResult.status === 'rejected') {
-          tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${itemsResult.reason.message}</td></tr>`;
+          tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${escHTML(itemsResult.reason.message)}</td></tr>`;
           return;
         }
         allItems = itemsResult.value;
       } catch (e) {
-        tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${e.message}</td></tr>`;
+        tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${escHTML(e.message)}</td></tr>`;
         return;
       }
       document.getElementById('inv-search').value = '';
@@ -373,41 +357,41 @@
       if (viewMode === 'deleted') {
         const thead = document.querySelector('#inventory-body').closest('table').querySelector('thead tr');
         thead.innerHTML = `
-          <th class="px-8 py-4 text-center">Asset Name</th>
-          <th class="px-6 py-4 text-center">Category</th>
-          <th class="px-6 py-4 text-center">Qty</th>
-          <th class="px-6 py-4 text-center">Deleted On</th>
-          <th class="px-8 py-4 text-center">Actions</th>`;
+          <th class="px-8 py-3.5 text-center">Asset Name</th>
+          <th class="px-6 py-3.5 text-center">Category</th>
+          <th class="px-6 py-3.5 text-center">Qty</th>
+          <th class="px-6 py-3.5 text-center">Deleted On</th>
+          <th class="px-8 py-3.5 text-center">Actions</th>`;
         if (!deletedItems.length) {
-          tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-400">No deleted items found.</td></tr>`;
+          tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-[#5d6f96]">No deleted items found.</td></tr>`;
           document.getElementById('pagination-text').textContent = 'Showing 0 deleted items';
           return;
         }
         tb.innerHTML = deletedItems.map(c => {
           const qty = c.quantity ?? 0;
-          const iconDiv = `<div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 mr-4 border border-gray-100"><span class="material-symbols-outlined text-xl">devices</span></div>`;
+          const iconDiv = `<div class="w-10 h-10 rounded-lg bg-[#1d2942] flex items-center justify-center text-[#5d6f96] mr-4 border border-[#243352]"><span class="material-symbols-outlined text-xl">devices</span></div>`;
           const sku = `SKU: ${c.itemID.substring(0, 8).toUpperCase()}`;
           const deletedOn = c.deletedAt ? new Date(c.deletedAt).toLocaleDateString() : '—';
           const safeName = c.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-          return `<tr class="hover:bg-red-50/30 transition-colors group">
-            <td class="px-8 py-4 text-center">
+          return `<tr class="hover:bg-[#1d2942]/40 transition-colors group">
+            <td class="px-8 py-3.5 text-center">
               <div class="flex items-center">
                 ${iconDiv}
                 <div>
-                  <div class="font-bold text-gray-400 text-[13px] line-through">${c.name}</div>
-                  <div class="text-[11px] font-medium text-gray-300 mt-0.5">${sku}</div>
+                  <div class="font-bold text-[#5d6f96] text-[13px] line-through">${c.name}</div>
+                  <div class="text-[11px] font-medium text-[#5d6f96] mt-0.5">${sku}</div>
                 </div>
               </div>
             </td>
-            <td class="px-6 py-4 text-center text-[13px] text-gray-400">${c.category || 'Uncategorized'}</td>
-            <td class="px-6 py-4 text-center font-bold text-gray-400 text-[13px]">${qty}</td>
-            <td class="px-6 py-4 text-center text-[13px] text-gray-400">${deletedOn}</td>
-            <td class="px-8 py-4 text-center">
-              <button class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[12px] font-bold flex items-center gap-1 mx-auto cursor-pointer transition"
+            <td class="px-6 py-3.5 text-center text-[13px] text-[#5d6f96]">${c.category || 'Uncategorized'}</td>
+            <td class="px-6 py-3.5 text-center font-bold text-[#5d6f96] text-[13px]">${qty}</td>
+            <td class="px-6 py-3.5 text-center text-[13px] text-[#5d6f96]">${deletedOn}</td>
+            <td class="px-8 py-3.5 text-center">
+              <button class="px-3 py-1.5 bg-[#34d399]/10 hover:bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/25 rounded-lg text-[12px] font-bold flex items-center gap-1 mx-auto cursor-pointer transition"
                 onclick="handleRestore('${c.itemID}', '${safeName}')">
                 <span class="material-symbols-outlined text-[15px]">restore</span> Restore
               </button>
-              <span id="restore-status-${c.itemID}" class="text-[11px] text-red-500 hidden block mt-1"></span>
+              <span id="restore-status-${c.itemID}" class="text-[11px] text-[#f87171] hidden block mt-1"></span>
             </td>
           </tr>`;
         }).join('');
@@ -418,58 +402,58 @@
       // Active view — restore original headers
       const thead = document.querySelector('#inventory-body').closest('table').querySelector('thead tr');
       thead.innerHTML = `
-        <th class="px-8 py-4 text-center">Asset Name</th>
-        <th class="px-6 py-4 text-center">Category</th>
-        <th class="px-6 py-4 text-center">Qty</th>
-        <th class="px-6 py-4 text-center">Status</th>
-        <th class="px-8 py-4 text-center">Actions</th>`;
+        <th class="px-8 py-3.5 text-center">Asset Name</th>
+        <th class="px-6 py-3.5 text-center">Category</th>
+        <th class="px-6 py-3.5 text-center">Qty</th>
+        <th class="px-6 py-3.5 text-center">Status</th>
+        <th class="px-8 py-3.5 text-center">Actions</th>`;
 
       if (!items.length) {
         const msg = allItems.length ? 'No items match your search.' : 'No items found.';
-        tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-gray-500">${msg}</td></tr>`;
+        tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-[#5d6f96]">${escHTML(msg)}</td></tr>`;
         document.getElementById('pagination-text').textContent = 'Showing 0 of 0 assets';
         return;
       }
 
       tb.innerHTML = items.map(c => {
         const qty = c.quantity ?? 0, thr = c.lowStockThreshold ?? 10;
-        const iconDiv = `<div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 mr-4 border border-gray-100"><span class="material-symbols-outlined text-xl">devices</span></div>`;
+        const iconDiv = `<div class="w-10 h-10 rounded-lg bg-[#1d2942] flex items-center justify-center text-[#5d6f96] mr-4 border border-[#243352]"><span class="material-symbols-outlined text-xl">devices</span></div>`;
         const sku = `SKU: ${c.itemID.substring(0, 8).toUpperCase()}`;
         const badge = qty === 0
-          ? '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#fef2f2] text-[#dc2626]">Out of Stock</span>'
+          ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#f87171]/10 text-[#f87171] border border-[#f87171]/25"><span class="w-1.5 h-1.5 rounded-full bg-[#f87171] dot-pulse"></span>Out</span>'
           : qty <= thr
-            ? '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#fffbeb] text-[#d97706]">Low Stock</span>'
-            : '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#ecfdf5] text-[#059669]">In Stock</span>';
+            ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#fbbf24]/10 text-[#fbbf24] border border-[#fbbf24]/25"><span class="w-1.5 h-1.5 rounded-full bg-[#fbbf24]"></span>Low</span>'
+            : '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/25"><span class="w-1.5 h-1.5 rounded-full bg-[#34d399]"></span>In Stock</span>';
         const currentCat = c.category || 'Uncategorized';
         const catSet = Array.from(new Set([...(allCategories.length ? allCategories : ['Uncategorized']), currentCat])).sort();
         const catOpts = catSet.map(cat => `<option value="${cat}" ${cat === currentCat ? 'selected' : ''}>${cat}</option>`).join('');
-        return `<tr class="hover:bg-gray-50/80 transition-colors group" data-item-id="${c.itemID}">
-          <td class="px-8 py-4 text-center">
+        return `<tr class="hover:bg-[#161f36] transition-colors group" data-item-id="${c.itemID}">
+          <td class="px-8 py-3.5 text-center">
             <div class="flex items-center">
               ${iconDiv}
               <div>
-                <div class="font-bold text-gray-900 text-[13px]">${c.name}</div>
-                <div class="text-[11px] font-medium text-gray-400 mt-0.5">${sku}</div>
+                <div class="font-bold text-[#eef2fb] text-[13px]">${c.name}</div>
+                <div class="text-[11px] font-medium text-[#5d6f96] mt-0.5">${sku}</div>
               </div>
             </div>
           </td>
-          <td class="px-6 py-4 text-center">
+          <td class="px-6 py-3.5 text-center">
             <select data-item-id="${c.itemID}" onchange="updateItemCategory('${c.itemID}', this.value, this)"
-              class="bg-transparent border border-transparent hover:border-gray-200 focus:border-gray-300 rounded-lg text-gray-500 text-[13px] font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all min-w-[120px]">
+              class="bg-transparent border border-transparent hover:border-[#243352] focus:border-[#33476f] rounded-lg text-[#9fb0d0] text-[13px] font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#005ab4] transition-all min-w-[120px]">
               ${catOpts}
             </select>
             <span id="cat-status-${c.itemID}" class="ml-1 text-[11px] hidden"></span>
           </td>
-          <td class="px-6 py-4 text-center font-bold text-gray-900 text-[13px]">${qty}</td>
-          <td class="px-6 py-4 text-center">${badge}</td>
-          <td class="px-8 py-4 text-center relative">
+          <td class="px-6 py-3.5 text-center font-bold text-[#eef2fb] text-[13px] tnum">${qty}</td>
+          <td class="px-6 py-3.5 text-center">${badge}</td>
+          <td class="px-8 py-3.5 text-center relative">
             <div class="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg cursor-pointer transition p-0" title="Add Stock" onclick="openAddModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty}, ${c.version || 1})"><span class="material-symbols-outlined text-[18px]">add</span></button>
-              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg cursor-pointer transition p-0" title="Deduct Stock" onclick="openDeductModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty}, ${c.version || 1})"><span class="material-symbols-outlined text-[18px]">remove</span></button>
-              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#005ab4] hover:bg-[#e8f0fe] rounded-lg cursor-pointer transition p-0" onclick="editItem('${c.itemID}')"><span class="material-symbols-outlined text-[18px]">edit</span></button>
-              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition p-0" onclick="handleDelete('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+              <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#34d399] hover:bg-[#34d399]/10 rounded-lg cursor-pointer transition p-0" title="Add Stock" onclick="openAddModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty}, ${c.version || 1})"><span class="material-symbols-outlined text-[18px]">add</span></button>
+              <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#fbbf24] hover:bg-[#fbbf24]/10 rounded-lg cursor-pointer transition p-0" title="Deduct Stock" onclick="openDeductModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty}, ${c.version || 1})"><span class="material-symbols-outlined text-[18px]">remove</span></button>
+              <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#3b8df0] hover:bg-[#3b8df0]/10 rounded-lg cursor-pointer transition p-0" onclick="editItem('${c.itemID}')"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+              <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#f87171] hover:bg-[#f87171]/10 rounded-lg cursor-pointer transition p-0" onclick="handleDelete('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"><span class="material-symbols-outlined text-[18px]">delete</span></button>
             </div>
-            <span class="material-symbols-outlined text-gray-400 absolute right-8 top-1/2 -translate-y-1/2 group-hover:hidden transition">more_vert</span>
+            <span class="material-symbols-outlined text-[#5d6f96] absolute right-8 top-1/2 -translate-y-1/2 group-hover:hidden transition">more_vert</span>
           </td>
         </tr>`;
       }).join('');
@@ -507,8 +491,8 @@
       if (viewMode === 'deleted') {
         btn.classList.remove('hidden');
         label.textContent = 'Show Active';
-        btn.classList.add('bg-red-50', 'text-red-700', 'border-red-200');
-        btn.classList.remove('bg-gray-50', 'text-gray-500', 'border-gray-200');
+        btn.classList.add('bg-[#f87171]/10', 'text-[#f87171]', 'border-[#f87171]/25');
+        btn.classList.remove('bg-[#1d2942]', 'text-[#9fb0d0]', 'border-[#243352]');
         addBtn.classList.add('hidden');
         manageCatBtn.classList.add('hidden');
       } else {
@@ -518,8 +502,8 @@
         } else {
           btn.classList.add('hidden');
         }
-        btn.classList.remove('bg-red-50', 'text-red-700', 'border-red-200');
-        btn.classList.add('bg-gray-50', 'text-gray-500', 'border-gray-200');
+        btn.classList.remove('bg-[#f87171]/10', 'text-[#f87171]', 'border-[#f87171]/25');
+        btn.classList.add('bg-[#1d2942]', 'text-[#9fb0d0]', 'border-[#243352]');
         addBtn.classList.remove('hidden');
         manageCatBtn.classList.remove('hidden');
       }
@@ -543,7 +527,7 @@
         renderTable();
       } catch (e) {
         const tb = document.getElementById('inventory-body');
-        tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${e.message}</td></tr>`;
+        tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${escHTML(e.message)}</td></tr>`;
       } finally {
         btn.disabled = false;
       }
@@ -908,7 +892,7 @@
         },
         decoder: { readers: ['ean_reader', 'upc_reader', 'code_128_reader'] },
         locate: true
-      }, function(err) {
+      }, function (err) {
         if (err) { showInvFallback(); return; }
         Quagga.start();
         _invScanActive = true;
@@ -919,7 +903,7 @@
 
     function stopInvCamera() {
       if (_invScanActive) {
-        try { Quagga.stop(); } catch (_) {}
+        try { Quagga.stop(); } catch (_) { }
         _invScanActive = false;
       }
     }
@@ -980,18 +964,19 @@
         </button>
       </div>
       <div class="px-6 py-5 space-y-4">
-        <p class="text-sm text-gray-500">Upload a CSV file to import multiple items at once. Files ≤100 rows process instantly; larger files upload in the background.</p>
+        <p class="text-sm text-gray-500">Upload a CSV file to import multiple items at once. Files ≤100 rows process
+          instantly; larger files upload in the background.</p>
         <a href="import-template.csv" download
           class="inline-flex items-center gap-2 text-[13px] font-bold text-[#005ab4] hover:underline">
           <span class="material-symbols-outlined text-[16px]">download</span> Download template
         </a>
         <div id="import-drop-zone"
           class="border-2 border-dashed border-gray-200 rounded-2xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-[#005ab4] transition"
-          onclick="document.getElementById('import-file-input').click()"
-          ondragover="event.preventDefault()"
+          onclick="document.getElementById('import-file-input').click()" ondragover="event.preventDefault()"
           ondrop="event.preventDefault(); handleImportFile(event.dataTransfer.files[0])">
           <span class="material-symbols-outlined text-4xl text-gray-300">upload_file</span>
-          <p class="text-sm text-gray-500 font-medium">Drag & drop a CSV or <span class="text-[#005ab4] font-bold">browse</span></p>
+          <p class="text-sm text-gray-500 font-medium">Drag & drop a CSV or <span
+              class="text-[#005ab4] font-bold">browse</span></p>
           <input type="file" id="import-file-input" accept=".csv" class="hidden"
             onchange="handleImportFile(this.files[0])">
         </div>
@@ -1069,7 +1054,7 @@
           successEl.textContent = `Imported ${result.inserted} item${result.inserted !== 1 ? 's' : ''}${result.failed > 0 ? `, ${result.failed} failed` : ''}.`;
           successEl.classList.remove('hidden');
           if (result.errors && result.errors.length) {
-            errorsEl.innerHTML = result.errors.map(e => `Row ${e.row} — ${e.field}: ${e.message}`).join('<br>');
+            errorsEl.innerHTML = result.errors.map(e => `Row ${e.row} — ${escHTML(e.field)}: ${escHTML(e.message)}`).join('<br>');
             errorsEl.classList.remove('hidden');
           }
           setTimeout(() => { closeImportModal(); loadInventory(); }, 1500);
@@ -1111,7 +1096,7 @@
           successEl.textContent = `Imported ${done} item${done !== 1 ? 's' : ''}${failed > 0 ? `, ${failed} failed` : ''}.`;
           successEl.classList.remove('hidden');
           if (job.errors && job.errors.length) {
-            errorsEl.innerHTML = job.errors.slice(0, 20).map(e => `Row ${e.row} — ${e.field}: ${e.message}`).join('<br>');
+            errorsEl.innerHTML = job.errors.slice(0, 20).map(e => `Row ${e.row} — ${escHTML(e.field)}: ${escHTML(e.message)}`).join('<br>');
             errorsEl.classList.remove('hidden');
           }
           setTimeout(() => { closeImportModal(); loadInventory(); }, 2000);
@@ -1143,7 +1128,8 @@
         <input type="text" id="inv-scan-manual-input" placeholder="e.g. 737628064502"
           class="w-full rounded-xl px-4 py-3 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-medium text-gray-900" />
         <button onclick="invLookupManual()"
-          class="w-full bg-[#005ab4] hover:bg-[#00458d] text-white px-4 py-3 rounded-xl font-bold text-sm transition-all">Search / Add</button>
+          class="w-full bg-[#005ab4] hover:bg-[#00458d] text-white px-4 py-3 rounded-xl font-bold text-sm transition-all">Search
+          / Add</button>
       </div>
       <div id="inv-scan-status" class="px-6 py-3 text-sm text-center text-gray-500 min-h-[2.5rem]"></div>
     </div>

@@ -63,35 +63,40 @@ def _handle(event, context):
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'body': ''}
 
-    # Extract and validate userID
-    user_id = (event.get('queryStringParameters') or {}).get('userID', '')
+    # Extract and validate userID from securely injected headers
+    headers = event.get('headers') or {}
+    user_id = (headers.get('x-iq-user') or headers.get('X-Iq-User') or '').strip()
     if not user_id:
         return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'userID required'})}
 
-    # Scan transactions table filtering by userID
-    # DynamoDB scan returns max 1MB per request, so handle pagination
-    result = table.scan(FilterExpression=Attr('userID').eq(user_id))
-    items = result.get('Items', [])
+    try:
+        # Scan transactions table filtering by userID
+        # DynamoDB scan returns max 1MB per request, so handle pagination
+        result = table.scan(FilterExpression=Attr('userID').eq(user_id))
+        items = result.get('Items', [])
 
-    # Pagination loop: continue scanning if more results exist (LastEvaluatedKey present)
-    while 'LastEvaluatedKey' in result:
-        result = table.scan(
-            ExclusiveStartKey=result['LastEvaluatedKey'],
-            FilterExpression=Attr('userID').eq(user_id)
-        )
-        items.extend(result.get('Items', []))
+        # Pagination loop: continue scanning if more results exist (LastEvaluatedKey present)
+        while 'LastEvaluatedKey' in result:
+            result = table.scan(
+                ExclusiveStartKey=result['LastEvaluatedKey'],
+                FilterExpression=Attr('userID').eq(user_id)
+            )
+            items.extend(result.get('Items', []))
 
-    # Convert Decimal types to float for JSON serialization
-    # DynamoDB returns Decimal objects which JSON cannot serialize by default
-    for item in items:
-        for k, v in item.items():
-            if isinstance(v, Decimal):
-                item[k] = float(v)
+        # Convert Decimal types to float for JSON serialization
+        # DynamoDB returns Decimal objects which JSON cannot serialize by default
+        for item in items:
+            for k, v in item.items():
+                if isinstance(v, Decimal):
+                    item[k] = float(v)
 
-    # Sort by creation date, newest transactions first
-    # This provides a reverse-chronological view of activity
-    items.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
+        # Sort by creation date, newest transactions first
+        # This provides a reverse-chronological view of activity
+        items.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
 
-    # Return up to 200 most recent transactions
-    # This limits response size and provides the most useful data (recent changes)
-    return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(items[:200])}
+        # Return up to 200 most recent transactions
+        # This limits response size and provides the most useful data (recent changes)
+        return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(items[:200])}
+
+    except Exception as e:
+        return {'statusCode': 500, 'headers': CORS, 'body': json.dumps({'error': 'Internal Server Error'})}

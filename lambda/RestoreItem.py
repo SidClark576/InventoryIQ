@@ -86,7 +86,7 @@ def _handle(event, context):
         try:
             deleted_dt = datetime.fromisoformat(deleted_at)
         except ValueError:
-            deleted_dt = datetime.utcnow()  # Fallback: allow restore if timestamp is unparseable
+            deleted_dt = datetime.now(timezone.utc)  # Fallback: allow restore if timestamp is unparseable
 
         if deleted_dt.tzinfo is None:
             deleted_dt = deleted_dt.replace(tzinfo=timezone.utc)
@@ -98,7 +98,7 @@ def _handle(event, context):
                 'error': f'Item was deleted {age_days} days ago and cannot be restored (window: {RESTORE_WINDOW_DAYS} days)'
             })
 
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
 
         # Restore: atomically remove deletedAt + deletedBy, update updatedAt
         # ConditionExpression ensures item is still in deleted state (not already restored)

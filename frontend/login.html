@@ -5,222 +5,265 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>InventoryIQ | Login</title>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { brand: '#005ab4' } } }
+    }
+  </script>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "background": "#f9f9ff", "error": "#ba1a1a", "error-container": "#ffdad6", "inverse-on-surface": "#eff0fa",
-            "inverse-primary": "#aac7ff", "inverse-surface": "#2d3038", "on-background": "#181c22", "on-error": "#ffffff",
-            "on-error-container": "#93000a", "on-primary": "#ffffff", "on-primary-container": "#fefcff", "on-primary-fixed": "#001b3e",
-            "on-primary-fixed-variant": "#00458d", "on-secondary": "#ffffff", "on-secondary-container": "#405882", "on-secondary-fixed": "#001b3e",
-            "on-secondary-fixed-variant": "#2e4770", "on-surface": "#181c22", "on-surface-variant": "#414753", "on-tertiary": "#ffffff",
-            "on-tertiary-container": "#fffbff", "on-tertiary-fixed": "#321200", "on-tertiary-fixed-variant": "#763400", "outline": "#717785",
-            "outline-variant": "#c1c6d5", "primary": "#005ab4", "primary-container": "#0873df", "primary-fixed": "#d6e3ff",
-            "primary-fixed-dim": "#aac7ff", "secondary": "#465f89", "secondary-container": "#b7cfff", "secondary-fixed": "#d6e3ff",
-            "secondary-fixed-dim": "#afc7f7", "surface": "#f9f9ff", "surface-bright": "#f9f9ff", "surface-container": "#ecedf7",
-            "surface-container-high": "#e6e8f1", "surface-container-highest": "#e0e2ec", "surface-container-low": "#f2f3fd", "surface-container-lowest": "#ffffff",
-            "surface-dim": "#d8dae3", "surface-tint": "#005db8", "surface-variant": "#e0e2ec", "tertiary": "#964400",
-            "tertiary-container": "#bd5700", "tertiary-fixed": "#ffdbc9", "tertiary-fixed-dim": "#ffb68c",
-            "primary-dim": "#00458d", "secondary-dim": "#2e4770", "tertiary-dim": "#763400", "error-dim": "#93000a",
-            "slate-950": "#f9f9ff", "slate-400": "#414753", "slate-500": "#717785", "slate-200": "#181c22"
-          },
-          fontFamily: { "body": ["Inter"], "headline": ["Inter"] },
-        },
-      },
-    }
-  </script>
   <link rel="stylesheet" href="style.css" />
 </head>
 
-<body class="selection:bg-primary/30 antialiased">
-  <div class="flex items-center justify-center min-h-[100dvh] p-4 text-left relative bg-background">
+<body class="antialiased text-[#eef2fb]">
+  <main class="min-h-[100dvh] grid lg:grid-cols-[1.05fr_1fr]">
 
-    <!-- Auth Card -->
-    <div
-      class="bg-surface-container-lowest w-full max-w-md rounded-[1.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-outline-variant/30 overflow-hidden z-10 relative">
-      <!-- Card header -->
-      <div class="bg-[#1864c0] h-36 relative flex items-center justify-center">
-        <div class="relative z-10 w-20 h-20 bg-white rounded-2xl shadow-md flex items-center justify-center">
-          <div class="w-12 h-12">
-            <svg viewBox="0 0 100 100" class="w-full h-full">
-              <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
-              <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
-              <polygon points="85,35 50,55 50,90 85,70" fill="#9c3f91" />
-            </svg>
+    <!-- Brand panel -->
+    <section
+      class="relative overflow-hidden bg-[#0a0e1a] border-b lg:border-b-0 lg:border-r border-[#243352] flex flex-col justify-between px-7 py-8 lg:px-14 lg:py-14"
+      aria-label="InventoryIQ">
+      <!-- atmospheric glow -->
+      <div class="pointer-events-none absolute -top-32 -left-24 w-[480px] h-[480px] rounded-full"
+        style="background:radial-gradient(circle,rgba(0,90,180,0.30),transparent 65%)"></div>
+      <div class="pointer-events-none absolute -bottom-40 -right-24 w-[520px] h-[520px] rounded-full"
+        style="background:radial-gradient(circle,rgba(226,182,92,0.12),transparent 65%)"></div>
+
+      <header class="relative z-10 flex items-center gap-3.5">
+        <div
+          class="w-11 h-11 bg-[#0a0e1a] rounded-xl border border-[#243352] flex items-center justify-center p-2 shadow-[0_0_24px_-6px_rgba(226,182,92,0.5)]">
+          <svg viewBox="0 0 100 100" class="w-full h-full">
+            <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
+            <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
+            <polygon points="85,35 50,55 50,90 85,70" fill="#9c3f91" />
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-[17px] font-black text-[#eef2fb] leading-tight tracking-tight">InventoryIQ</span>
+          <span class="text-[10px] font-bold text-[#5d6f96] tracking-[0.14em] uppercase">Ops Terminal</span>
+        </div>
+      </header>
+
+      <div class="relative z-10 my-10 lg:my-0 max-w-md">
+        <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#3b8df0]">Inventory Intelligence</p>
+        <h2 class="mt-3 text-3xl lg:text-[44px] leading-[1.05] font-black tracking-tight text-[#eef2fb]">
+          Run your stock<br class="hidden lg:block" /> like a trading desk.
+        </h2>
+        <div class="h-[2px] w-16 mt-5 rounded" style="background:linear-gradient(90deg,#3b8df0,transparent)"></div>
+        <ul class="mt-8 space-y-3.5 text-sm text-[#9fb0d0]">
+          <li class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#34d399] text-[20px]">monitoring</span>
+            Live stock health &amp; reorder forecasting
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#e2b65c] text-[20px]">savings</span>
+            Track inventory value down to the cent
+          </li>
+          <li class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#3b8df0] text-[20px]">bolt</span>
+            Instant low-stock alerts &amp; audit trail
+          </li>
+        </ul>
+      </div>
+
+      <footer class="relative z-10 text-[11px] text-[#5d6f96] hidden lg:block">
+        Secure session auth · No data leaves your tenant
+      </footer>
+    </section>
+
+    <!-- Auth panel -->
+    <section class="flex items-center justify-center px-6 py-10 lg:px-10 bg-[#0a0e1a]">
+      <div class="w-full max-w-[400px]">
+        <div class="surface-card p-7 lg:p-9">
+          <div class="mb-7">
+            <h1 id="auth-title" class="text-2xl font-black text-[#eef2fb] tracking-tight">Welcome back</h1>
+            <p id="auth-subtitle" class="text-sm text-[#9fb0d0] mt-1.5">Manage your inventory with precision</p>
+          </div>
+
+          <!-- Login form -->
+          <div id="login-form" class="auth-form active space-y-5">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Email
+                address</label>
+              <div class="relative flex items-center">
+                <span
+                  class="material-symbols-outlined absolute left-3.5 text-[#5d6f96] text-xl pointer-events-none">mail</span>
+                <input type="email" id="login-email"
+                  class="w-full pl-11 pr-4 py-3 rounded-xl bg-[#1d2942] border border-[#243352] text-sm text-[#eef2fb] placeholder:text-[#5d6f96]"
+                  placeholder="name@company.com" />
+              </div>
+            </div>
+
+            <div>
+              <label
+                class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Password</label>
+              <div class="relative flex items-center">
+                <span
+                  class="material-symbols-outlined absolute left-3.5 text-[#5d6f96] text-xl pointer-events-none">lock</span>
+                <input type="password" id="login-password"
+                  class="w-full pl-11 pr-11 py-3 rounded-xl bg-[#1d2942] border border-[#243352] text-sm text-[#eef2fb] placeholder:text-[#5d6f96] tracking-widest"
+                  placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()" />
+                <button type="button"
+                  class="material-symbols-outlined absolute right-3 text-[#5d6f96] hover:text-[#eef2fb] transition-colors cursor-pointer text-xl bg-transparent border-0 p-0"
+                  tabindex="-1" onclick="toggleVisibility('login-password', this)">visibility</button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-0.5">
+              <label class="flex items-center gap-2 text-sm text-[#9fb0d0] cursor-pointer">
+                <input type="checkbox" id="remember" class="w-4 h-4 rounded" />
+                Remember device
+              </label>
+              <a href="forgot-password.html" class="text-sm text-[#3b8df0] font-semibold hover:underline">Forgot
+                password?</a>
+            </div>
+
+            <button
+              class="btn-press w-full bg-[#005ab4] hover:bg-[#0a6ed4] text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_24px_-10px_rgba(0,90,180,0.9)]"
+              onclick="handleLogin()">
+              Login
+              <span class="material-symbols-outlined text-xl">arrow_forward</span>
+            </button>
+
+            <div id="login-msg" class="hidden mt-2 p-3 rounded-xl text-center text-sm font-semibold"></div>
+
+            <div class="pt-5 border-t border-[#243352] text-center text-sm text-[#9fb0d0]">
+              Don't have an account?
+              <span class="text-[#3b8df0] font-bold cursor-pointer hover:underline"
+                onclick="switchAuthTab('register')">Sign Up</span>
+            </div>
+          </div>
+
+          <!-- Register form -->
+          <div id="register-form" class="auth-form space-y-5">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Email
+                address</label>
+              <div class="relative flex items-center">
+                <span
+                  class="material-symbols-outlined absolute left-3.5 text-[#5d6f96] text-xl pointer-events-none">mail</span>
+                <input type="email" id="reg-email"
+                  class="w-full pl-11 pr-4 py-3 rounded-xl bg-[#1d2942] border border-[#243352] text-sm text-[#eef2fb] placeholder:text-[#5d6f96]"
+                  placeholder="name@company.com" />
+              </div>
+            </div>
+            <div>
+              <label
+                class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Password</label>
+              <div class="relative flex items-center">
+                <span
+                  class="material-symbols-outlined absolute left-3.5 text-[#5d6f96] text-xl pointer-events-none">lock</span>
+                <input type="password" id="reg-password"
+                  class="w-full pl-11 pr-11 py-3 rounded-xl bg-[#1d2942] border border-[#243352] text-sm text-[#eef2fb] placeholder:text-[#5d6f96]"
+                  placeholder="Create password" />
+                <button type="button"
+                  class="material-symbols-outlined absolute right-3 text-[#5d6f96] hover:text-[#eef2fb] transition-colors cursor-pointer text-xl bg-transparent border-0 p-0"
+                  tabindex="-1" onclick="toggleVisibility('reg-password', this)">visibility</button>
+              </div>
+              <p class="text-[11px] text-[#5d6f96] mt-1.5">8+ chars with uppercase, lowercase, and a number.</p>
+            </div>
+            <button
+              class="btn-press w-full mt-1 bg-[#005ab4] hover:bg-[#0a6ed4] text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 text-[15px] shadow-[0_8px_24px_-10px_rgba(0,90,180,0.9)]"
+              onclick="handleRegister()">
+              Create Account
+              <span class="material-symbols-outlined text-xl">person_add</span>
+            </button>
+            <div id="reg-msg" class="hidden mt-2 p-3 rounded-xl text-center text-sm font-semibold"></div>
+
+            <div class="pt-5 border-t border-[#243352] text-center text-sm text-[#9fb0d0]">
+              Already have an account?
+              <span class="text-[#3b8df0] font-bold cursor-pointer hover:underline" onclick="switchAuthTab('login')">Log
+                In</span>
+            </div>
           </div>
         </div>
       </div>
+    </section>
+  </main>
 
-      <!-- Card body -->
-      <div class="p-8">
-        <div class="text-center mb-8">
-          <h1 id="auth-title" class="text-2xl font-bold text-on-surface mb-1 tracking-tight">Welcome to InventoryIQ</h1>
-        </div>
+  <script src="config.js"></script>
+  <script src="api.js"></script>
+  <script>
+    function toggleVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      btn.textContent = show ? 'visibility_off' : 'visibility';
+    }
 
-        <div id="login-form" class="auth-form active space-y-5">
-          <div>
-            <label class="block text-sm font-semibold text-on-surface mb-2">Email address</label>
-            <div class="relative flex items-center">
-              <span class="material-symbols-outlined absolute left-3 text-outline text-xl">mail</span>
-              <input type="email" id="login-email"
-                class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm"
-                placeholder="name@company.com" />
-            </div>
-          </div>
-
-          <div>
-            <div class="flex justify-between items-center mb-2">
-              <label class="block text-sm font-semibold text-on-surface">Password</label>
-            </div>
-            <div class="relative flex items-center">
-              <span class="material-symbols-outlined absolute left-3 text-outline text-xl">lock</span>
-              <input type="password" id="login-password"
-                class="w-full pl-10 pr-10 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm tracking-widest"
-                placeholder="••••••••" onkeydown="if(event.key==='Enter') handleLogin()" />
-              <button
-                class="material-symbols-outlined absolute right-3 text-outline hover:text-on-surface transition-colors cursor-pointer text-xl"
-                tabindex="-1">visibility</button>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between pt-1 pb-1">
-            <div class="flex items-center gap-2">
-              <input type="checkbox" id="remember"
-                class="w-4 h-4 rounded border-outline-variant/50 text-primary focus:ring-primary" />
-              <label for="remember" class="text-sm text-on-surface-variant">Remember this device</label>
-            </div>
-            <a href="forgot-password.html" class="text-sm text-primary font-semibold hover:underline">Forgot password?</a>
-          </div>
-
-          <button
-            class="w-full bg-primary hover:bg-primary-dim text-on-primary py-3 rounded-lg font-bold transition-all cursor-pointer flex justify-center items-center gap-2 text-base shadow-sm"
-            onclick="handleLogin()">
-            Login
-            <span class="material-symbols-outlined text-xl">arrow_forward</span>
-          </button>
-
-          <div id="login-msg" class="hidden mt-4 p-3 rounded-md text-center text-sm font-medium"></div>
-
-          <div class="pt-6 border-t border-outline-variant/30 mt-6 text-center text-sm text-on-surface-variant">
-            Don't have an account? <span class="text-primary font-bold cursor-pointer hover:underline"
-              onclick="switchAuthTab('register')">Sign Up</span>
-          </div>
-        </div>
-
-        <div id="register-form" class="auth-form space-y-5">
-          <div>
-            <label class="block text-sm font-semibold text-on-surface mb-2">Email address</label>
-            <div class="relative flex items-center">
-              <span class="material-symbols-outlined absolute left-3 text-outline text-xl">mail</span>
-              <input type="email" id="reg-email"
-                class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm"
-                placeholder="name@company.com" />
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-on-surface mb-2">Password</label>
-            <div class="relative flex items-center">
-              <span class="material-symbols-outlined absolute left-3 text-outline text-xl">lock</span>
-              <input type="password" id="reg-password"
-                class="w-full pl-10 pr-10 py-3 rounded-lg border border-outline-variant/50 focus:border-primary focus:ring-1 focus:ring-primary text-sm shadow-sm"
-                placeholder="Create password" />
-            </div>
-          </div>
-          <button
-            class="w-full mt-2 bg-primary hover:bg-primary-dim text-on-primary py-3 rounded-lg font-bold transition-all cursor-pointer flex justify-center items-center gap-2 text-base shadow-sm"
-            onclick="handleRegister()">
-            Create Account
-            <span class="material-symbols-outlined text-xl">person_add</span>
-          </button>
-          <div id="reg-msg" class="hidden mt-4 p-3 rounded-md text-center text-sm font-medium"></div>
-
-          <div class="pt-6 border-t border-outline-variant/30 mt-6 text-center text-sm text-on-surface-variant">
-            Already have an account? <span class="text-primary font-bold cursor-pointer hover:underline"
-              onclick="switchAuthTab('login')">Log In</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <script src="config.js"></script>
-    <script src="api.js"></script>
-    <script>
-      function switchAuthTab(tab) {
-        const isLogin = tab === 'login';
-        document.getElementById('login-form').classList.toggle('active', isLogin);
-        document.getElementById('register-form').classList.toggle('active', !isLogin);
-        const title = document.getElementById('auth-title');
-        const subtitle = document.getElementById('auth-subtitle');
-        if (isLogin) {
-          title.textContent = 'Welcome back';
-          subtitle.textContent = 'Manage your inventory with precision';
-        } else {
-          title.textContent = 'Create Account';
-          subtitle.textContent = 'Start managing your inventory today';
-        }
+    function switchAuthTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('login-form').classList.toggle('active', isLogin);
+      document.getElementById('register-form').classList.toggle('active', !isLogin);
+      const title = document.getElementById('auth-title');
+      const subtitle = document.getElementById('auth-subtitle');
+      if (isLogin) {
+        title.textContent = 'Welcome back';
+        subtitle.textContent = 'Manage your inventory with precision';
+      } else {
+        title.textContent = 'Create account';
+        subtitle.textContent = 'Start managing your inventory today';
       }
+    }
 
-      async function handleLogin() {
-        const email = document.getElementById('login-email').value.trim();
-        const pwd = document.getElementById('login-password').value;
-        const msg = document.getElementById('login-msg');
-        msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium";
-        if (!email || !pwd) {
-          msg.classList.add('bg-error-container/20', 'text-error', 'block');
-          msg.textContent = 'Enter email & password.';
-          return;
-        }
-        msg.classList.add('bg-surface-variant', 'text-on-surface', 'block');
-        msg.textContent = 'Logging in...';
-        const { status, data } = await authLogin(email, pwd);
-        if (status === 200) {
-          sessionStorage.setItem('sessionToken', data.token);
-          sessionStorage.setItem('userEmail', data.email);
-          window.location.href = 'dashboard.html';
-        } else {
-          msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-error-container/20 text-error";
-          msg.textContent = data.message || 'Login failed.';
-        }
-      }
-
-      async function handleRegister() {
-        const email = document.getElementById('reg-email').value.trim();
-        const pwd = document.getElementById('reg-password').value;
-        const msg = document.getElementById('reg-msg');
-        msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium";
-        if (!email || !pwd) {
-          msg.classList.add('bg-error-container/20', 'text-error', 'block');
-          msg.textContent = 'Enter email & password.';
-          return;
-        }
-        if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(pwd)) {
-          msg.classList.add('bg-error-container/20', 'text-error', 'block');
-          msg.textContent = 'Password must be 8+ chars with uppercase, lowercase, and a number.';
-          return;
-        }
-        msg.classList.add('bg-surface-variant', 'text-on-surface', 'block');
-        msg.textContent = 'Creating account...';
-        const { status, data } = await authRegister(email, pwd);
-        if (status === 200) {
-          msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-tertiary-container/30 text-tertiary";
-          msg.textContent = 'Account created!';
-          setTimeout(() => switchAuthTab('login'), 1500);
-        } else {
-          msg.className = "mt-4 p-3 rounded-xl text-center text-sm font-medium block bg-error-container/20 text-error";
-          msg.textContent = data.message || 'Registration failed.';
-        }
-      }
-
-      window.onload = function () {
-        if (sessionStorage.getItem('userEmail')) window.location.href = 'dashboard.html';
+    function setMsg(el, kind, text) {
+      const base = "mt-2 p-3 rounded-xl text-center text-sm font-semibold block border ";
+      const styles = {
+        err: "bg-[#f87171]/10 text-[#f87171] border-[#f87171]/25",
+        info: "bg-[#1d2942] text-[#9fb0d0] border-[#243352]",
+        ok: "bg-[#34d399]/10 text-[#34d399] border-[#34d399]/25"
       };
-    </script>
+      el.className = base + styles[kind];
+      el.textContent = text;
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const pwd = document.getElementById('login-password').value;
+      const msg = document.getElementById('login-msg');
+      if (!email || !pwd) { setMsg(msg, 'err', 'Enter email & password.'); return; }
+      setMsg(msg, 'info', 'Logging in...');
+      const { status, data } = await authLogin(email, pwd);
+      if (status === 200) {
+        sessionStorage.setItem('sessionToken', data.token);
+        sessionStorage.setItem('userEmail', data.email);
+        window.location.href = 'dashboard.html';
+      } else {
+        setMsg(msg, 'err', data.message || 'Login failed.');
+      }
+    }
+
+    async function handleRegister() {
+      const email = document.getElementById('reg-email').value.trim();
+      const pwd = document.getElementById('reg-password').value;
+      const msg = document.getElementById('reg-msg');
+      if (!email || !pwd) { setMsg(msg, 'err', 'Enter email & password.'); return; }
+      if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(pwd)) {
+        setMsg(msg, 'err', 'Password must be 8+ chars with uppercase, lowercase, and a number.');
+        return;
+      }
+      setMsg(msg, 'info', 'Creating account...');
+      const { status, data } = await authRegister(email, pwd);
+      if (status === 200) {
+        setMsg(msg, 'ok', 'Account created!');
+        setTimeout(() => switchAuthTab('login'), 1500);
+      } else {
+        setMsg(msg, 'err', data.message || 'Registration failed.');
+      }
+    }
+
+    window.onload = function () {
+      if (sessionStorage.getItem('userEmail')) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('expired') === '1') {
+        setMsg(document.getElementById('login-msg'), 'err', 'Session expired. Please log in again.');
+      }
+    };
+  </script>
 </body>
 
 </html>

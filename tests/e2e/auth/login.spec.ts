@@ -28,9 +28,9 @@ test.describe('User Login', () => {
     const hasToken = await loginPage.isTokenPresent()
     expect(hasToken).toBe(true)
 
-    // Verify token format
+    // Verify token format (UUID v4)
     const token = await loginPage.getTokenFromStorage()
-    expect(token).toMatch(/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/)
+    expect(token).toMatch(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/i)
 
     // Verify redirect to dashboard
     await page.waitForURL('/dashboard.html', { timeout: 5000 })
@@ -38,7 +38,7 @@ test.describe('User Login', () => {
   })
 
   test('should show error with invalid email', async ({ page }) => {
-    const wrongEmail = 'nonexistent@example.com'
+    const wrongEmail = `nonexistent_${Date.now()}@example.com`
 
     await loginPage.login(wrongEmail, testPassword)
 
@@ -74,7 +74,7 @@ test.describe('User Login', () => {
 
     // Token should still be present (sessionStorage survives reload)
     token = await page.evaluate(() => {
-      return sessionStorage.getItem('iq_jwt_token')
+      return sessionStorage.getItem('sessionToken')
     })
     expect(token).toBeTruthy()
 
@@ -98,7 +98,7 @@ test.describe('User Login', () => {
 
     // Verify token exists
     let token = await page.evaluate(() => {
-      return sessionStorage.getItem('iq_jwt_token')
+      return sessionStorage.getItem('sessionToken')
     })
     expect(token).toBeTruthy()
 
@@ -111,7 +111,7 @@ test.describe('User Login', () => {
 
     // Token should be cleared
     token = await page.evaluate(() => {
-      return sessionStorage.getItem('iq_jwt_token')
+      return sessionStorage.getItem('sessionToken')
     })
     expect(token).toBeNull()
   })
@@ -135,13 +135,13 @@ test.describe('User Login', () => {
   test('token should be in correct sessionStorage key', async ({ page }) => {
     await loginPage.login(testEmail, testPassword)
 
-    // Verify token is in 'iq_jwt_token' key (not 'authToken' or old keys)
-    const jwtToken = await page.evaluate(() => {
-      return sessionStorage.getItem('iq_jwt_token')
+    // Verify token is in 'sessionToken' key
+    const sessionToken = await page.evaluate(() => {
+      return sessionStorage.getItem('sessionToken')
     })
 
-    expect(jwtToken).toBeTruthy()
-    expect(jwtToken).toMatch(/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/)
+    expect(sessionToken).toBeTruthy()
+    expect(sessionToken).toMatch(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/i)
   })
 
   test('should show error message when server returns non-JSON error (502 simulation)', async ({ page }) => {
@@ -170,49 +170,16 @@ test.describe('User Login', () => {
     expect(errorMsg!.toLowerCase()).toMatch(/error|failed|try again|server/i)
   })
 
-  test('should NOT redirect when proxy returns 401 but token is not expired (config error)', async ({ page }) => {
-    // This tests the "fresh token + broken proxy" scenario (JWT_SECRET mismatch)
-    // Expected behavior: user stays on dashboard with data errors, NOT redirected to login
-
-    // Step 1: Log in successfully — gets a fresh token with exp ~8h in the future
-    await loginPage.login(testEmail, testPassword)
-    await page.waitForURL('/dashboard.html', { timeout: 5000 })
-
-    // Step 2: Intercept all proxied API calls to return 401 (simulating JWT_SECRET mismatch)
-    await page.route('**/proxy/**', (route) => {
-      route.fulfill({
-        status: 401,
-        contentType: 'application/json',
-        body: JSON.stringify({ error: 'Missing or invalid authorization' })
-      })
-    })
-
-    // Step 3: Navigate to dashboard — triggers loadDashboard() + loadInventory() which call proxy
-    await page.goto('/dashboard.html')
-    await page.waitForTimeout(3000)
-
-    // Step 4: Should stay on dashboard — NOT redirect to login
-    expect(page.url()).toContain('dashboard.html')
-
-    // Step 5: Token should still be in sessionStorage (not cleared)
-    const token = await page.evaluate(() => sessionStorage.getItem('iq_jwt_token'))
-    expect(token).toBeTruthy()
-  })
 
   test('should redirect to login with session-expired message when token IS expired and proxy returns 401', async ({ page }) => {
     // This tests genuine token expiry — check401 should redirect
 
-    // Step 1: Inject an EXPIRED token into sessionStorage (exp in the past)
-    await page.goto('/dashboard.html', { waitUntil: 'commit' })
+    // Step 1: Inject an EXPIRED-like token into sessionStorage
+    await page.goto('/login.html')
     await page.evaluate(() => {
-      // Build a fake JWT with exp = 1 hour ago
-      const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
-      const payload = btoa(JSON.stringify({
-        sub: 'test@example.com',
-        exp: Math.floor(Date.now() / 1000) - 3600 // expired 1 hour ago
-      }))
-      const fakeToken = `${header}.${payload}.fakesignature`
-      sessionStorage.setItem('iq_jwt_token', fakeToken)
+      // Build a fake session token
+      const fakeToken = `00000000-0000-0000-0000-000000000000`
+      sessionStorage.setItem('sessionToken', fakeToken)
       sessionStorage.setItem('userEmail', 'test@example.com')
     })
 
@@ -229,7 +196,7 @@ test.describe('User Login', () => {
     await page.goto('/dashboard.html')
 
     // Step 4: Should redirect to login (token IS expired, so redirect is correct)
-    await page.waitForURL('/login.html', { timeout: 5000 })
+    await page.waitForURL(/login\.html/, { timeout: 5000 })
     expect(page.url()).toContain('login.html')
 
     // Step 5: Should show session-expired message
@@ -244,7 +211,7 @@ test.describe('User Login', () => {
 
     // Get initial token
     const initialToken = await page.evaluate(() => {
-      return sessionStorage.getItem('iq_jwt_token')
+      return sessionStorage.getItem('sessionToken')
     })
 
     // Navigate to inventory page — check token at DOMContentLoaded before async API
@@ -254,7 +221,7 @@ test.describe('User Login', () => {
 
     // Token should be unchanged
     const tokenAfterNav = await page.evaluate(() => {
-      return sessionStorage.getItem('iq_jwt_token')
+      return sessionStorage.getItem('sessionToken')
     })
 
     expect(tokenAfterNav).toBe(initialToken)

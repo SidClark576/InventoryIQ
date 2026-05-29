@@ -59,40 +59,45 @@ def _handle(event, context):
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'body': ''}
 
-    # Extract and validate userID
-    user_id = (event.get('queryStringParameters') or {}).get('userID', '')
+    # Extract and validate userID from securely injected headers
+    headers = event.get('headers') or {}
+    user_id = (headers.get('x-iq-user') or headers.get('X-Iq-User') or '').strip()
     if not user_id:
         return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'userID required'})}
 
-    # Query userID-index GSI instead of scanning the full table
-    result = table.query(
-        IndexName='userID-index',
-        KeyConditionExpression=Key('userID').eq(user_id)
-    )
-    items = result.get('Items', [])
-
-    # Pagination loop: handle DynamoDB query page limit (1MB per request)
-    while 'LastEvaluatedKey' in result:
+    try:
+        # Query userID-index GSI instead of scanning the full table
         result = table.query(
             IndexName='userID-index',
-            KeyConditionExpression=Key('userID').eq(user_id),
-            ExclusiveStartKey=result['LastEvaluatedKey']
+            KeyConditionExpression=Key('userID').eq(user_id)
         )
-        items.extend(result.get('Items', []))
+        items = result.get('Items', [])
 
-    # Extract unique categories from all items
-    # Set() removes duplicates, sorted() orders alphabetically
-    categories = sorted(list(set(
-        item.get('category', 'Uncategorized')
-        for item in items
-        if item.get('category')  # Filter out None/empty values
-    )))
+        # Pagination loop: handle DynamoDB query page limit (1MB per request)
+        while 'LastEvaluatedKey' in result:
+            result = table.query(
+                IndexName='userID-index',
+                KeyConditionExpression=Key('userID').eq(user_id),
+                ExclusiveStartKey=result['LastEvaluatedKey']
+            )
+            items.extend(result.get('Items', []))
 
-    # Always include "Uncategorized" even if user has no items with that category
-    # This ensures the dropdown always has at least one option
-    # and prevents errors when no items exist for that category explicitly
-    if 'Uncategorized' not in categories:
-        categories.append('Uncategorized')
-        categories.sort()
+        # Extract unique categories from all items
+        # Set() removes duplicates, sorted() orders alphabetically
+        categories = sorted(list(set(
+            item.get('category', 'Uncategorized')
+            for item in items
+            if item.get('category')  # Filter out None/empty values
+        )))
 
-    return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(categories)}
+        # Always include "Uncategorized" even if user has no items with that category
+        # This ensures the dropdown always has at least one option
+        # and prevents errors when no items exist for that category explicitly
+        if 'Uncategorized' not in categories:
+            categories.append('Uncategorized')
+            categories.sort()
+
+        return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(categories)}
+
+    except Exception as e:
+        return {'statusCode': 500, 'headers': CORS, 'body': json.dumps({'error': 'Internal Server Error'})}

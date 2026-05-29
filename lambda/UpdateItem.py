@@ -2,7 +2,7 @@ import json
 import uuid
 import boto3
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from boto3.dynamodb.types import TypeSerializer
 from botocore.exceptions import ClientError
@@ -67,7 +67,7 @@ def _handle(event, context):
 
         body      = json.loads(event.get('body', '{}'))
         headers   = event.get('headers') or {}
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
 
         # Sprint 3: read userID from proxy-injected header; do NOT fall back to body
         user_id = (
@@ -97,7 +97,7 @@ def _handle(event, context):
             return response(404, {'error': 'Item not found'})
 
         # Ownership check: prevent cross-tenant writes
-        if user_id and existing.get('userID', '') != user_id:
+        if not user_id or existing.get('userID', '') != user_id:
             return response(403, {'error': 'Forbidden: item belongs to another user'})
 
         # Fast-fail version check before touching the DB
@@ -207,7 +207,7 @@ def _handle(event, context):
             return response(412, {'error': 'Version conflict — item was modified concurrently. Re-fetch and retry.'})
         raise
     except Exception as e:
-        return response(500, {'error': str(e)})
+        return response(500, {'error': 'Internal Server Error'})
 
 
 def response(status_code, body, extra_headers=None):

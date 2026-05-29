@@ -32,7 +32,9 @@ async function authRegister(email, password) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   });
-  return { status: res.status, data: await res.json() };
+  let data;
+  try { data = await res.json(); } catch { data = { message: "Internal Server Error" }; }
+  return { status: res.status, data };
 }
 
 async function authLogin(email, password) {
@@ -41,16 +43,15 @@ async function authLogin(email, password) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   });
-  return { status: res.status, data: await res.json() };
+  let data;
+  try { data = await res.json(); } catch { data = { message: "Internal Server Error" }; }
+  return { status: res.status, data };
 }
 
 // ── INVENTORY FUNCTIONS ───────────────────────────────────────
 
 async function getAllItems() {
-  const userID = getCurrentUserID();
-  const url = userID
-    ? `${CONFIG.API_ENDPOINT}/items?userID=${encodeURIComponent(userID)}`
-    : `${CONFIG.API_ENDPOINT}/items`;
+  const url = `${CONFIG.API_ENDPOINT}/items`;
   const res = await fetch(url, {
     headers: authHeaders()
   });
@@ -78,10 +79,7 @@ async function getAllItems() {
 }
 
 async function getDeletedItems() {
-  const userID = getCurrentUserID();
-  const url = userID
-    ? `${CONFIG.API_ENDPOINT}/items?userID=${encodeURIComponent(userID)}&deleted=true`
-    : `${CONFIG.API_ENDPOINT}/items?deleted=true`;
+  const url = `${CONFIG.API_ENDPOINT}/items?deleted=true`;
   const res = await fetch(url, { headers: authHeaders() });
   checkQuota(res);
   check401(res);
@@ -157,9 +155,8 @@ async function restoreItem(itemID) {
 
 async function deleteItem(itemID) {
   // Adding a timestamp query param bypasses any cached failed CORS preflight responses in the browser
-  // userID is sent for server-side ownership validation
-  const userID = getCurrentUserID();
-  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}?_cb=${Date.now()}&userID=${encodeURIComponent(userID)}`, {
+  // userID is sent automatically via session token server-side
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}?_cb=${Date.now()}`, {
     method: "DELETE",
     headers: authHeaders(),
     cache: "no-store",
@@ -178,10 +175,7 @@ async function deleteItem(itemID) {
 }
 
 async function getInsights() {
-  const userID = getCurrentUserID();
-  const url = userID
-    ? `${CONFIG.API_ENDPOINT}/insights?userID=${encodeURIComponent(userID)}`
-    : `${CONFIG.API_ENDPOINT}/insights`;
+  const url = `${CONFIG.API_ENDPOINT}/insights`;
 
   const res = await fetch(url, {
     headers: authHeaders()
@@ -194,10 +188,7 @@ async function getInsights() {
 }
 
 async function getTransactions() {
-  const userID = getCurrentUserID();
-  const url = userID
-    ? `${CONFIG.API_ENDPOINT}/transactions?userID=${encodeURIComponent(userID)}`
-    : `${CONFIG.API_ENDPOINT}/transactions`;
+  const url = `${CONFIG.API_ENDPOINT}/transactions`;
   const res = await fetch(url, { headers: authHeaders() });
   checkQuota(res);
   check401(res);
@@ -207,10 +198,7 @@ async function getTransactions() {
 }
 
 async function getCategories() {
-  const userID = getCurrentUserID();
-  const url = userID
-    ? `${CONFIG.API_ENDPOINT}/categories?userID=${encodeURIComponent(userID)}`
-    : `${CONFIG.API_ENDPOINT}/categories`;
+  const url = `${CONFIG.API_ENDPOINT}/categories`;
   const res = await fetch(url, {
     headers: authHeaders()
   });
@@ -234,9 +222,8 @@ async function lookupBarcode(code) {
 }
 
 async function deleteCategory(categoryName) {
-  const userID = getCurrentUserID();
   const res = await fetch(
-    `${CONFIG.API_ENDPOINT}/categories/${encodeURIComponent(categoryName)}?userID=${encodeURIComponent(userID)}`,
+    `${CONFIG.API_ENDPOINT}/categories/${encodeURIComponent(categoryName)}`,
     {
       method: "DELETE",
       headers: authHeaders()

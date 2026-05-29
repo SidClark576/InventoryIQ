@@ -2,12 +2,17 @@ function requireAuth() {
   if (!sessionStorage.getItem('userEmail')) window.location.href = 'login.html';
 }
 
+function escHTML(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function initNav(activePageId) {
   const email = sessionStorage.getItem('userEmail') || '';
   const el = document.getElementById('nav-email');
   if (el) el.textContent = email;
 
-  document.querySelectorAll('[data-page]').forEach(function(a) {
+  document.querySelectorAll('[data-page]').forEach(function (a) {
     const active = a.dataset.page === activePageId;
     a.classList.toggle('text-[#005ab4]', active);
     a.classList.toggle('bg-[#e8f0fe]', active);

@@ -5,48 +5,28 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>InventoryIQ | Insights</title>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { brand: '#005ab4' } } }
+    }
+  </script>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "background": "#f9f9ff", "error": "#ba1a1a", "error-container": "#ffdad6", "inverse-on-surface": "#eff0fa",
-            "inverse-primary": "#aac7ff", "inverse-surface": "#2d3038", "on-background": "#181c22", "on-error": "#ffffff",
-            "on-error-container": "#93000a", "on-primary": "#ffffff", "on-primary-container": "#fefcff", "on-primary-fixed": "#001b3e",
-            "on-primary-fixed-variant": "#00458d", "on-secondary": "#ffffff", "on-secondary-container": "#405882", "on-secondary-fixed": "#001b3e",
-            "on-secondary-fixed-variant": "#2e4770", "on-surface": "#181c22", "on-surface-variant": "#414753", "on-tertiary": "#ffffff",
-            "on-tertiary-container": "#fffbff", "on-tertiary-fixed": "#321200", "on-tertiary-fixed-variant": "#763400", "outline": "#717785",
-            "outline-variant": "#c1c6d5", "primary": "#005ab4", "primary-container": "#0873df", "primary-fixed": "#d6e3ff",
-            "primary-fixed-dim": "#aac7ff", "secondary": "#465f89", "secondary-container": "#b7cfff", "secondary-fixed": "#d6e3ff",
-            "secondary-fixed-dim": "#afc7f7", "surface": "#f9f9ff", "surface-bright": "#f9f9ff", "surface-container": "#ecedf7",
-            "surface-container-high": "#e6e8f1", "surface-container-highest": "#e0e2ec", "surface-container-low": "#f2f3fd", "surface-container-lowest": "#ffffff",
-            "surface-dim": "#d8dae3", "surface-tint": "#005db8", "surface-variant": "#e0e2ec", "tertiary": "#964400",
-            "tertiary-container": "#bd5700", "tertiary-fixed": "#ffdbc9", "tertiary-fixed-dim": "#ffb68c",
-            "primary-dim": "#00458d", "secondary-dim": "#2e4770", "tertiary-dim": "#763400", "error-dim": "#93000a",
-            "slate-950": "#f9f9ff", "slate-400": "#414753", "slate-500": "#717785", "slate-200": "#181c22"
-          },
-          fontFamily: { "body": ["Inter"], "headline": ["Inter"] },
-        },
-      },
-    }
-  </script>
   <link rel="stylesheet" href="style.css" />
 </head>
 
-<body class="selection:bg-primary/30 antialiased">
-  <div class="h-screen overflow-hidden flex bg-[#f5f6fa]">
+<body class="antialiased text-[#eef2fb]">
+  <div class="h-screen overflow-hidden flex">
 
     <!-- Sidebar -->
-    <aside class="w-[260px] bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
+    <aside class="w-[260px] bg-[#11182b] border-r border-[#243352] flex flex-col justify-between shrink-0">
       <div>
-        <div class="h-24 flex items-center px-6 border-b border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-[#060e20] rounded-xl flex items-center justify-center p-2 shadow-sm">
+        <div class="h-20 flex items-center px-6 border-b border-[#243352]">
+          <div class="flex items-center gap-3.5">
+            <div
+              class="w-10 h-10 bg-[#0a0e1a] rounded-xl border border-[#243352] flex items-center justify-center p-1.5 shadow-[0_0_20px_-6px_rgba(226,182,92,0.4)]">
               <svg viewBox="0 0 100 100" class="w-full h-full">
                 <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
                 <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
@@ -54,38 +34,39 @@
               </svg>
             </div>
             <div class="flex flex-col">
-              <span class="text-[17px] font-bold text-gray-900 leading-tight">InventoryIQ</span>
+              <span class="text-[16px] font-black text-[#eef2fb] leading-tight tracking-tight">InventoryIQ</span>
+              <span class="text-[10px] font-bold text-[#5d6f96] tracking-[0.12em] uppercase">Ops Terminal</span>
             </div>
           </div>
         </div>
 
-        <nav class="p-4 space-y-1.5 mt-2">
+        <nav class="p-3 space-y-1 mt-3">
           <a href="dashboard.html" data-page="dashboard"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">grid_view</span> Dashboard
           </a>
           <a href="inventory.html" data-page="inventory"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">inventory_2</span> Inventory
           </a>
           <a href="insights.html" data-page="insights"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">bar_chart</span> Insights
           </a>
           <a href="transactions.html" data-page="transactions"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">receipt_long</span> Transactions
           </a>
           <a href="forecast.html" data-page="forecast"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">trending_up</span> Forecast
           </a>
         </nav>
       </div>
 
-      <div class="p-4 space-y-1 mb-2 border-t border-gray-100 pt-6">
+      <div class="p-3 border-t border-[#243352] pt-4">
         <button
-          class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer"
+          class="btn-press flex items-center gap-3 w-full px-4 py-3 text-[#f87171] hover:bg-[#f87171]/10 rounded-xl font-semibold text-sm cursor-pointer"
           onclick="handleLogout()">
           <span class="material-symbols-outlined text-xl">logout</span> Logout
         </button>
@@ -94,26 +75,29 @@
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
-      <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
+      <header
+        class="h-20 bg-[#11182b]/80 backdrop-blur border-b border-[#243352] flex items-center justify-between px-10 shrink-0">
         <div class="ml-auto flex items-center gap-3">
-          <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
+          <span class="w-2 h-2 rounded-full bg-[#34d399]"></span>
+          <span class="text-sm font-semibold text-[#9fb0d0]" id="nav-email"></span>
         </div>
       </header>
 
       <main class="flex-1 overflow-auto p-10 space-y-8">
-        <div class="flex items-center justify-between">
+        <div class="flex items-end justify-between">
           <div>
-            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Insights</h1>
-            <p class="text-gray-500 mt-2 font-medium">AI-driven curation and tracking analysis</p>
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Inventory Intelligence</p>
+            <h1 class="text-3xl font-black text-[#eef2fb] tracking-tight">Insights</h1>
+            <div class="title-rule"></div>
           </div>
           <button
-            class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
+            class="btn-press bg-[#161f36] border border-[#243352] px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#9fb0d0] hover:text-[#eef2fb] hover:border-[#33476f] flex items-center gap-2 cursor-pointer"
             onclick="loadInsights()">
             <span class="material-symbols-outlined font-bold text-[18px]">refresh</span> Refresh
           </button>
         </div>
-        <div id="insights-content" class="bg-white p-10 rounded-3xl shadow-sm border border-gray-200">
-          <p class="text-gray-500 font-medium">Ready to process your data...</p>
+        <div id="insights-content">
+          <p class="text-[#9fb0d0] font-medium">Ready to process your data...</p>
         </div>
       </main>
     </div>
@@ -122,13 +106,34 @@
   <script src="config.js"></script>
   <script src="utils.js"></script>
   <script src="api.js"></script>
+  <script src="charts.js"></script>
   <script>
     requireAuth();
     initNav('insights');
 
+    function insightsSkeleton() {
+      return `
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div class="surface-card p-7 flex items-center justify-center"><span class="skeleton w-40 h-40 rounded-full"></span></div>
+          <div class="lg:col-span-2 surface-card p-7 space-y-4">
+            <span class="skeleton block h-4 w-40"></span>
+            <span class="skeleton block h-3 w-full"></span>
+            <span class="skeleton block h-3 w-3/4"></span>
+            <span class="skeleton block h-3 w-5/6"></span>
+          </div>
+        </div>`;
+    }
+
+    const URGENCY = {
+      critical: { color: '#f87171', label: 'Critical' },
+      high: { color: '#fbbf24', label: 'High' },
+      medium: { color: '#fbbf24', label: 'Medium' },
+      low: { color: '#34d399', label: 'Low' }
+    };
+
     async function loadInsights() {
       const panel = document.getElementById('insights-content');
-      panel.innerHTML = '<p class="text-on-surface-variant py-4">Analyzing...</p>';
+      panel.innerHTML = insightsSkeleton();
 
       try {
         const d = await getInsights();
@@ -139,34 +144,129 @@
         const totalProducts = Number.isFinite(Number(s.totalProducts)) ? Number(s.totalProducts) : 0;
         const estValue = Number.isFinite(Number(s.estimatedInventoryValue)) ? Number(s.estimatedInventoryValue) : 0;
 
-        // Format large inventory values to prevent card overflow (M for millions, k for thousands)
+        const lowItems = d.lowStockItems || [];
+        const outItems = d.outOfStockItems || [];
+        const lowCount = Number.isFinite(Number(s.lowStockCount)) ? Number(s.lowStockCount) : lowItems.length;
+        const outCount = Number.isFinite(Number(s.outOfStockCount)) ? Number(s.outOfStockCount) : outItems.length;
+        const inStockCount = Math.max(0, totalProducts - lowCount - outCount);
+
         let estValueStr = estValue.toFixed(2);
         if (estValue >= 1000000) estValueStr = (estValue / 1000000).toFixed(2) + 'M';
         else if (estValue >= 1000) estValueStr = (estValue / 1000).toFixed(1) + 'k';
 
-        const recs = (d.recommendations || []).map(r => `<li class="py-2 border-b border-outline-variant/30 last:border-0">${r}</li>`).join('') || '<li>No recommendations yet.</li>';
-        const reorder = (d.topReorderPriorities || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0"><strong>${i.name}</strong> (${i.category}) — Qty ${i.currentQuantity}, reorder ~${i.suggestedOrderQuantity} <span class="uppercase text-xs ml-2 ${i.urgency === 'critical' ? 'text-error' : i.urgency === 'high' ? 'text-secondary' : 'text-tertiary'}">${i.urgency}</span></li>`).join('') || '<li>None</li>';
-        const risk = (d.categoryRiskBreakdown || []).map(c => `<li class="py-2 border-b border-outline-variant/30 last:border-0"><strong>${c.category}</strong>: ${c.atRiskItems}/${c.totalItems} at risk (${c.riskPercent}%)</li>`).join('') || '<li>No data</li>';
-        const low = (d.lowStockItems || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0 text-secondary-dim">⚠️ <strong>${i.name}</strong> — ${i.quantity} left</li>`).join('') || '<li>None</li>';
-        const out = (d.outOfStockItems || []).map(i => `<li class="py-2 border-b border-outline-variant/30 last:border-0 text-error-dim">🚨 <strong>${i.name}</strong></li>`).join('') || '<li>None</li>';
+        const gauge = renderRadialGauge(healthScore, { size: 168, label: 'Health' });
+        const stackBar = renderStackBar({ inStock: inStockCount, low: lowCount, out: outCount });
+
+        const recsArr = d.recommendations || [];
+        const recs = recsArr.length
+          ? recsArr.map(r => `<li class="flex items-start gap-3 py-2.5 border-b border-[#243352] last:border-0"><span class="material-symbols-outlined text-[#3b8df0] text-[18px] mt-0.5">lightbulb</span><span class="text-[13px] text-[#9fb0d0] leading-relaxed">${escHTML(r)}</span></li>`).join('')
+          : emptyLine('check_circle', 'All clear — no recommendations right now.');
+
+        const reorderArr = d.topReorderPriorities || [];
+        const reorder = reorderArr.length
+          ? reorderArr.map(i => {
+            const u = URGENCY[i.urgency] || URGENCY.low;
+            return `<div class="relative pl-4 pr-4 py-3 rounded-xl bg-[#11182b] border border-[#243352] overflow-hidden">
+                <span class="absolute left-0 top-0 bottom-0 w-1" style="background:${u.color}"></span>
+                <div class="flex items-center justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="font-bold text-[#eef2fb] text-[13px] truncate">${escHTML(i.name)}</div>
+                    <div class="text-[11px] text-[#5d6f96] mt-0.5">${escHTML(i.category || 'Uncategorized')} · Qty <span class="tnum">${i.currentQuantity}</span></div>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <div class="text-[11px] font-bold uppercase tracking-wider" style="color:${u.color}">${u.label}</div>
+                    <div class="text-[11px] text-[#9fb0d0]">reorder <span class="tnum font-bold text-[#eef2fb]">~${i.suggestedOrderQuantity}</span></div>
+                  </div>
+                </div>
+              </div>`;
+          }).join('')
+          : emptyLine('inventory_2', 'No reorder priorities yet.');
+
+        const riskArr = d.categoryRiskBreakdown || [];
+        const risk = riskArr.length
+          ? riskArr.map(c => {
+            const pct = Number(c.riskPercent) || 0;
+            const color = pct >= 50 ? '#f87171' : pct >= 20 ? '#fbbf24' : '#34d399';
+            return `<div class="py-2.5 border-b border-[#243352] last:border-0">
+                <div class="flex items-center justify-between text-[13px] mb-1.5">
+                  <span class="font-semibold text-[#eef2fb]">${escHTML(c.category)}</span>
+                  <span class="tnum text-[#9fb0d0]"><span style="color:${color}" class="font-bold">${c.atRiskItems}</span>/${c.totalItems} · ${pct}%</span>
+                </div>
+                <div class="h-1.5 rounded-full bg-[#1d2942] overflow-hidden"><div class="h-full rounded-full" style="width:${Math.min(100, pct)}%;background:${color}"></div></div>
+              </div>`;
+          }).join('')
+          : emptyLine('donut_large', 'No category data.');
+
+        const lowList = lowItems.length
+          ? lowItems.map(i => `<li class="flex items-center justify-between py-2 border-b border-[#243352] last:border-0 text-[13px]"><span class="text-[#9fb0d0]">${escHTML(i.name)}</span><span class="tnum font-bold text-[#fbbf24]">${i.quantity} left</span></li>`).join('')
+          : emptyLine('check', 'No low-stock items.');
+        const outList = outItems.length
+          ? outItems.map(i => `<li class="flex items-center justify-between py-2 border-b border-[#243352] last:border-0 text-[13px]"><span class="text-[#9fb0d0]">${escHTML(i.name)}</span><span class="text-[11px] font-bold uppercase text-[#f87171]">Out</span></li>`).join('')
+          : emptyLine('check', 'No out-of-stock items.');
 
         panel.innerHTML = `
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Health Score</div><div class="text-3xl font-black ${healthScore < 50 ? 'text-error' : healthScore < 80 ? 'text-secondary' : 'text-tertiary'}">${healthScore}/100</div></div>
-            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">At Risk</div><div class="text-3xl font-black text-on-surface">${atRiskCount}</div></div>
-            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Products</div><div class="text-3xl font-black text-on-surface">${totalProducts}</div></div>
-            <div class="rounded-2xl bg-surface-container-low/50 border border-outline-variant/50 p-4"><div class="text-xs uppercase tracking-widest text-on-surface-variant">Inventory Value</div><div class="text-3xl font-black text-on-surface">$${estValueStr}</div></div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <!-- Health gauge -->
+            <div class="surface-card p-7 flex flex-col items-center justify-center text-center">
+              <div class="flex items-center justify-center">${gauge}</div>
+              <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mt-4">Inventory Health Score</p>
+              <p class="text-[12px] text-[#9fb0d0] mt-1"><span class="tnum font-bold text-[#eef2fb]">${atRiskCount}</span> of <span class="tnum">${totalProducts}</span> at risk</p>
+            </div>
+
+            <!-- Distribution + KPIs -->
+            <div class="lg:col-span-2 surface-card p-7 flex flex-col">
+              <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-4">Stock Distribution</p>
+              ${stackBar}
+              <div class="flex items-center gap-6 mt-3 text-[11px] font-semibold">
+                <span class="flex items-center gap-1.5 text-[#34d399]"><span class="w-2 h-2 rounded-full bg-[#34d399]"></span>In Stock <span class="tnum text-[#eef2fb]">${inStockCount}</span></span>
+                <span class="flex items-center gap-1.5 text-[#fbbf24]"><span class="w-2 h-2 rounded-full bg-[#fbbf24]"></span>Low <span class="tnum text-[#eef2fb]">${lowCount}</span></span>
+                <span class="flex items-center gap-1.5 text-[#f87171]"><span class="w-2 h-2 rounded-full bg-[#f87171]"></span>Out <span class="tnum text-[#eef2fb]">${outCount}</span></span>
+              </div>
+              <div class="grid grid-cols-2 gap-4 mt-auto pt-6">
+                <div class="rounded-xl bg-[#11182b] border border-[#243352] p-4">
+                  <div class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96]">Products</div>
+                  <div class="tnum text-2xl font-black text-[#eef2fb] mt-1">${totalProducts}</div>
+                </div>
+                <div class="rounded-xl bg-[#11182b] border border-[#9c7d3a]/30 p-4">
+                  <div class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#9c7d3a]">Inventory Value</div>
+                  <div class="tnum text-2xl font-black text-[#e2b65c] mt-1">$${estValueStr}</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-outline-variant/50">Recommendations</h3><ul>${recs}</ul></div>
-            <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-outline-variant/50">Top Reorder Priorities</h3><ul>${reorder}</ul></div>
-            <div><h3 class="text-lg font-bold text-on-surface mb-2 pb-2 border-b border-outline-variant/50">Category Risk</h3><ul>${risk}</ul></div>
-            <div><h3 class="text-lg font-bold text-secondary mb-2 pb-2 border-b border-outline-variant/50">Low Stock</h3><ul>${low}</ul></div>
-            <div><h3 class="text-lg font-bold text-error mb-2 pb-2 border-b border-outline-variant/50">Out of Stock</h3><ul>${out}</ul></div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5">
+            <div class="surface-card p-7">
+              <h3 class="text-lg font-bold text-[#eef2fb] mb-3 pb-3 border-b border-[#243352]">Recommendations</h3>
+              <ul>${recs}</ul>
+            </div>
+            <div class="surface-card p-7">
+              <h3 class="text-lg font-bold text-[#eef2fb] mb-4 pb-3 border-b border-[#243352]">Top Reorder Priorities</h3>
+              <div class="space-y-2.5">${reorder}</div>
+            </div>
+            <div class="surface-card p-7">
+              <h3 class="text-lg font-bold text-[#eef2fb] mb-3 pb-3 border-b border-[#243352]">Category Risk</h3>
+              ${risk}
+            </div>
+            <div class="surface-card p-7">
+              <h3 class="text-lg font-bold text-[#eef2fb] mb-3 pb-3 border-b border-[#243352]">Stock Watch</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div><p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#fbbf24] mb-1">Low Stock</p><ul>${lowList}</ul></div>
+                <div><p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#f87171] mb-1">Out of Stock</p><ul>${outList}</ul></div>
+              </div>
+            </div>
           </div>`;
       } catch (e) {
-        panel.innerHTML = `<p class="text-error py-4">Unable to analyze right now: ${e.message}</p>`;
+        panel.innerHTML = `<div class="surface-card p-10 text-center">
+          <span class="w-14 h-14 mx-auto rounded-full bg-[#f87171]/10 border border-[#f87171]/25 flex items-center justify-center text-[#f87171] mb-4"><span class="material-symbols-outlined text-[26px]">error</span></span>
+          <p class="text-[#eef2fb] font-bold">Unable to analyze right now</p>
+          <p class="text-[13px] text-[#9fb0d0] mt-1">${escHTML(e.message)}</p>
+        </div>`;
       }
+    }
+
+    function emptyLine(icon, text) {
+      return `<li class="flex items-center gap-2 py-2 text-[13px] text-[#5d6f96]"><span class="material-symbols-outlined text-[18px]">${icon}</span>${escHTML(text)}</li>`;
     }
 
     loadInsights();

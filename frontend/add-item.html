@@ -5,48 +5,28 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>InventoryIQ | Add Asset</title>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { brand: '#005ab4' } } }
+    }
+  </script>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "background": "#f9f9ff", "error": "#ba1a1a", "error-container": "#ffdad6", "inverse-on-surface": "#eff0fa",
-            "inverse-primary": "#aac7ff", "inverse-surface": "#2d3038", "on-background": "#181c22", "on-error": "#ffffff",
-            "on-error-container": "#93000a", "on-primary": "#ffffff", "on-primary-container": "#fefcff", "on-primary-fixed": "#001b3e",
-            "on-primary-fixed-variant": "#00458d", "on-secondary": "#ffffff", "on-secondary-container": "#405882", "on-secondary-fixed": "#001b3e",
-            "on-secondary-fixed-variant": "#2e4770", "on-surface": "#181c22", "on-surface-variant": "#414753", "on-tertiary": "#ffffff",
-            "on-tertiary-container": "#fffbff", "on-tertiary-fixed": "#321200", "on-tertiary-fixed-variant": "#763400", "outline": "#717785",
-            "outline-variant": "#c1c6d5", "primary": "#005ab4", "primary-container": "#0873df", "primary-fixed": "#d6e3ff",
-            "primary-fixed-dim": "#aac7ff", "secondary": "#465f89", "secondary-container": "#b7cfff", "secondary-fixed": "#d6e3ff",
-            "secondary-fixed-dim": "#afc7f7", "surface": "#f9f9ff", "surface-bright": "#f9f9ff", "surface-container": "#ecedf7",
-            "surface-container-high": "#e6e8f1", "surface-container-highest": "#e0e2ec", "surface-container-low": "#f2f3fd", "surface-container-lowest": "#ffffff",
-            "surface-dim": "#d8dae3", "surface-tint": "#005db8", "surface-variant": "#e0e2ec", "tertiary": "#964400",
-            "tertiary-container": "#bd5700", "tertiary-fixed": "#ffdbc9", "tertiary-fixed-dim": "#ffb68c",
-            "primary-dim": "#00458d", "secondary-dim": "#2e4770", "tertiary-dim": "#763400", "error-dim": "#93000a",
-            "slate-950": "#f9f9ff", "slate-400": "#414753", "slate-500": "#717785", "slate-200": "#181c22"
-          },
-          fontFamily: { "body": ["Inter"], "headline": ["Inter"] },
-        },
-      },
-    }
-  </script>
   <link rel="stylesheet" href="style.css" />
 </head>
 
-<body class="selection:bg-primary/30 antialiased">
-  <div class="h-screen overflow-hidden flex bg-[#f5f6fa]">
+<body class="antialiased text-[#eef2fb]">
+  <div class="h-screen overflow-hidden flex">
 
     <!-- Sidebar -->
-    <aside class="w-[260px] bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
+    <aside class="w-[260px] bg-[#11182b] border-r border-[#243352] flex flex-col justify-between shrink-0">
       <div>
-        <div class="h-24 flex items-center px-6 border-b border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-[#060e20] rounded-xl flex items-center justify-center p-2 shadow-sm">
+        <div class="h-20 flex items-center px-6 border-b border-[#243352]">
+          <div class="flex items-center gap-3.5">
+            <div
+              class="w-10 h-10 bg-[#0a0e1a] rounded-xl border border-[#243352] flex items-center justify-center p-1.5 shadow-[0_0_20px_-6px_rgba(226,182,92,0.4)]">
               <svg viewBox="0 0 100 100" class="w-full h-full">
                 <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
                 <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
@@ -54,39 +34,39 @@
               </svg>
             </div>
             <div class="flex flex-col">
-              <span class="text-[17px] font-bold text-gray-900 leading-tight">InventoryIQ</span>
-              <span class="text-[10px] font-bold text-gray-400 tracking-wider uppercase mt-0.5">Management Portal</span>
+              <span class="text-[16px] font-black text-[#eef2fb] leading-tight tracking-tight">InventoryIQ</span>
+              <span class="text-[10px] font-bold text-[#5d6f96] tracking-[0.12em] uppercase">Ops Terminal</span>
             </div>
           </div>
         </div>
 
-        <nav class="p-4 space-y-1.5 mt-2">
+        <nav class="p-3 space-y-1 mt-3">
           <a href="dashboard.html" data-page="dashboard"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">grid_view</span> Dashboard
           </a>
           <a href="inventory.html" data-page="inventory"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">inventory_2</span> Inventory
           </a>
           <a href="insights.html" data-page="insights"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">bar_chart</span> Insights
           </a>
           <a href="transactions.html" data-page="transactions"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">receipt_long</span> Transactions
           </a>
           <a href="forecast.html" data-page="forecast"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">trending_up</span> Forecast
           </a>
         </nav>
       </div>
 
-      <div class="p-4 space-y-1 mb-2 border-t border-gray-100 pt-6">
+      <div class="p-3 border-t border-[#243352] pt-4">
         <button
-          class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer"
+          class="btn-press flex items-center gap-3 w-full px-4 py-3 text-[#f87171] hover:bg-[#f87171]/10 rounded-xl font-semibold text-sm cursor-pointer"
           onclick="handleLogout()">
           <span class="material-symbols-outlined text-xl">logout</span> Logout
         </button>
@@ -95,105 +75,129 @@
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
-      <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
-        <div class="relative w-[480px]">
-          <span
-            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
-          <input type="text" placeholder="Search inventory, assets, or orders..."
-            class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium" />
-        </div>
-        <div class="flex items-center gap-6">
-          <button
-            class="text-gray-400 hover:text-gray-700 relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
-            <span class="material-symbols-outlined">notifications</span>
-            <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
-          <button
-            class="text-gray-400 hover:text-gray-700 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-50 transition">
-            <span class="material-symbols-outlined">settings</span>
-          </button>
-          <div class="h-10 w-px bg-gray-200 ml-2 mr-2"></div>
-          <div class="flex items-center gap-3 pr-2">
-            <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
-          </div>
-        </div>
+      <header
+        class="h-20 bg-[#11182b]/80 backdrop-blur border-b border-[#243352] flex items-center justify-between px-10 shrink-0">
+        <a href="inventory.html"
+          class="flex items-center gap-2 text-sm font-semibold text-[#9fb0d0] hover:text-[#eef2fb] transition-colors">
+          <span class="material-symbols-outlined text-lg">arrow_back</span> Back to inventory
+        </a>
+        <span class="text-sm font-semibold text-[#9fb0d0]" id="nav-email"></span>
       </header>
 
       <main class="flex-1 overflow-auto p-10 space-y-8">
         <div>
-          <h1 id="form-title" class="text-3xl font-black text-gray-900 tracking-tight">Add New Item</h1>
+          <h1 id="form-title" class="text-3xl font-black text-[#eef2fb] tracking-tight">Add New Item</h1>
+          <div class="title-rule"></div>
         </div>
-        <div class="bg-white rounded-3xl p-10 max-w-3xl shadow-sm border border-gray-200">
-          <input type="hidden" id="edit-id" />
-          <input type="hidden" id="edit-version" />
-          <input type="hidden" id="f-barcode" />
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="col-span-full">
-              <div class="flex items-center justify-between mb-2">
-                <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500">Product Name *</label>
-                <button type="button" onclick="openScanModal()"
-                  class="flex items-center gap-1.5 text-xs font-semibold text-[#005ab4] hover:text-[#00458d] transition-colors">
-                  <span class="material-symbols-outlined text-base">qr_code_scanner</span> Scan Barcode
-                </button>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start max-w-5xl">
+          <!-- Form card -->
+          <div class="surface-card p-8">
+            <input type="hidden" id="edit-id" />
+            <input type="hidden" id="edit-version" />
+            <input type="hidden" id="f-barcode" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="col-span-full">
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96]">Product Name
+                    *</label>
+                  <button type="button" onclick="openScanModal()"
+                    class="flex items-center gap-1.5 text-xs font-semibold text-[#3b8df0] hover:text-[#5ba3f5] transition-colors">
+                    <span class="material-symbols-outlined text-base">qr_code_scanner</span> Scan Barcode
+                  </button>
+                </div>
+                <input type="text" id="f-name" oninput="updatePreview()"
+                  class="w-full rounded-xl px-4 py-3.5 bg-[#1d2942] border border-[#243352] font-medium text-[#eef2fb] placeholder:text-[#5d6f96]"
+                  placeholder="e.g. Pro Studio Display" />
               </div>
-              <input type="text" id="f-name"
-                class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
-                placeholder="e.g. Pro Studio Display" />
+              <div>
+                <label
+                  class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Category</label>
+                <input type="text" id="f-category" list="category-suggestions" oninput="updatePreview()"
+                  class="w-full rounded-xl px-4 py-3.5 bg-[#1d2942] border border-[#243352] font-medium text-[#eef2fb] placeholder:text-[#5d6f96]"
+                  placeholder="e.g. Electronics" autocomplete="off" />
+                <datalist id="category-suggestions"></datalist>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Price
+                  ($)</label>
+                <input type="number" id="f-price" oninput="updatePreview()"
+                  class="w-full rounded-xl px-4 py-3.5 bg-[#1d2942] border border-[#243352] font-medium text-[#eef2fb] placeholder:text-[#5d6f96] tnum"
+                  placeholder="0.00" step="0.01" min="0" />
+                <p class="text-[11px] text-[#5d6f96] mt-1.5">Unit price used to compute inventory value.</p>
+              </div>
+              <div>
+                <label
+                  class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Quantity</label>
+                <input type="number" id="f-quantity" oninput="updatePreview()"
+                  class="w-full rounded-xl px-4 py-3.5 bg-[#1d2942] border border-[#243352] font-medium text-[#eef2fb] placeholder:text-[#5d6f96] tnum"
+                  placeholder="0" min="0" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Low Stock
+                  Threshold</label>
+                <input type="number" id="f-threshold" oninput="updatePreview()"
+                  class="w-full rounded-xl px-4 py-3.5 bg-[#1d2942] border border-[#243352] font-medium text-[#eef2fb] placeholder:text-[#5d6f96] tnum"
+                  placeholder="10" min="0" />
+                <p class="text-[11px] text-[#5d6f96] mt-1.5">Low-stock alerts trigger at or below this quantity.</p>
+              </div>
+              <div class="col-span-full">
+                <label
+                  class="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Description</label>
+                <textarea id="f-description"
+                  class="w-full rounded-xl px-4 py-3.5 bg-[#1d2942] border border-[#243352] font-medium text-[#eef2fb] placeholder:text-[#5d6f96] min-h-[100px]"
+                  placeholder="Optional details..."></textarea>
+              </div>
             </div>
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Category</label>
-              <input type="text" id="f-category" list="category-suggestions"
-                class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
-                placeholder="e.g. Electronics" autocomplete="off" />
-              <datalist id="category-suggestions"></datalist>
+            <div class="flex gap-3 mt-8 pt-7 border-t border-[#243352]">
+              <button
+                class="btn-press bg-[#005ab4] hover:bg-[#0a6ed4] text-white px-8 py-3.5 rounded-xl font-bold shadow-[0_8px_24px_-10px_rgba(0,90,180,0.9)] cursor-pointer"
+                onclick="handleSaveItem()">Save Asset</button>
+              <button
+                class="btn-press px-8 py-3.5 rounded-xl font-bold text-[#9fb0d0] bg-[#1d2942] border border-[#243352] hover:text-[#eef2fb] hover:border-[#33476f] cursor-pointer"
+                onclick="window.location.href='inventory.html'">Cancel</button>
             </div>
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Price ($)</label>
-              <input type="number" id="f-price"
-                class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
-                placeholder="0.00" step="0.01" min="0" />
-            </div>
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Quantity</label>
-              <input type="number" id="f-quantity"
-                class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
-                placeholder="0" min="0" />
-            </div>
-            <div>
-              <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Low Stock
-                Threshold</label>
-              <input type="number" id="f-threshold"
-                class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900"
-                placeholder="10" min="0" />
-            </div>
-            <div class="col-span-full">
-              <label
-                class="block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Description</label>
-              <textarea id="f-description"
-                class="w-full rounded-xl px-5 py-4 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all font-medium text-gray-900 min-h-[100px]"
-                placeholder="Optional details..."></textarea>
-            </div>
+            <div id="form-msg" class="mt-4 text-sm font-semibold"></div>
           </div>
-          <div class="flex gap-4 mt-10 pt-8 border-t border-gray-100">
-            <button
-              class="bg-[#005ab4] hover:bg-[#00458d] text-white px-10 py-4 rounded-xl font-bold shadow-sm transition-all cursor-pointer"
-              onclick="handleSaveItem()">Save Asset</button>
-            <button
-              class="px-10 py-4 rounded-xl font-bold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-all cursor-pointer"
-              onclick="window.location.href='dashboard.html'">Cancel</button>
+
+          <!-- Live preview -->
+          <div class="surface-card stat-card p-6 lg:sticky lg:top-0">
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-4">Live Preview</p>
+            <div class="bg-[#1d2942] border border-[#243352] rounded-xl p-5">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div id="pv-name" class="font-bold text-[#eef2fb] text-base truncate">Untitled item</div>
+                  <div id="pv-category" class="text-[11px] font-semibold text-[#9fb0d0] mt-1">Uncategorized</div>
+                </div>
+                <span id="pv-badge"
+                  class="text-[11px] font-bold px-2.5 py-1 rounded-full border whitespace-nowrap bg-[#34d399]/10 text-[#34d399] border-[#34d399]/25">In
+                  Stock</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3 mt-5">
+                <div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-[#5d6f96]">Quantity</div>
+                  <div id="pv-qty" class="text-2xl font-black text-[#eef2fb] tnum leading-tight mt-1">0</div>
+                </div>
+                <div>
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-[#5d6f96]">Line Value</div>
+                  <div id="pv-value" class="text-2xl font-black text-[#e2b65c] tnum leading-tight mt-1">$0.00</div>
+                </div>
+              </div>
+            </div>
+            <p class="text-[11px] text-[#5d6f96] mt-4">This is how the asset will appear in your inventory once saved.
+            </p>
           </div>
-          <div id="form-msg" class="mt-4 text-sm font-semibold"></div>
         </div>
       </main>
     </div>
   </div>
 
   <!-- Barcode scan modal -->
-  <div id="scan-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-3xl shadow-xl w-full max-w-sm mx-4 overflow-hidden">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-        <h2 class="font-bold text-gray-900">Scan Barcode</h2>
-        <button onclick="closeScanModal()" class="text-gray-400 hover:text-gray-700 transition">
+  <div id="scan-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="surface-card w-full max-w-sm mx-4 overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[#243352]">
+        <h2 class="font-bold text-[#eef2fb]">Scan Barcode</h2>
+        <button onclick="closeScanModal()" class="text-[#5d6f96] hover:text-[#eef2fb] transition">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
@@ -204,29 +208,53 @@
         </div>
       </div>
       <div id="scan-fallback" class="hidden px-6 py-4 space-y-3">
-        <p class="text-xs text-gray-500">Camera unavailable. Enter barcode manually or upload an image.</p>
+        <p class="text-xs text-[#9fb0d0]">Camera unavailable. Enter barcode manually or upload an image.</p>
         <input type="text" id="scan-manual-input" placeholder="e.g. 737628064502"
-          class="w-full rounded-xl px-4 py-3 bg-gray-50 border border-transparent focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-indigo-50 transition-all text-sm font-medium text-gray-900" />
+          class="w-full rounded-xl px-4 py-3 bg-[#1d2942] border border-[#243352] text-sm font-medium text-[#eef2fb] placeholder:text-[#5d6f96]" />
         <button onclick="lookupManual()"
-          class="w-full bg-[#005ab4] hover:bg-[#00458d] text-white px-4 py-3 rounded-xl font-bold text-sm transition-all">Lookup</button>
-        <label class="block text-xs text-gray-500 text-center cursor-pointer">
+          class="btn-press w-full bg-[#005ab4] hover:bg-[#0a6ed4] text-white px-4 py-3 rounded-xl font-bold text-sm">Lookup</button>
+        <label class="block text-xs text-[#9fb0d0] text-center cursor-pointer">
           or upload barcode image
-          <input type="file" accept="image/*" capture="environment" id="scan-file-input" class="hidden" onchange="lookupFromImage(this)" />
-          <span class="block mt-1 text-[#005ab4] font-semibold hover:underline">Choose image</span>
+          <input type="file" accept="image/*" capture="environment" id="scan-file-input" class="hidden"
+            onchange="lookupFromImage(this)" />
+          <span class="block mt-1 text-[#3b8df0] font-semibold hover:underline">Choose image</span>
         </label>
       </div>
-      <div id="scan-status" class="px-6 py-3 text-sm text-center text-gray-500 min-h-[2.5rem]"></div>
+      <div id="scan-status" class="px-6 py-3 text-sm text-center text-[#9fb0d0] min-h-[2.5rem]"></div>
     </div>
   </div>
 
   <script src="config.js"></script>
   <script src="utils.js"></script>
   <script src="api.js"></script>
+  <script src="charts.js"></script>
   <script>
     requireAuth();
     initNav('');
 
-    (async function() {
+    function updatePreview() {
+      const name = (document.getElementById('f-name').value || '').trim();
+      const cat = (document.getElementById('f-category').value || '').trim();
+      const qty = parseInt(document.getElementById('f-quantity').value) || 0;
+      const price = parseFloat(document.getElementById('f-price').value) || 0;
+      const thr = parseInt(document.getElementById('f-threshold').value);
+      const threshold = Number.isFinite(thr) ? thr : 10;
+
+      document.getElementById('pv-name').textContent = name || 'Untitled item';
+      document.getElementById('pv-category').textContent = cat || 'Uncategorized';
+      document.getElementById('pv-qty').textContent = qty.toLocaleString();
+      document.getElementById('pv-value').textContent = '$' + (qty * price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      const badge = document.getElementById('pv-badge');
+      let label, cls;
+      if (qty === 0) { label = 'Out of Stock'; cls = 'bg-[#f87171]/10 text-[#f87171] border-[#f87171]/25'; }
+      else if (qty <= threshold) { label = 'Low Stock'; cls = 'bg-[#fbbf24]/10 text-[#fbbf24] border-[#fbbf24]/25'; }
+      else { label = 'In Stock'; cls = 'bg-[#34d399]/10 text-[#34d399] border-[#34d399]/25'; }
+      badge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full border whitespace-nowrap ' + cls;
+      badge.textContent = label;
+    }
+
+    (async function () {
       try {
         const cats = await getCategories();
         const dl = document.getElementById('category-suggestions');
@@ -261,6 +289,7 @@
     } else {
       clearForm();
     }
+    updatePreview();
 
     async function handleSaveItem() {
       const id = document.getElementById('edit-id').value;
@@ -276,14 +305,16 @@
         barcode: document.getElementById('f-barcode').value,
         userID: sessionStorage.getItem('userEmail') || ''
       };
-      if (!p.name) { m.style.color = '#ba1a1a'; m.textContent = 'Name required.'; return; }
-      m.style.color = '#005ab4'; m.textContent = 'Saving...';
+      if (!p.name) { m.style.color = '#f87171'; m.textContent = 'Name required.'; return; }
+      m.style.color = '#9fb0d0'; m.textContent = 'Saving...';
       try {
         const r = id ? await updateItem(id, p, version) : await addItem(p);
-        m.style.color = '#964400'; m.textContent = '✅ ' + (r.message || 'Saved!');
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+        m.style.color = '#34d399'; m.textContent = '✅ ' + (r.message || 'Saved!');
+        if (typeof showToast === 'function') showToast(r.message || 'Item saved', 'ok');
+        setTimeout(() => { window.location.href = 'inventory.html'; }, 1000);
       } catch (e) {
-        m.style.color = '#ba1a1a'; m.textContent = '❌ ' + e.message;
+        m.style.color = '#f87171'; m.textContent = '❌ ' + e.message;
+        if (typeof showToast === 'function') showToast(e.message, 'err');
       }
     }
 
@@ -332,7 +363,7 @@
         },
         decoder: { readers: ['ean_reader', 'upc_reader', 'code_128_reader'] },
         locate: true
-      }, function(err) {
+      }, function (err) {
         if (err) { showFallback(); return; }
         Quagga.start();
         _scanActive = true;
@@ -343,7 +374,7 @@
 
     function stopCamera() {
       if (_scanActive) {
-        try { Quagga.stop(); } catch (_) {}
+        try { Quagga.stop(); } catch (_) { }
         _scanActive = false;
       }
     }
@@ -371,7 +402,7 @@
         decoder: { readers: ['ean_reader', 'upc_reader', 'code_128_reader'] },
         locate: true,
         src: URL.createObjectURL(file)
-      }, async function(result) {
+      }, async function (result) {
         const code = result && result.codeResult && result.codeResult.code;
         if (!code) { document.getElementById('scan-status').textContent = 'No barcode found in image.'; return; }
         document.getElementById('scan-status').textContent = `Found: ${code} — looking up...`;

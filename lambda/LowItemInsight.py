@@ -112,9 +112,9 @@ def _handle(event, context):
     - Range: 0-100
     """
     try:
-        # Extract and validate userID
-        params = event.get('queryStringParameters') or {}
-        user_id = params.get('userID', '').strip()
+        # Extract and validate userID from securely injected headers
+        headers = event.get('headers') or {}
+        user_id = (headers.get('x-iq-user') or headers.get('X-Iq-User') or '').strip()
 
         # Return empty insights if no userID (no inventory to analyze)
         if not user_id:
@@ -339,5 +339,5 @@ def _handle(event, context):
         return {
             'statusCode': 500,
             'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': str(e)})
+            'body': json.dumps({'error': 'Internal Server Error'})
         }

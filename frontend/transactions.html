@@ -5,48 +5,28 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>InventoryIQ | Transactions</title>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { brand: '#005ab4' } } }
+    }
+  </script>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "background": "#f9f9ff", "error": "#ba1a1a", "error-container": "#ffdad6", "inverse-on-surface": "#eff0fa",
-            "inverse-primary": "#aac7ff", "inverse-surface": "#2d3038", "on-background": "#181c22", "on-error": "#ffffff",
-            "on-error-container": "#93000a", "on-primary": "#ffffff", "on-primary-container": "#fefcff", "on-primary-fixed": "#001b3e",
-            "on-primary-fixed-variant": "#00458d", "on-secondary": "#ffffff", "on-secondary-container": "#405882", "on-secondary-fixed": "#001b3e",
-            "on-secondary-fixed-variant": "#2e4770", "on-surface": "#181c22", "on-surface-variant": "#414753", "on-tertiary": "#ffffff",
-            "on-tertiary-container": "#fffbff", "on-tertiary-fixed": "#321200", "on-tertiary-fixed-variant": "#763400", "outline": "#717785",
-            "outline-variant": "#c1c6d5", "primary": "#005ab4", "primary-container": "#0873df", "primary-fixed": "#d6e3ff",
-            "primary-fixed-dim": "#aac7ff", "secondary": "#465f89", "secondary-container": "#b7cfff", "secondary-fixed": "#d6e3ff",
-            "secondary-fixed-dim": "#afc7f7", "surface": "#f9f9ff", "surface-bright": "#f9f9ff", "surface-container": "#ecedf7",
-            "surface-container-high": "#e6e8f1", "surface-container-highest": "#e0e2ec", "surface-container-low": "#f2f3fd", "surface-container-lowest": "#ffffff",
-            "surface-dim": "#d8dae3", "surface-tint": "#005db8", "surface-variant": "#e0e2ec", "tertiary": "#964400",
-            "tertiary-container": "#bd5700", "tertiary-fixed": "#ffdbc9", "tertiary-fixed-dim": "#ffb68c",
-            "primary-dim": "#00458d", "secondary-dim": "#2e4770", "tertiary-dim": "#763400", "error-dim": "#93000a",
-            "slate-950": "#f9f9ff", "slate-400": "#414753", "slate-500": "#717785", "slate-200": "#181c22"
-          },
-          fontFamily: { "body": ["Inter"], "headline": ["Inter"] },
-        },
-      },
-    }
-  </script>
   <link rel="stylesheet" href="style.css" />
 </head>
 
-<body class="selection:bg-primary/30 antialiased">
-  <div class="h-screen overflow-hidden flex bg-[#f5f6fa]">
+<body class="antialiased text-[#eef2fb]">
+  <div class="h-screen overflow-hidden flex">
 
     <!-- Sidebar -->
-    <aside class="w-[260px] bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
+    <aside class="w-[260px] bg-[#11182b] border-r border-[#243352] flex flex-col justify-between shrink-0">
       <div>
-        <div class="h-24 flex items-center px-6 border-b border-gray-100">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-[#060e20] rounded-xl flex items-center justify-center p-2 shadow-sm">
+        <div class="h-20 flex items-center px-6 border-b border-[#243352]">
+          <div class="flex items-center gap-3.5">
+            <div
+              class="w-10 h-10 bg-[#0a0e1a] rounded-xl border border-[#243352] flex items-center justify-center p-1.5 shadow-[0_0_20px_-6px_rgba(226,182,92,0.4)]">
               <svg viewBox="0 0 100 100" class="w-full h-full">
                 <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
                 <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
@@ -54,38 +34,39 @@
               </svg>
             </div>
             <div class="flex flex-col">
-              <span class="text-[17px] font-bold text-gray-900 leading-tight">InventoryIQ</span>
+              <span class="text-[16px] font-black text-[#eef2fb] leading-tight tracking-tight">InventoryIQ</span>
+              <span class="text-[10px] font-bold text-[#5d6f96] tracking-[0.12em] uppercase">Ops Terminal</span>
             </div>
           </div>
         </div>
 
-        <nav class="p-4 space-y-1.5 mt-2">
+        <nav class="p-3 space-y-1 mt-3">
           <a href="dashboard.html" data-page="dashboard"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">grid_view</span> Dashboard
           </a>
           <a href="inventory.html" data-page="inventory"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">inventory_2</span> Inventory
           </a>
           <a href="insights.html" data-page="insights"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">bar_chart</span> Insights
           </a>
           <a href="transactions.html" data-page="transactions"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">receipt_long</span> Transactions
           </a>
           <a href="forecast.html" data-page="forecast"
-            class="nav-btn flex items-center gap-3 w-full px-4 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl text-sm transition-colors border-l-4 border-transparent">
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">trending_up</span> Forecast
           </a>
         </nav>
       </div>
 
-      <div class="p-4 space-y-1 mb-2 border-t border-gray-100 pt-6">
+      <div class="p-3 border-t border-[#243352] pt-4">
         <button
-          class="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium text-sm transition-colors cursor-pointer"
+          class="btn-press flex items-center gap-3 w-full px-4 py-3 text-[#f87171] hover:bg-[#f87171]/10 rounded-xl font-semibold text-sm cursor-pointer"
           onclick="handleLogout()">
           <span class="material-symbols-outlined text-xl">logout</span> Logout
         </button>
@@ -94,36 +75,37 @@
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
-      <header class="h-24 bg-white border-b border-gray-100 flex items-center justify-between px-10 shrink-0">
+      <header
+        class="h-20 bg-[#11182b]/80 backdrop-blur border-b border-[#243352] flex items-center justify-between px-10 shrink-0">
         <div class="ml-auto flex items-center gap-3">
-          <span class="text-sm font-bold text-gray-700" id="nav-email"></span>
+          <span class="w-2 h-2 rounded-full bg-[#34d399]"></span>
+          <span class="text-sm font-semibold text-[#9fb0d0]" id="nav-email"></span>
         </div>
       </header>
 
       <main class="flex-1 overflow-auto p-10 space-y-8">
-        <div class="flex items-center justify-between">
+        <div class="flex items-end justify-between">
           <div>
-            <h1 class="text-3xl font-black text-gray-900 tracking-tight">Transaction Log</h1>
-            <p class="text-gray-500 mt-2 font-medium">Running history of all changes.</p>
+            <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Audit Trail</p>
+            <h1 class="text-3xl font-black text-[#eef2fb] tracking-tight">Transaction Log</h1>
+            <div class="title-rule"></div>
           </div>
           <button
-            class="bg-white border border-gray-200 px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#005ab4] shadow-sm hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer"
+            class="btn-press bg-[#161f36] border border-[#243352] px-5 py-2.5 rounded-xl font-bold text-[13px] text-[#9fb0d0] hover:text-[#eef2fb] hover:border-[#33476f] flex items-center gap-2 cursor-pointer"
             onclick="loadTransactions()">
             <span class="material-symbols-outlined font-bold text-[18px]">refresh</span> Refresh
           </button>
         </div>
 
         <!-- Filters -->
-        <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center gap-4">
           <div class="relative w-[300px]">
             <span
-              class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+              class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#5d6f96] text-lg">search</span>
             <input type="text" placeholder="Search transactions..." id="tx-search"
-              class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl text-sm focus:border-gray-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-50 transition-all font-medium"
-              oninput="applyFilters()" />
+              class="w-full pl-12 pr-4 py-2.5 rounded-xl text-sm font-medium" oninput="applyFilters()" />
           </div>
-          <select id="tx-filter"
-            class="rounded-xl px-6.5 py-2 bg-white border border-gray-200 text-[13px] font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-100 cursor-pointer"
+          <select id="tx-filter" class="rounded-xl px-4 py-2.5 text-[13px] font-semibold cursor-pointer"
             onchange="applyFilters()">
             <option value="">All Types</option>
             <option value="stock_in">Stock In</option>
@@ -132,27 +114,27 @@
             <option value="update">Update</option>
             <option value="delete">Delete</option>
           </select>
-          <span class="text-[13px] font-medium text-gray-400" id="tx-count">0 transactions</span>
+          <span class="text-[13px] font-medium text-[#5d6f96]" id="tx-count">0 transactions</span>
         </div>
 
-        <div class="bg-white rounded-[1.25rem] shadow-sm border border-gray-200 overflow-hidden">
+        <div class="surface-card overflow-hidden">
           <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="iq-table w-full text-left border-collapse">
               <thead>
                 <tr
-                  class="border-y border-gray-100 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50/50">
-                  <th class="px-6 py-4">Date / Time</th>
-                  <th class="px-6 py-4">Item</th>
-                  <th class="px-6 py-4">Type</th>
-                  <th class="px-6 py-4">Before</th>
-                  <th class="px-6 py-4">After</th>
-                  <th class="px-6 py-4">Delta</th>
-                  <th class="px-6 py-4">Notes</th>
+                  class="text-[#5d6f96] text-[10px] font-black uppercase tracking-[0.12em] bg-[#0a0e1a]/40 border-b border-[#243352]">
+                  <th class="px-6 py-3.5">Date / Time</th>
+                  <th class="px-6 py-3.5">Item</th>
+                  <th class="px-6 py-3.5">Type</th>
+                  <th class="px-6 py-3.5 text-right">Before</th>
+                  <th class="px-6 py-3.5 text-right">After</th>
+                  <th class="px-6 py-3.5 text-right">Delta</th>
+                  <th class="px-6 py-3.5">Notes</th>
                 </tr>
               </thead>
-              <tbody id="tx-body" class="divide-y divide-gray-100">
+              <tbody id="tx-body" class="divide-y divide-[#243352]">
                 <tr>
-                  <td colspan="7" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading...</td>
+                  <td colspan="7" class="px-8 py-12 text-center text-sm text-[#5d6f96]"></td>
                 </tr>
               </tbody>
             </table>
@@ -172,16 +154,32 @@
     let allTx = [];
 
     const BADGE = {
-      stock_in: 'bg-emerald-50 text-emerald-700',
-      stock_out: 'bg-red-50 text-red-700',
-      create: 'bg-blue-50 text-blue-700',
-      delete: 'bg-gray-100 text-gray-600',
-      update: 'bg-yellow-50 text-yellow-700'
+      stock_in: { cls: 'bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/25', icon: 'south_west' },
+      stock_out: { cls: 'bg-[#fbbf24]/10 text-[#fbbf24] border border-[#fbbf24]/25', icon: 'north_east' },
+      create: { cls: 'bg-[#3b8df0]/10 text-[#3b8df0] border border-[#3b8df0]/25', icon: 'add_circle' },
+      delete: { cls: 'bg-[#f87171]/10 text-[#f87171] border border-[#f87171]/25', icon: 'delete' },
+      update: { cls: 'bg-[#9fb0d0]/10 text-[#9fb0d0] border border-[#9fb0d0]/20', icon: 'edit' }
     };
+
+    function txSkeleton() {
+      let out = '';
+      for (let i = 0; i < 6; i++) {
+        out += `<tr>
+          <td class="px-6 py-3.5"><span class="skeleton block h-3 w-28"></span></td>
+          <td class="px-6 py-3.5"><span class="skeleton block h-3 w-32"></span></td>
+          <td class="px-6 py-3.5"><span class="skeleton block h-5 w-20 rounded-md"></span></td>
+          <td class="px-6 py-3.5 text-right"><span class="skeleton inline-block h-3 w-6"></span></td>
+          <td class="px-6 py-3.5 text-right"><span class="skeleton inline-block h-3 w-6"></span></td>
+          <td class="px-6 py-3.5 text-right"><span class="skeleton inline-block h-3 w-8"></span></td>
+          <td class="px-6 py-3.5"><span class="skeleton block h-3 w-24"></span></td>
+        </tr>`;
+      }
+      return out;
+    }
 
     async function loadTransactions() {
       const tb = document.getElementById('tx-body');
-      tb.innerHTML = '<tr><td colspan="7" class="px-8 py-12 text-center text-sm font-medium text-gray-400">Loading...</td></tr>';
+      tb.innerHTML = txSkeleton();
       try {
         const data = await getTransactions();
         if (!Array.isArray(data) || (data.length > 0 && typeof data[0] !== 'object')) {
@@ -190,7 +188,7 @@
         allTx = data;
         applyFilters();
       } catch (e) {
-        tb.innerHTML = `<tr><td colspan="7" class="px-8 py-12 text-center text-sm font-medium text-red-500">${e.message}</td></tr>`;
+        tb.innerHTML = `<tr><td colspan="7" class="px-8 py-12 text-center text-sm font-medium text-[#f87171]">${escHTML(e.message)}</td></tr>`;
       }
     }
 
@@ -209,26 +207,33 @@
       const tb = document.getElementById('tx-body');
       document.getElementById('tx-count').textContent = `${rows.length} transaction${rows.length !== 1 ? 's' : ''}`;
       if (!rows.length) {
-        tb.innerHTML = '<tr><td colspan="7" class="px-8 py-12 text-center text-sm font-medium text-gray-400">No transactions found.</td></tr>';
+        const empty = allTx.length ? 'No transactions match your filters.' : 'No transactions recorded yet.';
+        tb.innerHTML = `<tr><td colspan="7" class="px-8 py-16 text-center">
+          <div class="flex flex-col items-center gap-3">
+            <span class="w-14 h-14 rounded-full bg-[#1d2942] border border-[#243352] flex items-center justify-center text-[#5d6f96]"><span class="material-symbols-outlined text-[26px]">receipt_long</span></span>
+            <p class="text-[#eef2fb] font-bold text-sm">${escHTML(empty)}</p>
+            <p class="text-[#5d6f96] text-[13px]">Stock changes will appear here as they happen.</p>
+          </div></td></tr>`;
         return;
       }
       tb.innerHTML = rows.map(t => {
         const dt = t.createdAt ? new Date(t.createdAt).toLocaleString() : '—';
         const delta = t.quantityDelta ?? 0;
         const deltaStr = delta > 0
-          ? `<span class="text-emerald-600 font-bold">+${delta}</span>`
+          ? `<span class="text-[#34d399] font-bold tnum">+${delta}</span>`
           : delta < 0
-            ? `<span class="text-red-600 font-bold">${delta}</span>`
-            : `<span class="text-gray-400">0</span>`;
-        const badge = `<span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md ${BADGE[t.changeType] || 'bg-gray-100 text-gray-600'}">${(t.changeType || '').replace('_', ' ')}</span>`;
-        return `<tr class="hover:bg-gray-50/80 transition-colors">
-          <td class="px-6 py-3 text-[12px] text-gray-500 whitespace-nowrap">${dt}</td>
-          <td class="px-6 py-3 font-bold text-[13px] text-gray-900">${t.itemName || '—'}</td>
-          <td class="px-6 py-3">${badge}</td>
-          <td class="px-6 py-3 text-[13px] text-gray-600">${t.quantityBefore ?? '—'}</td>
-          <td class="px-6 py-3 text-[13px] text-gray-600">${t.quantityAfter ?? '—'}</td>
-          <td class="px-6 py-3">${deltaStr}</td>
-          <td class="px-6 py-3 text-[12px] text-gray-400">${t.notes || '—'}</td>
+            ? `<span class="text-[#f87171] font-bold tnum">${delta}</span>`
+            : `<span class="text-[#5d6f96] tnum">0</span>`;
+        const b = BADGE[t.changeType] || { cls: 'bg-[#9fb0d0]/10 text-[#9fb0d0] border border-[#9fb0d0]/20', icon: 'help' };
+        const badge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md ${b.cls}"><span class="material-symbols-outlined text-[13px]">${b.icon}</span>${escHTML((t.changeType || '').replace('_', ' '))}</span>`;
+        return `<tr>
+          <td class="px-6 py-3.5 text-[12px] text-[#9fb0d0] whitespace-nowrap tnum">${escHTML(dt)}</td>
+          <td class="px-6 py-3.5 font-bold text-[13px] text-[#eef2fb]">${escHTML(t.itemName || '—')}</td>
+          <td class="px-6 py-3.5">${badge}</td>
+          <td class="px-6 py-3.5 text-right text-[13px] text-[#9fb0d0] tnum">${t.quantityBefore ?? '—'}</td>
+          <td class="px-6 py-3.5 text-right text-[13px] text-[#9fb0d0] tnum">${t.quantityAfter ?? '—'}</td>
+          <td class="px-6 py-3.5 text-right">${deltaStr}</td>
+          <td class="px-6 py-3.5 text-[12px] text-[#5d6f96]">${escHTML(t.notes || '—')}</td>
         </tr>`;
       }).join('');
     }

@@ -2,7 +2,7 @@ import json
 import uuid
 import boto3
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from boto3.dynamodb.types import TypeSerializer
 from botocore.exceptions import ClientError
 import time as _time
@@ -77,14 +77,14 @@ def _handle(event, context):
             return response(404, {'error': 'Item not found'})
 
         # Ownership check: prevent cross-tenant deletes
-        if user_id and existing.get('userID', '') != user_id:
+        if not user_id or existing.get('userID', '') != user_id:
             return response(403, {'error': 'Forbidden: item belongs to another user'})
 
         # Already soft-deleted — return 410 Gone
         if existing.get('deletedAt'):
             return response(410, {'error': 'Item already deleted'})
 
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
         qty       = int(existing.get('quantity', 0))
 
         tx_item = {
@@ -130,7 +130,7 @@ def _handle(event, context):
             return response(409, {'error': 'Conflict — item may have been deleted concurrently'})
         raise
     except Exception as e:
-        return response(500, {'error': str(e)})
+        return response(500, {'error': 'Internal Server Error'})
 
 
 def response(status_code, body):

@@ -2,7 +2,7 @@ import json
 import boto3
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from boto3.dynamodb.types import TypeSerializer
 from botocore.exceptions import ClientError
@@ -89,7 +89,7 @@ def _handle(event, context):
         ).strip()
 
         item_id   = str(uuid.uuid4())
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
 
         # Build item with version=1 for optimistic locking (Sprint 3)
         item = {
@@ -144,7 +144,7 @@ def _handle(event, context):
             idem_table.put_item(Item={
                 'key'         : idem_key,
                 'responseBody': json.dumps(resp_body),
-                'expiresAt'   : int(datetime.utcnow().timestamp()) + 86400,
+                'expiresAt'   : int(datetime.now(timezone.utc).timestamp()) + 86400,
             })
 
         item['price'] = float(item['price'])
@@ -155,7 +155,7 @@ def _handle(event, context):
             return response(409, {'error': 'Conflict — duplicate item ID or concurrent duplicate request'})
         raise
     except Exception as e:
-        return response(500, {'error': str(e)})
+        return response(500, {'error': 'Internal Server Error'})
 
 
 def response(status_code, body):

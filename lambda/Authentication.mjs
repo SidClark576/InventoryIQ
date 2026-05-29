@@ -415,19 +415,24 @@ export const handler = async (event) => {
             }));
 
             // Invalidate all active sessions for this user (force re-login everywhere)
-            const sessionsResp = await docClient.send(new QueryCommand({
-                TableName: SESSIONS_TABLE,
-                IndexName: 'userID-index',
-                KeyConditionExpression: 'userID = :uid',
-                ExpressionAttributeValues: { ':uid': userEmail },
-                ProjectionExpression: 'sessionToken'
-            }));
-            for (const s of (sessionsResp.Items || [])) {
-                await docClient.send(new DeleteCommand({
+            let lastKey;
+            do {
+                const sessionsResp = await docClient.send(new QueryCommand({
                     TableName: SESSIONS_TABLE,
-                    Key: { sessionToken: s.sessionToken }
+                    IndexName: 'userID-index',
+                    KeyConditionExpression: 'userID = :uid',
+                    ExpressionAttributeValues: { ':uid': userEmail },
+                    ProjectionExpression: 'sessionToken',
+                    ExclusiveStartKey: lastKey
                 }));
-            }
+                for (const s of (sessionsResp.Items || [])) {
+                    await docClient.send(new DeleteCommand({
+                        TableName: SESSIONS_TABLE,
+                        Key: { sessionToken: s.sessionToken }
+                    }));
+                }
+                lastKey = sessionsResp.LastEvaluatedKey;
+            } while (lastKey);
 
             // Clear any rate-limit lockout for this email
             await _clearAttempts(userEmail);
@@ -447,7 +452,7 @@ export const handler = async (event) => {
         };
 
     } catch (error) {
-        console.error("Auth Error:", error);
+        console.error("Auth Error:", { name: error.name, message: error.message });
 
         if (error.name === "ConditionalCheckFailedException") {
             return {
@@ -460,7 +465,7 @@ export const handler = async (event) => {
         return {
             statusCode: 500,
             headers,
-            body: JSON.stringify({ message: "Internal Server Error", error: error.message })
+            body: JSON.stringify({ message: "Internal Server Error" })
         };
     }
 };

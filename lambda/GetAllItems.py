@@ -49,9 +49,12 @@ def _handle(event, context):
     Response: {'items': [...], 'count': N}
     """
     try:
-        # Extract and validate userID from query parameters
+        # Extract and validate userID from securely injected headers
+        headers = event.get('headers') or {}
+        user_id = (headers.get('x-iq-user') or headers.get('X-Iq-User') or '').strip()
+
+        # Handle optional deleted flag from query string
         params = event.get('queryStringParameters') or {}
-        user_id = params.get('userID', '').strip()
         show_deleted = params.get('deleted', '').lower() == 'true'
 
         # Return empty result if userID is not provided (prevents returning all items)
@@ -111,5 +114,5 @@ def _handle(event, context):
         return {
             'statusCode': 500,
             'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': str(e)})
+            'body': json.dumps({'error': 'Internal Server Error'})
         }
