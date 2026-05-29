@@ -148,7 +148,7 @@
           </div>
 
           <div class="overflow-x-auto">
-            <table class="iq-table w-full text-left border-collapse">
+            <table class="iq-table table-interactive w-full text-left border-collapse">
               <thead>
                 <tr
                   class="text-[#5d6f96] text-[10px] font-black uppercase tracking-[0.12em] bg-[#0a0e1a]/40 border-b border-[#243352]">
@@ -289,12 +289,12 @@
     function tableSkeleton(rows) {
       let out = '';
       for (let i = 0; i < rows; i++) {
-        out += `<tr>
-          <td class="px-8 py-3.5"><div class="flex items-center gap-4"><span class="skeleton w-10 h-10 rounded-lg"></span><div class="space-y-2"><span class="skeleton block h-3 w-32"></span><span class="skeleton block h-2.5 w-20"></span></div></div></td>
-          <td class="px-6 py-3.5"><span class="skeleton block h-3 w-24 mx-auto"></span></td>
-          <td class="px-6 py-3.5 text-center"><span class="skeleton inline-block h-3 w-8"></span></td>
-          <td class="px-6 py-3.5 text-center"><span class="skeleton block h-5 w-20 rounded-md mx-auto"></span></td>
-          <td class="px-8 py-3.5 text-center"><span class="skeleton block h-8 w-16 rounded-md mx-auto"></span></td>
+        out += `<tr class="skeleton-row">
+          <td class="px-8 py-3.5"><div class="flex items-center gap-4"><span class="skeleton-block w-10 h-10 rounded-lg"></span><div class="space-y-2"><span class="skeleton-block h-3 w-32 block"></span><span class="skeleton-block h-2.5 w-20 block"></span></div></div></td>
+          <td class="px-6 py-3.5"><span class="skeleton-block h-3 w-24 mx-auto block"></span></td>
+          <td class="px-6 py-3.5 text-center"><span class="skeleton-block h-3 w-8 mx-auto block"></span></td>
+          <td class="px-6 py-3.5 text-center"><span class="skeleton-block h-5 w-20 rounded-md mx-auto block"></span></td>
+          <td class="px-8 py-3.5 text-center"><span class="skeleton-block h-8 w-16 rounded-md mx-auto block"></span></td>
         </tr>`;
       }
       return out;
@@ -363,7 +363,13 @@
           <th class="px-6 py-3.5 text-center">Deleted On</th>
           <th class="px-8 py-3.5 text-center">Actions</th>`;
         if (!deletedItems.length) {
-          tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-[#5d6f96]">No deleted items found.</td></tr>`;
+          tb.innerHTML = `<tr><td colspan="5">
+            <div class="empty-state">
+              <div class="empty-state-icon"><span class="material-symbols-outlined text-4xl">delete_sweep</span></div>
+              <div class="empty-state-title">No deleted items</div>
+              <p class="text-xs">There are currently no items in the trash.</p>
+            </div>
+          </td></tr>`;
           document.getElementById('pagination-text').textContent = 'Showing 0 deleted items';
           return;
         }
@@ -409,8 +415,15 @@
         <th class="px-8 py-3.5 text-center">Actions</th>`;
 
       if (!items.length) {
-        const msg = allItems.length ? 'No items match your search.' : 'No items found.';
-        tb.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-[#5d6f96]">${escHTML(msg)}</td></tr>`;
+        const msg = allItems.length ? 'No items match your search.' : 'No items found. Add your first item.';
+        const icon = allItems.length ? 'search_off' : 'inventory_2';
+        tb.innerHTML = `<tr><td colspan="5">
+          <div class="empty-state">
+            <div class="empty-state-icon"><span class="material-symbols-outlined text-4xl">${icon}</span></div>
+            <div class="empty-state-title">${msg}</div>
+            <p class="text-xs">Start managing your inventory to see insights and logs.</p>
+          </div>
+        </td></tr>`;
         document.getElementById('pagination-text').textContent = 'Showing 0 of 0 assets';
         return;
       }
@@ -474,10 +487,10 @@
         await deleteItem(id);
       } catch (e) {
         console.error('Delete failed:', e);
-        if (e.message.includes("Failed to fetch")) {
-          alert(`Failed to delete item: Network or CORS Error.\n\nMake sure the OPTIONS method is enabled and deployed for the /items/{itemID} endpoint in API Gateway.`);
+        if (e.message.includes('Failed to fetch')) {
+          showPremiumToast('Network Error', 'Failed to delete item. Make sure the OPTIONS method is enabled.', 'error');
         } else {
-          alert(`Failed to delete item: ${e.message}`);
+          showPremiumToast('Error', `Failed to delete item: ${e.message}`, 'error');
         }
       }
       loadInventory();
@@ -594,7 +607,7 @@
     }
 
     function printReport() {
-      if (!allItems.length) { alert('No items to print'); return; }
+      if (!allItems.length) { showPremiumToast('Cannot Print', 'No items to print.', 'warning'); return; }
       const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       const total = allItems.length;
       const outOfStock = allItems.filter(i => (i.quantity ?? 0) === 0).length;
@@ -638,7 +651,7 @@
     }
 
     function exportCSV() {
-      if (!allItems.length) { alert('No items'); return; }
+      if (!allItems.length) { showPremiumToast('Cannot Export', 'No items available to export.', 'warning'); return; }
       const headers = ['itemID', 'name', 'category', 'quantity', 'price', 'lowStockThreshold', 'description'];
       const rows = allItems.map(i => headers.map(h => `"${(i[h] ?? '').toString().replace(/"/g, '""')}"`).join(','));
       const a = document.createElement('a');
@@ -746,7 +759,7 @@
         renderCategoryChips();
         document.getElementById('manage-categories-modal').classList.remove('hidden');
       } catch (e) {
-        alert('Failed to load categories: ' + e.message);
+        showPremiumToast('Error', 'Failed to load categories: ' + e.message, 'error');
       }
     }
 
@@ -842,7 +855,7 @@
         closeDeleteConfirmModal();
         loadInventory(); // Refresh table to show updated categories
       } catch (e) {
-        alert('Failed to delete category: ' + e.message);
+        showPremiumToast('Error', 'Failed to delete category: ' + e.message, 'error');
         closeDeleteConfirmModal();
       }
     }

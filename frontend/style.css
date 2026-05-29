@@ -446,6 +446,169 @@ main>*:nth-child(6) {
 }
 
 /* ============================================================
+   PREMIUM UI/UX ENHANCEMENTS
+   ============================================================ */
+
+/* Skeleton Loading Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton-row td {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-row td::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0.05) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+.skeleton-block {
+  background-color: var(--bg-surface-3);
+  border-radius: 4px;
+  height: 20px;
+  width: 100%;
+  opacity: 0.7;
+}
+
+/* Beautiful Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  color: var(--border-strong);
+  margin-bottom: 1rem;
+  background: var(--bg-surface-3);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(0, 90, 180, 0.1);
+  border: 1px solid var(--border-subtle);
+}
+
+.empty-state-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Interactive Table Rows */
+.table-interactive tbody tr {
+  transition: transform var(--duration-fast) ease,
+              background-color var(--duration-fast) ease,
+              box-shadow var(--duration-fast) ease;
+}
+
+.table-interactive tbody tr:hover {
+  transform: translateY(-1px);
+  background-color: var(--bg-surface-3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  position: relative;
+}
+
+/* Premium Toast Notifications */
+#toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.premium-toast {
+  background: rgba(17, 24, 43, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--accent-bright);
+  color: var(--text-primary);
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 300px;
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.4s var(--ease-out-expo), opacity 0.3s ease;
+}
+
+.premium-toast.toast-error {
+  border-left-color: var(--red);
+}
+
+.premium-toast.toast-success {
+  border-left-color: var(--emerald);
+}
+
+.premium-toast.toast-warning {
+  border-left-color: var(--amber);
+}
+
+.premium-toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast-icon {
+  font-size: 1.25rem;
+}
+
+.toast-success .toast-icon { color: var(--emerald); }
+.toast-error .toast-icon { color: var(--red); }
+.toast-warning .toast-icon { color: var(--amber); }
+
+.toast-content {
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+.toast-title {
+  font-weight: 600;
+  margin-bottom: 0.125rem;
+}
+
+.toast-message {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+/* ============================================================
    PRINT — force a clean light report. The app is dark on
    screen, but #print-section must be legible on paper.
    ============================================================ */

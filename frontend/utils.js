@@ -39,3 +39,42 @@ async function handleLogout() {
   sessionStorage.clear();
   window.location.href = 'login.html';
 }
+
+function showPremiumToast(title, message, type = 'success') {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `premium-toast toast-${type}`;
+  
+  let iconName = 'check_circle';
+  if (type === 'error') iconName = 'error';
+  if (type === 'warning') iconName = 'warning';
+
+  toast.innerHTML = `
+    <span class="material-symbols-outlined toast-icon">${iconName}</span>
+    <div class="toast-content">
+      <div class="toast-title">${escHTML(title)}</div>
+      <div class="toast-message">${escHTML(message)}</div>
+    </div>
+  `;
+
+  container.appendChild(toast);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      toast.remove();
+      if (container.childNodes.length === 0) container.remove();
+    }, 400); // Wait for transition out
+  }, 4000);
+}
