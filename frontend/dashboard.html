@@ -49,6 +49,11 @@
             class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">inventory_2</span> Inventory
           </a>
+          <a href="suppliers.html" data-page="suppliers"
+            class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
+            <span class="material-symbols-outlined text-xl">local_shipping</span> Suppliers
+          </a>
+
           <a href="insights.html" data-page="insights"
             class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
             <span class="material-symbols-outlined text-xl">bar_chart</span> Insights
@@ -172,153 +177,4 @@
               <h3 class="text-lg font-bold text-[#eef2fb]">Inventory Snapshot</h3>
               <p class="text-[13px] text-[#9fb0d0] mt-1">Real-time status of all tracked assets.</p>
             </div>
-            <a href="inventory.html"
-              class="btn-press text-[12px] font-bold text-[#3b8df0] hover:text-[#eef2fb] flex items-center gap-1">
-              Manage <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-            </a>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="iq-table w-full text-left border-collapse">
-              <thead>
-                <tr
-                  class="text-[#5d6f96] text-[10px] font-black uppercase tracking-[0.12em] bg-[#0a0e1a]/40 border-b border-[#243352]">
-                  <th class="px-8 py-3.5">Asset Name</th>
-                  <th class="px-6 py-3.5">Category</th>
-                  <th class="px-6 py-3.5 text-right">Qty</th>
-                  <th class="px-6 py-3.5">Status</th>
-                </tr>
-              </thead>
-              <tbody id="inventory-body" class="divide-y divide-[#243352]">
-                <tr>
-                  <td colspan="4" class="px-8 py-12 text-center text-sm text-[#5d6f96]"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div
-            class="p-5 px-8 flex items-center justify-between text-[12px] font-medium text-[#5d6f96] border-t border-[#243352]">
-            <span id="pagination-text">Showing 0 of 0 assets</span>
-          </div>
-        </div>
-
-      </main>
-    </div>
-  </div>
-
-  <script src="config.js"></script>
-  <script src="utils.js"></script>
-  <script src="api.js"></script>
-  <script src="charts.js"></script>
-  <script>
-    requireAuth();
-    initNav('dashboard');
-
-    function statSkeleton() {
-      ['stat-total', 'stat-out', 'stat-low', 'stat-value'].forEach(id => {
-        document.getElementById(id).innerHTML = '<span class="skeleton inline-block h-9 w-20 align-middle"></span>';
-      });
-    }
-
-    async function loadDashboard() {
-      statSkeleton();
-      let data = {};
-      try { data = await getInsights(); } catch { data = {}; }
-
-      const s = data.summary || {};
-      const outOfStockItems = Array.isArray(data.outOfStockItems) ? data.outOfStockItems : [];
-      const lowStockItems = Array.isArray(data.lowStockItems) ? data.lowStockItems : [];
-      const totalProducts = Number.isFinite(Number(s.totalProducts)) ? Number(s.totalProducts) : outOfStockItems.length + lowStockItems.length;
-      const outOfStockCount = Number.isFinite(Number(s.outOfStockCount)) ? Number(s.outOfStockCount) : outOfStockItems.length;
-      const lowStockCount = Number.isFinite(Number(s.lowStockCount)) ? Number(s.lowStockCount) : lowStockItems.length;
-      const estimatedInventoryValue = Number.isFinite(Number(s.estimatedInventoryValue)) ? Number(s.estimatedInventoryValue) : 0;
-
-      document.getElementById('stat-total').textContent = String(totalProducts || 0);
-      document.getElementById('stat-out').textContent = String(outOfStockCount || 0);
-      document.getElementById('stat-low').textContent = String(lowStockCount || 0);
-
-      let valStr = estimatedInventoryValue.toFixed(2);
-      if (estimatedInventoryValue >= 1000000) valStr = (estimatedInventoryValue / 1000000).toFixed(2) + 'M';
-      else if (estimatedInventoryValue >= 1000) valStr = (estimatedInventoryValue / 1000).toFixed(1) + 'k';
-      document.getElementById('stat-value').textContent = '$' + valStr;
-
-      const alertsDiv = document.getElementById('dashboard-alerts');
-      alertsDiv.innerHTML = '';
-      outOfStockItems.forEach(i => {
-        alertsDiv.innerHTML += `<div class="relative pl-5 pr-4 py-3.5 rounded-xl bg-[#f87171]/8 border border-[#f87171]/20 flex items-center gap-3 overflow-hidden"><span class="absolute left-0 top-0 bottom-0 w-1 bg-[#f87171]"></span><span class="material-symbols-outlined text-[#f87171] text-[20px]">cancel</span><span class="text-[#f87171] text-[13px] font-medium"><strong class="font-bold text-[#fca5a5]">${escHTML(i.name)}</strong> is out of stock</span></div>`;
-      });
-      lowStockItems.forEach(i => {
-        alertsDiv.innerHTML += `<div class="relative pl-5 pr-4 py-3.5 rounded-xl bg-[#fbbf24]/8 border border-[#fbbf24]/20 flex items-center gap-3 overflow-hidden"><span class="absolute left-0 top-0 bottom-0 w-1 bg-[#fbbf24]"></span><span class="material-symbols-outlined text-[#fbbf24] text-[20px]">warning</span><span class="text-[#fbbf24] text-[13px] font-medium"><strong class="font-bold text-[#fcd34d]">${escHTML(i.name)}</strong> — <span class="tnum">${i.quantity}</span> left</span></div>`;
-      });
-    }
-
-    function tableSkeleton(rows) {
-      let out = '';
-      for (let i = 0; i < rows; i++) {
-        out += `<tr>
-          <td class="px-8 py-4"><div class="flex items-center gap-4"><span class="skeleton w-10 h-10 rounded-lg"></span><div class="space-y-2"><span class="skeleton block h-3 w-32"></span><span class="skeleton block h-2.5 w-20"></span></div></div></td>
-          <td class="px-6 py-4"><span class="skeleton block h-3 w-24"></span></td>
-          <td class="px-6 py-4 text-right"><span class="skeleton inline-block h-3 w-8"></span></td>
-          <td class="px-6 py-4"><span class="skeleton block h-5 w-20 rounded-md"></span></td>
-        </tr>`;
-      }
-      return out;
-    }
-
-    let allItems = [];
-    async function loadInventory() {
-      const tb = document.getElementById('inventory-body');
-      tb.innerHTML = tableSkeleton(5);
-
-      try {
-        allItems = await getAllItems();
-      } catch (e) {
-        tb.innerHTML = `<tr><td colspan="4" class="px-8 py-10 text-center text-sm font-medium text-[#f87171]">${escHTML(e.message)}</td></tr>`;
-        return;
-      }
-      if (!allItems.length) {
-        tb.innerHTML = `<tr><td colspan="4" class="px-8 py-16 text-center">
-          <div class="flex flex-col items-center gap-3">
-            <span class="w-14 h-14 rounded-full bg-[#1d2942] border border-[#243352] flex items-center justify-center text-[#5d6f96]"><span class="material-symbols-outlined text-[26px]">inventory_2</span></span>
-            <p class="text-[#eef2fb] font-bold text-sm">No assets tracked yet</p>
-            <p class="text-[#5d6f96] text-[13px]">Add your first item to start monitoring stock.</p>
-          </div></td></tr>`;
-        document.getElementById('pagination-text').textContent = 'Showing 0 of 0 assets';
-        return;
-      }
-
-      tb.innerHTML = allItems.map(c => {
-        const qty = c.quantity ?? 0, thr = c.lowStockThreshold ?? 10;
-        const iconDiv = `<div class="w-10 h-10 rounded-lg bg-[#1d2942] flex items-center justify-center text-[#5d6f96] mr-4 border border-[#243352]"><span class="material-symbols-outlined text-xl">devices</span></div>`;
-        const sku = `SKU ${escHTML(c.itemID.substring(0, 8).toUpperCase())}`;
-        const badge = qty === 0
-          ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#f87171]/10 text-[#f87171] border border-[#f87171]/25"><span class="w-1.5 h-1.5 rounded-full bg-[#f87171] dot-pulse"></span>Out</span>'
-          : qty <= thr
-            ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#fbbf24]/10 text-[#fbbf24] border border-[#fbbf24]/25"><span class="w-1.5 h-1.5 rounded-full bg-[#fbbf24]"></span>Low</span>'
-            : '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/25"><span class="w-1.5 h-1.5 rounded-full bg-[#34d399]"></span>In Stock</span>';
-        return `<tr>
-          <td class="px-8 py-3.5">
-            <div class="flex items-center">
-              ${iconDiv}
-              <div>
-                <div class="font-bold text-[#eef2fb] text-[13px]">${escHTML(c.name)}</div>
-                <div class="text-[11px] font-medium text-[#5d6f96] mt-0.5 tnum">${sku}</div>
-              </div>
-            </div>
-          </td>
-          <td class="px-6 py-3.5 text-[#9fb0d0] text-[13px] font-medium">${escHTML(c.category || '—')}</td>
-          <td class="px-6 py-3.5 text-right font-bold text-[#eef2fb] text-[13px] tnum">${qty}</td>
-          <td class="px-6 py-3.5">${badge}</td>
-        </tr>`;
-      }).join('');
-
-      document.getElementById('pagination-text').textContent = `Showing ${allItems.length} of ${allItems.length} assets`;
-    }
-
-    loadDashboard();
-    loadInventory();
-  </script>
-</body>
-
-</html>
+            

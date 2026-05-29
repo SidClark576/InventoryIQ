@@ -2,6 +2,21 @@ import json
 import time
 import hashlib
 import os
+import sys
+
+# Add python_vendor to path for sentry-sdk
+sys.path.append(os.path.join(os.path.dirname(__file__), 'python_vendor'))
+
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
+    sentry_sdk.init(
+        dsn="https://cc83f9a25ccfc1b1228ac3a5b12958b8@o4511472709926912.ingest.us.sentry.io/4511472719233024",
+        integrations=[AwsLambdaIntegration()],
+        traces_sample_rate=1.0,
+    )
+except ImportError:
+    pass
 
 FUNCTION_NAME = os.environ.get('AWS_LAMBDA_FUNCTION_NAME', 'unknown')
 
@@ -10,50 +25,22 @@ def log_json(event=None, level='INFO', function=None, latency_ms=None,
              userID_hash=None, is_error=False, extra_metric=None,
              count_request=True, **kwargs):
     """
-    Emit a structured log line in CloudWatch Embedded Metric Format (EMF).
-    CloudWatch auto-extracts metrics from the _aws envelope.
-
-    Metrics emitted:
-      iq.requests   (Count)    — every call (skip with count_request=False)
-      iq.errors     (Count)    — only when is_error=True
-      iq.latency_ms (Milliseconds) — only when latency_ms provided
-
-    Dimensions: {function}
-    Namespace:  InventoryIQ
+    Emit a structured log line without CloudWatch Embedded Metric Format (EMF)
+    to save costs. Sentry integration can be added here later.
     """
     fn = function or FUNCTION_NAME
-    now_ms = int(time.time() * 1000)
-
-    metrics = ([{"Name": "iq.requests", "Unit": "Count"}] if count_request else [])
-    if is_error:
-        metrics.append({"Name": "iq.errors", "Unit": "Count"})
-    if latency_ms is not None:
-        metrics.append({"Name": "iq.latency_ms", "Unit": "Milliseconds"})
-    if extra_metric is not None:
-        # extra_metric: (name, unit) or (name, unit, value); value defaults to 1
-        em_name = extra_metric[0]
-        em_unit = extra_metric[1]
-        em_val  = extra_metric[2] if len(extra_metric) > 2 else 1
-        metrics.append({"Name": em_name, "Unit": em_unit})
 
     record = {
-        "_aws": {
-            "Timestamp": now_ms,
-            "CloudWatchMetrics": [{
-                "Namespace": "InventoryIQ",
-                "Dimensions": [["function"]],
-                "Metrics": metrics
-            }]
-        },
         "level": level,
         "function": fn,
-        **({"iq.requests": 1} if count_request else {}),
-        "iq.errors": 1 if is_error else 0,
+        "is_error": is_error,
     }
 
     if latency_ms is not None:
-        record["iq.latency_ms"] = round(latency_ms, 2)
+        record["latency_ms"] = round(latency_ms, 2)
     if extra_metric is not None:
+        em_name = extra_metric[0]
+        em_val  = extra_metric[2] if len(extra_metric) > 2 else 1
         record[em_name] = em_val
     if userID_hash is not None:
         record["userID_hash"] = userID_hash

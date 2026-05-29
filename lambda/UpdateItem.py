@@ -139,6 +139,9 @@ def _handle(event, context):
         if 'barcode' in body:
             update_parts.append('barcode = :barcode')
             expr_values[':barcode'] = body['barcode']
+        if 'supplierID' in body:
+            update_parts.append('supplierID = :supplierID')
+            expr_values[':supplierID'] = body['supplierID']
 
         update_expr     = 'SET ' + ', '.join(update_parts)
         ddb_expr_values = {k: serializer.serialize(v) for k, v in expr_values.items()}

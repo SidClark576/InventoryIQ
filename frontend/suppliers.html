@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>InventoryIQ | Suppliers</title>
+  <script>
+    tailwind.config = {
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { brand: '#005ab4' } } }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a0e1a] text-[#eef2fb] font-sans antialiased selection:bg-[#005ab4] selection:text-white">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-[280px] bg-[#161f36] border-r border-[#243352] flex flex-col z-20 shrink-0">
+      <div class="h-full flex flex-col">
+        <div class="p-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#1d2942] to-[#0a0e1a] border border-[#243352] shadow-inner flex items-center justify-center p-2.5">
+              <svg viewBox="0 0 100 100" class="w-full h-full">
+                <polygon points="50,15 85,35 50,55 15,35" fill="#fbbd5c" />
+                <polygon points="15,35 50,55 50,90 15,70" fill="#f26d5b" />
+                <polygon points="85,35 50,55 50,90 85,70" fill="#9c3f91" />
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[16px] font-black text-[#eef2fb] leading-tight tracking-tight">InventoryIQ</span>
+              <span class="text-[10px] font-bold text-[#5d6f96] tracking-[0.12em] uppercase">Ops Terminal</span>
+            </div>
+          </div>
+        </div>
+        <nav class="p-3 space-y-1 mt-3">
+          <a href="dashboard.html" data-page="dashboard" class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
+            <span class="material-symbols-outlined text-xl">grid_view</span> Dashboard
+          </a>
+          <a href="inventory.html" data-page="inventory" class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
+            <span class="material-symbols-outlined text-xl">inventory_2</span> Inventory
+          </a>
+          <a href="suppliers.html" data-page="suppliers" class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
+            <span class="material-symbols-outlined text-xl">local_shipping</span> Suppliers
+          </a>
+          <a href="insights.html" data-page="insights" class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
+            <span class="material-symbols-outlined text-xl">bar_chart</span> Insights
+          </a>
+          <a href="transactions.html" data-page="transactions" class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
+            <span class="material-symbols-outlined text-xl">receipt_long</span> Transactions
+          </a>
+          <a href="forecast.html" data-page="forecast" class="nav-link nav-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm">
+            <span class="material-symbols-outlined text-xl">trending_up</span> Forecast
+          </a>
+        </nav>
+        <div class="mt-auto p-6">
+          <div class="bg-[#1d2942] rounded-2xl p-4 border border-[#243352]">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-8 h-8 rounded-full bg-[#243352] flex items-center justify-center text-[#9fb0d0] font-bold text-xs" id="nav-initial">ID</div>
+              <div class="flex-1 overflow-hidden">
+                <p class="text-xs font-bold text-[#eef2fb] truncate" id="nav-email">user@domain.com</p>
+                <p class="text-[10px] text-[#34d399] font-medium flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-pulse"></span> Online</p>
+              </div>
+            </div>
+            <button onclick="handleLogout()" class="w-full py-2 rounded-xl text-xs font-bold text-[#f87171] bg-[#f87171]/10 hover:bg-[#f87171]/20 border border-[#f87171]/20 transition cursor-pointer">Sign Out</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-gradient-to-br from-[#0a0e1a] to-[#0f1523] relative">
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-20 pointer-events-none mix-blend-overlay"></div>
+      
+      <main class="flex-1 overflow-y-auto p-8 lg:p-12 z-10 custom-scrollbar">
+        <div class="max-w-[1200px] mx-auto space-y-8">
+          <div class="flex items-end justify-between">
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#5d6f96] mb-2">Vendor Management</p>
+              <h1 class="text-3xl font-black text-[#eef2fb] tracking-tight">Suppliers</h1>
+              <div class="title-rule"></div>
+            </div>
+          </div>
+
+          <div class="surface-card overflow-hidden">
+            <div class="p-5 border-b border-[#243352] flex flex-col md:flex-row gap-4 items-center justify-between bg-[#161f36]">
+              <div class="relative w-full xl:w-[320px]">
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#5d6f96] text-lg">search</span>
+                <input type="text" placeholder="Search by name or email..." id="searchInput"
+                  class="w-full pl-12 pr-4 py-2.5 rounded-xl text-sm font-medium bg-[#1d2942] border border-[#243352] text-[#eef2fb] placeholder-[#5d6f96] focus:outline-none focus:ring-2 focus:ring-[#005ab4]" oninput="renderTable()" />
+              </div>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <button id="btn-add-new"
+                  class="btn-press px-5 py-2.5 bg-[#005ab4] hover:bg-[#0a6fd6] text-white rounded-xl text-[13px] font-bold flex items-center gap-2 cursor-pointer shadow-[0_8px_24px_-10px_rgba(0,90,180,0.9)]"
+                  onclick="openSupplierModal()">
+                  <span class="material-symbols-outlined text-[18px]">add</span> Add Supplier
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto w-full custom-scrollbar pb-4">
+              <table class="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                  <tr class="text-[#5d6f96] text-[10px] font-black uppercase tracking-[0.12em] bg-[#0a0e1a]/40 border-b border-[#243352]">
+                    <th class="px-8 py-3.5 text-center">Name</th>
+                    <th class="px-6 py-3.5 text-center">Contact Email</th>
+                    <th class="px-6 py-3.5 text-center">Phone</th>
+                    <th class="px-6 py-3.5 text-center">Notes</th>
+                    <th class="px-8 py-3.5 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryBody" class="divide-y divide-[#243352] bg-[#161f36]">
+                  <!-- Injected by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add/Edit Supplier Modal -->
+  <div id="supplierModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-[#161f36] border border-[#243352] rounded-2xl shadow-xl p-8 w-[400px]">
+      <h2 id="modalTitle" class="text-lg font-black text-[#eef2fb] mb-6">New Supplier</h2>
+      <div class="space-y-4 mb-6">
+        <div>
+          <label class="block text-[11px] font-bold text-[#5d6f96] uppercase tracking-[0.12em] mb-2">Name</label>
+          <input type="text" id="supplierName" class="w-full bg-[#1d2942] border border-[#243352] rounded-xl px-4 py-3 text-sm font-semibold text-[#eef2fb] focus:outline-none focus:ring-2 focus:ring-[#005ab4]" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-[#5d6f96] uppercase tracking-[0.12em] mb-2">Contact Email</label>
+          <input type="email" id="supplierEmail" class="w-full bg-[#1d2942] border border-[#243352] rounded-xl px-4 py-3 text-sm font-semibold text-[#eef2fb] focus:outline-none focus:ring-2 focus:ring-[#005ab4]" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-[#5d6f96] uppercase tracking-[0.12em] mb-2">Phone</label>
+          <input type="text" id="supplierPhone" class="w-full bg-[#1d2942] border border-[#243352] rounded-xl px-4 py-3 text-sm font-semibold text-[#eef2fb] focus:outline-none focus:ring-2 focus:ring-[#005ab4]" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-[#5d6f96] uppercase tracking-[0.12em] mb-2">Notes</label>
+          <textarea id="supplierNotes" rows="3" class="w-full bg-[#1d2942] border border-[#243352] rounded-xl px-4 py-3 text-sm font-semibold text-[#eef2fb] focus:outline-none focus:ring-2 focus:ring-[#005ab4]"></textarea>
+        </div>
+      </div>
+      <div class="flex gap-3 justify-end">
+        <button class="px-5 py-2.5 rounded-xl text-sm font-bold text-[#9fb0d0] bg-[#1d2942] border border-[#243352] hover:text-[#eef2fb] hover:border-[#33476f] transition" onclick="closeSupplierModal()">Cancel</button>
+        <button class="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#005ab4] text-white hover:bg-[#0a6ed4] shadow-[0_8px_24px_-10px_rgba(0,90,180,0.9)] transition" onclick="saveSupplier()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="utils.js"></script>
+  <script src="api.js"></script>
+  <script>
+    let allSuppliers = [];
+    let currentSupplierId = null;
+
+    function tableSkeleton(rows) {
+      let out = '';
+      for (let i = 0; i < rows; i++) {
+        out += `<tr class="skeleton-row">
+          <td class="px-8 py-3.5"><div class="flex items-center gap-4"><span class="skeleton-block w-10 h-10 rounded-lg"></span><div class="space-y-2"><span class="skeleton-block h-3 w-32 block"></span><span class="skeleton-block h-2.5 w-20 block"></span></div></div></td>
+          <td class="px-6 py-3.5"><span class="skeleton-block h-3 w-24 mx-auto block"></span></td>
+          <td class="px-6 py-3.5 text-center"><span class="skeleton-block h-3 w-24 mx-auto block"></span></td>
+          <td class="px-6 py-3.5 text-center"><span class="skeleton-block h-3 w-32 mx-auto block"></span></td>
+          <td class="px-8 py-3.5 text-center"><span class="skeleton-block h-8 w-16 rounded-md mx-auto block"></span></td>
+        </tr>`;
+      }
+      return out;
+    }
+
+    async function loadSuppliers() {
+      const tbody = document.getElementById("inventoryBody");
+      tbody.innerHTML = tableSkeleton(5);
+
+      try {
+        allSuppliers = await apiCall('/suppliers');
+        renderTable();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-sm font-medium text-red-500">${escHTML(err.message)}</td></tr>`;
+        showPremiumToast(err.message, 'error');
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("inventoryBody");
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      
+      let filtered = allSuppliers.filter(s => 
+        (s.name || '').toLowerCase().includes(search) || 
+        (s.contactEmail || '').toLowerCase().includes(search)
+      );
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="padding: 4rem 1rem;">
+              <div class="empty-state">
+                <div class="empty-state-icon"><span class="material-symbols-outlined text-4xl">domain</span></div>
+                <div class="empty-state-title">No Suppliers Found</div>
+                <div class="empty-subtitle">Add a supplier to manage your vendor relationships.</div>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(c => {
+        const iconDiv = `<div class="w-10 h-10 rounded-lg bg-[#1d2942] flex items-center justify-center text-[#5d6f96] mr-4 border border-[#243352]"><span class="material-symbols-outlined text-xl">domain</span></div>`;
+        return `
+          <tr class="table-interactive hover:bg-[#161f36] transition-colors group">
+            <td class="px-8 py-3.5 text-center">
+              <div class="flex items-center">
+                ${iconDiv}
+                <div class="text-left">
+                  <div class="font-bold text-[#eef2fb] text-[13px]">${escHTML(c.name)}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-3.5 text-center text-[#5d6f96] text-[13px]">${escHTML(c.contactEmail || '-')}</td>
+            <td class="px-6 py-3.5 text-center text-[#5d6f96] text-[13px]">${escHTML(c.phone || '-')}</td>
+            <td class="px-6 py-3.5 text-center text-[#5d6f96] text-[13px] max-w-[200px] truncate">${escHTML(c.notes || '-')}</td>
+            <td class="px-8 py-3.5 text-center relative">
+              <div class="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#3b8df0] hover:bg-[#3b8df0]/10 rounded-lg cursor-pointer transition p-0" onclick="editSupplier('${c.supplierID}')"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+                <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#f87171] hover:bg-[#f87171]/10 rounded-lg cursor-pointer transition p-0" onclick="deleteSupplier('${c.supplierID}')"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+              </div>
+              <span class="material-symbols-outlined text-[#5d6f96] absolute right-8 top-1/2 -translate-y-1/2 group-hover:hidden transition">more_vert</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openSupplierModal(id = null) {
+      currentSupplierId = id;
+      const modal = document.getElementById("supplierModal");
+      const title = document.getElementById("modalTitle");
+      
+      if (id) {
+        const s = allSuppliers.find(x => x.supplierID === id);
+        title.textContent = "Edit Supplier";
+        document.getElementById("supplierName").value = s.name || '';
+        document.getElementById("supplierEmail").value = s.contactEmail || '';
+        document.getElementById("supplierPhone").value = s.phone || '';
+        document.getElementById("supplierNotes").value = s.notes || '';
+      } else {
+        title.textContent = "New Supplier";
+        document.getElementById("supplierName").value = '';
+        document.getElementById("supplierEmail").value = '';
+        document.getElementById("supplierPhone").value = '';
+        document.getElementById("supplierNotes").value = '';
+      }
+      modal.classList.remove("hidden");
+    }
+
+    function closeSupplierModal() {
+      document.getElementById("supplierModal").classList.add("hidden");
+    }
+
+    function editSupplier(id) {
+      openSupplierModal(id);
+    }
+
+    async function deleteSupplier(id) {
+      if (!confirm("Are you sure you want to delete this supplier?")) return;
+      try {
+        await fetch(\`\${CONFIG.API_ENDPOINT}/suppliers/\${id}\`, {
+          method: 'DELETE',
+          headers: authHeaders()
+        });
+        showPremiumToast('Supplier deleted', 'success');
+        loadSuppliers();
+      } catch (err) {
+        showPremiumToast(err.message, 'error');
+      }
+    }
+
+    async function saveSupplier() {
+      const name = document.getElementById("supplierName").value.trim();
+      const email = document.getElementById("supplierEmail").value.trim();
+      const phone = document.getElementById("supplierPhone").value.trim();
+      const notes = document.getElementById("supplierNotes").value.trim();
+      
+      if (!name) return showPremiumToast("Name is required", "error");
+
+      const payload = { name, contactEmail: email, phone, notes };
+      
+      try {
+        if (currentSupplierId) {
+          await fetch(\`\${CONFIG.API_ENDPOINT}/suppliers/\${currentSupplierId}\`, {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: JSON.stringify(payload)
+          });
+          showPremiumToast('Supplier updated', 'success');
+        } else {
+          await fetch(\`\${CONFIG.API_ENDPOINT}/suppliers\`, {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify(payload)
+          });
+          showPremiumToast('Supplier added', 'success');
+        }
+        closeSupplierModal();
+        loadSuppliers();
+      } catch (err) {
+        showPremiumToast(err.message, 'error');
+      }
+    }
+
+    async function apiCall(path) {
+      const res = await fetch(\`\${CONFIG.API_ENDPOINT}\${path}\`, { headers: authHeaders() });
+      checkQuota(res); check401(res);
+      if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || "Request failed");
+      }
+      return await res.json();
+    }
+
+    // Init
+    requireAuth();
+    initNav('suppliers');
+    loadSuppliers();
+  </script>
+</body>
+</html>

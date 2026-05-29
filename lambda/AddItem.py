@@ -98,6 +98,7 @@ def _handle(event, context):
             'name'             : body.get('name'),
             'description'      : body.get('description', ''),
             'category'         : body.get('category', 'Uncategorized'),
+            'supplierID'       : body.get('supplierID', ''),
             'quantity'         : int(body.get('quantity', 0)),
             'price'            : Decimal(str(body.get('price', 0))),
             'lowStockThreshold': int(body.get('lowStockThreshold', 10)),

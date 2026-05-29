@@ -16,6 +16,7 @@ def lambda_handler(event, context):
         sessions_table = dynamodb.Table(os.environ.get('SESSIONS_TABLE', 'Sessions'))
         auth_attempts_table = dynamodb.Table(os.environ.get('AUTH_ATTEMPTS_TABLE', 'AuthAttempts'))
         password_resets_table = dynamodb.Table(os.environ.get('PASSWORD_RESETS_TABLE', 'PasswordResets'))
+        suppliers_table = dynamodb.Table(os.environ.get('SUPPLIERS_TABLE', 'Suppliers'))
         
         for record in event.get('Records', []):
             if record['eventName'] == 'REMOVE':
@@ -115,6 +116,28 @@ def lambda_handler(event, context):
                     print(f"Deleted {len(resets)} password resets for {email}")
                 except Exception as e:
                     print(f"Error deleting password resets: {str(e)}")
+
+                # 6. Delete Suppliers
+                try:
+                    res = suppliers_table.query(
+                        IndexName='userID-index',
+                        KeyConditionExpression=Key('userID').eq(email)
+                    )
+                    suppliers = res.get('Items', [])
+                    while 'LastEvaluatedKey' in res:
+                        res = suppliers_table.query(
+                            IndexName='userID-index',
+                            KeyConditionExpression=Key('userID').eq(email),
+                            ExclusiveStartKey=res['LastEvaluatedKey']
+                        )
+                        suppliers.extend(res.get('Items', []))
+                        
+                    with suppliers_table.batch_writer() as batch:
+                        for s in suppliers:
+                            batch.delete_item(Key={'supplierID': s['supplierID']})
+                    print(f"Deleted {len(suppliers)} suppliers for {email}")
+                except Exception as e:
+                    print(f"Error deleting suppliers: {str(e)}")
                     
         return {'statusCode': 200, 'body': 'Cascade delete completed successfully'}
     except Exception as e:

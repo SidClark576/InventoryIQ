@@ -10,23 +10,21 @@ import {
 import { SNSClient, SubscribeCommand, ListSubscriptionsByTopicCommand } from "@aws-sdk/client-sns";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import crypto from "crypto";
+import * as Sentry from "@sentry/aws-serverless";
 
-// ── Inline EMF metric helper ──────────────────────────────────
-// Prints a single CloudWatch Embedded Metric Format JSON line.
-// CloudWatch auto-extracts Namespace/InventoryIQ metrics from the _aws envelope.
+Sentry.init({
+  dsn: "https://d8ca26e026dc66bead1ef873577dc89f@o4511472709926912.ingest.us.sentry.io/4511472738893824",
+  tracesSampleRate: 1.0,
+});
+
+// ── Inline Metric helper ──────────────────────────────────
+// Prints a single structured JSON log.
+// Stripped of CloudWatch EMF envelope to save costs on custom metrics.
 function emitAuthMetric(metricName, path, email) {
     const userHash = email
         ? crypto.createHash('sha256').update(email).digest('hex').slice(0, 12)
         : undefined;
     const record = {
-        _aws: {
-            Timestamp: Date.now(),
-            CloudWatchMetrics: [{
-                Namespace: "InventoryIQ",
-                Dimensions: [["function"]],
-                Metrics: [{ Name: metricName, Unit: "Count" }]
-            }]
-        },
         level: "INFO",
         function: "Authentication",
         [metricName]: 1,
@@ -105,7 +103,7 @@ async function _clearAttempts(email) {
     }));
 }
 
-export const handler = async (event) => {
+export const handler = Sentry.wrapHandler(async (event) => {
     try {
 
         if (event.httpMethod === "OPTIONS") {
@@ -468,4 +466,4 @@ export const handler = async (event) => {
             body: JSON.stringify({ message: "Internal Server Error" })
         };
     }
-};
+});
