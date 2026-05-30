@@ -56,7 +56,7 @@ const MAX_FAILURES        = 5;              // max failed logins before 429
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 const headers = {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": process.env.CORS_ORIGIN || "*",
     "Access-Control-Allow-Headers": "Content-Type,x-api-key,X-Session-Token",
     "Access-Control-Allow-Methods": "OPTIONS,POST",
     "Content-Type": "application/json"

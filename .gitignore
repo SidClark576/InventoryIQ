@@ -4,6 +4,6 @@ package.json
 playwright-results.json
 playwright-report
 tests/*
-test*
+tests
 playwright.config.ts
 .env*

@@ -5,10 +5,7 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "enabledPlugins": {
-    "ecc@ecc": true,
     "skill-codex@skill-codex": true,
-    "codex@openai-codex": true,
-    "everything-claude-code@ecc": true,
-    "ecc@everything-claude-code": true
+    "codex@openai-codex": true
   }
 }
