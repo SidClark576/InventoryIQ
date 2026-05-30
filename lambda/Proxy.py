@@ -242,7 +242,7 @@ def _forward(event, path, method, user_id, origin=''):
         except Exception as e:
             if attempt == 0:
                 continue  # Retry once on network/timeout errors
-            return {'statusCode': 500, 'headers': cors, 'body': json.dumps({'error': str(e)})}
+            return {'statusCode': 500, 'headers': cors, 'body': json.dumps({'error': 'Internal Server Error'})}
 
     # Safety net — should not be reached
     return {'statusCode': 502, 'headers': cors, 'body': json.dumps({'error': 'Bad Gateway'})}

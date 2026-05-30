@@ -6,3 +6,4 @@ playwright-report
 tests/*
 test*
 playwright.config.ts
+.env*

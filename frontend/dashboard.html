@@ -177,4 +177,122 @@
               <h3 class="text-lg font-bold text-[#eef2fb]">Inventory Snapshot</h3>
               <p class="text-[13px] text-[#9fb0d0] mt-1">Real-time status of all tracked assets.</p>
             </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-[#243352] text-[#5d6f96] text-[10px] font-black uppercase tracking-widest">
+                  <th class="px-8 py-4">Asset Name</th>
+                  <th class="px-6 py-4">Category</th>
+                  <th class="px-6 py-4">Qty</th>
+                  <th class="px-6 py-4">Status</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-body" class="divide-y divide-[#1d2942]">
+                <tr>
+                  <td colspan="4" class="px-8 py-12 text-center text-sm font-medium text-[#5d6f96]">Loading Items...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-6 flex items-center justify-between text-[13px] font-medium text-[#5d6f96] border-t border-[#243352]">
+            <span id="pagination-text">Showing 0 of 0 assets</span>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="utils.js"></script>
+  <script src="api.js"></script>
+  <script>
+    requireAuth();
+    initNav('dashboard');
+
+    async function loadDashboard() {
+      let data = {};
+      try { data = await getInsights(); } catch { data = {}; }
+
+      const s = data.summary || {};
+      const outOfStockItems = Array.isArray(data.outOfStockItems) ? data.outOfStockItems : [];
+      const lowStockItems = Array.isArray(data.lowStockItems) ? data.lowStockItems : [];
+      const totalProducts = Number.isFinite(Number(s.totalProducts)) ? Number(s.totalProducts) : outOfStockItems.length + lowStockItems.length;
+      const outOfStockCount = Number.isFinite(Number(s.outOfStockCount)) ? Number(s.outOfStockCount) : outOfStockItems.length;
+      const lowStockCount = Number.isFinite(Number(s.lowStockCount)) ? Number(s.lowStockCount) : lowStockItems.length;
+      const estimatedInventoryValue = Number.isFinite(Number(s.estimatedInventoryValue)) ? Number(s.estimatedInventoryValue) : 0;
+
+      document.getElementById('stat-total').textContent = String(totalProducts || 0);
+      document.getElementById('stat-out').textContent = String(outOfStockCount || 0);
+      document.getElementById('stat-low').textContent = String(lowStockCount || 0);
+
+      let valStr = estimatedInventoryValue.toFixed(2);
+      if (estimatedInventoryValue >= 1000000) valStr = (estimatedInventoryValue / 1000000).toFixed(2) + 'M';
+      else if (estimatedInventoryValue >= 1000) valStr = (estimatedInventoryValue / 1000).toFixed(1) + 'k';
+      document.getElementById('stat-value').textContent = '$' + valStr;
+
+      const alertsDiv = document.getElementById('dashboard-alerts');
+      alertsDiv.innerHTML = '';
+      outOfStockItems.forEach(i => {
+        alertsDiv.innerHTML += `<div class="p-4 rounded-xl bg-[#f87171]/10 border border-[#f87171]/20 flex items-center gap-3"><span class="material-symbols-outlined text-[#f87171]">cancel</span><span class="text-[#f87171] text-sm"><strong>${escHTML(i.name)}</strong> is OUT OF STOCK</span></div>`;
+      });
+      lowStockItems.forEach(i => {
+        alertsDiv.innerHTML += `<div class="p-4 rounded-xl bg-[#fbbf24]/10 border border-[#fbbf24]/20 flex items-center gap-3"><span class="material-symbols-outlined text-[#fbbf24]">warning</span><span class="text-[#fbbf24] text-sm"><strong>${escHTML(i.name)}</strong> — ${Number(i.quantity)} left</span></div>`;
+      });
+    }
+
+    let allItems = [];
+    async function loadInventory() {
+      const tb = document.getElementById('inventory-body');
+      tb.innerHTML = '<tr><td colspan="4" class="px-8 py-12 text-center text-sm font-medium text-[#5d6f96]">Loading Items...</td></tr>';
+
+      try {
+        allItems = await getAllItems();
+      } catch (e) {
+        tb.innerHTML = `<tr><td colspan="4" class="px-8 py-10 text-center text-sm font-medium text-[#f87171]">${escHTML(e.message)}</td></tr>`;
+        return;
+      }
+      if (!allItems.length) {
+        tb.innerHTML = '<tr><td colspan="4" class="px-8 py-12 text-center text-sm font-medium text-[#5d6f96]">No items found.</td></tr>';
+        document.getElementById('pagination-text').textContent = 'Showing 0 of 0 assets';
+        return;
+      }
+
+      tb.innerHTML = allItems.map(c => {
+        const qty = c.quantity ?? 0, thr = c.lowStockThreshold ?? 10;
+        const iconDiv = `<div class="w-10 h-10 rounded-lg bg-[#1d2942] flex items-center justify-center text-[#5d6f96] mr-4 border border-[#243352]"><span class="material-symbols-outlined text-xl">devices</span></div>`;
+        const sku = `SKU: ${c.itemID.substring(0, 8).toUpperCase()}`;
+        const badge = qty === 0
+          ? '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#f87171]/15 text-[#f87171]">Out of Stock</span>'
+          : qty <= thr
+            ? '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#fbbf24]/15 text-[#fbbf24]">Low Stock</span>'
+            : '<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-[#34d399]/15 text-[#34d399]">In Stock</span>';
+        return `<tr class="hover:bg-[#1d2942]/50 transition-colors">
+          <td class="px-8 py-4">
+            <div class="flex items-center">
+              ${iconDiv}
+              <div>
+                <div class="font-bold text-[#eef2fb] text-[13px]">${escHTML(c.name)}</div>
+                <div class="text-[11px] font-medium text-[#5d6f96] mt-0.5">${escHTML(sku)}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-[#9fb0d0] text-[13px] font-medium">${escHTML(c.category || '—')}</td>
+          <td class="px-6 py-4 font-bold text-[#eef2fb] text-[13px]">${qty}</td>
+          <td class="px-6 py-4">${badge}</td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('pagination-text').textContent = `Showing ${allItems.length} of ${allItems.length} assets`;
+    }
+
+    loadDashboard();
+    loadInventory();
+  </script>
+</body>
+
+</html>
             

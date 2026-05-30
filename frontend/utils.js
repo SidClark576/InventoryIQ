@@ -11,6 +11,8 @@ function initNav(activePageId) {
   const email = sessionStorage.getItem('userEmail') || '';
   const el = document.getElementById('nav-email');
   if (el) el.textContent = email;
+  const initEl = document.getElementById('nav-initial');
+  if (initEl && email) initEl.textContent = email[0].toUpperCase();
 
   document.querySelectorAll('[data-page]').forEach(function (a) {
     const active = a.dataset.page === activePageId;

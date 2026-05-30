@@ -74,7 +74,7 @@ def _handle(event, context):
             return response(404, {'error': 'Item not found'})
 
         # Ownership check: prevent cross-tenant restores
-        if user_id and existing.get('userID', '') != user_id:
+        if not user_id or existing.get('userID', '') != user_id:
             return response(403, {'error': 'Forbidden: item belongs to another user'})
 
         # Item must actually be soft-deleted to restore it
@@ -121,7 +121,7 @@ def _handle(event, context):
             return response(409, {'error': 'Item is not in a deleted state — may have been restored already'})
         raise
     except Exception as e:
-        return response(500, {'error': str(e)})
+        return response(500, {'error': 'Internal Server Error'})
 
 
 def response(status_code, body):

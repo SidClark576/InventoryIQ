@@ -12,10 +12,9 @@ import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import crypto from "crypto";
 import * as Sentry from "@sentry/aws-serverless";
 
-Sentry.init({
-  dsn: "https://d8ca26e026dc66bead1ef873577dc89f@o4511472709926912.ingest.us.sentry.io/4511472738893824",
-  tracesSampleRate: 1.0,
-});
+if (process.env.SENTRY_DSN) {
+  Sentry.init({ dsn: process.env.SENTRY_DSN, tracesSampleRate: 1.0 });
+}
 
 // ── Inline Metric helper ──────────────────────────────────
 // Prints a single structured JSON log.
@@ -117,6 +116,10 @@ export const handler = Sentry.wrapHandler(async (event) => {
         if (path.endsWith("/register")) {
             const { email, password } = body;
 
+            if (await _isRateLimited(email)) {
+                return { statusCode: 429, headers: { ...headers, 'Retry-After': String(LOCKOUT_SECONDS) }, body: JSON.stringify({ message: "Too many attempts. Please wait 15 minutes." }) };
+            }
+
             if (!email || !password) {
                 return {
                     statusCode: 400,
@@ -144,7 +147,7 @@ export const handler = Sentry.wrapHandler(async (event) => {
                 TableName: USERS_TABLE,
                 ConditionExpression: "attribute_not_exists(Email)",
                 Item: {
-                    Email: email,
+                    Email: email.toLowerCase(),
                     passwordHash: hashedPassword,
                     salt: salt,
                     createdAt: new Date().toISOString()
@@ -156,7 +159,7 @@ export const handler = Sentry.wrapHandler(async (event) => {
                 await snsClient.send(new SubscribeCommand({
                     TopicArn: SNS_TOPIC_ARN,
                     Protocol: "email",
-                    Endpoint: email,
+                    Endpoint: email.toLowerCase(),
                     ReturnSubscriptionArn: true
                 }));
             }
@@ -194,7 +197,7 @@ export const handler = Sentry.wrapHandler(async (event) => {
 
             const result = await docClient.send(new GetCommand({
                 TableName: USERS_TABLE,
-                Key: { Email: email }
+                Key: { Email: email.toLowerCase() }
             }));
 
             const user = result.Item;
@@ -209,7 +212,10 @@ export const handler = Sentry.wrapHandler(async (event) => {
                 };
             }
 
-            const isValid = hashPassword(password, user.salt) === user.passwordHash;
+            const isValid = crypto.timingSafeEqual(
+                Buffer.from(hashPassword(password, user.salt)),
+                Buffer.from(user.passwordHash)
+            );
 
             if (!isValid) {
                 await _recordFailedAttempt(email);
@@ -310,10 +316,14 @@ export const handler = Sentry.wrapHandler(async (event) => {
                 return { statusCode: 400, headers, body: JSON.stringify({ message: "Email required." }) };
             }
 
+            if (await _isRateLimited(email)) {
+                return { statusCode: 429, headers: { ...headers, 'Retry-After': String(LOCKOUT_SECONDS) }, body: JSON.stringify({ message: "Too many attempts. Please wait 15 minutes." }) };
+            }
+
             // Check user exists — but always return 200 to prevent email enumeration
             const userResp = await docClient.send(new GetCommand({
                 TableName: USERS_TABLE,
-                Key: { Email: email }
+                Key: { Email: email.toLowerCase() }
             }));
 
             if (userResp.Item && SES_SENDER && APP_URL) {

@@ -10,11 +10,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'python_vendor'))
 try:
     import sentry_sdk
     from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
-    sentry_sdk.init(
-        dsn="https://cc83f9a25ccfc1b1228ac3a5b12958b8@o4511472709926912.ingest.us.sentry.io/4511472719233024",
-        integrations=[AwsLambdaIntegration()],
-        traces_sample_rate=1.0,
-    )
+    _dsn = os.environ.get('SENTRY_DSN')
+    if _dsn:
+        sentry_sdk.init(
+            dsn=_dsn,
+            integrations=[AwsLambdaIntegration()],
+            traces_sample_rate=1.0,
+        )
 except ImportError:
     pass
 

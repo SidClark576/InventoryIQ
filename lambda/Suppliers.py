@@ -4,10 +4,17 @@ import uuid
 import time
 import boto3
 from boto3.dynamodb.conditions import Key
+from datetime import datetime, timezone
+from decimal import Decimal
 import _logging
 import re
 
 FUNCTION_NAME = 'Suppliers'
+
+def _decimal(obj):
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ.get('SUPPLIERS_TABLE', 'Suppliers'))
@@ -73,7 +80,7 @@ def get_suppliers(user_id):
             items.extend(res.get('Items', []))
             
         items.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
-        return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(items)}
+        return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(items, default=_decimal)}
     except Exception as e:
         _logging.log_json(function="Suppliers_get", error=str(e))
         return {'statusCode': 500, 'headers': CORS, 'body': json.dumps({'error': 'An internal error occurred'})}
@@ -96,7 +103,7 @@ def create_supplier(event, user_id):
             'contactEmail': contact_email,
             'phone': body.get('phone', '').strip(),
             'notes': body.get('notes', '').strip(),
-            'createdAt': datetime.utcnow().isoformat() + 'Z' if 'datetime' in globals() else time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+            'createdAt': datetime.now(timezone.utc).isoformat()
         }
         
         table.put_item(Item=supplier)
@@ -115,12 +122,15 @@ def update_supplier(event, supplier_id, user_id):
             return {'statusCode': 404, 'headers': CORS, 'body': json.dumps({'error': 'Supplier not found'})}
             
         update_expr = "SET #nm = :name, contactEmail = :email, phone = :phone, notes = :notes"
+        new_name = body.get('name', resp['Item'].get('name', '')).strip()
+        if not new_name:
+            return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'Supplier name is required'})}
         contact_email = body.get('contactEmail', resp['Item'].get('contactEmail', '')).strip()
         if contact_email and not re.match(r"^[^@]+@[^@]+\.[^@]+$", contact_email):
             return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'Invalid email format'})}
 
         expr_vals = {
-            ':name': body.get('name', resp['Item'].get('name')).strip(),
+            ':name': new_name,
             ':email': contact_email,
             ':phone': body.get('phone', resp['Item'].get('phone', '')).strip(),
             ':notes': body.get('notes', resp['Item'].get('notes', '')).strip()
@@ -134,7 +144,7 @@ def update_supplier(event, supplier_id, user_id):
             ExpressionAttributeNames=expr_names,
             ReturnValues="ALL_NEW"
         )
-        return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(updated.get('Attributes', {}))}
+        return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(updated.get('Attributes', {}), default=_decimal)}
     except Exception as e:
         _logging.log_json(function="Suppliers_update", error=str(e))
         return {'statusCode': 500, 'headers': CORS, 'body': json.dumps({'error': 'An internal error occurred'})}
