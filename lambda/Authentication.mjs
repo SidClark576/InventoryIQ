@@ -62,6 +62,23 @@ const headers = {
     "Content-Type": "application/json"
 };
 
+const JWT_SECRET = process.env.JWT_SECRET || '';
+if (!JWT_SECRET) {
+    console.error('FATAL: JWT_SECRET environment variable is not set');
+}
+
+function _base64url(buf) {
+    return buf.toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+function _signJWT(sub, exp) {
+    const h = _base64url(Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })));
+    const p = _base64url(Buffer.from(JSON.stringify({ sub, exp, iat: Math.floor(Date.now() / 1000) })));
+    const msg = `${h}.${p}`;
+    const sig = _base64url(crypto.createHmac('sha256', JWT_SECRET).update(msg).digest());
+    return `${msg}.${sig}`;
+}
+
 const hashPassword = (password, salt) => {
     return crypto.scryptSync(password, salt, 64).toString("hex");
 };
@@ -230,11 +247,13 @@ export const handler = Sentry.wrapHandler(async (event) => {
             // Successful login: clear any prior failed attempts
             await _clearAttempts(email);
 
-            const sessionToken = crypto.randomUUID();
             const nowEpoch = Math.floor(Date.now() / 1000);
             const expiresAt = nowEpoch + SESSION_TTL_SECONDS;
 
-            // Write session row to Sessions table with TTL
+            // Sign a JWT — stateless, no DB lookup needed for validation
+            const sessionToken = _signJWT(email.toLowerCase(), expiresAt);
+
+            // Keep Sessions entry for audit trail and logout cleanup
             await docClient.send(new PutCommand({
                 TableName: SESSIONS_TABLE,
                 Item: {

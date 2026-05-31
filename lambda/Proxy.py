@@ -1,24 +1,19 @@
-import json, boto3, urllib.request, urllib.parse, os, time
+import json, boto3, urllib.request, urllib.parse, os, time, hmac, hashlib, base64
 import _logging
 
 FUNCTION_NAME = 'Proxy'
 
 API_ENDPOINT     = os.environ['API_ENDPOINT']
-SESSIONS_TABLE   = os.environ.get('SESSIONS_TABLE', 'Sessions')
 API_KEY_SECRET   = os.environ.get('API_KEY_SECRET', 'inventoryiq/api-key')
 # Fallback: read API_KEY directly from env (used if Secrets Manager not configured)
 _API_KEY_ENV     = os.environ.get('API_KEY', '')
 # CORS_ORIGIN: comma-separated list of allowed origins, or '*' for open
 CORS_ORIGIN      = os.environ.get('CORS_ORIGIN', '*')
 _CORS_ORIGINS    = {o.strip() for o in CORS_ORIGIN.split(',') if o.strip()} if CORS_ORIGIN != '*' else None
+# JWT secret — must match Authentication Lambda
+_JWT_SECRET      = os.environ.get('JWT_SECRET', '').encode()
 
-dynamodb        = boto3.resource('dynamodb')
-sessions_table  = dynamodb.Table(SESSIONS_TABLE)
 secrets_client  = boto3.client('secretsmanager')
-
-# Module-level session cache: { token: (userID, expiresAt, cachedAt) }
-_session_cache = {}
-_CACHE_TTL = 60  # seconds
 
 # API key cache: avoid Secrets Manager call on every request
 _api_key_cache = {'value': _API_KEY_ENV, 'fetched_at': 0 if not _API_KEY_ENV else time.time()}
@@ -70,61 +65,34 @@ def _unauthorized(msg='Unauthorized', origin=''):
     return {'statusCode': 401, 'headers': _cors_headers(origin), 'body': json.dumps({'error': msg})}
 
 
-def _validate_session(token):
+def _verify_jwt(token: str):
     """
-    Returns (userID, expiresAt) if token is valid and not expired.
-    Returns (None, None) otherwise.
-    Uses module-level cache with 60s TTL to reduce DynamoDB reads.
+    Verify HS256 JWT using stdlib only — no DynamoDB, no external deps.
+    Returns userID (sub claim) if valid, None otherwise.
     """
-    now = time.time()
-
-    # Check warm cache first
-    cached = _session_cache.get(token)
-    if cached:
-        user_id, expires_at, cached_at = cached
-        if now - cached_at < _CACHE_TTL and expires_at > now:
-            return user_id, expires_at
-        # Evict stale cache entry
-        _session_cache.pop(token, None)
-
-    # Cache miss: hit DynamoDB
-    resp = sessions_table.get_item(Key={'sessionToken': token})
-    item = resp.get('Item')
-
-    if not item:
-        return None, None
-
-    expires_at = int(item.get('expiresAt', 0))
-    if expires_at <= now:
-        return None, None
-
-    user_id = item.get('userID', '')
-    _session_cache[token] = (user_id, expires_at, now)
-    return user_id, expires_at
-
-
-def _slide_expiry(token, expires_at):
-    """
-    Extends session TTL by 8 hours if less than 4 hours remain.
-    Best-effort: errors are swallowed so validation never blocks on this.
-    """
-    now = time.time()
-    hours_remaining = (expires_at - now) / 3600
-    if hours_remaining >= 4:
-        return
-    new_expiry = int(now) + (8 * 3600)
     try:
-        sessions_table.update_item(
-            Key={'sessionToken': token},
-            UpdateExpression='SET expiresAt = :e',
-            ExpressionAttributeValues={':e': new_expiry}
-        )
-        # Update cache
-        if token in _session_cache:
-            uid, _, cached_at = _session_cache[token]
-            _session_cache[token] = (uid, new_expiry, cached_at)
+        parts = token.split('.')
+        if len(parts) != 3:
+            return None
+        header_b64, payload_b64, sig_b64 = parts
+
+        def _pad(s: str) -> str:
+            return s + '=' * ((4 - len(s) % 4) % 4)
+
+        msg = f"{header_b64}.{payload_b64}".encode()
+        sig = base64.urlsafe_b64decode(_pad(sig_b64))
+        expected = hmac.new(_JWT_SECRET, msg, hashlib.sha256).digest()
+
+        if not hmac.compare_digest(sig, expected):
+            return None
+
+        payload = json.loads(base64.urlsafe_b64decode(_pad(payload_b64)))
+        if payload.get('exp', 0) <= time.time():
+            return None
+
+        return payload.get('sub')
     except Exception:
-        pass  # Non-blocking
+        return None
 
 
 def lambda_handler(event, context):
@@ -170,15 +138,12 @@ def _handle(event, context):
                           extra_metric=('iq.auth.invalid_session', 'Count'))
         return _unauthorized('Missing X-Session-Token header', origin)
 
-    user_id, expires_at = _validate_session(token)
+    user_id = _verify_jwt(token)
     if not user_id:
         _logging.log_json(event=event, function=FUNCTION_NAME,
                           level='WARN', count_request=False,
                           extra_metric=('iq.auth.invalid_session', 'Count'))
         return _unauthorized('Invalid or expired session', origin)
-
-    # Slide expiry in background (best-effort)
-    _slide_expiry(token, expires_at)
 
     return _forward(event, path, method, user_id=user_id, origin=origin)
 
