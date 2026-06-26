@@ -55,12 +55,25 @@ const MAX_FAILURES        = 5;              // max failed logins before 429
 // Password must have lowercase, uppercase, digit, min 8 chars
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-const headers = {
-    "Access-Control-Allow-Origin": process.env.CORS_ORIGIN || "*",
-    "Access-Control-Allow-Headers": "Content-Type,x-api-key,X-Session-Token",
-    "Access-Control-Allow-Methods": "OPTIONS,POST",
-    "Content-Type": "application/json"
-};
+const _CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+const _CORS_ORIGINS = _CORS_ORIGIN !== '*'
+    ? new Set(_CORS_ORIGIN.split(',').map(o => o.trim()).filter(Boolean))
+    : null;
+
+function _corsHeaders(requestOrigin = '') {
+    const base = {
+        "Access-Control-Allow-Headers": "Content-Type,x-api-key,X-Session-Token",
+        "Access-Control-Allow-Methods": "OPTIONS,POST",
+        "Content-Type": "application/json"
+    };
+    if (_CORS_ORIGINS === null) {
+        base["Access-Control-Allow-Origin"] = '*';
+    } else if (requestOrigin && _CORS_ORIGINS.has(requestOrigin)) {
+        base["Access-Control-Allow-Origin"] = requestOrigin;
+        base["Vary"] = "Origin";
+    }
+    return base;
+}
 
 const JWT_SECRET = process.env.JWT_SECRET || '';
 if (!JWT_SECRET) {
@@ -121,6 +134,9 @@ async function _clearAttempts(email) {
 
 export const handler = Sentry.wrapHandler(async (event) => {
     try {
+
+        const requestOrigin = (event.headers && (event.headers['Origin'] || event.headers['origin'])) || '';
+        const headers = _corsHeaders(requestOrigin);
 
         if (event.httpMethod === "OPTIONS") {
             return { statusCode: 200, headers, body: JSON.stringify({}) };

@@ -1,9 +1,29 @@
+# Dependencies
 node_modules
 package-lock.json
 package.json
+
+# Python
+.venv
+.pytest_cache
+__pycache__/
+*.pyc
+
+# Lambda build artifacts (regenerated on deploy)
+lambda/*.zip
+
+# Tests / reports
+tests
+tests/*
 playwright-results.json
 playwright-report
-tests/*
-tests
-playwright.config.ts
+test-results
+
+# Env
 .env*
+
+# OS
+.DS_Store
+
+# OpenWolf
+.wolf/*

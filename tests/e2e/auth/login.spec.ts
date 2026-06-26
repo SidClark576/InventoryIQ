@@ -8,14 +8,14 @@ test.describe('Auth — Login', () => {
   test('valid credentials redirect to dashboard with session token', async ({ authenticatedPage: page }) => {
     expect(page.url()).toContain('dashboard.html')
     const token = await page.evaluate(() => sessionStorage.getItem('sessionToken'))
-    expect(token).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+    expect(token).toMatch(/^[\w-]+\.[\w-]+\.[\w-]+$/)
   })
 
   base.test('wrong password shows error', async ({ page }) => {
     await page.goto('/login.html')
     await page.waitForLoadState('domcontentloaded')
-    await page.locator('input[type="email"]').fill(EMAIL)
-    await page.locator('input[type="password"]').fill('WrongPassword999!')
+    await page.locator('#login-email').fill(EMAIL)
+    await page.locator('#login-password').fill('WrongPassword999!')
     await page.locator('button:has-text("Login")').click()
     await page.waitForTimeout(3000)
     expect(page.url()).toContain('login.html')
