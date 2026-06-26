@@ -8,8 +8,8 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), 'python_vendor'))
 
 try:
-    import sentry_sdk
-    from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
+    import sentry_sdk  # type: ignore[import-not-found]  # vendored in python_vendor/ (see sys.path above)
+    from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration  # type: ignore[import-not-found]
     _dsn = os.environ.get('SENTRY_DSN')
     if _dsn:
         sentry_sdk.init(
@@ -18,9 +18,13 @@ try:
             traces_sample_rate=1.0,
         )
 except ImportError:
-    pass
+    sentry_sdk = None
 
 FUNCTION_NAME = os.environ.get('AWS_LAMBDA_FUNCTION_NAME', 'unknown')
+
+# ponytail: stdout off by default to keep CloudWatch ingestion ~$0; errors go to Sentry.
+# Set LOG_STDOUT=1 to re-enable structured stdout logs (e.g. local debugging).
+_LOG_STDOUT = os.environ.get('LOG_STDOUT', '').lower() in ('1', 'true', 'yes')
 
 
 def log_json(event=None, level='INFO', function=None, latency_ms=None,
@@ -56,7 +60,23 @@ def log_json(event=None, level='INFO', function=None, latency_ms=None,
         record["requestId"] = req_ctx.get("requestId", "")
 
     record.update(kwargs)
-    print(json.dumps(record))
+    if _LOG_STDOUT:
+        print(json.dumps(record))
+
+
+def capture_error(exc=None, **context):
+    """Send an error to Sentry. Pass the caught exception for a full stack
+    trace, plus optional context (userID_hash, requestId, etc.). No-op if
+    sentry_sdk is unavailable or SENTRY_DSN is unset."""
+    if sentry_sdk is None:
+        return
+    with sentry_sdk.push_scope() as scope:
+        for key, value in context.items():
+            scope.set_tag(key, value)
+        if exc is not None:
+            sentry_sdk.capture_exception(exc)
+        else:
+            sentry_sdk.capture_message(context.get('message', 'error'), level='error')
 
 
 def hash_user(user_id):

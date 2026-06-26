@@ -210,6 +210,7 @@ def _handle(event, context):
             return response(412, {'error': 'Version conflict — item was modified concurrently. Re-fetch and retry.'})
         raise
     except Exception as e:
+        _logging.capture_error(e)
         return response(500, {'error': 'Internal Server Error'})
 
 

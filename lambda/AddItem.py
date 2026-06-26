@@ -156,6 +156,7 @@ def _handle(event, context):
             return response(409, {'error': 'Conflict — duplicate item ID or concurrent duplicate request'})
         raise
     except Exception as e:
+        _logging.capture_error(e)
         return response(500, {'error': 'Internal Server Error'})
 
 

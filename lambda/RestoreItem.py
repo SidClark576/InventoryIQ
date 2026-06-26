@@ -121,6 +121,7 @@ def _handle(event, context):
             return response(409, {'error': 'Item is not in a deleted state — may have been restored already'})
         raise
     except Exception as e:
+        _logging.capture_error(e)
         return response(500, {'error': 'Internal Server Error'})
 
 

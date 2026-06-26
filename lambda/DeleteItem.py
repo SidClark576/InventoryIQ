@@ -130,6 +130,7 @@ def _handle(event, context):
             return response(409, {'error': 'Conflict — item may have been deleted concurrently'})
         raise
     except Exception as e:
+        _logging.capture_error(e)
         return response(500, {'error': 'Internal Server Error'})
 
 
