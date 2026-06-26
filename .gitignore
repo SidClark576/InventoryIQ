@@ -27,3 +27,6 @@ test-results
 
 # OpenWolf
 .wolf/*
+
+# Local Netlify folder
+.netlify
