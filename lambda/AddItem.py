@@ -160,14 +160,4 @@ def _handle(event, context):
         return response(500, {'error': 'Internal Server Error'})
 
 
-def response(status_code, body):
-    return {
-        'statusCode': status_code,
-        'headers': {
-            'Content-Type'                : 'application/json',
-            'Access-Control-Allow-Origin' : '*',
-            'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE',
-        },
-        'body': json.dumps(body),
-    }
+response = _logging.response

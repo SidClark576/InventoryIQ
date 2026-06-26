@@ -79,6 +79,25 @@ def capture_error(exc=None, **context):
             sentry_sdk.capture_message(context.get('message', 'error'), level='error')
 
 
+def response(status_code, body, methods='OPTIONS,POST,GET,PUT,DELETE', extra_headers=None):
+    """Standard JSON API response with CORS headers. Pass `methods` to override
+    Access-Control-Allow-Methods; pass `extra_headers` to add response headers
+    (e.g. ETag)."""
+    headers = {
+        'Content-Type'                : 'application/json',
+        'Access-Control-Allow-Origin' : '*',
+        'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
+        'Access-Control-Allow-Methods': methods,
+    }
+    if extra_headers:
+        headers.update(extra_headers)
+    return {
+        'statusCode': status_code,
+        'headers'   : headers,
+        'body'      : json.dumps(body),
+    }
+
+
 def hash_user(user_id):
     """Return first 12 hex chars of sha256(user_id). Returns None if falsy."""
     if not user_id:
