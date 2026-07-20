@@ -22,7 +22,9 @@ function getCurrentUserID() {
 function authHeaders() {
   return {
     'Content-Type': 'application/json',
-    'X-Session-Token': sessionStorage.getItem('sessionToken') || ''
+    'X-Session-Token': sessionStorage.getItem('sessionToken') || '',
+    // Selected org/workspace. Empty on org-management calls (list/accept) — Proxy treats blank as "no org".
+    'X-IQ-Org': sessionStorage.getItem('currentOrg') || ''
   };
 }
 
@@ -294,4 +296,60 @@ async function getForecast() {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to fetch forecast');
   return data;
+}
+
+// ── ORG / MEMBERSHIP FUNCTIONS ────────────────────────────────
+
+async function _orgJson(url, opts, failMsg) {
+  const res = await fetch(url, { headers: authHeaders(), ...opts });
+  checkQuota(res);
+  check401(res);
+  let data;
+  try { data = await res.json(); } catch { data = {}; }
+  if (!res.ok) throw new Error(data.error || failMsg);
+  return data;
+}
+
+// Orgs the current user belongs to (switcher). Returns { orgs: [...] }.
+async function getOrgs() {
+  return _orgJson(`${CONFIG.API_ENDPOINT}/orgs`, {}, 'Failed to load organizations');
+}
+
+// Select a workspace; persists currentOrg so subsequent calls are scoped to it.
+async function switchOrg(orgID) {
+  const data = await _orgJson(`${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}/switch`,
+    { method: 'POST' }, 'Failed to switch organization');
+  sessionStorage.setItem('currentOrg', orgID);
+  if (data.role) sessionStorage.setItem('currentRole', data.role);
+  return data;
+}
+
+async function getMembers(orgID) {
+  return _orgJson(`${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}/members`, {}, 'Failed to load members');
+}
+
+async function inviteMember(orgID, email, role) {
+  return _orgJson(`${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}/invites`,
+    { method: 'POST', body: JSON.stringify({ email, role }) }, 'Failed to send invite');
+}
+
+async function revokeInvite(orgID, inviteID) {
+  return _orgJson(`${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}/invites/${encodeURIComponent(inviteID)}/revoke`,
+    { method: 'POST' }, 'Failed to revoke invite');
+}
+
+async function changeMemberRole(orgID, userID, role) {
+  return _orgJson(`${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}/members/${encodeURIComponent(userID)}`,
+    { method: 'PATCH', body: JSON.stringify({ role }) }, 'Failed to change role');
+}
+
+async function removeMember(orgID, userID) {
+  return _orgJson(`${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}/members/${encodeURIComponent(userID)}`,
+    { method: 'DELETE' }, 'Failed to remove member');
+}
+
+// Accept an invite by token (user must be logged in as the invited email).
+async function acceptInvite(token) {
+  return _orgJson(`${CONFIG.API_ENDPOINT}/org-invites/${encodeURIComponent(token)}/accept`,
+    { method: 'POST' }, 'Failed to accept invite');
 }

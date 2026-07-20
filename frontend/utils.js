@@ -7,6 +7,20 @@ function escHTML(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+function toggleSidebar() {
+  document.getElementById('sidebar')?.classList.toggle('-translate-x-full');
+  document.getElementById('sidebar-backdrop')?.classList.toggle('hidden');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar')?.classList.add('-translate-x-full');
+  document.getElementById('sidebar-backdrop')?.classList.add('hidden');
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeSidebar();
+});
+
 function initNav(activePageId) {
   const email = sessionStorage.getItem('userEmail') || '';
   const el = document.getElementById('nav-email');

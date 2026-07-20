@@ -1,5 +1,6 @@
 import json, boto3, urllib.request, urllib.parse, os, time, hmac, hashlib, base64
 import _logging
+import _org
 
 FUNCTION_NAME = 'Proxy'
 
@@ -63,6 +64,10 @@ def _get_api_key():
 
 def _unauthorized(msg='Unauthorized', origin=''):
     return {'statusCode': 401, 'headers': _cors_headers(origin), 'body': json.dumps({'error': msg})}
+
+
+def _forbidden(msg='Forbidden', origin=''):
+    return {'statusCode': 403, 'headers': _cors_headers(origin), 'body': json.dumps({'error': msg})}
 
 
 def _verify_jwt(token: str):
@@ -145,10 +150,20 @@ def _handle(event, context):
                           extra_metric=('iq.auth.invalid_session', 'Count'))
         return _unauthorized('Invalid or expired session', origin)
 
-    return _forward(event, path, method, user_id=user_id, origin=origin)
+    # Org tenancy: if a workspace is selected (X-IQ-Org), the user must be an active member.
+    # Org-management routes (GET /orgs, accept invite) send no X-IQ-Org and pass through.
+    org_id = (raw_headers.get('x-iq-org') or raw_headers.get('X-IQ-Org') or '').strip()
+    role = None
+    if org_id:
+        member = _org.get_membership(org_id, user_id)
+        if not member:
+            return _forbidden('Not a member of the selected organization', origin)
+        role = member.get('role')
+
+    return _forward(event, path, method, user_id=user_id, origin=origin, org_id=org_id, role=role)
 
 
-def _forward(event, path, method, user_id, origin=''):
+def _forward(event, path, method, user_id, origin='', org_id='', role=None):
     """Forward the request to the real API Gateway stage."""
     body = event.get('body') or ''
 
@@ -170,8 +185,14 @@ def _forward(event, path, method, user_id, origin=''):
         'Content-Type': 'application/json',
         'x-api-key': _get_api_key()
     }
+    # Trusted identity headers built fresh here, so any client-supplied
+    # x-iq-user / x-iq-org / x-iq-role are dropped (anti-spoofing).
     if user_id:
         fwd_headers['x-iq-user'] = user_id
+    if org_id:
+        fwd_headers['x-iq-org'] = org_id
+    if role:
+        fwd_headers['x-iq-role'] = role
 
     # Forward selected client headers downstream
     _PASSTHROUGH_HEADERS = ('if-match', 'idempotency-key')

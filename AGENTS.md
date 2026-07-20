@@ -1,228 +1,181 @@
-# InventoryIQ — Consolidated Agent Intelligence Blueprint
+# InventoryIQ — Agent Reference
 
-This file serves as the definitive reference guide for **AI Coding Assistants**—including **Claude Code**, **Gemini CLI**, **Codex**, and **Antigravity**—to understand the repository architecture, data models, conventions, and operational constraints.
-
-> [!IMPORTANT]
-> **COMPANION FILES:** Always refer to [CLAUDE.md](file:///Users/sidneyordonia/Documents/InventoryIQ/CLAUDE.md) (standard developer guidance) and [GEMINI.md](file:///Users/sidneyordonia/Documents/InventoryIQ/GEMINI.md) (project context overrides) for additional agent-specific context.
+Definitive guide for AI coding assistants (Claude Code, Gemini CLI, Codex). `CLAUDE.md` and `GEMINI.md` are redirects to this file.
 
 ---
 
-## 0. OpenWolf Context Protocol (READ FIRST)
+## 0. OpenWolf Context Protocol
 
-This project uses **OpenWolf** for cross-session context management. All AI coding agents — Claude Code, Gemini CLI, Codex, and others — MUST follow this protocol every session.
+This project uses OpenWolf. Full protocol: [.wolf/OPENWOLF.md](.wolf/OPENWOLF.md). Non-negotiables:
 
-### Mandatory Startup Sequence
-1. Read `.wolf/anatomy.md` **before opening any project file.** It has a 2-3 line description and token estimate for every file — use it to decide whether you need the full file.
-2. Read `.wolf/cerebrum.md` **before generating any code.** Check `## Do-Not-Repeat` for known mistakes, `## Key Learnings` for project conventions, and `## User Preferences` for how this user works.
-3. Read `.wolf/buglog.json` **before fixing any bug.** The fix may already be documented.
-
-### Mandatory Update Protocol (After Every Significant Action)
-| Trigger | Action |
-| :--- | :--- |
-| Created, renamed, or deleted a file | Update `.wolf/anatomy.md` with the new/removed entry |
-| Completed any meaningful task | Append one line to `.wolf/memory.md`: `\| HH:MM \| description \| file(s) \| outcome \| ~tokens \|` |
-| User corrects your approach or expresses a preference | Update `.wolf/cerebrum.md` → `## User Preferences` |
-| Discovered a project convention not obvious from code | Update `.wolf/cerebrum.md` → `## Key Learnings` |
-| Fixed a bug, failed test, or broken build | Append to `.wolf/buglog.json` with `id`, `error_message`, `root_cause`, `fix`, `tags` |
-| Made a significant architectural or trade-off decision | Update `.wolf/cerebrum.md` → `## Decision Log` |
-
-### Key Wolf Files
-| File | Purpose |
-| :--- | :--- |
-| `.wolf/OPENWOLF.md` | Full operating protocol — read this if anything is unclear |
-| `.wolf/anatomy.md` | File registry with token estimates for every file in the project |
-| `.wolf/cerebrum.md` | Persistent learning memory: preferences, conventions, mistakes, decisions |
-| `.wolf/memory.md` | Chronological session action log |
-| `.wolf/buglog.json` | Known bugs with root causes and fixes |
-| `.wolf/buglog.json` | Known bugs with root causes and fixes |
-| `.wolf/designqc-report.json` | Latest design QC evaluation results |
-| `.wolf/suggestions.json` | AI-generated improvement suggestions |
-
-### Token Discipline
-- Never re-read a file already read this session unless it was modified.
-- Prefer anatomy.md descriptions over full file reads.
-- Use targeted Grep over full file reads when searching for specific code.
+1. Read `.wolf/anatomy.md` before opening files, `.wolf/cerebrum.md` before writing code, `.wolf/buglog.json` before fixing bugs.
+2. After significant actions: update `anatomy.md` (file changes), append to `memory.md` (tasks), `cerebrum.md` (corrections/learnings), `buglog.json` (any fix).
 
 ---
 
-## 1. Architecture Blueprint & Request Flow
+## 1. Architecture & Request Flow
 
-InventoryIQ is a serverless, multi-tenant inventory management system built on AWS. 
+Serverless multi-tenant inventory system on AWS. Static S3 frontend → API Gateway proxy stage → `Proxy.py` → API Gateway real stage (x-api-key) → Lambdas.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                 Static S3 Website (Frontend)                │
-│       Plain HTML/JS/CSS  ·  Tailwind CSS (CDN)  ·  Inter    │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ HTTPS (No API Key exposed)
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│             API Gateway (Proxy Stage: /prod/proxy/*)        │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ Forwards Request
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 Proxy Lambda (Proxy.py)                     │
-│  - Validates session token against "Sessions" (60s cache)   │
-│  - Rejects invalid sessions immediately (401 Unauthorized)   │
-│  - Injects backend API Key from Secrets Manager (5m cache)   │
-│  - Injects tenant identity (x-iq-user) and strips spoofed headers │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ Forwards with Auth & Key Injected
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│               API Gateway (Real Stage: /prod/*)             │
-│                 Secured via x-api-key Auth                  │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-            ┌──────────────────┼──────────────────┐
-            ▼                  ▼                  ▼
-┌───────────────────────┐ ┌───────────────┐ ┌───────────────┐
-│  Auth Lambda (Node)   │ │  Py Lambdas   │ │   SQS / SNS   │
-│  Authentication.mjs   │ │ (CRUD & Ops)  │ │ Alert Topics  │
-│  (Bypasses Proxy edge)│ │               │ │ & Event Queue │
-└───────────────────────┘ └───────────────┘ └───────────────┘
+Browser (sessionStorage.sessionToken, sent as X-Session-Token)
+   │  HTTPS — no API key exposed to client
+   ▼
+API Gateway  /prod/proxy/{proxy+}
+   ▼
+Proxy.py
+   - Verifies X-Session-Token as HS256 JWT (stdlib hmac — no DB read, no jwt library)
+   - Invalid/expired token → 401
+   - If X-IQ-Org header present: live membership lookup via _org.get_membership()
+     (single GetItem — this is what makes member removal instant). Non-member → 403.
+   - Strips client-supplied x-iq-user / x-iq-org / x-iq-role (anti-spoofing),
+     injects validated x-iq-user, x-iq-org, x-iq-role
+   - Injects backend x-api-key from Secrets Manager (5m cache)
+   ▼
+API Gateway  /prod/*  (x-api-key required — direct calls without it → 403)
+   ▼
+Authentication.mjs (Node) · Python CRUD/org Lambdas · SQS/SNS alerts
 ```
 
-### Edge Proxy Execution Details:
-1. **API Key Concealment:** The frontend (`config.js`) only communicates with the `/prod/proxy` endpoint. Downstream API keys are never exposed to the client.
-2. **Session Verification:** `Proxy.py` extracts the `X-Session-Token` header, checks it against the `Sessions` DynamoDB table (using a 60-second in-memory cache to prevent duplicate reads), and slides the session expiry (by 8 hours if <4 hours remain).
-3. **Identity Injection:** The proxy stamps the validated user email as the `x-iq-user` header and forwards the request to the backend. Any client-provided `x-iq-user` headers are stripped to prevent identity spoofing.
+**Auth model (JWT, stateless):**
+
+- `Authentication.mjs` signs an HS256 JWT on login (`sub` = lowercased email). Client stores it in `sessionStorage.sessionToken`.
+- Validation is stateless — `Proxy.py` and `Authorizer.mjs` verify the signature with stdlib crypto only. **No external JWT library anywhere; keep it pure `crypto` / `hmac`+`hashlib`.**
+- `JWT_SECRET` env var MUST match across `Authentication`, `Proxy`, and `Authorizer` Lambdas or all logins 401.
+- The `Sessions` table is now audit-trail + logout cleanup only — never used for token validation.
 
 ---
 
-## 2. Directory Layout & Core Components
+## 2. Directory Layout
 
 ```
-├── frontend/               # Static S3 Web assets (HTML, vanilla ESM JS, Vanilla CSS)
-├── lambda/                 # Standalone AWS Lambda functions (Python & Node.js ESM)
-├── docs/                   # Guided labs, UI design specifications, and artifacts
-├── tests/                  # Playwright E2E tests and page objects
-├── playwright.config.ts    # E2E test configuration
-└── CLAUDE.md / GEMINI.md   # Assistant reference guides
+├── frontend/     # Static S3 assets: plain HTML, vanilla ESM JS, vanilla CSS
+├── lambda/       # Standalone Lambdas (Python + Node ESM). python_vendor/ = bundled pip deps
+│                 # (sentry_sdk, certifi, urllib3) — include in deploy zips for Lambdas that import them
+├── scripts/      # Operational one-shots (migrate_orgs.py)
+├── docs/         # PRDs and design artifacts
+├── tests/        # Playwright E2E (page objects in tests/pages/)
+└── playwright.config.ts
 ```
 
-### Frontend File Registry (`frontend/`):
-*   **`index.html`:** Quick redirect/router shim that sends unauthenticated visitors to `login.html`.
-*   **`login.html`:** Dedicated Authentication interface supporting unified signup, sign-in, and SNS alert subscription.
-*   **`forgot-password.html` / `reset-password.html`:** Clean workflow for issuing secure, time-limited password recovery emails.
-*   **`dashboard.html`:** Responsive home panel displaying critical KPI counts (total products, out-of-stock, low-stock, total value), running audit logs, and status visualizations.
-*   **`inventory.html`:** Full asset manager equipped with paginated searches, print report generators, quick stock increments/decrements (+/− modals), category assignments, and CSV exports.
-*   **`add-item.html`:** Form for creating assets or editing existing ones (edit payloads are safely parsed from `sessionStorage.iq_editItem`).
-*   **`insights.html`:** Advanced inventory analysis showing low-stock products, category weights, and recommended actions.
-*   **`forecast.html`:** Predictive stockout planner showing Estimated Daily Burn, Days Until Stockout, and Confidence levels.
-*   **`suppliers.html`:** Supplier and vendor management interface — create, edit, delete, and associate suppliers with inventory items.
-*   **`transactions.html`:** Paginated audit log viewer with filtering by change type, date range, and item name.
-*   **`api.js`:** Unified wrapper around the Fetch API providing rate-limiting checks (`checkQuota`), CORS support, and JWT-free header configurations.
-*   **`utils.js`:** Shared utilities for checking session permissions (`requireAuth`), logging out, rendering sidebar menus, and displaying premium toast notifications.
-*   **`charts.js`:** Modular scripting to render interactive inventory diagrams.
-*   **`config.js`:** Environment configurations (`API_ENDPOINT`, `AUTH_ENDPOINT`). Must be loaded first on every protected page.
-*   **`style.css`:** **Dark luxury** design system using CSS custom properties. Dark mode only — no light/dark toggle. See Section 4.C for the full palette. Includes `@media print` overrides forcing a clean light report layout.
+### Frontend (`frontend/`)
 
-### Backend Lambda Registry (`lambda/`):
-*   **`Proxy.py`** (Python): Intercepts, authenticates, caches session data, and safely routes browser queries.
-*   **`Authentication.mjs`** (Node.js ESM): Manages registration, logins, SES password-reset links, rate-limiting (AuthAttempts with 15-minute lockout window), SNS Topic subscription handling, and Sentry error monitoring. Enforces lowercase email normalization on all auth operations. Wrapped with `Sentry.wrapHandler`.
-*   **`AddItem.py`** (Python): Adds inventory items with automatic UUID assignments and version trackers. Logs events atomically via `transact_write_items`.
-*   **`GetAllItems.py`** (Python): Scans the active catalog, handles page splits, and filters out soft-deleted products.
-*   **`UpdateItem.py`** (Python): Modifies inventory attributes. Enforces optimistic lock checks against the client-supplied `If-Match` header.
-*   **`DeleteItem.py`** (Python): Implements 30-day soft-deletions by writing `deletedAt` and `deletedBy` flags to DB records.
-*   **`RestoreItem.py`** (Python): Restores soft-deleted catalog products.
-*   **`PurgeDeletedItems.py`** (Python): Routine cleanup script designed to sweep and delete assets that have spent over 30 days in soft-delete.
-*   **`GetCategories.py`** (Python): Aggregates unique classification names, always guaranteeing the existence of `"Uncategorized"`.
-*   **`DeleteCategory.py`** (Python): Safely deletes category tags, shifting affected items into the default `"Uncategorized"` group to prevent orphaned products.
-*   **`GetTransactions.py`** (Python): Gathers the historic user log, ordered chronologically.
-*   **`LowItemInsight.py`** (Python): Generates comprehensive reorder insights. Emits SNS alerts + SQS stockout events with a 24-hour alert cooldown per user.
-*   **`Forecast.py`** (Python): Generates stockout projections using a Weighted Moving Average (WMA) on `stock_out` logs (30d=50%, 60d=30%, 90d=20%).
-*   **`BulkImport.py` / `BulkImportAsync.py`** (Python): Ingests batches of assets via CSV files, utilizing S3 presigned upload URLs.
-*   **`BarcodeLookup.py`** (Python): Performs item lookups utilizing barcode records.
-*   **`Suppliers.py`** (Python): Full CRUD for supplier records scoped per user via `x-iq-user`. Backed by the `Suppliers` DynamoDB table.
-*   **`CascadeDeleteUser.py`** (Python): DynamoDB Streams trigger that fires on `Users` table `REMOVE` events. Cascades deletion across all user-owned records in `InventoryIQ`, `InventoryTransactions`, `Sessions`, `AuthAttempts`, `PasswordResets`, and `Suppliers` tables.
-*   **`DailyAlert.py`** (Python): Scheduled Lambda that generates and sends a daily inventory stock-level summary via SNS (email/SMS) to subscribed users. Designed for administrators who want a single daily report.
-*   **`_logging.py`** (Python): Centralized logging utility for standard JSON format metrics.
+- `index.html` — redirect shim to `login.html` for unauthenticated visitors.
+- `login.html` — signup, sign-in, SNS alert subscription.
+- `forgot-password.html` / `reset-password.html` — time-limited email reset flow.
+- `dashboard.html` — KPI counts, audit log, status charts.
+- `inventory.html` — paginated search, +/− stock modals, categories, CSV export, print reports.
+- `add-item.html` — create/edit form (edit payload from `sessionStorage.iq_editItem`).
+- `insights.html` — low-stock analysis and reorder recommendations.
+- `forecast.html` — stockout projections (daily burn, days-until-stockout, confidence).
+- `suppliers.html` — supplier CRUD, item association.
+- `transactions.html` — filtered audit log viewer.
+- `api.js` — fetch wrapper: `checkQuota()` (429), `check401()`, CORS headers.
+- `utils.js` — `requireAuth()`, logout, sidebar render, toast notifications.
+- `charts.js` — chart rendering.
+- `config.js` — `API_ENDPOINT`, `AUTH_ENDPOINT`. Must load first on every protected page.
+- `style.css` — dark-luxury design system (Section 4.C). `@media print` forces a light report layout.
 
----
+### Backend (`lambda/`)
 
-## 3. Database Blueprint (DynamoDB Tables)
+- `Proxy.py` — edge auth: JWT verify, org membership check, header injection/stripping.
+- `Authorizer.mjs` — API Gateway TOKEN authorizer; validates X-Session-Token JWT, no DB lookup.
+- `Authentication.mjs` — register/login/logout, JWT signing, SES password reset, AuthAttempts rate limiting (15-min lockout), SNS subscription, Sentry (`Sentry.wrapHandler`). Lowercases all emails.
+- `_org.py` — shared org/RBAC helpers: `get_membership`, `has_role`, `ROLE_RANK`, `list_user_orgs`, seat cap (`ORG_SEAT_CAP`, default 5). Imported by Proxy + org Lambdas.
+- `Orgs.py` — org CRUD: list/switch/rename/delete/transfer-owner.
+- `OrgMembers.py` — member list, role change, removal.
+- `OrgInvites.py` — invite create/revoke/accept. Tokens emailed raw, stored **only as SHA-256 hash** (`inviteTokenHash` PK) — never store or log a raw invite token.
+- `_logging.py` — shared `log_json`, `capture_error` (→ Sentry), `response` (CORS envelope), `hash_user`. All Python Lambdas use these; don't hand-roll response dicts.
+- `AddItem.py` — create item (UUID, `version: 1`), atomic transaction log.
+- `GetAllItems.py` — paginated scan, filters soft-deleted.
+- `UpdateItem.py` — optimistic-lock update (`If-Match` → 412 on mismatch, new version in `ETag`).
+- `DeleteItem.py` / `RestoreItem.py` / `PurgeDeletedItems.py` — 30-day soft-delete lifecycle.
+- `GetCategories.py` / `DeleteCategory.py` — category ops; `"Uncategorized"` always exists and absorbs orphans.
+- `GetTransactions.py` — chronological audit log.
+- `LowItemInsight.py` — reorder insights; SNS alerts + SQS events, 24h cooldown per user.
+- `Forecast.py` — WMA stockout forecast on `stock_out` logs (30d=50%, 60d=30%, 90d=20%).
+- `BulkImport.py` / `BulkImportAsync.py` — CSV ingest via S3 presigned URLs.
+- `BarcodeLookup.py` — barcode item lookup.
+- `Suppliers.py` — supplier CRUD.
+- `CascadeDeleteUser.py` — DynamoDB Streams trigger on `Users` REMOVE; cascades deletion across all user-owned tables.
+- `DailyAlert.py` — scheduled daily SNS stock summary.
 
-The application models its schemas across **8 primary tables** in DynamoDB:
+### Scripts (`scripts/`)
 
-| Table | Partition Key | Sort Key | Global Secondary Indexes (GSI) | TTL Attribute | Purpose |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **`InventoryIQ`** | `itemID` (String) | *None* | `userID-index`<br>(PK: `userID`, SK: `createdAt`) | *None* | Primary store for assets. Attributes: `name`, `description`, `category`, `quantity`, `price` (Decimal), `lowStockThreshold`, `userID` (email), `barcode`, `version`, `createdAt`, `updatedAt`, `deletedAt`, `deletedBy`. |
-| **`Users`** | `Email` (String) | *None* | *None* | *None* | Stores accounts. Attributes: `passwordHash` (scrypt), `salt`, `createdAt`. DynamoDB Streams enabled — `REMOVE` events trigger `CascadeDeleteUser`. |
-| **`Sessions`** | `sessionToken` (String) | *None* | `userID-index`<br>(PK: `userID`, SK: `createdAt`) | `expiresAt` (Unix Secs) | Manages authentication states. Token is an opaque UUID string. |
-| **`AuthAttempts`** | `email` (String) | *None* | *None* | `ttl` (Unix Secs) | Tracks failed logins per email for rate-limiting. Lockout window: 15 minutes. |
-| **`PasswordResets`** | `resetToken` (String) | *None* | *None* | `expiresAt` (Unix Secs) | Tracks single-use password recovery tokens. |
-| **`InventoryTransactions`** | `transactionID` (String) | *None* | *None* | *None* | Historic audit trail. Attributes: `itemID`, `itemName`, `userID`, `changeType` (`create`/`stock_in`/`stock_out`/`update`/`delete`), `quantityBefore`, `quantityAfter`, `quantityDelta`, `notes`, `createdAt`. |
-| **`IdempotencyKeys`** | `key` (String) | *None* | *None* | `expiresAt` (Unix Secs) | Prevents duplicate requests. Stores `responseBody` and `expiresAt` (24h TTL). |
-| **`Suppliers`** | `supplierID` (String) | *None* | `userID-index`<br>(PK: `userID`) | *None* | Supplier/vendor records scoped per user. Attributes: `name`, `contactEmail`, `phone`, `address`, `userID`, `createdAt`, `updatedAt`. |
+- `migrate_orgs.py` — one-shot backfill: personal org per existing user, stamps `orgID` on their data. **Dry-run by default**; `--apply` writes, `--selftest` runs offline. Idempotent. Prereq: org tables + `orgID-index` GSIs must already exist (it does not create them).
 
 ---
 
-## 4. Key Conventions & Rules (STRICTLY ENFORCED)
+## 3. DynamoDB Tables
 
-### A. General Development Policies
-1.  **JWT BANNED:** Never introduce JSON Web Tokens. Authentication is strictly opaque UUID session tokens stored in `Sessions` and managed client-side in `sessionStorage.sessionToken`.
-2.  **No Automatic Deployment:** Never attempt to invoke direct AWS Lambda deployment actions automatically. When modifying files in `lambda/`, write the code changes, then explicitly prompt the user with the zip and deployment CLI statements:
-    ```bash
-    zip function.zip lambda/AddItem.py && aws lambda update-function-code --function-name AddItem --zip-file fileb://function.zip
-    ```
-3.  **Sentry Error Monitoring:** Both Python and Node.js Lambdas integrate Sentry. Node uses `@sentry/aws-serverless` with `Sentry.wrapHandler`; Python uses `sentry-sdk`. Always initialize with `SENTRY_DSN` from environment variables. Do not remove Sentry instrumentation.
-
-### B. Backend Lambda Conventions (Python/Node)
-1.  **Multi-User Data Separation:** Inventory items are mapped to owners via `userID` (email). Inside Lambda functions, ALWAYS read the owner's identity from the `x-iq-user` header (injected by the proxy). Never trust client-side user identifiers sent in request bodies or query parameters.
-2.  **Email Normalization:** All email values MUST be lowercased before any DynamoDB read or write (`email.toLowerCase()` in Node, `email.lower()` in Python). Enforced at the `Authentication.mjs` layer and must be consistent everywhere emails are used as keys.
-3.  **DynamoDB Decimal Casting:** DynamoDB queries return numeric attributes as `Decimal` objects. Python Lambdas MUST parse and convert all `Decimal` fields to standard `float` or `int` formats prior to executing `json.dumps()` in responses.
-4.  **Atomic DB Modifications:** Any backend mutation (`AddItem`, `UpdateItem`, `DeleteItem`) MUST write both the item update and the corresponding `InventoryTransactions` log atomically in a single `TransactWriteItems` call.
-5.  **Optimistic Concurrency Controls:** 
-    *   Items are created with `version: 1`.
-    *   Any update request MUST contain an `If-Match` header representing the client's current version of the item.
-    *   `UpdateItem.py` verifies this version matches the DB. On mismatch, it fails fast with `412 Precondition Failed`. On success, it increments the version by 1 and returns the new value as the `ETag` header.
-6.  **Soft-Deletions:**
-    *   `DeleteItem.py` must never purge records entirely. It marks products as soft-deleted by setting `deletedAt` and `deletedBy` attributes.
-    *   `GetAllItems.py` and other inventory reads must actively filter out products that possess a `deletedAt` flag.
-    *   Items may be restored within 30 days via `RestoreItem.py` (`POST /items/{id}/restore`).
-7.  **Idempotency Protection:** Writes (`AddItem.py`, `BulkImport.py`) must support the `Idempotency-Key` header. If a key has been processed within 24 hours, replay the cached response body directly without re-executing business logic.
-8.  **Reserved Words:** `"name"` is a reserved keyword in DynamoDB. Always utilize the expression alias `#nm` when referencing it in query expression structures.
-9.  **Rate Limiting:** `Authentication.mjs` enforces a 15-minute lockout window tracked in `AuthAttempts`. Failed attempts increment on each bad login; successful login clears the lockout. Password complexity requires minimum 8 characters with at least one uppercase, one lowercase, and one digit.
-10. **Cascade Deletion:** Deleting a `Users` record triggers `CascadeDeleteUser.py` via DynamoDB Streams. This Lambda removes all user-owned records across all tables. Do not manually delete user records without accounting for this cascade.
-
-### C. Frontend Script Loading & UI Conventions
-1.  **Strict Script Loading Order:** Protected frontend pages must load scripts in this exact sequence to ensure dependency resolution:
-    1.  `config.js` — Loads environment configurations (`API_ENDPOINT`, `AUTH_ENDPOINT`).
-    2.  `utils.js` — Initializes the navigation sidebar and runs `requireAuth()` validation.
-    3.  `api.js` — Provides API communication and helper functions (`getAllItems`, `updateItem`).
-    4.  Page-Specific Scripts — Executes page-level hooks and data rendering.
-2.  **API Error Handling:** 
-    *   Never fail silently. Wrap all API requests inside `try...catch` scopes.
-    *   Detect HTTP `429 Too Many Requests` (Quota Exceeded) and HTTP `401 Unauthorized` (Session Expired) using the `checkQuota()` and `check401()` middleware inside `api.js`.
-    *   Render all errors directly in the browser layout (using clean, red typography elements) instead of letting loading elements hang indefinitely.
-3.  **Design and Theme Consistency:**
-    *   **Theme:** Dark luxury — deep navy backgrounds. **Dark mode only, no light/dark toggle.**
-    *   **Font:** Inter (via Google Fonts CDN).
-    *   **CSS Variables (never hardcode these values — always use the var()):**
-        *   Backgrounds: `--bg-base: #0a0e1a`, `--bg-surface: #11182b`, `--bg-surface-2: #161f36`, `--bg-surface-3: #1d2942`
-        *   Borders: `--border-subtle: #243352`, `--border-strong: #33476f`
-        *   Text: `--text-primary: #eef2fb`, `--text-secondary: #9fb0d0`, `--text-muted: #5d6f96`
-        *   Accent: `--accent: #005ab4`, `--accent-bright: #3b8df0`, `--gold: #e2b65c`, `--gold-dim: #9c7d3a`
-        *   Status: `--emerald: #34d399` (in stock), `--amber: #fbbf24` (low stock), `--red: #f87171` (out of stock)
-    *   **Toasts:** Use the premium toast notification system from `utils.js` for user feedback. Do not use `alert()` or inline DOM error messages for success/info states.
-    *   **Print:** `@media print` rules in `style.css` override the dark theme to render clean light inventory reports.
+| Table | PK | SK | GSIs | TTL | Notes |
+|---|---|---|---|---|---|
+| `InventoryIQ` | `itemID` | — | `userID-index`, `orgID-index` | — | Items: `name`, `category`, `quantity`, `price` (Decimal), `lowStockThreshold`, `userID`, `orgID`, `barcode`, `version`, timestamps, `deletedAt`/`deletedBy` |
+| `Users` | `Email` | — | — | — | `passwordHash` (scrypt), `salt`. Streams on — REMOVE triggers `CascadeDeleteUser` |
+| `Sessions` | `sessionToken` | — | `userID-index` | `expiresAt` | Audit trail + logout cleanup only. NOT used to validate tokens (JWT is stateless) |
+| `AuthAttempts` | `email` | — | — | `ttl` | Failed-login rate limiting, 15-min lockout |
+| `PasswordResets` | `resetToken` | — | — | `expiresAt` | Single-use reset tokens |
+| `InventoryTransactions` | `transactionID` | — | `orgID-index` | — | Audit trail: `changeType` (`create`/`stock_in`/`stock_out`/`update`/`delete`), before/after/delta quantities |
+| `IdempotencyKeys` | `key` | — | — | `expiresAt` | 24h replay cache: stores `responseBody` |
+| `Suppliers` | `supplierID` | — | `userID-index`, `orgID-index` | — | Supplier records |
+| `Organizations` | `orgID` | — | — | — | `name`, `memberCount`, soft-delete via `deletedAt` |
+| `OrgMembers` | `orgID` | `userID` | `userID-index` | — | `role`, `status` (`active`); the live-lookup table for instant revoke |
+| `OrgInvites` | `inviteTokenHash` | — | `orgID-index`, `email-index` | — | SHA-256 of invite token, `role`, invited email |
 
 ---
 
-## 5. Testing & Verification Guide
+## 4. Conventions (STRICTLY ENFORCED)
 
-E2E testing is conducted using Playwright against live AWS endpoints.
+### A. General
 
-### Run Tests:
+1. **Auth = stateless HS256 JWT, stdlib only.** Never add a JWT library (`jsonwebtoken`, `PyJWT`, etc.) — signing/verification is pure `crypto` (Node) / `hmac`+`hashlib`+`base64` (Python). `JWT_SECRET` must match on `Authentication`, `Proxy`, and `Authorizer`. Token travels as `X-Session-Token`; client keeps it in `sessionStorage.sessionToken`.
+2. **No automatic deployment.** Never invoke AWS deploy commands. Write the code, then give the user the commands:
+   ```bash
+   zip function.zip lambda/AddItem.py && aws lambda update-function-code --function-name AddItem --zip-file fileb://function.zip
+   ```
+   Lambdas importing `sentry_sdk` need `python_vendor/` contents in the zip.
+3. **Sentry stays.** Node: `@sentry/aws-serverless` + `Sentry.wrapHandler`. Python: `sentry-sdk` via `_logging.capture_error`. `SENTRY_DSN` from env. Never remove instrumentation, never let a handler swallow an exception without `capture_error`.
+
+### B. Backend
+
+1. **Identity & tenancy:** trust only proxy-injected headers — `x-iq-user` (actor email), `x-iq-org` (data boundary), `x-iq-role`. Never read identity, org, or role from request bodies, query params, or the JWT payload client-side. Role is looked up live per request (`_org.get_membership`) so removal is instant — never cache membership in a token.
+2. **RBAC:** `ROLE_RANK = viewer 1 < editor 2 < admin 3 < owner 4`; check with `has_role(have, need)` (rank comparison). Exactly one owner per org. Seat cap via `ORG_SEAT_CAP` (default 5). Enforce on every mutation, not just in UI.
+3. **Email normalization:** lowercase every email before any DynamoDB read/write (`.toLowerCase()` / `.lower()`).
+4. **Decimal casting:** DynamoDB numerics come back as `Decimal` — convert to `int`/`float` before `json.dumps()`.
+5. **Atomic writes:** every mutation writes the item change + `InventoryTransactions` log in one `TransactWriteItems`.
+6. **Optimistic locking:** items start at `version: 1`; updates require `If-Match`, mismatch → `412`, success increments version and returns it as `ETag`.
+7. **Soft-deletes:** `DeleteItem` sets `deletedAt`/`deletedBy`, never purges. All reads filter `deletedAt`. Restore within 30 days; `PurgeDeletedItems` sweeps after.
+8. **Idempotency:** writes honor `Idempotency-Key` — replay cached response within 24h, skip business logic.
+9. **Reserved words:** `name` is DynamoDB-reserved — alias as `#nm` in expressions.
+10. **Header reads are case-insensitive:** API Gateway lowercases headers, direct invokes may not. Use `_org.header()` or check both cases.
+11. **Cascade deletes:** removing a `Users` record fires `CascadeDeleteUser` via Streams across all user-owned tables — never delete user records casually.
+12. **Invite tokens:** generate with `secrets.token_urlsafe(32)`, store/lookup only the SHA-256 hash. Raw token appears once, in the invite email.
+
+### C. Frontend
+
+1. **Script order on protected pages:** `config.js` → `utils.js` → `api.js` → page script. Breaking this breaks auth and API calls.
+2. **Errors:** wrap API calls in `try/catch`; route 429 through `checkQuota()` and 401 through `check401()`; render errors in the page — never leave a spinner hanging, never fail silently.
+3. **Theme:** dark luxury, dark-only (no toggle). Font: Inter (Google Fonts CDN). Never hardcode palette values — use the CSS variables:
+   - Backgrounds `--bg-base: #0a0e1a`, `--bg-surface: #11182b`, `--bg-surface-2: #161f36`, `--bg-surface-3: #1d2942`
+   - Borders `--border-subtle: #243352`, `--border-strong: #33476f`
+   - Text `--text-primary: #eef2fb`, `--text-secondary: #9fb0d0`, `--text-muted: #5d6f96`
+   - Accent `--accent: #005ab4`, `--accent-bright: #3b8df0`, `--gold: #e2b65c`, `--gold-dim: #9c7d3a`
+   - Status `--emerald: #34d399` (in stock), `--amber: #fbbf24` (low), `--red: #f87171` (out)
+4. **Feedback:** toasts from `utils.js` — no `alert()`, no inline DOM error text for success/info.
+5. **Print:** `@media print` overrides dark theme for clean light reports.
+
+---
+
+## 5. Testing
+
+Playwright E2E against live AWS endpoints — no unit test suite; E2E is the coverage strategy here.
+
 ```bash
-npx playwright test                      # Runs all suites
-npx playwright test tests/e2e/auth/      # Runs auth suite only
-npx playwright test --headed             # Runs with browser visual window
-npx playwright show-report               # Displays the HTML report
+npx playwright test                      # all suites
+npx playwright test tests/e2e/auth/      # one suite
+npx playwright test --headed
+npx playwright show-report
 ```
 
-*   **Config File:** [playwright.config.ts](file:///Users/sidneyordonia/Documents/InventoryIQ/playwright.config.ts)
-*   **Test Location:** `tests/e2e/` (using Page Object files situated under `tests/pages/`).
-*   **Target Scope:** Tests communicate directly with API Gateway and AWS infrastructure. Ensure all endpoints are correctly deployed and that credentials under `notes` match your context before running.
+- Tests hit `/prod/proxy/...` — bare routes like `/prod/categories` return 403 (API key required). Never target bare routes.
+- Page objects: `tests/pages/`. Config: `playwright.config.ts`.

@@ -17,7 +17,7 @@
 <body class="bg-[#0a0e1a] text-[#eef2fb] font-sans antialiased selection:bg-[#005ab4] selection:text-white">
   <div class="flex h-screen overflow-hidden">
     <!-- Sidebar -->
-    <aside class="w-[280px] bg-[#161f36] border-r border-[#243352] flex flex-col z-20 shrink-0">
+    <aside id="sidebar" class="w-[280px] bg-[#161f36] border-r border-[#243352] flex flex-col z-20 shrink-0 fixed inset-y-0 left-0 z-40 -translate-x-full transition-transform duration-300 ease-out lg:static lg:translate-x-0">
       <div class="h-full flex flex-col">
         <div class="p-6">
           <div class="flex items-center gap-4">
@@ -69,10 +69,20 @@
       </div>
     </aside>
 
+    <!-- Mobile sidebar backdrop -->
+    <div id="sidebar-backdrop" class="hidden fixed inset-0 bg-black/60 z-30 lg:hidden" onclick="closeSidebar()"></div>
+
     <!-- Main Content -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-gradient-to-br from-[#0a0e1a] to-[#0f1523] relative">
       <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-20 pointer-events-none mix-blend-overlay"></div>
       
+      <div class="lg:hidden flex items-center gap-3 px-4 h-16 border-b border-[#243352] bg-[#161f36]/80 backdrop-blur z-10 shrink-0">
+        <button type="button" onclick="toggleSidebar()" aria-label="Toggle menu"
+          class="w-10 h-10 -ml-1 flex items-center justify-center rounded-lg text-[#9fb0d0] hover:text-[#eef2fb] hover:bg-white/5 cursor-pointer">
+          <span class="material-symbols-outlined text-2xl">menu</span>
+        </button>
+        <span class="text-[15px] font-black text-[#eef2fb] tracking-tight">InventoryIQ</span>
+      </div>
       <main class="flex-1 overflow-y-auto p-8 lg:p-12 z-10 custom-scrollbar">
         <div class="max-w-[1200px] mx-auto space-y-8">
           <div class="flex items-end justify-between">
@@ -123,7 +133,7 @@
 
   <!-- Add/Edit Supplier Modal -->
   <div id="supplierModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
-    <div class="bg-[#161f36] border border-[#243352] rounded-2xl shadow-xl p-8 w-[400px]">
+    <div class="bg-[#161f36] border border-[#243352] rounded-2xl shadow-xl p-6 sm:p-8 w-[90vw] max-w-[400px] max-h-[90vh] overflow-y-auto">
       <h2 id="modalTitle" class="text-lg font-black text-[#eef2fb] mb-6">New Supplier</h2>
       <div class="space-y-4 mb-6">
         <div>
