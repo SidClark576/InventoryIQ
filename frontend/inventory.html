@@ -457,7 +457,7 @@
             <div class="flex items-center">
               ${iconDiv}
               <div>
-                <div class="font-bold text-[#eef2fb] text-[13px]">${c.name}</div>
+                <div class="font-bold text-[#eef2fb] text-[13px]">${escHTML(c.name)}</div>
                 <div class="text-[11px] font-medium text-[#5d6f96] mt-0.5">${sku}</div>
               </div>
             </div>
@@ -473,10 +473,10 @@
           <td class="px-6 py-3.5 text-center">${badge}</td>
           <td class="px-8 py-3.5 text-center relative">
             <div class="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#34d399] hover:bg-[#34d399]/10 rounded-lg cursor-pointer transition p-0" title="Add Stock" onclick="openAddModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty}, ${c.version || 1})"><span class="material-symbols-outlined text-[18px]">add</span></button>
-              <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#fbbf24] hover:bg-[#fbbf24]/10 rounded-lg cursor-pointer transition p-0" title="Deduct Stock" onclick="openDeductModal('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', ${qty}, ${c.version || 1})"><span class="material-symbols-outlined text-[18px]">remove</span></button>
+              <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#34d399] hover:bg-[#34d399]/10 rounded-lg cursor-pointer transition p-0" title="Add Stock" onclick="openAddModal('${c.itemID}', '${escHTML(c.name).replace(/'/g, "\\'")}', ${qty}, ${c.version || 1})"><span class="material-symbols-outlined text-[18px]">add</span></button>
+              <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#fbbf24] hover:bg-[#fbbf24]/10 rounded-lg cursor-pointer transition p-0" title="Deduct Stock" onclick="openDeductModal('${c.itemID}', '${escHTML(c.name).replace(/'/g, "\\'")}', ${qty}, ${c.version || 1})"><span class="material-symbols-outlined text-[18px]">remove</span></button>
               <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#3b8df0] hover:bg-[#3b8df0]/10 rounded-lg cursor-pointer transition p-0" onclick="editItem('${c.itemID}')"><span class="material-symbols-outlined text-[18px]">edit</span></button>
-              <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#f87171] hover:bg-[#f87171]/10 rounded-lg cursor-pointer transition p-0" onclick="handleDelete('${c.itemID}', '${c.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+              <button class="w-8 h-8 flex items-center justify-center text-[#5d6f96] hover:text-[#f87171] hover:bg-[#f87171]/10 rounded-lg cursor-pointer transition p-0" onclick="handleDelete('${c.itemID}', '${escHTML(c.name).replace(/'/g, "\\'")}')"><span class="material-symbols-outlined text-[18px]">delete</span></button>
             </div>
             <span class="material-symbols-outlined text-[#5d6f96] absolute right-8 top-1/2 -translate-y-1/2 group-hover:hidden transition">more_vert</span>
           </td>

@@ -2,10 +2,16 @@
 [build]
   publish = "frontend"
 
-# Security headers (frontend is static; CSP kept loose because pages use inline scripts)
+# Security headers. CSP still allows 'unsafe-inline' script/style — every page's
+# logic is inline <script> + onclick="" handlers, and Tailwind's CDN build injects
+# inline <style>. Tightening further needs externalizing page scripts to nonces/hashes.
+# What this CSP does block: any script/frame/object from an origin outside this list —
+# the actual delivery mechanism an attacker-injected <script src="evil.tld"> would need.
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.execute-api.us-east-1.amazonaws.com https://*.s3.amazonaws.com;"
