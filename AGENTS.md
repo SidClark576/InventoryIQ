@@ -2,6 +2,16 @@
 
 Definitive guide for AI coding assistants (Claude Code, Gemini CLI, Codex). `CLAUDE.md` and `GEMINI.md` are redirects to this file.
 
+## Companion Documents — read before you edit
+
+| Document | Read it | What it holds |
+|---|---|---|
+| **[ARCHITECTURE-ESSENTIALS.md](ARCHITECTURE-ESSENTIALS.md)** | Always — before your first edit, every session | Only the decisions where getting it wrong compiles and passes review, then fails in production |
+| **[ARCHITECTURE.md](ARCHITECTURE.md)** | When you need structure or exact facts | System diagram, tech stack, full data model, ERD |
+| **[PRD.md](PRD.md)** | When the *why* or user-facing behavior matters | Who the product is for, what exists today, what it deliberately is not |
+
+This repo is also indexed by [Graft](graft/) — prefer `graft ask`/`graft callers`/`graft skeleton` over grep for codebase navigation.
+
 ---
 
 ## 0. OpenWolf Context Protocol
