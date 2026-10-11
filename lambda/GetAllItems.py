@@ -5,6 +5,7 @@ from decimal import Decimal
 from boto3.dynamodb.conditions import Key, Attr
 import time as _time
 import _logging
+import _org
 
 FUNCTION_NAME = 'GetAllItems'
 
@@ -49,70 +50,23 @@ def _handle(event, context):
     Response: {'items': [...], 'count': N}
     """
     try:
-        # Extract and validate userID from securely injected headers
         headers = event.get('headers') or {}
-        user_id = (headers.get('x-iq-user') or headers.get('X-Iq-User') or '').strip()
+        ctx, err = _org.require_member(headers, minimum='viewer')
+        if err:
+            return err
 
-        # Handle optional deleted flag from query string
         params = event.get('queryStringParameters') or {}
         show_deleted = params.get('deleted', '').lower() == 'true'
-
-        # Return empty result if userID is not provided (prevents returning all items)
-        if not user_id:
-            return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-                },
-                'body': json.dumps({'items': [], 'count': 0})
-            }
-
-        # Query userID-index GSI for this user's items.
-        # When ?deleted=true, return only soft-deleted items (deletedAt exists).
-        # Otherwise return only active items (deletedAt not exists).
         filter_expr = Attr('deletedAt').exists() if show_deleted else Attr('deletedAt').not_exists()
-        result = table.query(
-            IndexName='userID-index',
-            KeyConditionExpression=Key('userID').eq(user_id),
-            FilterExpression=filter_expr
-        )
-        items = result.get('Items', [])
+        items = _org.list_scoped_items(table, ctx['org_id'], ctx['user_id'], filter_expr)
 
-        # Handle pagination: DynamoDB query returns max 1MB at a time
-        # LastEvaluatedKey indicates there are more results to fetch
-        while 'LastEvaluatedKey' in result:
-            result = table.query(
-                IndexName='userID-index',
-                KeyConditionExpression=Key('userID').eq(user_id),
-                FilterExpression=filter_expr,
-                ExclusiveStartKey=result['LastEvaluatedKey']
-            )
-            items.extend(result.get('Items', []))
-
-        # Convert Decimal types to float for JSON serialization
-        # DynamoDB returns Decimal objects which cannot be JSON serialized by default
         items = [
             {k: float(v) if isinstance(v, Decimal) else v for k, v in item.items()}
             for item in items
         ]
 
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
-            },
-            'body': json.dumps({'items': items, 'count': len(items)})
-        }
+        return _logging.response(200, {'items': items, 'count': len(items)})
 
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': 'Internal Server Error'})
-        }
+        _logging.capture_error(e, function=FUNCTION_NAME)
+        return _logging.response(500, {'error': 'Internal Server Error'})

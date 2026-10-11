@@ -5,14 +5,25 @@ import {
     GetCommand,
     DeleteCommand,
     UpdateCommand,
-    QueryCommand
+    QueryCommand,
+    TransactWriteCommand
 } from "@aws-sdk/lib-dynamodb";
 import { SNSClient, SubscribeCommand, ListSubscriptionsByTopicCommand } from "@aws-sdk/client-sns";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import crypto from "crypto";
-import * as Sentry from "@sentry/aws-serverless";
 
-if (process.env.SENTRY_DSN) {
+let Sentry = {
+  init() {},
+  wrapHandler(fn) { return fn; },
+  captureException() {},
+};
+try {
+  Sentry = await import("@sentry/aws-serverless");
+} catch {
+  console.warn("Sentry package not bundled; continuing without it");
+}
+
+if (process.env.SENTRY_DSN && typeof Sentry.init === "function") {
   Sentry.init({ dsn: process.env.SENTRY_DSN, tracesSampleRate: 1.0 });
 }
 
@@ -44,7 +55,9 @@ const AUTH_ATTEMPTS_TABLE  = process.env.AUTH_ATTEMPTS_TABLE   || "AuthAttempts"
 const PASSWORD_RESETS_TABLE = process.env.PASSWORD_RESETS_TABLE || "PasswordResets";
 const SNS_TOPIC_ARN        = process.env.SNS_TOPIC_ARN;
 const SES_SENDER           = process.env.SES_SENDER            || "";  // verified SES sender email
-const APP_URL              = process.env.APP_URL               || "";  // e.g. https://your-app.s3-website...
+const APP_URL              = process.env.APP_URL               || "https://theinventoryiq.netlify.app";
+const ORGS_TABLE           = process.env.ORGS_TABLE            || "Organizations";
+const MEMBERS_TABLE        = process.env.MEMBERS_TABLE         || "OrgMembers";
 
 // Lifetimes
 const SESSION_TTL_SECONDS = 8 * 60 * 60;   // 8 h
@@ -55,7 +68,7 @@ const MAX_FAILURES        = 5;              // max failed logins before 429
 // Password must have lowercase, uppercase, digit, min 8 chars
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-const _CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+const _CORS_ORIGIN = process.env.CORS_ORIGIN || 'https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500';
 const _CORS_ORIGINS = _CORS_ORIGIN !== '*'
     ? new Set(_CORS_ORIGIN.split(',').map(o => o.trim()).filter(Boolean))
     : null;
@@ -174,18 +187,63 @@ export const handler = Sentry.wrapHandler(async (event) => {
 
             const salt = crypto.randomBytes(16).toString("hex");
             const hashedPassword = hashPassword(password, salt);
+            const emailKey = email.toLowerCase();
+            const now = new Date().toISOString();
+            const orgId = crypto.randomUUID();
 
-            // Write user to DynamoDB
-            await docClient.send(new PutCommand({
-                TableName: USERS_TABLE,
-                ConditionExpression: "attribute_not_exists(Email)",
-                Item: {
-                    Email: email.toLowerCase(),
-                    passwordHash: hashedPassword,
-                    salt: salt,
-                    createdAt: new Date().toISOString()
-                }
-            }));
+            const userItem = {
+                Email: emailKey,
+                passwordHash: hashedPassword,
+                salt: salt,
+                createdAt: now
+            };
+            try {
+                await docClient.send(new TransactWriteCommand({
+                    TransactItems: [
+                        {
+                            Put: {
+                                TableName: USERS_TABLE,
+                                ConditionExpression: "attribute_not_exists(Email)",
+                                Item: userItem
+                            }
+                        },
+                        {
+                            Put: {
+                                TableName: ORGS_TABLE,
+                                Item: {
+                                    orgID: orgId,
+                                    name: "My Inventory",
+                                    ownerUserID: emailKey,
+                                    memberCount: 1,
+                                    seatCount: 1,
+                                    createdAt: now,
+                                    updatedAt: now
+                                }
+                            }
+                        },
+                        {
+                            Put: {
+                                TableName: MEMBERS_TABLE,
+                                Item: {
+                                    orgID: orgId,
+                                    userID: emailKey,
+                                    role: "owner",
+                                    status: "active",
+                                    joinedAt: now
+                                }
+                            }
+                        }
+                    ]
+                }));
+            } catch (orgErr) {
+                // Org tables are not live yet — still create the user so signup works.
+                Sentry.captureException(orgErr);
+                await docClient.send(new PutCommand({
+                    TableName: USERS_TABLE,
+                    ConditionExpression: "attribute_not_exists(Email)",
+                    Item: userItem
+                }));
+            }
 
             // Subscribe the new user's email to SNS topic for stock alerts
             if (SNS_TOPIC_ARN) {

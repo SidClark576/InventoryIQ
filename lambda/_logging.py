@@ -79,21 +79,40 @@ def capture_error(exc=None, **context):
             sentry_sdk.capture_message(context.get('message', 'error'), level='error')
 
 
+_DEFAULT_CORS = 'https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500'
+_CORS_ORIGIN = os.environ.get('CORS_ORIGIN', _DEFAULT_CORS)
+_CORS_ORIGINS = (
+    None if _CORS_ORIGIN == '*'
+    else {o.strip() for o in _CORS_ORIGIN.split(',') if o.strip()}
+)
+
+
+def cors_headers(methods='OPTIONS,POST,GET,PUT,DELETE', extra_headers=None, request_origin=''):
+    """CORS headers locked to Netlify + local Playwright unless CORS_ORIGIN=*."""
+    headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Headers': 'Content-Type,x-api-key,X-Session-Token,If-Match,Idempotency-Key,X-IQ-Org',
+        'Access-Control-Allow-Methods': methods,
+    }
+    if _CORS_ORIGINS is None:
+        headers['Access-Control-Allow-Origin'] = '*'
+    elif request_origin and request_origin in _CORS_ORIGINS:
+        headers['Access-Control-Allow-Origin'] = request_origin
+        headers['Vary'] = 'Origin'
+    else:
+        headers['Access-Control-Allow-Origin'] = 'https://theinventoryiq.netlify.app'
+    if extra_headers:
+        headers.update(extra_headers)
+    return headers
+
+
 def response(status_code, body, methods='OPTIONS,POST,GET,PUT,DELETE', extra_headers=None):
     """Standard JSON API response with CORS headers. Pass `methods` to override
     Access-Control-Allow-Methods; pass `extra_headers` to add response headers
     (e.g. ETag)."""
-    headers = {
-        'Content-Type'                : 'application/json',
-        'Access-Control-Allow-Origin' : '*',
-        'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-        'Access-Control-Allow-Methods': methods,
-    }
-    if extra_headers:
-        headers.update(extra_headers)
     return {
         'statusCode': status_code,
-        'headers'   : headers,
+        'headers'   : cors_headers(methods, extra_headers),
         'body'      : json.dumps(body),
     }
 

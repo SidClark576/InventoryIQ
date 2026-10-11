@@ -4,6 +4,7 @@ import boto3
 from boto3.dynamodb.conditions import Key
 import time as _time
 import _logging
+import _org
 
 FUNCTION_NAME = 'GetCategories'
 
@@ -59,28 +60,13 @@ def _handle(event, context):
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'body': ''}
 
-    # Extract and validate userID from securely injected headers
     headers = event.get('headers') or {}
-    user_id = (headers.get('x-iq-user') or headers.get('X-Iq-User') or '').strip()
-    if not user_id:
-        return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'userID required'})}
+    ctx, err = _org.require_member(headers, minimum='viewer')
+    if err:
+        return err
 
     try:
-        # Query userID-index GSI instead of scanning the full table
-        result = table.query(
-            IndexName='userID-index',
-            KeyConditionExpression=Key('userID').eq(user_id)
-        )
-        items = result.get('Items', [])
-
-        # Pagination loop: handle DynamoDB query page limit (1MB per request)
-        while 'LastEvaluatedKey' in result:
-            result = table.query(
-                IndexName='userID-index',
-                KeyConditionExpression=Key('userID').eq(user_id),
-                ExclusiveStartKey=result['LastEvaluatedKey']
-            )
-            items.extend(result.get('Items', []))
+        items = _org.list_scoped_items(table, ctx['org_id'], ctx['user_id'])
 
         # Extract unique categories from all items
         # Set() removes duplicates, sorted() orders alphabetically

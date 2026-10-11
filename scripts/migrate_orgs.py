@@ -10,9 +10,10 @@ Pass --apply to actually write. Idempotent — re-running skips users/items alre
 
 Prereqs (NOT created here — create first): tables Organizations, OrgMembers
 (+ GSI userID-index), OrgInvites (+ GSIs orgID-index, email-index), and an
-orgID-index GSI on InventoryIQ / InventoryTransactions / Suppliers.
+orgID-index GSI on InventoryIQ / InventoryTransactions.
 """
 import argparse
+import time
 import uuid
 from datetime import datetime, timezone
 
@@ -20,7 +21,7 @@ USERS_TABLE   = 'Users'
 ORGS_TABLE    = 'Organizations'
 MEMBERS_TABLE = 'OrgMembers'
 # (table, partition-key attr) for data that gets stamped with orgID
-DATA_TABLES = [('InventoryIQ', 'itemID'), ('InventoryTransactions', 'transactionID'), ('Suppliers', 'supplierID')]
+DATA_TABLES = [('InventoryIQ', 'itemID'), ('InventoryTransactions', 'transactionID')]
 
 
 def normalize_email(email):
@@ -49,9 +50,40 @@ def _scan(table):
 
 
 def run(apply):
-    import boto3
-    from boto3.dynamodb.conditions import Key
+    try:
+        import boto3
+        from boto3.dynamodb.conditions import Key
+    except ImportError:
+        raise SystemExit(
+            'boto3 is not installed for this python3.\n'
+            'Install: python3 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt\n'
+            'Then: AWS_PROFILE=inventoryiq .venv/bin/python scripts/migrate_orgs.py --apply'
+        )
     ddb = boto3.resource('dynamodb')
+    client = boto3.client('dynamodb')
+    for table_name, index_name in (
+        (ORGS_TABLE, None),
+        (MEMBERS_TABLE, 'userID-index'),
+    ):
+        client.get_waiter('table_exists').wait(TableName=table_name)
+        if not index_name:
+            continue
+        deadline = time.time() + 300
+        while True:
+            desc = client.describe_table(TableName=table_name)['Table']
+            match = next(
+                (i for i in (desc.get('GlobalSecondaryIndexes') or [])
+                 if i['IndexName'] == index_name),
+                None,
+            )
+            if match and match.get('IndexStatus') == 'ACTIVE':
+                break
+            if time.time() >= deadline:
+                raise SystemExit(
+                    f'{table_name}.{index_name} not ACTIVE — re-run '
+                    'provision_org_infra.py --apply and wait, then migrate again'
+                )
+            time.sleep(5)
     users   = ddb.Table(USERS_TABLE)
     orgs    = ddb.Table(ORGS_TABLE)
     members = ddb.Table(MEMBERS_TABLE)

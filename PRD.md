@@ -9,17 +9,17 @@
 ## 1. TL;DR
 
 InventoryIQ is a multi-tenant inventory management web app: teams track
-stock levels, log stock in/out, get low-stock and reorder alerts, forecast
-stockouts, and manage suppliers, with organization-level roles so multiple
-users can share and control access to the same inventory.
+stock levels, log stock in/out, and get low-stock reorder alerts, with
+organization-level roles so multiple users can share and control access
+to the same inventory.
 
 ## 2. Background
 
 Small teams tracking inventory in spreadsheets lose visibility into stock
 levels, reorder timing, and who changed what. InventoryIQ replaces that with
 a shared, audited, role-gated system: every quantity change is logged, every
-user's access is scoped to their organization, and low-stock/forecast
-signals surface before a stockout happens.
+user's access is scoped to their organization, and low-stock signals
+surface before a stockout happens.
 
 ## 3. Problem & Target Users
 
@@ -48,10 +48,9 @@ signals surface before a stockout happens.
    determine what a user can see and do.
 2. **Inventory core** — add/edit/search items, adjust stock with an audit
    log, soft-delete with 30-day restore window.
-3. **Insight layer** — low-stock detection, reorder recommendations,
-   stockout forecasting from historical stock-out logs.
-4. **Supporting ops** — supplier records, CSV bulk import, barcode lookup,
-   printable reports, scheduled daily alert summaries.
+3. **Insight layer** — low-stock detection and reorder recommendations.
+4. **Supporting ops** — CSV bulk import, barcode lookup, printable reports,
+   scheduled daily alert summaries.
 
 ## 6. User Experience — what exists today
 
@@ -65,11 +64,9 @@ signals surface before a stockout happens.
   reads the item from `sessionStorage.iq_editItem`.
 - **Insights** (`insights.html`) — low-stock analysis and reorder
   recommendations.
-- **Forecast** (`forecast.html`) — stockout projections: daily burn rate,
-  days-until-stockout, confidence, weighted by 30/60/90-day stock-out history
-  (50%/30%/20%).
-- **Suppliers** (`suppliers.html`) — supplier CRUD and item association.
 - **Transactions** (`transactions.html`) — filtered audit log viewer.
+- **Organization** (`org.html`) — member admin for the current org.
+- **Accept invite** (`accept.html`) — `accept.html?token=` from the invite email.
 
 ## 7. Requirements
 
@@ -82,8 +79,8 @@ signals surface before a stockout happens.
   locking (`If-Match`/`version`), soft-delete, and restore within 30 days.
 - Every item mutation writes an `InventoryTransactions` audit entry in the
   same transaction as the item write.
-- Low-stock and forecast pages compute from real transaction history, not
-  static thresholds alone.
+- The insights page computes low-stock and reorder signals from current
+  inventory, not from a separate forecast screen.
 - CSV bulk import runs via S3 presigned URLs, with an async path for large
   files (`BulkImportAsync.py`).
 - Deleting a user cascades deletion across all their owned data via
@@ -93,7 +90,7 @@ signals surface before a stockout happens.
 
 | Gap | Impact |
 |---|---|
-| No unit test suite, only E2E against live AWS | A logic bug in a Lambda not covered by an E2E path ships undetected |
+| Python unit tests cover only a few Lambdas (`tests/unit/python/`). Playwright is still the main check | A logic bug in a Lambda not covered by those tests can ship |
 | `ORG_SEAT_CAP` is a fixed default (5), not per-org configurable in UI | Growing orgs must be raised by a backend change, not self-serve |
 | Weekly `cerebrum-reflection` cron (dev tooling, not product) can hang indefinitely (`ETIMEDOUT`) without pruning | Not a product gap, but a known dev-tooling reliability issue — see `.wolf/OPENWOLF.md` |
 

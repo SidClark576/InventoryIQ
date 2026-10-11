@@ -7,6 +7,7 @@ from decimal import Decimal
 from datetime import datetime, timezone
 import time as _time
 import _logging
+import _org
 
 FUNCTION_NAME = 'BulkImport'
 
@@ -69,12 +70,14 @@ def _handle(event, context):
     path = event.get('path', '')
     headers = {k.lower(): v for k, v in (event.get('headers') or {}).items()}
 
-    user_id = (headers.get('x-iq-user') or '').strip()
-    if not user_id:
-        return _err(401, 'Missing x-iq-user header')
-
     if method == 'OPTIONS':
         return {'statusCode': 200, 'headers': _headers(), 'body': ''}
+
+    ctx, err = _org.require_member(event.get('headers') or {}, minimum='editor')
+    if err:
+        return err
+    user_id = ctx['user_id']
+    org_id = ctx['org_id']
 
     if method == 'GET' and 'presign' in path:
         return _handle_presign(event, user_id)
@@ -83,7 +86,7 @@ def _handle(event, context):
         return _handle_get_job(event, user_id)
 
     if method == 'POST':
-        return _handle_sync_import(event, headers, user_id)
+        return _handle_sync_import(event, headers, user_id, org_id)
 
     return _err(405, f'Method {method} not allowed')
 
@@ -200,7 +203,7 @@ def _validate_row(row, idx):
     return item, None
 
 
-def _write_chunk(valid_rows, user_id, timestamp):
+def _write_chunk(valid_rows, user_id, timestamp, org_id=''):
     """Write a chunk of ≤25 items atomically via TransactWriteItems."""
     transact_items = []
     for row in valid_rows:
@@ -219,6 +222,8 @@ def _write_chunk(valid_rows, user_id, timestamp):
             'createdAt': timestamp,
             'updatedAt': timestamp,
         }
+        if org_id:
+            item['orgID'] = org_id
         tx_item = {
             'transactionID': str(uuid.uuid4()),
             'itemID': item_id,
@@ -231,6 +236,8 @@ def _write_chunk(valid_rows, user_id, timestamp):
             'notes': 'Bulk import',
             'createdAt': timestamp,
         }
+        if org_id:
+            tx_item['orgID'] = org_id
         transact_items.append({
             'Put': {
                 'TableName': TABLE,
@@ -247,7 +254,7 @@ def _write_chunk(valid_rows, user_id, timestamp):
     ddb_client.transact_write_items(TransactItems=transact_items)
 
 
-def _handle_sync_import(event, headers, user_id):
+def _handle_sync_import(event, headers, user_id, org_id=''):
     """
     Sync import: parse JSON body rows, validate each, write in chunks of 25.
     Returns {inserted, failed, errors}.
@@ -289,7 +296,7 @@ def _handle_sync_import(event, headers, user_id):
         for i in range(num_chunks):
             chunk = valid_rows[i * CHUNK_SIZE:(i + 1) * CHUNK_SIZE]
             try:
-                _write_chunk(chunk, user_id, timestamp)
+                _write_chunk(chunk, user_id, timestamp, org_id)
                 inserted += len(chunk)
             except Exception as e:
                 for row in chunk:

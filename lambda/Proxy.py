@@ -9,7 +9,7 @@ API_KEY_SECRET   = os.environ.get('API_KEY_SECRET', 'inventoryiq/api-key')
 # Fallback: read API_KEY directly from env (used if Secrets Manager not configured)
 _API_KEY_ENV     = os.environ.get('API_KEY', '')
 # CORS_ORIGIN: comma-separated list of allowed origins, or '*' for open
-CORS_ORIGIN      = os.environ.get('CORS_ORIGIN', '*')
+CORS_ORIGIN      = os.environ.get('CORS_ORIGIN', 'https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500')
 _CORS_ORIGINS    = {o.strip() for o in CORS_ORIGIN.split(',') if o.strip()} if CORS_ORIGIN != '*' else None
 # JWT secret — must match Authentication Lambda
 _JWT_SECRET      = os.environ.get('JWT_SECRET', '').encode()
@@ -22,7 +22,7 @@ _API_KEY_TTL   = 300  # 5 minutes
 
 _CORS_STATIC = {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Headers': 'Content-Type,x-api-key,X-Session-Token,If-Match,Idempotency-Key',
+    'Access-Control-Allow-Headers': 'Content-Type,x-api-key,X-Session-Token,If-Match,Idempotency-Key,X-IQ-Org',
     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
 }
 
@@ -120,6 +120,9 @@ def _handle(event, context):
 
     if method == 'OPTIONS':
         return {'statusCode': 200, 'headers': _cors_headers(origin), 'body': ''}
+
+    if not _JWT_SECRET:
+        return _unauthorized('Server misconfigured', origin)
 
     # {proxy+} sends the sub-path in pathParameters
     path = event.get('pathParameters', {}).get('proxy', '')

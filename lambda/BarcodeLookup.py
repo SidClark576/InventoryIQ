@@ -7,6 +7,7 @@ from decimal import Decimal
 from datetime import datetime, timezone
 import time as _time
 import _logging
+import _org
 
 FUNCTION_NAME = 'BarcodeLookup'
 
@@ -129,6 +130,10 @@ def _handle(event, context):
     Returns 404 if no product found in any source.
     """
     try:
+        ctx, err = _org.require_member(event.get('headers') or {}, minimum='viewer')
+        if err:
+            return err
+
         path_params = event.get('pathParameters') or {}
         code = (path_params.get('code') or '').strip()
 

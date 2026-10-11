@@ -1,7 +1,8 @@
 # Dependencies
 node_modules
-package-lock.json
-package.json
+
+# Vite build output
+frontend/dist
 
 # Python
 .venv
@@ -12,12 +13,14 @@ __pycache__/
 # Lambda build artifacts (regenerated on deploy)
 lambda/*.zip
 
-# Tests / reports
-tests
-tests/*
+# Test reports (keep tests/ and package.json tracked)
 playwright-results.json
 playwright-report
 test-results
+
+# Agent / local capture bloat
+.agent/
+.playwright-mcp/
 
 # Env
 .env*

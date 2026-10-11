@@ -12,8 +12,8 @@
 
 ## 1. System Overview
 
-Serverless multi-tenant inventory management system on AWS. Static S3
-frontend calls a proxy Lambda that verifies identity/tenancy, then forwards
+Serverless multi-tenant inventory management system on AWS. Static Netlify
+frontend (`theinventoryiq.netlify.app`) calls a proxy Lambda that verifies identity/tenancy, then forwards
 to a second, API-key-protected API Gateway stage fronting the business-logic
 Lambdas.
 
@@ -32,7 +32,7 @@ flowchart LR
 
 | Layer | Technology | Notes |
 |---|---|---|
-| Frontend | Static S3, plain HTML, vanilla ESM JS, vanilla CSS | No framework/build step |
+| Frontend | Static Netlify, plain HTML, vanilla ESM JS, vanilla CSS | No framework/build step; `netlify.toml` publishes `frontend/` |
 | Edge auth | `Proxy.py` (Python Lambda) | JWT verify, org membership check, header injection |
 | API authorizer | `Authorizer.mjs` (Node) | API Gateway TOKEN authorizer, stdlib crypto only |
 | Business logic | Python + Node ESM Lambdas | See `lambda/` |
@@ -46,7 +46,7 @@ flowchart LR
 **Directory layout:**
 
 ```
-├── frontend/     Static S3 assets: plain HTML, vanilla ESM JS, vanilla CSS
+├── frontend/     Static Netlify assets: plain HTML, vanilla ESM JS, vanilla CSS
 ├── lambda/       Standalone Lambdas (Python + Node ESM); python_vendor/ = bundled pip deps
 ├── scripts/      Operational one-shots (migrate_orgs.py)
 ├── docs/         PRDs and design artifacts
@@ -78,14 +78,11 @@ the Lambda) → item write + audit log write in one `TransactWriteItems`.
 **Backend Lambda catalog:** see `AGENTS.md` §2 for the full annotated list
 (`AddItem.py`, `GetAllItems.py`, `UpdateItem.py`, `DeleteItem.py`/
 `RestoreItem.py`/`PurgeDeletedItems.py`, `GetCategories.py`,
-`GetTransactions.py`, `LowItemInsight.py`, `Forecast.py`, `BulkImport*.py`,
-`BarcodeLookup.py`, `Suppliers.py`, `CascadeDeleteUser.py`, `DailyAlert.py`,
+`GetTransactions.py`, `LowItemInsight.py`, `BulkImport*.py`,
+`BarcodeLookup.py`, `CascadeDeleteUser.py`, `DailyAlert.py`,
 `Orgs.py`, `OrgMembers.py`, `OrgInvites.py`, `_org.py`, `_logging.py`).
 
-**Frontend catalog:** see `AGENTS.md` §2 for the full annotated page list
-(`login.html`, `dashboard.html`, `inventory.html`, `add-item.html`,
-`insights.html`, `forecast.html`, `suppliers.html`, `transactions.html`,
-plus shared `api.js`/`utils.js`/`charts.js`/`config.js`).
+**Frontend catalog:** see `AGENTS.md` §2. HTML pages keep their URLs. Each page loads `frontend/src/pages/<page>.ts`. Shared client is `frontend/src/config.ts`, `session.ts`, `api.ts`, `utils.ts`, and `charts.ts`. Vite builds to `frontend/dist`.
 
 ## 4. Data Model
 
@@ -146,10 +143,10 @@ sufficiency: that's a second, per-request check.
 
 | Layer | Location | Runner |
 |---|---|---|
-| E2E (only layer) | `tests/e2e/`, page objects in `tests/pages/` | Playwright, config `playwright.config.ts` |
+| E2E | `tests/e2e/`, page objects in `tests/pages/` | Playwright. `playwright.config.ts` starts Vite on port 8000 |
+| Python unit | `tests/unit/python/` | `python` / the CI `py_compile` job does not run these by itself |
 
-No unit test suite — E2E against live AWS endpoints is the coverage
-strategy. See `AGENTS.md` §5 for commands and the proxy-route requirement.
+Playwright hits live AWS through `/prod/proxy`. See `AGENTS.md` §5. Localhost preview skips login unless `iq_local_logout` is set; the auth fixture sets that flag.
 
 ## 8. Where to Look
 
@@ -159,6 +156,6 @@ strategy. See `AGENTS.md` §5 for commands and the proxy-route requirement.
 | How is tenancy/RBAC enforced? | `lambda/_org.py` |
 | What's the DynamoDB schema? | §4 above |
 | How does an item mutation work end to end? | `lambda/AddItem.py` / `lambda/UpdateItem.py` |
-| How does the frontend call the API? | `frontend/api.js`, `frontend/config.js` |
+| How does the frontend call the API? | `frontend/src/api.ts`, `frontend/src/config.ts` |
 | What are the theme/design tokens? | `AGENTS.md` §4.C |
 | How do I run tests? | `AGENTS.md` §5 |

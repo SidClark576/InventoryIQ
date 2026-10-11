@@ -7,6 +7,7 @@ from boto3.dynamodb.types import TypeSerializer
 from botocore.exceptions import ClientError
 import time as _time
 import _logging
+import _org
 
 FUNCTION_NAME = 'DeleteItem'
 
@@ -63,12 +64,11 @@ def _handle(event, context):
 
         headers = event.get('headers') or {}
 
-        # Sprint 3: read userID from proxy-injected header; do NOT fall back to query params
-        user_id = (
-            headers.get('x-iq-user') or
-            headers.get('X-Iq-User') or
-            ''
-        ).strip()
+        ctx, err = _org.require_member(headers, minimum='editor')
+        if err:
+            return err
+        user_id = ctx['user_id']
+        org_id = ctx['org_id']
 
         # Read existing item for ownership check and audit trail
         existing_resp = table.get_item(Key={'itemID': item_id})
@@ -76,9 +76,8 @@ def _handle(event, context):
         if not existing:
             return response(404, {'error': 'Item not found'})
 
-        # Ownership check: prevent cross-tenant deletes
-        if not user_id or existing.get('userID', '') != user_id:
-            return response(403, {'error': 'Forbidden: item belongs to another user'})
+        if not _org.item_in_scope(existing, org_id, user_id):
+            return response(403, {'error': 'Forbidden: item is outside this organization'})
 
         # Already soft-deleted — return 410 Gone
         if existing.get('deletedAt'):

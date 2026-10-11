@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "aws-core": {
+      "command": "uvx",
+      "args": ["mcp-proxy-for-aws@latest", "https://aws-mcp.us-east-1.api.aws/mcp"],
+      "env": {
+        "AWS_PROFILE": "inventoryiq",
+        "AWS_REGION": "us-east-1",
+        "AWS_API_MCP_PROFILE_NAME": "inventoryiq"
+      }
+    },
+    "aws-serverless": {
+      "command": "uvx",
+      "args": ["awslabs.aws-serverless-mcp-server@latest"],
+      "env": {
+        "AWS_PROFILE": "inventoryiq",
+        "AWS_REGION": "us-east-1",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      }
+    }
+  }
+}

@@ -8,6 +8,7 @@ from boto3.dynamodb.types import TypeSerializer
 from botocore.exceptions import ClientError
 import time as _time
 import _logging
+import _org
 
 FUNCTION_NAME = 'AddItem'
 
@@ -81,12 +82,11 @@ def _handle(event, context):
                 # Replay: return the original successful response unchanged
                 return response(200, json.loads(idem_resp['Item']['responseBody']))
 
-        # Sprint 3: read userID from proxy-injected header; do NOT fall back to body
-        user_id = (
-            headers.get('x-iq-user') or
-            headers.get('X-Iq-User') or
-            ''
-        ).strip()
+        ctx, err = _org.require_member(headers, minimum='editor')
+        if err:
+            return err
+        user_id = ctx['user_id']
+        org_id = ctx['org_id']
 
         item_id   = str(uuid.uuid4())
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -107,6 +107,8 @@ def _handle(event, context):
             'createdAt'        : timestamp,
             'updatedAt'        : timestamp,
         }
+        if org_id:
+            item['orgID'] = org_id
         tx_item = {
             'transactionID' : str(uuid.uuid4()),
             'itemID'        : item_id,
@@ -119,6 +121,8 @@ def _handle(event, context):
             'notes'         : 'Item created',
             'createdAt'     : timestamp,
         }
+        if org_id:
+            tx_item['orgID'] = org_id
 
         # Atomic write: item + transaction log in a single transaction
         # ConditionExpression prevents overwriting an existing item (UUID collision guard)

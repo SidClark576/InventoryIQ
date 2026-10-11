@@ -8,6 +8,7 @@ from boto3.dynamodb.types import TypeSerializer
 from botocore.exceptions import ClientError
 import time as _time
 import _logging
+import _org
 
 FUNCTION_NAME = 'UpdateItem'
 
@@ -69,12 +70,11 @@ def _handle(event, context):
         headers   = event.get('headers') or {}
         timestamp = datetime.now(timezone.utc).isoformat()
 
-        # Sprint 3: read userID from proxy-injected header; do NOT fall back to body
-        user_id = (
-            headers.get('x-iq-user') or
-            headers.get('X-Iq-User') or
-            ''
-        ).strip()
+        ctx, err = _org.require_member(headers, minimum='editor')
+        if err:
+            return err
+        user_id = ctx['user_id']
+        org_id = ctx['org_id']
 
         # Sprint 3: If-Match header required for all updates (optimistic locking)
         if_match_raw = (
@@ -96,9 +96,8 @@ def _handle(event, context):
         if not existing:
             return response(404, {'error': 'Item not found'})
 
-        # Ownership check: prevent cross-tenant writes
-        if not user_id or existing.get('userID', '') != user_id:
-            return response(403, {'error': 'Forbidden: item belongs to another user'})
+        if not _org.item_in_scope(existing, org_id, user_id):
+            return response(403, {'error': 'Forbidden: item is outside this organization'})
 
         # Fast-fail version check before touching the DB
         # TransactWriteItems ConditionExpression below handles the concurrent race case
@@ -165,6 +164,8 @@ def _handle(event, context):
             'notes'         : body.get('notes', ''),
             'createdAt'     : timestamp,
         }
+        if org_id:
+            tx_item['orgID'] = org_id
 
         # Atomic write: update item with version guard + log transaction
         # ConditionExpression '#ver = :v' catches concurrent writes that slipped past

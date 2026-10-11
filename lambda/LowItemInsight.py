@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from boto3.dynamodb.conditions import Key, Attr
 import time as _time
 import _logging
+import _org
 
 FUNCTION_NAME = 'LowItemInsight'
 
@@ -112,53 +113,12 @@ def _handle(event, context):
     - Range: 0-100
     """
     try:
-        # Extract and validate userID from securely injected headers
         headers = event.get('headers') or {}
-        user_id = (headers.get('x-iq-user') or headers.get('X-Iq-User') or '').strip()
-
-        # Return empty insights if no userID (no inventory to analyze)
-        if not user_id:
-            return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Headers': 'Content-Type,x-api-key',
-                    'Access-Control-Allow-Methods': 'OPTIONS,GET'
-                },
-                'body': json.dumps({
-                    'summary': {
-                        'totalProducts': 0, 'outOfStockCount': 0, 'lowStockCount': 0,
-                        'atRiskCount': 0, 'healthScore': 100, 'estimatedInventoryValue': 0
-                    },
-                    'outOfStockItems': [], 'lowStockItems': [], 'categoryBreakdown': {},
-                    'categoryRiskBreakdown': [], 'topReorderPriorities': [],
-                    'recommendations': ['📦 No inventory found. Start by adding products.'],
-                    'generatedAt': datetime.now(timezone.utc).isoformat()
-                })
-            }
-
-        # Query userID-index GSI instead of scanning the full table
-        # Sentinel items (alert_meta#) have userID='__system__' so they are
-        # automatically excluded when querying by the real user's email.
-        # FilterExpression excludes soft-deleted items so dashboard counts
-        # (totalProducts, outOfStockCount, etc.) match what Inventory shows.
-        result = table.query(
-            IndexName='userID-index',
-            KeyConditionExpression=Key('userID').eq(user_id),
-            FilterExpression=Attr('deletedAt').not_exists()
-        )
-        items = result.get('Items', [])
-
-        # Pagination loop: handle DynamoDB query page limit (1MB per request)
-        while 'LastEvaluatedKey' in result:
-            result = table.query(
-                IndexName='userID-index',
-                KeyConditionExpression=Key('userID').eq(user_id),
-                FilterExpression=Attr('deletedAt').not_exists(),
-                ExclusiveStartKey=result['LastEvaluatedKey']
-            )
-            items.extend(result.get('Items', []))
+        ctx, err = _org.require_member(headers, minimum='viewer')
+        if err:
+            return err
+        user_id = ctx['user_id']
+        items = _org.list_scoped_items(table, ctx['org_id'], user_id, Attr('deletedAt').not_exists())
 
         # Initialize data structures for analysis
         low_stock = []  # Items with qty > 0 but <= threshold

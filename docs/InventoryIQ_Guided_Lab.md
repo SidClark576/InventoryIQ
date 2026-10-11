@@ -1,5 +1,7 @@
 # 🧪 Guided Lab: Building InventoryIQ on AWS
 
+> **Snapshot from April 2026.** This lab uploads classic `config.js`, `api.js`, and `utils.js` and puts an API key in the browser. The repository no longer works that way. The current frontend is a Vite multi-page TypeScript app: `npm run dev` on port 8000, `npm run build` writes `frontend/dist`, and Netlify publishes that folder. Endpoints live in `frontend/src/config.ts` (`/prod/proxy` and `/prod/auth`). The browser sends `X-Session-Token` and does not hold the API key. Do not copy the old appendix JavaScript into `frontend/`.
+
 **Course:** IT 426 — Cloud Application Development  
 **Lab Title:** Deploying a Serverless Inventory Management Application  
 **Estimated Duration:** 90–120 minutes  
@@ -58,7 +60,7 @@ You will need these files locally on your computer:
 - `DailyAlert.py`
 - `login.html`, `dashboard.html`, `inventory.html`, `add-item.html`
 - `insights.html`, `transactions.html`, `index.html`
-- `api.js`, `config.js`, `utils.js`, `style.css`
+- `frontend/src/config.ts`, `frontend/src/api.ts`, `frontend/src/utils.ts`, `frontend/style.css` (the lab steps below still name the old `config.js` / `api.js` / `utils.js` files from this snapshot)
 
 ---
 
@@ -455,7 +457,7 @@ export const handler = async (event) => {
 3. Set **Name:** `InventoryIQ-Key`
 4. Select **Auto Generate**.
 5. Click **Save**.
-6. **Copy and save the API key value** — you will need it in `config.js` later.
+6. **Copy and save the API key value.** In this 2026-04 lab snapshot it was pasted into `config.js`. In the current app the key stays on the proxy Lambda. Do not put it in `frontend/src/config.ts`.
 
 ---
 
@@ -623,7 +625,9 @@ You will now create the API resources and methods. The structure is:
 
 ---
 
-### Task 5.2 — Update `config.js`
+### Task 5.2 — Update `config.js` (lab snapshot only)
+
+The current repo uses `frontend/src/config.ts` and does not take an API key. The block below is the April 2026 lab file, not the file to commit.
 
 Before uploading, open `config.js` on your computer and update it with your actual API values:
 
@@ -642,7 +646,7 @@ Save the file.
 
 1. Click your newly created bucket name.
 2. Click **Upload**.
-3. Click **Add files** and select all of these files from your local machine:
+3. Click **Add files** and select all of these files from your local machine. This list is the April 2026 lab snapshot. The current app is built with `npm run build` and is not uploaded as loose `.js` files:
    - `login.html`
    - `dashboard.html`
    - `inventory.html`
@@ -901,7 +905,7 @@ if (SNS_TOPIC_ARN) {
 ## 📎 Appendix: Complete Source Code
 
 > Paste each block into the corresponding Lambda **Code source** editor and click **Deploy**.
-> For `config.js`, `utils.js`, and `api.js`, save locally and upload to your S3 bucket.
+> The `config.js`, `utils.js`, and `api.js` blocks at the end of this lab are the April 2026 snapshot. The current client is `frontend/src/config.ts`, `frontend/src/utils.ts`, and `frontend/src/api.ts`.
 
 ---
 
@@ -1540,9 +1544,11 @@ Key behaviors:
 
 ---
 
-### `config.js` — Frontend Configuration
+### `config.js` — Frontend Configuration (April 2026 snapshot)
 
-> ⚠️ **Replace all placeholder values** with your actual API Gateway Invoke URL and API Key before uploading to S3.
+> The current file is `frontend/src/config.ts`. It has `API_ENDPOINT` and `AUTH_ENDPOINT` only. Do not add `API_KEY` there.
+>
+> ⚠️ The block below is the old lab file. **Replace all placeholder values** with your actual API Gateway Invoke URL and API Key before uploading to S3 if you are still doing this lab snapshot.
 
 ```javascript
 const CONFIG = {
@@ -1554,7 +1560,9 @@ const CONFIG = {
 
 ---
 
-### `utils.js` — Shared Auth & Navigation Helpers
+### `utils.js` — Shared Auth & Navigation Helpers (April 2026 snapshot)
+
+> Current helpers are `frontend/src/utils.ts` and `frontend/src/session.ts`.
 
 ```javascript
 function requireAuth() {
@@ -1586,7 +1594,9 @@ function handleLogout() {
 
 ---
 
-### `api.js` — API Fetch Wrappers
+### `api.js` — API Fetch Wrappers (April 2026 snapshot)
+
+> Current client is `frontend/src/api.ts`. Calls go to `/prod/proxy` with `X-Session-Token`, not `x-api-key` from the browser.
 
 ```javascript
 // AUTH FUNCTIONS

@@ -1,2 +1,22 @@
 <!DOCTYPE html>
-<html><head><meta http-equiv="refresh" content="0;url=login.html" /></head><body></body></html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InventoryIQ</title>
+    <script>
+      // Apply the saved theme before first paint (next-themes key "theme") so dark mode does not flash light.
+      try {
+        var t = localStorage.getItem("theme");
+        if (t === "dark" || ((!t || t === "system") && matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

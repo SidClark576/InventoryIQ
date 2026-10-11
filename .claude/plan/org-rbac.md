@@ -2,9 +2,10 @@
 
 > Source: `docs/PRD-org-membership-rbac.md` · Generated: 2026-06-26
 > Dual-model analysis: **N/A** — `codeagent-wrapper` + Codex/Gemini prompts not installed on this machine. Plan synthesized by Claude from PRD + grounded reads of `lambda/Proxy.py` and `frontend/api.js`.
+> **2026-10-11:** that client moved to `frontend/src/api.ts`. `authHeaders()` omits `X-IQ-Org` when no org is selected. Line numbers below refer to the old `frontend/api.js`.
 
 ### Task Type
-- [x] Fullstack — Backend (Python Lambdas + Proxy) + Frontend (vanilla JS/HTML)
+- [x] Fullstack — Backend (Python Lambdas + Proxy) + Frontend (Vite TypeScript in `frontend/src`, HTML pages kept)
 
 ---
 
@@ -14,7 +15,7 @@
 |---|---|---|
 | `Proxy.py` verifies HS256 JWT **statelessly** — zero DynamoDB reads, injects only `x-iq-user` (= JWT `sub`) | `lambda/Proxy.py:68-95,166-175` | Org enforcement adds a **new** DynamoDB read to Proxy. PRD's "60s session cache" does not exist; there is nothing to invalidate — that is good. |
 | Proxy strips client `x-iq-user` already (anti-spoof pattern exists) | `lambda/Proxy.py:166-167` | Extend the same strip to `x-iq-org` / `x-iq-role`. |
-| Frontend sends auth via one chokepoint `authHeaders()` | `frontend/api.js:22-27` | Add `X-IQ-Org` in exactly one place; every call inherits it. |
+| Frontend sends auth via one chokepoint `authHeaders()` | `frontend/src/api.ts` (`authHeaders`) | Add `X-IQ-Org` in exactly one place; every call inherits it. Omit the header when no org is selected. |
 | `/auth/*` bypasses session validation | `lambda/Proxy.py:124-125` | Invite-accept that needs a session must NOT live under `/auth/`; org context resolves post-login. |
 | Data handlers trust `x-iq-user` header for tenancy today | PRD + handler pattern | Switch tenant key to `x-iq-org`; keep `x-iq-user` as actor only. |
 | JWT carries only `sub` | `lambda/Proxy.py:93` | Do **not** bake role/org into JWT — that would make revoke stale. Look role up live. |
@@ -66,7 +67,7 @@ Role check stays **server-side** (handlers read trusted `x-iq-role`); UI hiding 
     - **Deliverable:** AC#11 — all data paths org-scoped; Org A cannot read Org B by swapping `X-IQ-Org` (Proxy already blocks non-members).
 
 ### Phase 4 — Frontend
-11. `api.js authHeaders()`: add `'X-IQ-Org': sessionStorage.getItem('currentOrg') || ''`. (one-line chokepoint)
+11. `frontend/src/api.ts` `authHeaders()`: send `X-IQ-Org` only when `currentOrg` is set. (one chokepoint)
 12. Login flow: store orgs list + default `currentOrg` from login response (or call `GET /orgs` right after).
 13. Org switcher (header dropdown) → sets `currentOrg`, reloads data. Members/Team page (list, invite form w/ role select, pending list w/ revoke/resend, remove, role change). Invite-accept page (`accept.html?token=...`).
 14. UI hides forbidden actions by role — cosmetic; server is source of truth.
@@ -87,7 +88,7 @@ Role check stays **server-side** (handlers read trusted `x-iq-role`); UI hiding 
 | `lambda/OrgInvites.py` | Create | Invite create / revoke / accept (token hash, TTL, SES) |
 | `lambda/_logging.py` | Reuse | `response()`, `capture_error()` — no change |
 | `lambda/GetAllItems.py` + 15 data handlers | Modify | Tenant key `x-iq-user` → `x-iq-org`; `actorUserID` attribution |
-| `frontend/api.js:22-27` | Modify | Add `X-IQ-Org` to `authHeaders()` |
+| `frontend/src/api.ts` `authHeaders` | Modify | Send `X-IQ-Org` only when an org is selected |
 | `frontend/*.html` + new `members.html`, `accept.html` | Create/Modify | Switcher, team page, invite accept |
 | `scripts/migrate_orgs.py` | Create | One-shot backfill, dry-run + apply |
 

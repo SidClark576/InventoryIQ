@@ -5,6 +5,7 @@ from boto3.dynamodb.conditions import Attr
 from decimal import Decimal
 import time as _time
 import _logging
+import _org
 
 FUNCTION_NAME = 'GetTransactions'
 
@@ -63,25 +64,24 @@ def _handle(event, context):
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'body': ''}
 
-    # Extract and validate userID from securely injected headers
     headers = event.get('headers') or {}
-    user_id = (headers.get('x-iq-user') or headers.get('X-Iq-User') or '').strip()
-    if not user_id:
-        return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'userID required'})}
+    ctx, err = _org.require_member(headers, minimum='viewer')
+    if err:
+        return err
 
     try:
-        # Scan transactions table filtering by userID
-        # DynamoDB scan returns max 1MB per request, so handle pagination
-        result = table.scan(FilterExpression=Attr('userID').eq(user_id))
-        items = result.get('Items', [])
-
-        # Pagination loop: continue scanning if more results exist (LastEvaluatedKey present)
-        while 'LastEvaluatedKey' in result:
-            result = table.scan(
-                ExclusiveStartKey=result['LastEvaluatedKey'],
-                FilterExpression=Attr('userID').eq(user_id)
-            )
-            items.extend(result.get('Items', []))
+        try:
+            items = _org.list_scoped_items(table, ctx['org_id'], ctx['user_id'])
+        except Exception:
+            filt = Attr('orgID').eq(ctx['org_id']) if ctx['org_id'] else Attr('userID').eq(ctx['user_id'])
+            result = table.scan(FilterExpression=filt)
+            items = result.get('Items', [])
+            while 'LastEvaluatedKey' in result:
+                result = table.scan(
+                    ExclusiveStartKey=result['LastEvaluatedKey'],
+                    FilterExpression=filt
+                )
+                items.extend(result.get('Items', []))
 
         # Convert Decimal types to float for JSON serialization
         # DynamoDB returns Decimal objects which JSON cannot serialize by default
