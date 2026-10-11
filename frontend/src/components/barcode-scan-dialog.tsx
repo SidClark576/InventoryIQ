@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { errorText } from "@/lib/errors";
 
 type BarcodeHit = { codeResult?: { code?: string } };
 
@@ -30,6 +31,8 @@ type QuaggaLib = {
 const READERS = ["ean_reader", "upc_reader", "code_128_reader"];
 // Pinned: the CSP allows cdn.jsdelivr.net for this script only.
 const QUAGGA_SRC = "https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.12.1/dist/quagga.min.js";
+// SRI hash of dist/quagga.min.js from the npm tarball for 1.12.1. Update both together.
+const QUAGGA_SRI = "sha384-ZJs/WA0v1/wkDHl7QklRGGJe837hXnRR0k8lSFjjc0w2bGtl2Q1M/3JSFn9IJRFU";
 
 let quaggaLoad: Promise<void> | null = null;
 
@@ -43,6 +46,8 @@ function loadQuagga(): Promise<void> {
   quaggaLoad = new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.src = QUAGGA_SRC;
+    script.integrity = QUAGGA_SRI;
+    script.crossOrigin = "anonymous";
     script.onload = () => resolve();
     script.onerror = () => {
       quaggaLoad = null;
@@ -93,7 +98,7 @@ export function BarcodeScanDialog({ open, onOpenChange, description, onCode }: B
         setFallback(true);
       }
     } catch (err: unknown) {
-      setStatus(err instanceof Error ? err.message : "Lookup failed");
+      setStatus(errorText(err, "Lookup failed"));
       setFallback(true);
     } finally {
       busy.current = false;
@@ -124,7 +129,17 @@ export function BarcodeScanDialog({ open, onOpenChange, description, onCode }: B
             locate: true,
           },
           (err) => {
-            if (!alive) return;
+            if (!alive) {
+              // Closed during the camera permission prompt: init has opened the stream, release it.
+              if (!err) {
+                try {
+                  quagga.stop();
+                } catch {
+                  // Already stopped.
+                }
+              }
+              return;
+            }
             if (err) {
               setFallback(true);
               setStatus("");

@@ -12,7 +12,8 @@ const SHOWN = 8;
 
 type RestockListProps = {
   queue: readonly InventoryItem[];
-  onReceive: (item: InventoryItem) => void;
+  /** Omitted for viewers, which hides Receive. */
+  onReceive?: (item: InventoryItem) => void;
 };
 
 export function RestockList({ queue, onReceive }: RestockListProps) {
@@ -56,10 +57,12 @@ export function RestockList({ queue, onReceive }: RestockListProps) {
               </div>
               <LevelGauge quantity={quantity} threshold={threshold} level={level} className="hidden w-28 sm:block" />
               <div className="flex shrink-0 gap-1.5">
-                <Button type="button" variant="outline" size="sm" onClick={() => onReceive(item)}>
-                  <PlusIcon />
-                  Receive
-                </Button>
+                {onReceive ? (
+                  <Button type="button" variant="outline" size="sm" onClick={() => onReceive(item)}>
+                    <PlusIcon />
+                    Receive
+                  </Button>
+                ) : null}
                 <Button
                   type="button"
                   variant="ghost"

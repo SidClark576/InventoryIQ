@@ -1,5 +1,6 @@
 import {
   createContext,
+  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -26,6 +27,7 @@ import {
 import { InventoryProvider, useInventory } from "@/app/inventory-store";
 import { AccountMenu } from "@/components/account-menu";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -46,6 +48,7 @@ import {
   setCurrentOrgName,
   setLocalLogout,
 } from "@/session";
+import { errorText } from "@/lib/errors";
 
 export type OrgShellContextValue = {
   orgs: OrgRecord[];
@@ -56,6 +59,8 @@ export type OrgShellContextValue = {
   /** Bumps after a successful org switch so later screens can refetch. */
   orgEpoch: number;
   refreshOrgs: () => Promise<void>;
+  /** False for viewers. True for editor/admin/owner and in legacy (no-org) mode. */
+  canEdit: boolean;
 };
 
 const OrgShellContext = createContext<OrgShellContextValue | null>(null);
@@ -80,6 +85,12 @@ const NAV: readonly NavItem[] = [
   { to: "/activity", label: "Activity", icon: PulseIcon },
   { to: "/team", label: "Team", icon: UsersThreeIcon },
 ];
+
+const EDIT_ROLES: ReadonlySet<string> = new Set(["editor", "admin", "owner"]);
+
+function currentRoleOf(orgs: OrgRecord[]): string {
+  return orgs.find((org) => org.orgID === getCurrentOrg())?.role ?? getCurrentRole();
+}
 
 function roleText(role: string | undefined): string {
   return role ? role.charAt(0).toUpperCase() + role.slice(1) : "";
@@ -129,11 +140,12 @@ export function AppLayout() {
         await switchOrg(orgID);
         const chosen = orgs.find((org) => org.orgID === orgID);
         if (chosen?.name) setCurrentOrgName(chosen.name);
-        await refreshOrgs();
+        // Screens refetch for the new org right away; the org list refresh only updates names and roles.
         setOrgEpoch((epoch) => epoch + 1);
+        await refreshOrgs();
         toast.success(`Switched to ${chosen?.name || "organization"}`);
       } catch (err: unknown) {
-        toast.error(err instanceof Error ? err.message : "Failed to switch organization");
+        toast.error(errorText(err, "Failed to switch organization"));
       } finally {
         setSwitching(false);
       }
@@ -160,10 +172,12 @@ export function AppLayout() {
     navigate("/login", { replace: true });
   }, [loggingOut, navigate]);
 
-  const shell = useMemo<OrgShellContextValue>(
-    () => ({ orgs, orgsAvailable: orgs.length > 0, orgsReady, orgEpoch, refreshOrgs }),
-    [orgs, orgsReady, orgEpoch, refreshOrgs],
-  );
+  const shell = useMemo<OrgShellContextValue>(() => {
+    const role = currentRoleOf(orgs);
+    // No role and no orgs is legacy mode, which has full access.
+    const canEdit = role ? EDIT_ROLES.has(role) : orgs.length === 0;
+    return { orgs, orgsAvailable: orgs.length > 0, orgsReady, orgEpoch, refreshOrgs, canEdit };
+  }, [orgs, orgsReady, orgEpoch, refreshOrgs]);
 
   const account = {
     email,
@@ -212,7 +226,14 @@ export function AppLayout() {
               className="flex-1 px-4 pt-5 pb-28 outline-none md:px-8 md:pt-8 md:pb-12"
             >
               <div className="mx-auto w-full max-w-6xl">
-                <Outlet />
+                {shell.canEdit ? null : (
+                  <p className="mb-4 rounded-2xl border border-border bg-muted/50 px-4 py-2 text-sm text-muted-foreground">
+                    View only. Ask an admin for edit access.
+                  </p>
+                )}
+                <Suspense fallback={<ScreenSkeleton />}>
+                  <Outlet />
+                </Suspense>
               </div>
             </main>
           </div>
@@ -220,6 +241,16 @@ export function AppLayout() {
         </div>
       </InventoryProvider>
     </OrgShellContext.Provider>
+  );
+}
+
+function ScreenSkeleton() {
+  return (
+    <div className="flex flex-col gap-6" aria-busy="true">
+      <Skeleton className="h-9 w-64" />
+      <Skeleton className="h-24 w-full" />
+      <Skeleton className="h-72 w-full" />
+    </div>
   );
 }
 
@@ -249,12 +280,14 @@ function OrgSwitcher({
   const current = getCurrentOrg();
   const selected = orgs.some((org) => org.orgID === current) ? current : null;
   const items = orgs.map((org) => ({ value: org.orgID, label: org.name || org.orgID }));
-  const role = roleText(orgs.find((org) => org.orgID === current)?.role ?? getCurrentRole());
+  const role = roleText(currentRoleOf(orgs));
   const fallbackLabel = getCurrentOrgName() || "Workspace";
 
   return (
     <div className="px-3 pb-4" id="org-switcher">
-      <Label className="mb-1.5 px-2 text-xs text-muted-foreground">Organization</Label>
+      <Label htmlFor="org-select" className="mb-1.5 px-2 text-xs text-muted-foreground">
+        Organization
+      </Label>
       {orgs.length > 0 ? (
         <Select
           items={items}
@@ -264,7 +297,7 @@ function OrgSwitcher({
             if (typeof next === "string") onSwitch(next);
           }}
         >
-          <SelectTrigger className="w-full" aria-label="Organization">
+          <SelectTrigger id="org-select" className="w-full">
             <SelectValue placeholder={fallbackLabel} />
           </SelectTrigger>
           <SelectContent>
@@ -317,11 +350,9 @@ function SideNav({ showTeam }: { showTeam: boolean }) {
               <item.icon className="size-[18px]" weight={isActive ? "fill" : "regular"} />
               {item.label}
               {item.to === "/today" && restock > 0 ? (
-                <span
-                  className="ml-auto min-w-5 rounded-full bg-warning px-1.5 text-center text-xs leading-5 font-semibold text-background tabular-nums"
-                  aria-label={`${restock} to restock`}
-                >
+                <span className="ml-auto min-w-5 rounded-full bg-warning px-1.5 text-center text-xs leading-5 font-semibold text-background tabular-nums">
                   {restock}
+                  <span className="sr-only"> to restock</span>
                 </span>
               ) : null}
             </>
@@ -364,11 +395,9 @@ function TabBar({ showTeam }: { showTeam: boolean }) {
                   </span>
                   {item.label}
                   {item.to === "/today" && restock > 0 ? (
-                    <span
-                      className="absolute top-1.5 left-1/2 ml-2 min-w-4 rounded-full bg-warning px-1 text-center text-[10px] leading-4 font-semibold text-background tabular-nums"
-                      aria-label={`${restock} to restock`}
-                    >
+                    <span className="absolute top-1.5 left-1/2 ml-2 min-w-4 rounded-full bg-warning px-1 text-center text-[10px] leading-4 font-semibold text-background tabular-nums">
                       {restock}
+                      <span className="sr-only"> to restock</span>
                     </span>
                   ) : null}
                 </>

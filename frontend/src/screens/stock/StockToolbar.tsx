@@ -10,6 +10,7 @@ import {
   UploadSimpleIcon,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { useDebouncedInput } from "@/hooks/use-debounced-input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +36,8 @@ type StockToolbarProps = {
   onExport: () => void;
   onPrint: () => void;
   onTrash: () => void;
+  /** Viewers get search, scan, export and print only. */
+  canEdit: boolean;
 };
 
 export function StockToolbar({
@@ -51,7 +54,9 @@ export function StockToolbar({
   onExport,
   onPrint,
   onTrash,
+  canEdit,
 }: StockToolbarProps) {
+  const [search, setSearch] = useDebouncedInput(query, onQuery);
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
       <div className="relative min-w-0 flex-1 sm:max-w-sm">
@@ -59,8 +64,8 @@ export function StockToolbar({
         <Input
           id="inv-search"
           type="search"
-          value={query}
-          onChange={(event) => onQuery(event.target.value)}
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
           placeholder="Search name, category or barcode"
           aria-label="Search stock"
           className="pl-9"
@@ -89,17 +94,19 @@ export function StockToolbar({
           <BarcodeIcon />
           Scan
         </Button>
-        <Button
-          id="btn-count"
-          type="button"
-          variant={counting ? "default" : "outline"}
-          size="sm"
-          aria-pressed={counting}
-          onClick={onCount}
-        >
-          <ListChecksIcon />
-          {counting ? "Counting…" : "Count stock"}
-        </Button>
+        {canEdit ? (
+          <Button
+            id="btn-count"
+            type="button"
+            variant={counting ? "default" : "outline"}
+            size="sm"
+            aria-pressed={counting}
+            onClick={onCount}
+          >
+            <ListChecksIcon />
+            {counting ? "Counting…" : "Count stock"}
+          </Button>
+        ) : null}
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
@@ -110,14 +117,18 @@ export function StockToolbar({
             More
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem id="btn-manage-categories" onClick={onCategories}>
-              <TagIcon />
-              Manage categories
-            </DropdownMenuItem>
-            <DropdownMenuItem id="btn-bulk-import" onClick={onImport} disabled={!importAvailable}>
-              <UploadSimpleIcon />
-              {importAvailable ? "Import CSV" : "Import CSV (not available)"}
-            </DropdownMenuItem>
+            {canEdit ? (
+              <>
+                <DropdownMenuItem id="btn-manage-categories" onClick={onCategories}>
+                  <TagIcon />
+                  Manage categories
+                </DropdownMenuItem>
+                <DropdownMenuItem id="btn-bulk-import" onClick={onImport} disabled={!importAvailable}>
+                  <UploadSimpleIcon />
+                  {importAvailable ? "Import CSV" : "Import CSV (not available)"}
+                </DropdownMenuItem>
+              </>
+            ) : null}
             <DropdownMenuItem onClick={onExport}>
               <DownloadSimpleIcon />
               Export CSV
@@ -126,11 +137,15 @@ export function StockToolbar({
               <PrinterIcon />
               Print report
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem id="btn-show-deleted" onClick={onTrash}>
-              <ArrowCounterClockwiseIcon />
-              Show deleted
-            </DropdownMenuItem>
+            {canEdit ? (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem id="btn-show-deleted" onClick={onTrash}>
+                  <ArrowCounterClockwiseIcon />
+                  Show deleted
+                </DropdownMenuItem>
+              </>
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

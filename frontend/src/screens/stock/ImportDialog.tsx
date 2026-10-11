@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { parseCsv } from "@/lib/csv";
 import { cn } from "@/lib/utils";
+import { errorText } from "@/lib/errors";
 
 type RowError = { row?: unknown; field?: unknown; message?: unknown };
 
@@ -66,13 +67,16 @@ export function ImportDialog({ open, onOpenChange, onUnavailable }: ImportDialog
     setDone("");
   }, [open]);
 
-  function finish(inserted: number, failed: number, rowErrors: unknown) {
+  /** `jobFailed`: the background job itself stopped, so whatever was imported so far is partial. */
+  function finish(inserted: number, failed: number, rowErrors: unknown, jobFailed = false) {
     setProgress(100);
-    setStatus("Done");
+    setStatus(jobFailed ? "Import stopped" : "Done");
     setErrors(asErrors(rowErrors).slice(0, 20));
     const summary = `Imported ${inserted} item${inserted === 1 ? "" : "s"}${failed ? `, ${failed} failed` : ""}.`;
     setDone(summary);
-    toast.success(summary);
+    if (jobFailed) toast.error("Import stopped before it finished", { description: summary });
+    else if (inserted === 0 && failed > 0) toast.error(summary);
+    else toast.success(summary);
     void reloadItems();
     invalidateTransactions();
   }
@@ -84,7 +88,7 @@ export function ImportDialog({ open, onOpenChange, onUnavailable }: ImportDialog
       onUnavailable();
       return;
     }
-    setStatus(`Error: ${err instanceof Error ? err.message : "Import failed"}`);
+    setStatus(`Error: ${errorText(err, "Import failed")}`);
   }
 
   async function poll(run: number, jobId: string, total: number): Promise<void> {
@@ -96,7 +100,11 @@ export function ImportDialog({ open, onOpenChange, onUnavailable }: ImportDialog
       const failed = asNumber(job.failed);
       setProgress(Math.min(99, total > 0 ? Math.round(((imported + failed) / total) * 80) + 20 : 20));
       setStatus(`Processing ${imported + failed} of ${asNumber(job.total) || total}…`);
-      if (job.status === "completed" || job.status === "failed") {
+      if (job.status === "failed") {
+        finish(imported, failed, job.errors, true);
+        return;
+      }
+      if (job.status === "completed") {
         finish(imported, failed, job.errors);
         return;
       }
@@ -178,7 +186,12 @@ export function ImportDialog({ open, onOpenChange, onUnavailable }: ImportDialog
               type="file"
               accept=".csv,text/csv"
               className="sr-only"
-              onChange={(event) => void handleFile(event.target.files?.[0])}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                // Clear the input so picking the same file again (e.g. after fixing it) fires change.
+                event.target.value = "";
+                void handleFile(file);
+              }}
             />
           </label>
           {status ? (

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { ArrowRightIcon, ChartLineUpIcon } from "@phosphor-icons/react";
-import type { InventoryItem } from "@/api";
+import { useOrgShell } from "@/app/AppLayout";
 import { useInventory } from "@/app/inventory-store";
 import { ItemSheetHost } from "@/components/item-sheet/ItemSheetHost";
 import { TEXT_LINK_CLASS } from "@/components/text-link";
@@ -49,7 +49,8 @@ function Panel({
 
 export function TodayScreen() {
   const { items, itemsStatus, itemsError, reloadItems } = useInventory();
-  const [receiving, setReceiving] = useState<InventoryItem | null>(null);
+  const { canEdit } = useOrgShell();
+  const [receivingID, setReceivingID] = useState<string | null>(null);
   const now = new Date();
 
   useEffect(() => {
@@ -107,7 +108,7 @@ export function TodayScreen() {
               ))}
             </div>
           ) : (
-            <RestockList queue={queue} onReceive={setReceiving} />
+            <RestockList queue={queue} onReceive={canEdit ? (item) => setReceivingID(item.itemID ?? null) : undefined} />
           )}
         </Panel>
 
@@ -138,7 +139,7 @@ export function TodayScreen() {
         </div>
       </div>
 
-      <ReceiveDialog item={receiving} onClose={() => setReceiving(null)} />
+      <ReceiveDialog itemID={receivingID} onClose={() => setReceivingID(null)} />
       <ItemSheetHost />
     </div>
   );

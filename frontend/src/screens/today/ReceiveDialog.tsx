@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import type { InventoryItem } from "@/api";
+import { useInventory } from "@/app/inventory-store";
 import { useStockActions } from "@/app/use-stock-actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,13 +16,18 @@ import { quantityOf } from "@/lib/dashboardStats";
 import { reasonNote } from "@/lib/reasons";
 
 type ReceiveDialogProps = {
-  item: InventoryItem | null;
+  itemID: string | null;
   onClose: () => void;
 };
 
-/** Quick "a delivery arrived" from Today: adds units with a "Received N" note. */
-export function ReceiveDialog({ item, onClose }: ReceiveDialogProps) {
+/**
+ * Quick "a delivery arrived" from Today: adds units with a "Received N" note.
+ * Reads the item from the store on every render so a retry after a 412 uses the fresh version.
+ */
+export function ReceiveDialog({ itemID, onClose }: ReceiveDialogProps) {
+  const { items } = useInventory();
   const { setQuantity } = useStockActions();
+  const item = itemID ? (items.find((entry) => entry.itemID === itemID) ?? null) : null;
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);

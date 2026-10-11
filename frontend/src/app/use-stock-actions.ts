@@ -11,7 +11,7 @@ import {
 } from "@/api";
 import { useInventory } from "@/app/inventory-store";
 import { quantityOf } from "@/lib/dashboardStats";
-import { getUserEmail } from "@/session";
+import { errorText } from "@/lib/errors";
 
 export type ItemFields = {
   name?: string;
@@ -29,9 +29,9 @@ type QuantityOptions = {
   silent?: boolean;
 };
 
-function errorText(err: unknown, fallback: string): string {
-  return err instanceof Error && err.message ? err.message : fallback;
-}
+
+/** Undo toasts stay longer than Sonner's 4s default so there is time to react. */
+const UNDO_TOAST_MS = 10_000;
 
 function nameOf(item: InventoryItem): string {
   return item.name || "Item";
@@ -68,7 +68,7 @@ export function useStockActions() {
   const putItem = useCallback(
     async (item: InventoryItem, body: Record<string, unknown>): Promise<InventoryItem | null> => {
       if (!item.itemID) return null;
-      const result = await updateItem(item.itemID, { ...body, userID: getUserEmail() }, versionOf(item));
+      const result = await updateItem(item.itemID, body, versionOf(item));
       const saved = itemFromResponse(result) ?? { ...item, ...body, version: versionOf(item) + 1 };
       upsertItem(saved);
       invalidateTransactions();
@@ -107,6 +107,7 @@ export function useStockActions() {
         toast.success(`${nameOf(item)}: ${before} → ${next}`, {
           description: notes || undefined,
           action: undoable ? { label: "Undo", onClick: undo } : undefined,
+          duration: undoable ? UNDO_TOAST_MS : undefined,
         });
         return saved;
       } catch (err: unknown) {
@@ -132,9 +133,9 @@ export function useStockActions() {
   );
 
   const createItem = useCallback(
-    async (fields: ItemFields & { quantity: number }): Promise<InventoryItem | null> => {
+    async (fields: ItemFields & { quantity: number }, idemKey: string): Promise<InventoryItem | null> => {
       try {
-        const result = await addItem({ ...fields, userID: getUserEmail() });
+        const result = await addItem(fields, idemKey);
         const created = itemFromResponse(result);
         if (created) upsertItem(created);
         else void reloadItems();
@@ -181,6 +182,7 @@ export function useStockActions() {
         const label = deleted.length === 1 ? `Deleted ${nameOf(deleted[0]!)}` : `Deleted ${deleted.length} items`;
         toast.success(label, {
           description: "Restore from Show deleted for 30 days.",
+          duration: UNDO_TOAST_MS,
           action: {
             label: "Undo",
             onClick: () => {

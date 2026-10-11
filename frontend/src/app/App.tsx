@@ -3,6 +3,7 @@ import { AppLayout } from "@/app/AppLayout";
 import { legacyRouteForPath, RENAMED_ROUTES } from "@/app/legacyHtml";
 import { HOME_ROUTE } from "@/app/routes";
 import { isLocalPreview } from "@/api";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 import { lazy, Suspense } from "react";
@@ -115,7 +116,7 @@ function AppRoutes() {
 }
 
 export function App() {
-  // ThemeProvider's inline script can't run in a client-rendered app; index.html applies the class before paint instead.
+  // ThemeProvider's inline script would need 'unsafe-inline' in the CSP; public/theme-init.js applies the class before paint instead.
   return (
     <ThemeProvider
       attribute="class"
@@ -125,9 +126,12 @@ export function App() {
       scriptProps={{ type: "application/json" }}
     >
       <BrowserRouter>
-        <Suspense fallback={null}>
-          <AppRoutes />
-        </Suspense>
+        <ErrorBoundary>
+          {/* Signed-out screens only; the app layout has its own skeleton fallback around its Outlet. */}
+          <Suspense fallback={null}>
+            <AppRoutes />
+          </Suspense>
+        </ErrorBoundary>
       </BrowserRouter>
       <Toaster />
     </ThemeProvider>

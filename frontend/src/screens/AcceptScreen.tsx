@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { acceptInvite } from "@/api";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getSessionToken, setCurrentOrg, setCurrentRole, setInviteToken } from "@/session";
+import { getSessionToken, setCurrentOrg, setCurrentOrgName, setCurrentRole, setInviteToken } from "@/session";
+import { errorText } from "@/lib/errors";
 import { HOME_ROUTE } from "@/app/routes";
 
 const acceptInflight = new Map<string, Promise<Record<string, unknown>>>();
@@ -47,6 +48,9 @@ export function AcceptScreen() {
         if (data.orgID) {
           setCurrentOrg(String(data.orgID));
           if (data.role) setCurrentRole(String(data.role));
+          // Replace the previous org's name; the layout fills it from GET /orgs if the response has none.
+          const name = data.orgName ?? data.name;
+          setCurrentOrgName(typeof name === "string" ? name : "");
         }
         setMessage("Joined. Redirecting…");
         toast.success("Joined. Redirecting…");
@@ -54,9 +58,7 @@ export function AcceptScreen() {
       })
       .catch((err: unknown) => {
         if (!active) return;
-        const text = err instanceof Error && err.message ? err.message : "Could not accept invite.";
-        setMessage(text);
-        toast.error(text);
+        setMessage(errorText(err, "Could not accept invite."));
       });
     return () => {
       active = false;

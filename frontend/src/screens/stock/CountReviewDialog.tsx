@@ -22,40 +22,43 @@ type CountReviewDialogProps = {
   counted: number;
   total: number;
   changes: readonly CountChange[];
-  /** Called after the count is applied (or confirmed with no changes). */
-  onFinished: () => void;
+  /** Called after the count is applied (or confirmed with no changes) with the itemIDs that failed to save. */
+  onFinished: (failedIDs: readonly string[]) => void;
 };
 
 /** Lists only the rows that changed, then sends one PUT per item with the note "Count fix". */
 export function CountReviewDialog({ open, onOpenChange, counted, total, changes, onFinished }: CountReviewDialogProps) {
   const { setQuantity } = useStockActions();
   const { reloadItems } = useInventory();
-  const [progress, setProgress] = useState<number | null>(null);
-  const busy = progress !== null;
-  const net = changes.reduce((sum, change) => sum + (change.counted - change.expected) * priceOf(change.item), 0);
+  // Each saved row drops out of `changes`, so the save loop works from a snapshot taken at start.
+  const [saving, setSaving] = useState<{ batch: readonly CountChange[]; done: number } | null>(null);
+  const busy = saving !== null;
+  const shown = saving?.batch ?? changes;
+  const net = shown.reduce((sum, change) => sum + (change.counted - change.expected) * priceOf(change.item), 0);
 
   async function apply() {
-    if (changes.length === 0) {
+    const batch = changes;
+    if (batch.length === 0) {
       toast.success("Count saved. Everything matched.");
-      onFinished();
+      onFinished([]);
       return;
     }
-    const failed: string[] = [];
-    for (const [index, change] of changes.entries()) {
-      setProgress(index + 1);
+    const failed: CountChange[] = [];
+    for (const [index, change] of batch.entries()) {
+      setSaving({ batch, done: index + 1 });
       const saved = await setQuantity(change.item, change.counted, "Count fix", { silent: true });
-      if (!saved) failed.push(change.item.name || "Item");
+      if (!saved) failed.push(change);
     }
-    setProgress(null);
-    const updated = changes.length - failed.length;
+    setSaving(null);
+    const updated = batch.length - failed.length;
     if (updated) toast.success(`Count saved. ${plural(updated, "item")} updated.`);
     if (failed.length) {
       toast.error(`${plural(failed.length, "item")} didn't save`, {
-        description: `${failed.join(", ")}. Loaded the latest stock; count those again.`,
+        description: `${failed.map((change) => change.item.name || "Item").join(", ")}. Loaded the latest stock; their counts are kept, so review them again.`,
       });
       void reloadItems();
     }
-    onFinished();
+    onFinished(failed.flatMap((change) => (change.item.itemID ? [change.item.itemID] : [])));
   }
 
   return (
@@ -77,11 +80,11 @@ export function CountReviewDialog({ open, onOpenChange, counted, total, changes,
           <dl className="grid grid-cols-3 gap-2 rounded-2xl bg-muted/60 p-3 text-center">
             <div>
               <dt className="text-xs text-muted-foreground">Changes</dt>
-              <dd className="text-lg font-semibold tabular-nums">{changes.length}</dd>
+              <dd className="text-lg font-semibold tabular-nums">{shown.length}</dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Matched</dt>
-              <dd className="text-lg font-semibold tabular-nums">{counted - changes.length}</dd>
+              <dd className="text-lg font-semibold tabular-nums">{counted - shown.length}</dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Value change</dt>
@@ -91,9 +94,9 @@ export function CountReviewDialog({ open, onOpenChange, counted, total, changes,
               </dd>
             </div>
           </dl>
-          {changes.length ? (
+          {shown.length ? (
             <ul id="count-review-list" className="min-h-0 divide-y divide-border overflow-y-auto rounded-2xl border border-border">
-              {changes.map((change) => {
+              {shown.map((change) => {
                 const diff = change.counted - change.expected;
                 return (
                   <li key={change.item.itemID} className="flex items-center gap-3 px-4 py-2.5 text-sm">
@@ -122,8 +125,8 @@ export function CountReviewDialog({ open, onOpenChange, counted, total, changes,
             Keep counting
           </Button>
           <Button type="button" disabled={busy} onClick={() => void apply()}>
-            {busy
-              ? `Saving ${progress} of ${changes.length}…`
+            {saving
+              ? `Saving ${saving.done} of ${saving.batch.length}…`
               : changes.length
                 ? `Apply ${plural(changes.length, "change")}`
                 : "Finish count"}

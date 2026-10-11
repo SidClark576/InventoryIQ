@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TrashIcon } from "@phosphor-icons/react";
 import type { InventoryItem } from "@/api";
+import { useOrgShell } from "@/app/AppLayout";
 import { useStockActions } from "@/app/use-stock-actions";
 import { LevelGauge } from "@/components/charts/level-gauge";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -21,6 +22,7 @@ type ItemPanelProps = {
 
 export function ItemPanel({ item, onDeleted }: ItemPanelProps) {
   const { deleteItems } = useStockActions();
+  const { canEdit } = useOrgShell();
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const quantity = quantityOf(item);
@@ -72,21 +74,29 @@ export function ItemPanel({ item, onDeleted }: ItemPanelProps) {
           </dl>
         </div>
 
-        <AdjustControls item={item} />
-        <Separator />
-        <ItemEditForm item={item} />
-        <Separator />
+        {canEdit ? (
+          <>
+            <AdjustControls item={item} />
+            <Separator />
+            <ItemEditForm item={item} />
+            <Separator />
+          </>
+        ) : null}
         {itemID ? <ItemHistory itemID={itemID} /> : null}
-        <Separator />
-        <Button
-          type="button"
-          variant="destructive"
-          className="self-start"
-          onClick={() => setConfirming(true)}
-        >
-          <TrashIcon />
-          Delete item
-        </Button>
+        {canEdit ? (
+          <>
+            <Separator />
+            <Button
+              type="button"
+              variant="destructive"
+              className="self-start"
+              onClick={() => setConfirming(true)}
+            >
+              <TrashIcon />
+              Delete item
+            </Button>
+          </>
+        ) : null}
       </div>
       <ConfirmDialog
         open={confirming}

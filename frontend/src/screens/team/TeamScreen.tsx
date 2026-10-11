@@ -18,6 +18,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { getCurrentOrg, getCurrentOrgName, getCurrentRole } from "@/session";
+import { errorText } from "@/lib/errors";
 
 type Member = { userID?: string; email?: string; role?: string };
 type PendingInvite = { email?: string; role?: string };
@@ -39,9 +40,6 @@ const ROLE_HELP: Record<string, string> = {
 
 const CAN_INVITE = new Set(["admin", "owner"]);
 
-function errorText(err: unknown): string {
-  return err instanceof Error ? err.message : "";
-}
 
 function rows<T>(value: unknown): T[] {
   return Array.isArray(value) ? value.filter((row): row is T => Boolean(row) && typeof row === "object") : [];

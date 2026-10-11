@@ -8,7 +8,6 @@ import {
     QueryCommand,
     TransactWriteCommand
 } from "@aws-sdk/lib-dynamodb";
-import { SNSClient, SubscribeCommand, ListSubscriptionsByTopicCommand } from "@aws-sdk/client-sns";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import crypto from "crypto";
 
@@ -46,14 +45,12 @@ function emitAuthMetric(metricName, path, email) {
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
-const snsClient = new SNSClient({});
 const sesClient = new SESClient({});
 
 const USERS_TABLE          = process.env.USERS_TABLE           || "Users";
 const SESSIONS_TABLE       = process.env.SESSIONS_TABLE        || "Sessions";
 const AUTH_ATTEMPTS_TABLE  = process.env.AUTH_ATTEMPTS_TABLE   || "AuthAttempts";
 const PASSWORD_RESETS_TABLE = process.env.PASSWORD_RESETS_TABLE || "PasswordResets";
-const SNS_TOPIC_ARN        = process.env.SNS_TOPIC_ARN;
 const SES_SENDER           = process.env.SES_SENDER            || "";  // verified SES sender email
 const APP_URL              = process.env.APP_URL               || "https://theinventoryiq.netlify.app";
 const ORGS_TABLE           = process.env.ORGS_TABLE            || "Organizations";
@@ -245,21 +242,15 @@ export const handler = Sentry.wrapHandler(async (event) => {
                 }));
             }
 
-            // Subscribe the new user's email to SNS topic for stock alerts
-            if (SNS_TOPIC_ARN) {
-                await snsClient.send(new SubscribeCommand({
-                    TopicArn: SNS_TOPIC_ARN,
-                    Protocol: "email",
-                    Endpoint: email.toLowerCase(),
-                    ReturnSubscriptionArn: true
-                }));
-            }
+            // No SNS subscription here: the alert topic is shared by all users with no
+            // filter policy, so a subscriber would receive every user's stock alerts.
+            // Per-user alert delivery replaces it (docs/PRD-mobile-app-launch.md R10).
 
             return {
                 statusCode: 200,
                 headers,
                 body: JSON.stringify({
-                    message: "User registered successfully! Please check your email to confirm your alert subscription."
+                    message: "User registered successfully!"
                 })
             };
         }
@@ -338,38 +329,6 @@ export const handler = Sentry.wrapHandler(async (event) => {
                     userAgent: (event.headers && (event.headers['User-Agent'] || event.headers['user-agent'] || '')).slice(0, 200)
                 }
             }));
-
-            if (SNS_TOPIC_ARN) {
-                let isAlreadySubscribed = false;
-                let nextToken = undefined;
-
-                do {
-                    const listResult = await snsClient.send(new ListSubscriptionsByTopicCommand({
-                        TopicArn: SNS_TOPIC_ARN,
-                        NextToken: nextToken
-                    }));
-
-                    const match = listResult.Subscriptions.find(
-                        sub => sub.Endpoint === email && sub.SubscriptionArn !== "PendingConfirmation"
-                    );
-
-                    if (match) {
-                        isAlreadySubscribed = true;
-                        break;
-                    }
-
-                    nextToken = listResult.NextToken;
-                } while (nextToken);
-
-                if (!isAlreadySubscribed) {
-                    await snsClient.send(new SubscribeCommand({
-                        TopicArn: SNS_TOPIC_ARN,
-                        Protocol: "email",
-                        Endpoint: email,
-                        ReturnSubscriptionArn: true
-                    }));
-                }
-            }
 
             emitAuthMetric("iq.auth.login_success", path, email);
             return {

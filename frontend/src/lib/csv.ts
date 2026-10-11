@@ -1,5 +1,9 @@
+// Text starting with these is run as a formula by Excel/Sheets; a leading ' keeps it as text.
+const FORMULA_START = /^[=+\-@\t\r]/;
+
 function escapeCell(value: unknown): string {
-  const text = value === null || value === undefined ? "" : String(value);
+  const raw = value === null || value === undefined ? "" : String(value);
+  const text = typeof value === "string" && FORMULA_START.test(raw) ? `'${raw}` : raw;
   return `"${text.replace(/"/g, '""')}"`;
 }
 

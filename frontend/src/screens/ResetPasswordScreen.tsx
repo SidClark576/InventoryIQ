@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
-import { toast } from "sonner";
 import { AUTH_ENDPOINT } from "@/config";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -23,12 +22,6 @@ type StatusMsg = {
   kind: MsgKind;
   text: string;
 };
-
-function showToast(kind: MsgKind, text: string): void {
-  if (kind === "err") toast.error(text);
-  else if (kind === "ok") toast.success(text);
-  else toast.info(text);
-}
 
 function PasswordField({
   id,
@@ -103,24 +96,20 @@ export function ResetPasswordScreen() {
     if (!password || !confirm) {
       const text = "Both fields are required.";
       setMsg({ kind: "err", text });
-      showToast("err", text);
       return;
     }
     if (password !== confirm) {
       const text = "Passwords do not match.";
       setMsg({ kind: "err", text });
-      showToast("err", text);
       return;
     }
     if (!PASSWORD_REGEX.test(password)) {
       const text = "Password must be 8+ chars with uppercase, lowercase, and a number.";
       setMsg({ kind: "err", text });
-      showToast("err", text);
       return;
     }
     setPending(true);
     setMsg({ kind: "info", text: "Resetting password..." });
-    showToast("info", "Resetting password...");
     let succeeded = false;
     try {
       const res = await fetch(`${AUTH_ENDPOINT}/reset-password`, {
@@ -133,7 +122,6 @@ export function ResetPasswordScreen() {
         succeeded = true;
         const text = "Password reset! Redirecting to login...";
         setMsg({ kind: "ok", text });
-        showToast("ok", text);
         redirectTimer.current = window.setTimeout(() => {
           navigate("/login", { replace: true });
         }, 2000);
@@ -145,11 +133,9 @@ export function ResetPasswordScreen() {
       }
       const text = data.message ? String(data.message) : "Reset failed. Please try again.";
       setMsg({ kind: "err", text });
-      showToast("err", text);
     } catch {
       const text = "Network error. Please try again.";
       setMsg({ kind: "err", text });
-      showToast("err", text);
     } finally {
       if (!succeeded) setPending(false);
     }

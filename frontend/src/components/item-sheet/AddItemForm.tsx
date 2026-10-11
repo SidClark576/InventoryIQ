@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { BarcodeIcon } from "@phosphor-icons/react";
 import { lookupBarcode, type InventoryItem } from "@/api";
 import { useInventory } from "@/app/inventory-store";
@@ -8,7 +8,7 @@ import { Field, TEXTAREA_CLASS } from "@/components/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { getEditItem } from "@/session";
+import { clearEditItem, getEditItem } from "@/session";
 
 type Draft = {
   name: string;
@@ -61,9 +61,14 @@ export function AddItemForm({ onDone }: AddItemFormProps) {
   const { categories } = useInventory();
   const { createItem } = useStockActions();
   const [draft, setDraft] = useState<Draft>(prefilled);
+  // One key per form: a retry after a lost response cannot create the item twice.
+  const [idemKey] = useState(() => crypto.randomUUID());
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
+
+  // The prefill is single-use; clear it after the first read so a later empty add sheet starts blank.
+  useEffect(() => clearEditItem(), []);
 
   function patch(partial: Partial<Draft>) {
     setDraft((current) => ({ ...current, ...partial }));
@@ -96,15 +101,18 @@ export function AddItemForm({ onDone }: AddItemFormProps) {
     if (!Number.isFinite(price) || price < 0) return setError("Price must be 0 or more.");
     setError("");
     setSaving(true);
-    const created = await createItem({
-      name,
-      category: draft.category.trim(),
-      quantity,
-      lowStockThreshold: threshold,
-      price,
-      barcode: draft.barcode.trim(),
-      description: draft.description.trim(),
-    });
+    const created = await createItem(
+      {
+        name,
+        category: draft.category.trim() || "Uncategorized",
+        quantity,
+        lowStockThreshold: threshold,
+        price,
+        barcode: draft.barcode.trim(),
+        description: draft.description.trim(),
+      },
+      idemKey,
+    );
     setSaving(false);
     if (created) onDone(created);
   }

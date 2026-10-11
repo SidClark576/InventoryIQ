@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
-import { toast } from "sonner";
-import { authLogin, authRegister, getOrgs, isLocalPreview, switchOrg } from "@/api";
+import { authLogin, authRegister, getOrgs, switchOrg } from "@/api";
 import { TEXT_LINK_CLASS } from "@/components/text-link";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -20,8 +19,6 @@ import { cn } from "@/lib/utils";
 import {
   clearInviteToken,
   getInviteToken,
-  getLocalLogout,
-  getUserEmail,
   setCurrentOrgName,
   setSessionToken,
   setUserEmail,
@@ -40,12 +37,6 @@ type StatusMsg = {
 
 function serverMessage(data: Record<string, unknown>, fallback: string): string {
   return data.message ? String(data.message) : fallback;
-}
-
-function showToast(kind: MsgKind, text: string): void {
-  if (kind === "err") toast.error(text);
-  else if (kind === "ok") toast.success(text);
-  else toast.info(text);
 }
 
 function StatusAlert({ id, msg }: { id: string; msg: StatusMsg | null }) {
@@ -124,23 +115,6 @@ export function LoginScreen() {
   const switchTimer = useRef<number | null>(null);
 
   useEffect(() => {
-    if (searchParams.get("expired") === "1") {
-      toast.error("Session expired. Please log in again.");
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (isLocalPreview() && !getLocalLogout()) {
-      setUserEmail("preview@localhost");
-      navigate(HOME_ROUTE, { replace: true });
-      return;
-    }
-    if (getUserEmail()) {
-      navigate(HOME_ROUTE, { replace: true });
-    }
-  }, [navigate]);
-
-  useEffect(() => {
     const title = tab === "login" ? "InventoryIQ | Login" : "InventoryIQ | Sign up";
     document.title = title;
   }, [tab]);
@@ -162,12 +136,10 @@ export function LoginScreen() {
     if (!email || !pwd) {
       const text = "Enter email & password.";
       setLoginMsg({ kind: "err", text });
-      showToast("err", text);
       return;
     }
     setLoginPending(true);
     setLoginMsg({ kind: "info", text: "Logging in..." });
-    showToast("info", "Logging in...");
     let signedIn = false;
     try {
       const { status, data } = await authLogin(email, pwd);
@@ -197,11 +169,9 @@ export function LoginScreen() {
       }
       const text = serverMessage(data, "Login failed.");
       setLoginMsg({ kind: "err", text });
-      showToast("err", text);
     } catch {
       const text = "Network error. Please try again.";
       setLoginMsg({ kind: "err", text });
-      showToast("err", text);
     } finally {
       if (!signedIn) setLoginPending(false);
     }
@@ -214,18 +184,15 @@ export function LoginScreen() {
     if (!email || !pwd) {
       const text = "Enter email & password.";
       setRegMsg({ kind: "err", text });
-      showToast("err", text);
       return;
     }
     if (!PASSWORD_REGEX.test(pwd)) {
       const text = "Password must be 8+ chars with uppercase, lowercase, and a number.";
       setRegMsg({ kind: "err", text });
-      showToast("err", text);
       return;
     }
     setRegPending(true);
     setRegMsg({ kind: "info", text: "Creating account..." });
-    showToast("info", "Creating account...");
     let created = false;
     try {
       const { status, data } = await authRegister(email, pwd);
@@ -233,17 +200,14 @@ export function LoginScreen() {
         created = true;
         const text = "Account created!";
         setRegMsg({ kind: "ok", text });
-        showToast("ok", text);
         switchTimer.current = window.setTimeout(() => setTab("login"), 1500);
         return;
       }
       const text = serverMessage(data, "Registration failed.");
       setRegMsg({ kind: "err", text });
-      showToast("err", text);
     } catch {
       const text = "Network error. Please try again.";
       setRegMsg({ kind: "err", text });
-      showToast("err", text);
     } finally {
       if (!created) setRegPending(false);
     }
@@ -291,11 +255,7 @@ export function LoginScreen() {
                     autoComplete="current-password"
                     placeholder="••••••••"
                   />
-                  <div className="flex items-center justify-between gap-3">
-                    <Label htmlFor="remember" className="font-normal">
-                      <input id="remember" type="checkbox" className="size-4 accent-primary" />
-                      Remember device
-                    </Label>
+                  <div className="flex justify-end">
                     <Link
                       to="/forgot-password"
                       className={cn(TEXT_LINK_CLASS, "text-sm")}

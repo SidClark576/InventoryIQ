@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { getInsights } from "@/api";
+import { ArrowClockwiseIcon } from "@phosphor-icons/react";
+import { ensureOrgContext, getInsights } from "@/api";
 import { useOrgShell } from "@/app/AppLayout";
 import { PageHeader } from "@/components/page-header";
+import { Button } from "@/components/ui/button";
 import { RadialGauge } from "@/components/charts/radial-gauge";
 import { StockBar } from "@/components/charts/stock-bar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCurrentOrg } from "@/session";
+import { errorText } from "@/lib/errors";
+import { formatCompactMoney } from "@/lib/format";
 
 type StockItem = { name?: unknown; quantity?: unknown };
 type ReorderItem = {
@@ -56,15 +60,7 @@ function text(value: unknown): string {
   return String(value);
 }
 
-function errorText(err: unknown): string {
-  return err instanceof Error ? err.message : "";
-}
 
-function formatCompactMoney(value: number): string {
-  if (value >= 1000000) return `$${(value / 1000000).toFixed(2)}M`;
-  if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`;
-  return `$${value.toFixed(2)}`;
-}
 
 function parseInsights(raw: Record<string, unknown>): InsightView {
   const summary = (raw.summary ?? {}) as Record<string, unknown>;
@@ -89,21 +85,47 @@ function parseInsights(raw: Record<string, unknown>): InsightView {
   };
 }
 
+// GET /insights queues an SQS message and can send an SNS alert on every call.
+// Share one in-flight request per org so a StrictMode remount or a quick
+// re-render never fires a second one; Refresh starts a new request explicitly.
+let inflight: { orgID: string; request: Promise<Record<string, unknown>> } | null = null;
+
+function loadInsightsOnce(orgID: string): Promise<Record<string, unknown>> {
+  if (inflight && inflight.orgID === orgID) return inflight.request;
+  const request = getInsights().finally(() => {
+    if (inflight?.request === request) inflight = null;
+  });
+  inflight = { orgID, request };
+  return request;
+}
+
 export function InsightsScreen() {
-  const { orgEpoch, orgs } = useOrgShell();
+  const { orgEpoch } = useOrgShell();
   const [view, setView] = useState<InsightView | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState(0);
 
   useEffect(() => {
+    document.title = "Insights | InventoryIQ";
+  }, []);
+
+  // Only orgEpoch and an explicit Refresh trigger a load; never `orgs` (it changes right after mount).
+  useEffect(() => {
     let cancelled = false;
-    const orgID = getCurrentOrg();
     setView(null);
     setError(null);
     setLoading(true);
     void (async () => {
       try {
-        const raw = await getInsights();
+        await ensureOrgContext();
+      } catch {
+        // Legacy (no-org) mode.
+      }
+      const orgID = getCurrentOrg();
+      if (cancelled) return;
+      try {
+        const raw = await loadInsightsOnce(orgID);
         if (cancelled || getCurrentOrg() !== orgID) return;
         setView(parseInsights(raw));
       } catch (err: unknown) {
@@ -117,13 +139,24 @@ export function InsightsScreen() {
     return () => {
       cancelled = true;
     };
-  }, [orgEpoch, orgs]);
+  }, [orgEpoch, refreshToken]);
 
   return (
     <div id="insights-content" className="flex flex-col gap-6">
       <PageHeader
         title="Insights"
         description="Stock health, category risk, and what to reorder next."
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            disabled={loading}
+            onClick={() => setRefreshToken((token) => token + 1)}
+          >
+            <ArrowClockwiseIcon />
+            Refresh
+          </Button>
+        }
       />
 
       {loading ? <InsightsSkeleton /> : null}

@@ -10,6 +10,7 @@ import { TEXT_LINK_CLASS } from "@/components/text-link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDebouncedInput } from "@/hooks/use-debounced-input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   ACTIVITY_FILTERS,
@@ -37,12 +38,20 @@ export function ActivityScreen() {
     void loadTransactions();
   }, [loadTransactions]);
 
+  // Updater form: a debounced search commit must not overwrite a filter picked in the meantime.
   function setParam(key: string, value: string, fallback: string) {
-    const next = new URLSearchParams(params);
-    if (value && value !== fallback) next.set(key, value);
-    else next.delete(key);
-    setParams(next, { replace: true });
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        if (value && value !== fallback) next.set(key, value);
+        else next.delete(key);
+        return next;
+      },
+      { replace: true },
+    );
   }
+
+  const [search, setSearch] = useDebouncedInput(query, (value) => setParam("q", value, ""));
 
   const known = useMemo(() => new Set(items.map((item) => item.itemID)), [items]);
   const rows = useMemo(
@@ -95,8 +104,8 @@ export function ActivityScreen() {
           <Input
             id="tx-search"
             type="search"
-            value={query}
-            onChange={(event) => setParam("q", event.target.value, "")}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Search items or notes"
             aria-label="Search activity"
             className="pl-9"

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { quantityOf } from "@/lib/dashboardStats";
 import { plural } from "@/lib/format";
+import { errorText } from "@/lib/errors";
 
 const RESTORE_DAYS = 30;
 const DAY_MS = 86_400_000;
@@ -20,7 +21,7 @@ function daysLeft(deletedAt: string | undefined): number | null {
 }
 
 export function TrashView({ onBack }: { onBack: () => void }) {
-  const { orgEpoch } = useOrgShell();
+  const { orgEpoch, canEdit } = useOrgShell();
   const { restoreItems } = useStockActions();
   const [rows, setRows] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,7 @@ export function TrashView({ onBack }: { onBack: () => void }) {
         if (!cancelled) setRows(items);
       })
       .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Couldn't load deleted items");
+        if (!cancelled) setError(errorText(err, "Couldn't load deleted items"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -99,16 +100,18 @@ export function TrashView({ onBack }: { onBack: () => void }) {
                       {left !== null ? ` · ${plural(left, "day")} left` : ""}
                     </p>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={restoring !== null}
-                    onClick={() => void restore(item)}
-                  >
-                    <ArrowCounterClockwiseIcon />
-                    {restoring === item.itemID ? "Restoring…" : "Restore"}
-                  </Button>
+                  {canEdit ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={restoring !== null}
+                      onClick={() => void restore(item)}
+                    >
+                      <ArrowCounterClockwiseIcon />
+                      {restoring === item.itemID ? "Restoring…" : "Restore"}
+                    </Button>
+                  ) : null}
                 </li>
               );
             })}

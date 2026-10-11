@@ -23,6 +23,8 @@ export function AdjustControls({ item, initialReason = null }: AdjustControlsPro
   const current = quantityOf(item);
 
   async function apply(direction: Direction) {
+    // Enter on the amount field bypasses the disabled buttons.
+    if (busy) return;
     const units = Number(amount);
     if (!Number.isInteger(units) || units < 1) {
       setError("Enter a whole number of 1 or more.");

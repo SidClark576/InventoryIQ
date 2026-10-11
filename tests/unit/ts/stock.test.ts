@@ -82,6 +82,15 @@ describe("csv", () => {
     ]);
   });
 
+  test("neutralises formula-like text but keeps negative numbers", () => {
+    const text = toCsv(["name", "qty"], [['=HYPERLINK("x")', -2], ["@cmd", 3], ["Milk", 1]]);
+    assert.deepEqual(parseCsv(text), [
+      { name: `'=HYPERLINK("x")`, qty: "-2" },
+      { name: "'@cmd", qty: "3" },
+      { name: "Milk", qty: "1" },
+    ]);
+  });
+
   test("skips blank lines and handles CRLF", () => {
     assert.deepEqual(parseCsv("name,quantity\r\nCups,4\r\n\r\n"), [{ name: "Cups", quantity: "4" }]);
     assert.deepEqual(parseCsv(""), []);

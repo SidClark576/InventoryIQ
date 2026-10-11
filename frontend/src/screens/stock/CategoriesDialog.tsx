@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { plural } from "@/lib/format";
+import { errorText } from "@/lib/errors";
 
 const DEFAULT_CATEGORY = "Uncategorized";
 
@@ -46,7 +47,7 @@ export function CategoriesDialog({ open, onOpenChange }: CategoriesDialogProps) 
       await Promise.all([reloadItems(), loadCategories()]);
     } catch (err: unknown) {
       toast.error(`Couldn't delete ${pending}`, {
-        description: err instanceof Error ? err.message : "Try again.",
+        description: errorText(err, "Try again."),
       });
     } finally {
       setBusy(false);

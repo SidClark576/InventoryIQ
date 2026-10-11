@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { toast } from "sonner";
 import { AUTH_ENDPOINT } from "@/config";
 import { TEXT_LINK_CLASS } from "@/components/text-link";
 import { Alert, AlertTitle } from "@/components/ui/alert";
@@ -25,12 +24,6 @@ type StatusMsg = {
 const SENT =
   "If that email is registered, a reset link has been sent. Check your inbox.";
 
-function showToast(kind: MsgKind, text: string): void {
-  if (kind === "err") toast.error(text);
-  else if (kind === "ok") toast.success(text);
-  else toast.info(text);
-}
-
 export function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState<StatusMsg | null>(null);
@@ -47,26 +40,30 @@ export function ForgotPasswordScreen() {
     if (!trimmed) {
       const text = "Enter your email address.";
       setMsg({ kind: "err", text });
-      showToast("err", text);
       return;
     }
     setPending(true);
     setMsg({ kind: "info", text: "Sending..." });
-    showToast("info", "Sending...");
     try {
-      await fetch(`${AUTH_ENDPOINT}/forgot-password`, {
+      const res = await fetch(`${AUTH_ENDPOINT}/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: trimmed }),
       });
-      // Always show success — prevents email enumeration.
+      // Rate limits and server errors mean nothing was sent; say so instead of "sent".
+      if (res.status === 429 || res.status >= 500) {
+        setMsg({
+          kind: "err",
+          text: res.status === 429 ? "Too many requests. Wait a minute and try again." : "Couldn't send the link. Try again shortly.",
+        });
+        return;
+      }
+      // Every other answer shows the same message, so it can't reveal which emails are registered.
       setMsg({ kind: "ok", text: SENT });
-      showToast("ok", SENT);
       setSent(true);
     } catch {
       const text = "Network error. Please try again.";
       setMsg({ kind: "err", text });
-      showToast("err", text);
     } finally {
       setPending(false);
     }

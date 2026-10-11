@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { DownloadSimpleIcon, MagnifyingGlassIcon, PackageIcon, PlusIcon, TrashIcon, XIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { lookupBarcode, type InventoryItem } from "@/api";
+import { useOrgShell } from "@/app/AppLayout";
 import { useInventory } from "@/app/inventory-store";
 import { useSheetParams } from "@/app/use-sheet-params";
 import { useStockActions } from "@/app/use-stock-actions";
@@ -29,12 +31,10 @@ import { TrashView } from "./TrashView";
 
 type DialogName = "scan" | "categories" | "import" | "review" | "bulk-delete" | null;
 
-// Survives remounts in this tab: once the import routes answer 403/404, keep the menu item disabled.
-let importUnavailable = false;
-
 export function StockScreen() {
   const { items, itemsStatus, itemsError, reloadItems } = useInventory();
   const { deleteItems } = useStockActions();
+  const { canEdit, orgEpoch } = useOrgShell();
   const { openItem, openNew, itemHref } = useSheetParams();
   const view = useStockView();
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
@@ -43,19 +43,28 @@ export function StockScreen() {
   const [counts, setCounts] = useState<Counts>({});
   const [dialog, setDialog] = useState<DialogName>(null);
   const [busy, setBusy] = useState(false);
-  const [importAvailable, setImportAvailable] = useState(!importUnavailable);
+  const [importAvailable, setImportAvailable] = useState(true);
+  const [printing, setPrinting] = useState(false);
 
   useEffect(() => {
     document.title = "Stock | InventoryIQ";
   }, []);
 
-  // Print styles key off this attribute (index.css); keep it set only while printing.
+  // A 403/404 from the import routes is per org; another org may have them.
+  useEffect(() => {
+    setImportAvailable(true);
+  }, [orgEpoch]);
+
+  // Print styles key off this attribute (index.css); keep it set, and the report mounted, only while printing.
+  // flushSync renders the report before the browser snapshots the page.
   useEffect(() => {
     const arm = () => {
       document.documentElement.dataset.iqPrint = "inventory";
+      flushSync(() => setPrinting(true));
     };
     const clear = () => {
       delete document.documentElement.dataset.iqPrint;
+      setPrinting(false);
     };
     window.addEventListener("beforeprint", arm);
     window.addEventListener("afterprint", clear);
@@ -72,9 +81,10 @@ export function StockScreen() {
   const rows = useMemo(() => filterItems(items, view.status, view.query), [items, view.status, view.query]);
   const groups = useMemo(() => groupItems(rows, view.grouping), [rows, view.grouping]);
   const countSummary = useMemo(() => summarizeCount(items, counts), [items, counts]);
+  // Bulk actions only touch selected rows the current filters show.
   const selectedItems = useMemo(
-    () => items.filter((item) => item.itemID && selected.has(item.itemID)),
-    [items, selected],
+    () => rows.filter((item) => item.itemID && selected.has(item.itemID)),
+    [rows, selected],
   );
   const filtered = view.status !== "all" || view.query.trim() !== "";
 
@@ -133,6 +143,7 @@ export function StockScreen() {
       return;
     }
     document.documentElement.dataset.iqPrint = "inventory";
+    flushSync(() => setPrinting(true));
     window.print();
   }
 
@@ -143,6 +154,7 @@ export function StockScreen() {
       openItem(match.itemID);
       return;
     }
+    if (!canEdit) return `No item in stock has barcode ${code}.`;
     const product = await lookupBarcode(code);
     setEditItem(
       JSON.stringify(
@@ -158,10 +170,22 @@ export function StockScreen() {
 
   async function bulkDelete() {
     setBusy(true);
-    await deleteItems(selectedItems);
+    const deleted = new Set(await deleteItems(selectedItems));
     setBusy(false);
     setDialog(null);
-    setSelected(new Set());
+    // Rows that failed stay selected so a retry is one click.
+    setSelected(new Set(selectedItems.flatMap((item) => (item.itemID && !deleted.has(item.itemID) ? [item.itemID] : []))));
+  }
+
+  function finishCount(failedIDs: readonly string[]) {
+    setDialog(null);
+    if (failedIDs.length) {
+      // Keep counting with only the rows that did not save, so they can be reviewed again.
+      setCounts((prev) => Object.fromEntries(failedIDs.flatMap((id) => (id in prev ? [[id, prev[id]!]] : []))));
+      return;
+    }
+    setCounting(false);
+    setCounts({});
   }
 
   if (view.trash) {
@@ -180,10 +204,12 @@ export function StockScreen() {
           title="Stock"
           description={counting ? "Count each shelf and type what you see. Blank means not counted." : undefined}
           actions={
-            <Button id="btn-add-new" type="button" onClick={openNew} disabled={counting}>
-              <PlusIcon />
-              Add item
-            </Button>
+            canEdit ? (
+              <Button id="btn-add-new" type="button" onClick={openNew} disabled={counting}>
+                <PlusIcon />
+                Add item
+              </Button>
+            ) : undefined
           }
         />
 
@@ -209,6 +235,7 @@ export function StockScreen() {
           onExport={() => exportCsv(items)}
           onPrint={print}
           onTrash={() => view.setTrash(true)}
+          canEdit={canEdit}
         />
 
         {filtered && !loading ? (
@@ -249,11 +276,17 @@ export function StockScreen() {
             )}
             <p className="font-medium">{items.length ? "No items match" : "No items yet"}</p>
             <p className="text-sm text-muted-foreground">
-              {items.length ? "Try another search or status." : "Add your first item, scan a barcode, or import a CSV."}
+              {items.length
+                ? "Try another search or status."
+                : canEdit
+                  ? "Add your first item, scan a barcode, or import a CSV."
+                  : "Nothing has been added yet."}
             </p>
-            <Button type="button" variant="outline" onClick={items.length ? view.clearFilters : openNew}>
-              {items.length ? "Clear filters" : "Add item"}
-            </Button>
+            {items.length || canEdit ? (
+              <Button type="button" variant="outline" onClick={items.length ? view.clearFilters : openNew}>
+                {items.length ? "Clear filters" : "Add item"}
+              </Button>
+            ) : null}
           </div>
         ) : (
           <StockTable
@@ -269,7 +302,7 @@ export function StockScreen() {
           />
         )}
 
-        {counting || selected.size > 0 ? <div aria-hidden className="h-16" /> : null}
+        {counting || selectedItems.length > 0 ? <div aria-hidden className="h-16" /> : null}
 
         {counting ? (
           <FloatingBar label="Stock count">
@@ -283,17 +316,19 @@ export function StockScreen() {
               Review
             </Button>
           </FloatingBar>
-        ) : selected.size > 0 ? (
+        ) : selectedItems.length > 0 ? (
           <FloatingBar label="Selection">
-            <span className="mr-auto text-sm font-medium tabular-nums">{selected.size} selected</span>
+            <span className="mr-auto text-sm font-medium tabular-nums">{selectedItems.length} selected</span>
             <Button type="button" variant="outline" size="sm" onClick={() => exportCsv(selectedItems, "_selected")}>
               <DownloadSimpleIcon />
               Export
             </Button>
-            <Button type="button" variant="destructive" size="sm" onClick={() => setDialog("bulk-delete")}>
-              <TrashIcon />
-              Delete
-            </Button>
+            {canEdit ? (
+              <Button type="button" variant="destructive" size="sm" onClick={() => setDialog("bulk-delete")}>
+                <TrashIcon />
+                Delete
+              </Button>
+            ) : null}
             <Button
               type="button"
               variant="ghost"
@@ -307,7 +342,7 @@ export function StockScreen() {
         ) : null}
       </div>
 
-      <PrintReport items={items} />
+      {printing ? <PrintReport items={items} /> : null}
 
       <BarcodeScanDialog
         open={dialog === "scan"}
@@ -319,10 +354,7 @@ export function StockScreen() {
       <ImportDialog
         open={dialog === "import"}
         onOpenChange={(open) => setDialog(open ? "import" : null)}
-        onUnavailable={() => {
-          importUnavailable = true;
-          setImportAvailable(false);
-        }}
+        onUnavailable={() => setImportAvailable(false)}
       />
       <CountReviewDialog
         open={dialog === "review"}
@@ -330,11 +362,7 @@ export function StockScreen() {
         counted={countSummary.counted}
         total={items.length}
         changes={countSummary.changes}
-        onFinished={() => {
-          setDialog(null);
-          setCounting(false);
-          setCounts({});
-        }}
+        onFinished={finishCount}
       />
       <ConfirmDialog
         open={dialog === "bulk-delete"}

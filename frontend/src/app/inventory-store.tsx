@@ -17,6 +17,7 @@ import {
 } from "@/api";
 import { parseTransactions, type Transaction } from "@/lib/activity";
 import { getCurrentOrg } from "@/session";
+import { errorText } from "@/lib/errors";
 
 export type LoadStatus = "idle" | "loading" | "ready" | "error";
 
@@ -48,9 +49,6 @@ export function useInventory(): InventoryStore {
   return value;
 }
 
-function errorText(err: unknown, fallback: string): string {
-  return err instanceof Error && err.message ? err.message : fallback;
-}
 
 function mergeCategories(server: readonly string[], items: readonly InventoryItem[]): string[] {
   const fromItems = items.map((item) => item.category).filter((cat): cat is string => Boolean(cat));
@@ -84,7 +82,8 @@ export function InventoryProvider({ orgEpoch, children }: { orgEpoch: number; ch
 
   const reloadItems = useCallback(async () => {
     const gen = ++itemsGen.current;
-    setItemsStatus("loading");
+    // Skeletons only on an empty cache; a background reload keeps rows (and open count inputs) mounted.
+    setItemsStatus(itemsRef.current.length ? "ready" : "loading");
     setItemsError(null);
     try {
       await ensureOrgContext();
@@ -141,11 +140,12 @@ export function InventoryProvider({ orgEpoch, children }: { orgEpoch: number; ch
     const switched = loadedEpoch.current !== null && loadedEpoch.current !== orgEpoch;
     loadedEpoch.current = orgEpoch;
     if (switched) {
+      itemsRef.current = [];
       setItems([]);
       setTransactions([]);
       setServerCategories([]);
       setTxStatus("idle");
-      txGen.current = 0;
+      // txGen keeps counting so a late response for the old org can never match a new generation.
       if (txRequested.current) void loadTransactions(true);
     }
     void reloadItems();

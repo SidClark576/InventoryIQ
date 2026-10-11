@@ -3,7 +3,6 @@ import {
   clearSession,
   getCurrentOrg,
   getSessionToken,
-  getUserEmail,
   setCurrentOrg,
   setCurrentOrgName,
   setCurrentRole,
@@ -86,10 +85,6 @@ export function check401(res: Response): void {
     window.location.href = 'login.html?expired=1';
     throw new Error('Session expired. Please log in again.');
   }
-}
-
-export function getCurrentUserID(): string {
-  return getUserEmail();
 }
 
 export function authHeaders(): Record<string, string> {
@@ -227,10 +222,13 @@ export async function getDeletedItems(): Promise<InventoryItem[]> {
   return [];
 }
 
-export async function addItem(item: Record<string, unknown>): Promise<Record<string, unknown>> {
+/** `idemKey` lets the server drop a duplicate POST when a retry follows a lost response. */
+export async function addItem(item: Record<string, unknown>, idemKey?: string): Promise<Record<string, unknown>> {
+  const headers = await readyHeaders();
+  if (idemKey) headers['Idempotency-Key'] = idemKey;
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items`, {
     method: 'POST',
-    headers: await readyHeaders(),
+    headers,
     body: JSON.stringify(item),
   });
   checkQuota(res);
@@ -251,7 +249,7 @@ export async function updateItem(
   if (version !== undefined && version !== null) {
     headers['If-Match'] = String(version);
   }
-  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}`, {
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${encodeURIComponent(itemID)}`, {
     method: 'PUT',
     headers,
     body: JSON.stringify(updates),
@@ -275,7 +273,7 @@ export async function updateItem(
 }
 
 export async function restoreItem(itemID: string): Promise<Record<string, unknown>> {
-  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}/restore`, {
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${encodeURIComponent(itemID)}/restore`, {
     method: 'POST',
     headers: await readyHeaders(),
   });
@@ -294,7 +292,7 @@ export async function restoreItem(itemID: string): Promise<Record<string, unknow
 export async function deleteItem(itemID: string): Promise<Record<string, unknown>> {
   // Adding a timestamp query param bypasses any cached failed CORS preflight responses in the browser
   // userID is sent automatically via session token server-side
-  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${itemID}?_cb=${Date.now()}`, {
+  const res = await fetch(`${CONFIG.API_ENDPOINT}/items/${encodeURIComponent(itemID)}?_cb=${Date.now()}`, {
     method: 'DELETE',
     headers: await readyHeaders(),
     cache: 'no-store',
@@ -327,7 +325,7 @@ export async function getInsights(): Promise<Record<string, unknown>> {
 
 export async function getTransactions(): Promise<unknown[]> {
   const url = `${CONFIG.API_ENDPOINT}/transactions`;
-  const res = await fetch(url, { headers: authHeaders() });
+  const res = await fetch(url, { headers: await readyHeaders() });
   checkQuota(res);
   check401(res);
   const data: unknown = await res.json();
@@ -379,7 +377,7 @@ export async function bulkImport(
   idemKey?: string,
 ): Promise<Record<string, unknown>> {
   const headers = await readyHeaders();
-  if (idemKey) headers['X-Idempotency-Key'] = idemKey;
+  if (idemKey) headers['Idempotency-Key'] = idemKey;
   const res = await fetch(`${CONFIG.API_ENDPOINT}/items/import`, {
     method: 'POST',
     headers,
@@ -494,34 +492,6 @@ export async function inviteMember(
     `${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}/invites`,
     { method: 'POST', body: JSON.stringify({ email, role }) },
     'Failed to send invite',
-  );
-}
-
-export async function revokeInvite(orgID: string, inviteID: string): Promise<Record<string, unknown>> {
-  return orgJson(
-    `${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}/invites/${encodeURIComponent(inviteID)}/revoke`,
-    { method: 'POST' },
-    'Failed to revoke invite',
-  );
-}
-
-export async function changeMemberRole(
-  orgID: string,
-  userID: string,
-  role: Role | string,
-): Promise<Record<string, unknown>> {
-  return orgJson(
-    `${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}/members/${encodeURIComponent(userID)}`,
-    { method: 'PATCH', body: JSON.stringify({ role }) },
-    'Failed to change role',
-  );
-}
-
-export async function removeMember(orgID: string, userID: string): Promise<Record<string, unknown>> {
-  return orgJson(
-    `${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}/members/${encodeURIComponent(userID)}`,
-    { method: 'DELETE' },
-    'Failed to remove member',
   );
 }
 
