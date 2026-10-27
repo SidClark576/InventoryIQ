@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panindo: stock counts and low-stock alerts for small stores</title>
+  <meta name="description" content="Panindo turns your phone into a barcode scanner and stock book for sari-sari stores, convenience stores, and small shops. Works offline. Coming soon to Google Play.">
+  <link rel="canonical" href="https://panindo.app/">
+  <meta name="theme-color" content="#eadbc0" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#15140f" media="(prefers-color-scheme: dark)">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Panindo">
+  <meta property="og:title" content="Panindo: stop counting stock on paper">
+  <meta property="og:description" content="Scan, adjust, and get warned before a shelf runs empty. For sari-sari stores, convenience stores, and small shops. Coming soon to Google Play.">
+  <meta property="og:url" content="https://panindo.app/">
+  <meta property="og:image" content="https://panindo.app/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Panindo logo, the headline Never run out again, and a yellow price tag reading Hindi ka na mauubusan.">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M3 16 11 5h15a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H11z' fill='%23f4c430' stroke='%231b2420' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='10.5' cy='16' r='2.2' fill='%231b2420'/%3E%3Cpath d='M16 23V10h4.5a3.5 3.5 0 0 1 0 7H16' fill='none' stroke='%231b2420' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;family=Kalam:wght@700&amp;display=swap">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="/" aria-label="Panindo home">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><path class="mark-tag" d="M3 16 11 5h15a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H11z" stroke-width="2" stroke-linejoin="round"/><circle class="mark-ink" cx="10.5" cy="16" r="2.2"/><path class="mark-p" d="M16 23V10h4.5a3.5 3.5 0 0 1 0 7H16" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Panindo
+      </a>
+      <nav aria-label="Main">
+        <ul class="nav-links">
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="/support/">Support</a></li>
+        </ul>
+      </nav>
+      <a class="btn btn-tag btn-sm" href="mailto:support@panindo.app?subject=Panindo%20beta">Join the beta</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Coming soon to Google Play</p>
+          <h1 id="hero-title">Stop counting stock on paper.</h1>
+          <p class="lede">Panindo turns your phone into a barcode scanner and stock book, and warns you before a shelf runs empty.</p>
+          <div class="cta-row">
+            <a class="btn btn-tag" href="mailto:support@panindo.app?subject=Panindo%20beta">Join the beta</a>
+            <a class="btn btn-ghost" href="#pricing">See pricing</a>
+          </div>
+        </div>
+
+        <div class="stage" role="img" aria-label="Illustration of the Panindo app. A coffee sachet box has just been scanned, the stepper is set to add 24 to stock, and a push notification reads: Paper cups, 12 left, threshold 50.">
+          <div class="push">
+            <span class="app-icon"><svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true"><circle class="mark-ink" cx="10.5" cy="16" r="2.2"/><path class="mark-p" d="M16 23V10h4.5a3.5 3.5 0 0 1 0 7H16" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="head"><b>Panindo</b><span>now</span></span>
+            <span class="body">Paper cups: <em>12 left</em> (threshold 50)</span>
+          </div>
+          <div class="phone">
+            <div class="screen">
+              <div class="status"><span>9:41</span><span class="island"></span><span></span></div>
+              <div class="app-bar"><strong>Scan</strong><span>Rosa's Store &#9662;</span></div>
+              <div class="viewfinder"><span class="laser"></span></div>
+              <div class="sheet">
+                <div class="item">3-in-1 coffee sachet</div>
+                <div class="meta">On shelf: 18 &nbsp;&middot;&nbsp; Alert at 10</div>
+                <div class="stepper"><span>&minus;</span><span class="qty">+24</span><span>+</span></div>
+                <div class="save">Save +24</div>
+              </div>
+              <div class="tabs"><span>Today</span><span>Stock</span><span class="scan">Scan</span><span>Activity</span><span>More</span></div>
+            </div>
+          </div>
+          <p class="hang-tag hand"><span class="tag">Hindi ka na mauubusan.</span></p>
+        </div>
+      </div>
+      <div class="counter" aria-hidden="true"></div>
+    </section>
+
+    <section class="section" aria-labelledby="problem-title">
+      <div class="wrap problem-grid">
+        <div class="problem-copy">
+          <h2 id="problem-title">A notebook can't warn you.</h2>
+          <p>Counts get scribbled on paper and typed in later, or never. You find out an item is gone when a customer asks for it. And low-stock emails sit unread through the morning rush.</p>
+          <p class="turn">Panindo keeps the count on the phone already in your pocket, and buzzes you while there's still time to reorder.</p>
+        </div>
+        <figure class="notebook" aria-label="A handwritten stock notebook">
+          <ol>
+            <li><s>Coffee sachets: 18? 20?</s> count later</li>
+            <li>Paper cups <span class="circled">OUT</span> asked twice</li>
+            <li>Bottled water: check the back</li>
+            <li><s>Check email for alert</s></li>
+          </ol>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section how" id="how" aria-labelledby="how-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="how-title">Scan. Adjust. Get warned.</h2>
+        </div>
+        <ol class="steps">
+          <li>
+            <h3>Scan</h3>
+            <p>Point the camera at any barcode. Known products fill in their own name.</p>
+          </li>
+          <li>
+            <h3>Adjust</h3>
+            <p>Big + and &minus; buttons. Three taps from scan to saved, with a buzz to confirm.</p>
+          </li>
+          <li>
+            <h3>Get warned</h3>
+            <p>Set a low-stock level for each item. Your phone gets a push alert when stock drops below it.</p>
+          </li>
+        </ol>
+
+        <div class="flows">
+          <article class="flow flow-delivery" aria-labelledby="flow-delivery-title">
+            <h3 id="flow-delivery-title">A delivery comes in.</h3>
+            <p>Tap Scan, scan the box, enter how many, save. The scanner reopens for the next box, so the whole delivery is in before the paperwork is signed.</p>
+            <ul class="slip" aria-label="Example delivery">
+              <li><span>Bottled water 500 ml</span><b>+24</b></li>
+              <li><span>Instant noodles, chicken</span><b>+48</b></li>
+              <li><span>3-in-1 coffee sachet</span><b>+24</b></li>
+              <li><span>Paper cups 8 oz</span><b>+100</b></li>
+              <li><span class="hand">All in. Salamat!</span></li>
+            </ul>
+          </article>
+
+          <article class="flow flow-offline" aria-labelledby="flow-offline-title">
+            <h3 id="flow-offline-title">No signal in the stockroom? Keep counting.</h3>
+            <p>Counts and adjustments save on the phone and sync the next time the app is open and online. If someone changed an item while you were counting, Panindo asks which number is right. It never overwrites a count silently.</p>
+            <div class="offline-ui" aria-label="Example offline screens">
+              <p class="banner"><span>Offline: changes will sync</span><span>3 pending</span></p>
+              <div class="dialog">
+                <p>Joy added 10 after your count. Keep 40 or use 50?</p>
+                <div class="choices"><span>Keep 40</span><span>Use 50</span></div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section log" id="log" aria-labelledby="log-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="log-title">Every change, on the record.</h2>
+          <p>Who changed what, by how much, and when. No more guessing where ten cases of water went.</p>
+        </div>
+        <article class="receipt" aria-label="Example activity log">
+          <header>
+            <strong>Rosa's Store</strong>
+            <span>Activity, Tuesday</span>
+          </header>
+          <ol>
+            <li><time>7:58 AM</time><span class="what">Bottled water 500 ml</span><span class="delta up">+24</span><span class="who">rosa@ &middot; received delivery</span></li>
+            <li><time>8:12 AM</time><span class="what">Instant noodles, chicken</span><span class="delta down">&minus;3</span><span class="who">joy@ &middot; sold</span></li>
+            <li><time>9:40 AM</time><span class="what">Paper cups 8 oz</span><span class="delta">40</span><span class="who">ben@ &middot; Count: 40, was 38</span></li>
+            <li><time>9:41 AM</time><span class="what">Paper cups 8 oz</span><span class="delta down">&minus;28</span><span class="who">joy@ &middot; sold</span></li>
+          </ol>
+          <footer>Counts also keep the time on the phone that made them.</footer>
+        </article>
+        <p class="log-note">Deleted an item by mistake? It stays recoverable for 30 days.</p>
+      </div>
+    </section>
+
+    <section class="section team" id="team" aria-labelledby="team-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="team-title">Give everyone the right key.</h2>
+          <p>Invite staff by email and pick a role for each. Remove someone and their access ends on their very next tap.</p>
+        </div>
+        <ul class="pegboard">
+          <li class="key">
+            <h3>Owner</h3>
+            <p>Runs the store. Manages the plan, transfers ownership, and can delete the store.</p>
+            <p class="limit">One per store</p>
+          </li>
+          <li class="key">
+            <h3>Admin</h3>
+            <p>Invites and removes staff, changes roles, manages items, and exports to CSV.</p>
+          </li>
+          <li class="key">
+            <h3>Editor</h3>
+            <p>Adds and edits items, receives deliveries, and counts stock.</p>
+          </li>
+          <li class="key">
+            <h3>Viewer</h3>
+            <p>Sees stock levels and history. Can't change anything.</p>
+          </li>
+        </ul>
+        <p class="removed"><s>carlo@ &middot; Editor</s> <span>Removed at 9:14 AM. Access ended immediately, on every phone.</span></p>
+      </div>
+    </section>
+
+    <section class="section pricing" id="pricing" aria-labelledby="pricing-title">
+      <div class="wrap">
+        <div class="pricing-head">
+          <div class="section-head">
+            <h2 id="pricing-title">Free to start. Pay when the store grows.</h2>
+            <p>Every phone feature is free. Upgrade for more items, more people, and insights. Pro starts with a 14-day free trial.</p>
+          </div>
+          <fieldset class="currency">
+            <legend>Show prices in</legend>
+            <span class="seg">
+              <input type="radio" name="currency" id="cur-usd" value="usd" checked>
+              <label for="cur-usd">US $</label>
+              <input type="radio" name="currency" id="cur-php" value="php">
+              <label for="cur-php">PH &#8369;</label>
+            </span>
+          </fieldset>
+        </div>
+
+        <ul class="shelf">
+          <li class="plan plan-free">
+            <div>
+              <h3>Free</h3>
+              <p class="for">For one person getting started</p>
+            </div>
+            <p class="price"><span class="usd"><b>$0</b></span><span class="php"><b>&#8369;0</b></span></p>
+            <ul class="limits">
+              <li>100 items</li>
+              <li>2 seats</li>
+            </ul>
+            <ul>
+              <li>Barcode scanning</li>
+              <li>Push low-stock alerts</li>
+              <li>Works offline</li>
+              <li>CSV import and export</li>
+            </ul>
+            <div class="barcode" aria-hidden="true"></div>
+          </li>
+          <li class="plan plan-pro">
+            <p class="trial-tag hand"><span class="tag">14 days free</span></p>
+            <div>
+              <h3>Pro</h3>
+              <p class="for">For a busy store with a few staff</p>
+            </div>
+            <p class="price"><span class="usd"><b>$9.99</b>/mo</span><span class="php"><b>&#8369;199</b>/mo</span></p>
+            <p class="alt"><span class="usd">or $99 a year</span><span class="php">or &#8369;1,990 a year</span></p>
+            <ul class="limits">
+              <li>Unlimited items</li>
+              <li>5 seats</li>
+            </ul>
+            <ul>
+              <li>Everything in Free</li>
+              <li>Insights</li>
+            </ul>
+            <div class="barcode" aria-hidden="true"></div>
+          </li>
+          <li class="plan plan-business">
+            <div>
+              <h3>Business</h3>
+              <p class="for">For bigger shops and shift teams</p>
+            </div>
+            <p class="price"><span class="usd"><b>$29.99</b>/mo</span><span class="php"><b>&#8369;599</b>/mo</span></p>
+            <p class="alt"><span class="usd">or $299 a year</span><span class="php">or &#8369;5,990 a year</span></p>
+            <ul class="limits">
+              <li>Unlimited items</li>
+              <li>25 seats</li>
+            </ul>
+            <ul>
+              <li>Everything in Free</li>
+              <li>Insights</li>
+            </ul>
+            <div class="barcode" aria-hidden="true"></div>
+          </li>
+        </ul>
+
+        <div class="pricing-notes">
+          <p>Plans are bought inside the Panindo app through Google Play, and renew until you cancel in your Google Play subscription settings. This website doesn't sell anything.</p>
+          <p>Every member counts as a seat, Viewers included. The plan covers the whole store on every device. Prices can vary by country and include taxes as Google Play applies them.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq" aria-labelledby="faq-title">
+      <div class="wrap faq-grid">
+        <div class="section-head">
+          <h2 id="faq-title">Questions, answered.</h2>
+          <p>Something else? Email <a href="mailto:support@panindo.app">support@panindo.app</a>.</p>
+        </div>
+        <div class="faq-list">
+          <details>
+            <summary>Who owns my inventory data?</summary>
+            <div class="answer">
+              <p>You do. Owners and Admins can export everything to CSV at any time, on every plan, including Free.</p>
+              <p>We don't sell your data, show ads, or track you across other apps.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Does it work without internet?</summary>
+            <div class="answer">
+              <p>Yes. Your last-synced stock list stays on the phone, and stock adjustments and counts save offline. They sync when the app is open and back online.</p>
+              <p>Adding, editing, or deleting items still needs a connection for now.</p>
+            </div>
+          </details>
+          <details>
+            <summary>What happens if I stop paying?</summary>
+            <div class="answer">
+              <p>Nothing is deleted. Your store moves to the Free plan. If it has more items or members than Free allows, it becomes read-only for new items and new seats until you're under the limit or upgrade again.</p>
+              <p>You can still see everything, scan, and adjust stock.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Which phones does it run on?</summary>
+            <div class="answer">
+              <p>Android phones running Android 7 or later. Tablets work, but the layout isn't optimized for them yet.</p>
+              <p>Phones without Google services, such as recent Huawei models, can scan but won't get push alerts.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Which countries is it for?</summary>
+            <div class="answer">
+              <p>The United States and the Philippines, with prices in dollars or pesos. The app is in English.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Is there a web version?</summary>
+            <div class="answer">
+              <p>Yes. The web app uses the same account and store as your phone. CSV import lives on the web. Plans can only be bought in the mobile app.</p>
+            </div>
+          </details>
+          <details>
+            <summary>When can I download it?</summary>
+            <div class="answer">
+              <p>Panindo isn't on Google Play yet. Join the beta by email and we'll tell you the day it's live.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="beta-title">
+      <div class="wrap sign-wrap">
+        <div class="sign">
+          <span class="hand" lang="fil">Malapit nang magbukas.</span>
+          <h2 id="beta-title">Opening soon on Android.</h2>
+          <p>We're looking for a small group of stores in the US and the Philippines to try Panindo before launch. Email us your store's name and what you sell.</p>
+          <a class="btn btn-tag" href="mailto:support@panindo.app?subject=Panindo%20beta">Join the beta</a>
+          <small>Coming soon to Google Play.</small>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <a class="brand" href="/" aria-label="Panindo home">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><path class="mark-tag" d="M3 16 11 5h15a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H11z" stroke-width="2" stroke-linejoin="round"/><circle class="mark-ink" cx="10.5" cy="16" r="2.2"/><path class="mark-p" d="M16 23V10h4.5a3.5 3.5 0 0 1 0 7H16" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Panindo
+      </a>
+      <nav aria-label="Footer">
+        <ul>
+          <li><a href="/privacy/">Privacy</a></li>
+          <li><a href="/terms/">Terms</a></li>
+          <li><a href="/delete-account/">Delete account</a></li>
+          <li><a href="/support/">Support</a></li>
+        </ul>
+      </nav>
+      <small>&copy; 2026 Panindo</small>
+    </div>
+  </footer>
+</body>
+</html>

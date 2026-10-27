@@ -1,10 +1,30 @@
-# PRD: Panindo (formerly InventoryIQ): Mobile Launch on App Store & Google Play
+# PRD: Panindo (formerly InventoryIQ): Mobile Launch on Google Play (Android first)
 
 > Status: Decided (grilled + gap review) · Owner: Sidney · Created: 2026-10-11 · Updated: 2026-10-12
+> Readiness checklist (what the current app is missing before the mobile build): [PRD-mobile-readiness.md](PRD-mobile-readiness.md)
+> Domains: `panindo.app` = marketing + legal site (`site/`) · `app.panindo.app` = web app, invite/reset links, deep-link files
 
 ## TL;DR
 
-Rebrand InventoryIQ as **Panindo** and launch it on iOS and Android for small stores: sari-sari stores, convenience stores, and shops. Launch markets are the **US and the Philippines**. The app packages the existing React web app and adds native barcode scanning, push alerts for low stock, and stock counts that keep working without signal. A free plan gets a store started. Pro and Business plans, bought in-app through Apple or Google, unlock more items, more seats, and insights. Backend spending stays near $0 until paying customers justify more.
+Rebrand InventoryIQ as **Panindo** and launch it on **Android (Google Play)** first for small stores: sari-sari stores, convenience stores, and shops. Launch markets are the **US and the Philippines**. The app packages the existing React web app and adds native barcode scanning, push alerts for low stock, and stock counts that keep working without signal. A free plan gets a store started. Pro and Business plans, bought in-app through Google Play, unlock more items, more seats, and insights. Backend spending stays near $0 until paying customers justify more.
+
+## Platform scope: Android first (decided 2026-10-12)
+
+- **v1 ships on Android (Google Play) plus the existing web app.** There is no iOS app at launch.
+- **Why:** most of the Philippine market uses Android, and the sari-sari audience overwhelmingly so. Google's fee is $25 once instead of Apple's $99 a year, which fits the near-$0 spend rule. Billing and sign-in cover one store instead of two, and Google's 12-tester, 14-day test can start sooner.
+- **iPhone users** can use the web app at `app.panindo.app`, with the same account and store. The marketing site says only "Coming soon to Google Play".
+- **Deferred to Phase 6 (iOS):**
+  - Sign in with Apple
+  - StoreKit 2 and App Store Server Notifications
+  - APNs push
+  - the iOS privacy manifest and Xcode build floor
+  - TestFlight
+  - Apple developer enrollment and the Small Business Program
+  - the App Store privacy label and EULA clauses
+  - Apple "Hide My Email" invite handling
+
+  Apple-specific lines elsewhere in this PRD are kept for Phase 6 and marked **(iOS, Phase 6)**. They aren't v1 scope.
+- **When to start iOS:** open question O1 below. Until then, the Apple Developer fee is not paid.
 
 ## Background
 
@@ -25,7 +45,7 @@ Rebrand InventoryIQ as **Panindo** and launch it on iOS and Android for small st
 
 | Goal | Metric | Launch target |
 |---|---|---|
-| Approved on both stores | Review cycles to approval, iOS and Android | ≤2 each |
+| Approved on Google Play | Review cycles to production approval | ≤2 |
 | Self-serve activation | % of new signups adding ≥5 items within 7 days | ≥40% |
 | Mobile earns its place | % of stock adjustments made from mobile | ≥50% by day 60 |
 | Fast floor workflow | Median time from scan to stock adjusted | ≤10 s |
@@ -37,7 +57,7 @@ Rebrand InventoryIQ as **Panindo** and launch it on iOS and Android for small st
 
 ## Solution Overview
 
-1. **One product, three surfaces.** iOS, Android, and web share the same account, org, inventory, roles, and plan.
+1. **One product, two surfaces at launch.** Android and web share the same account, org, inventory, roles, and plan. iOS joins later (Phase 6).
 2. **Packaged React app.** Capacitor wraps the existing React app. Barcode scanning, push alerts, offline mode, and haptics are native. They are the core of the product, and they also answer Apple's "repackaged website" rule (Guideline 4.2).
 3. **Built for the store floor.** Scan → find item → adjust stock in 3 taps or fewer. Receiving a delivery and counting stock are the two flows to make excellent.
 4. **Freemium with store billing.** Every mobile feature is free. Customers pay when they grow (more items, more seats, insights).
@@ -45,12 +65,12 @@ Rebrand InventoryIQ as **Panindo** and launch it on iOS and Android for small st
 
 ## User Experience
 
-**New store finds Panindo in the app store**
-1. The owner installs the app and signs up with Apple, Google, or email.
+**New store finds Panindo on Google Play**
+1. The owner installs the app and signs up with Google or email.
 2. They name the store. This creates their org, with them as Owner.
 3. They add items: scan a barcode (the name is prefilled when the barcode is known), type them in, or import a spreadsheet on the web.
 4. The app asks for push permission and explains why ("Get warned before you run out").
-5. The owner verifies their email and invites a teammate. The invite link opens the app if it's installed, or the app store if not.
+5. The owner verifies their email and invites a teammate. The invite link opens the app if it's installed, or Google Play if not.
 
 **Receiving a delivery (core flow)**
 1. The user taps **Scan**, which sits in the center of the bottom navigation.
@@ -70,7 +90,7 @@ Rebrand InventoryIQ as **Panindo** and launch it on iOS and Android for small st
 - If push permission is denied, alerts still appear in an in-app alert list. Users can opt in to email alerts, sent individually to them. Shared alert topics are not used (see R10.1).
 
 **Upgrading**
-- When a store hits a Free limit, a paywall explains what Pro unlocks and offers a 14-day free trial. Purchase goes through the native Apple or Google sheet. The plan applies to the whole org on every device. Only the Owner can buy.
+- When a store hits a Free limit, a paywall explains what Pro unlocks and offers a 14-day free trial. Purchase goes through the native Google Play sheet. The plan applies to the whole org on every device. Only the Owner can buy.
 - The web app shows the plan but doesn't sell it. Web upgrade prompts say "upgrade in the Panindo app".
 
 **Navigation**
@@ -79,13 +99,13 @@ Rebrand InventoryIQ as **Panindo** and launch it on iOS and Android for small st
 ## Requirements
 
 ### R1. Accounts & sign-in (Amazon Cognito, Essentials tier)
-- Sign in with email and password, **Google**, and **Apple**. Sign in with Apple is required on iOS because Google sign-in is offered (Apple 4.8).
+- Sign in with email and password, or **Google**. **Sign in with Apple (iOS, Phase 6)** becomes required once an iOS app offers Google sign-in (Apple 4.8).
 - Sign-in runs in the system browser and returns through a deep link (PKCE). Google blocks sign-in inside embedded web views.
-- **Email verification** is required before inviting teammates or upgrading. Apple and Google sign-ins count as verified.
+- **Email verification** is required before inviting teammates or upgrading. Google sign-ins count as verified.
 - Users stay signed in for **30 days**, renewed while the app is in use. Tokens live in the device's secure storage.
 - **"Sign out of all devices"** is in Account settings and takes effect within **15 minutes** (access tokens last 15 minutes). A password change also signs out every device.
 - Removing a member from an org is **instant**, because membership is checked live on every request.
-- **In-app account deletion** (Apple 5.1.1(v)), plus a web page where users can request deletion (Google Play requirement). A sole Owner of an org with other members must transfer ownership or delete the org first.
+- **In-app account deletion** plus a public web page where users can request deletion (Google Play requirement; Apple 5.1.1(v) also requires in-app deletion for Phase 6). A sole Owner of an org with other members must transfer ownership or delete the org first.
 - Existing users move to Cognito **on their first sign-in, keeping their passwords** (Cognito's user-migration trigger checks the old password once).
 - Auth emails go through Amazon SES. Cognito's built-in email is capped at 50 per day.
 
@@ -119,13 +139,13 @@ Rebrand InventoryIQ as **Panindo** and launch it on iOS and Android for small st
 | US | $0 | $9.99/mo · $99/yr | $29.99/mo · $299/yr |
 | Philippines | ₱0 | ₱199/mo · ₱1,990/yr | ₱599/mo · ₱5,990/yr |
 
-- Purchases go through **StoreKit and Google Play Billing only**. There is no web checkout at launch. Plans are monthly or annual auto-renewing subscriptions. Restore Purchases is supported.
-- The plan belongs to the **org**. Only the Owner buys it. A plan bought on iOS is active on Android and web.
+- Purchases go through **Google Play Billing only** (StoreKit joins in Phase 6). There is no web checkout at launch. Plans are monthly or annual auto-renewing subscriptions. Restore Purchases is supported.
+- The plan belongs to the **org**. Only the Owner buys it. A plan bought on Android is active on the web too, and later on iOS.
 - A **14-day Pro free trial** runs through the store's free-trial offer, once per org.
 - Each person can **own one Free org**. They can join any number of orgs as a member.
 - **Limits are enforced on the server.** An org over its limit becomes read-only for new items and seats, and nothing is deleted.
 - **A CSV import that would exceed the limit is blocked** with a preview before anything is written, and the message "upgrade or start a trial in the app". A file is never half-imported.
-- **Ownership transfer:** the original buyer's subscription keeps running, and the plan screen shows "Billed via [name]'s Apple ID". The new Owner is prompted to subscribe before the period ends. If nobody renews, the org drops to Free under the rules above.
+- **Ownership transfer:** the original buyer's subscription keeps running, and the plan screen shows "Billed via [name]'s Google account". The new Owner is prompted to subscribe before the period ends. If nobody renews, the org drops to Free under the rules above.
 - **Existing orgs** get Pro free for 12 months, with an in-app notice 30 days before it ends.
 - A grace period on failed renewals, matching the store defaults.
 
@@ -133,14 +153,14 @@ Rebrand InventoryIQ as **Panindo** and launch it on iOS and Android for small st
 - The name is **Panindo** everywhere: stores, the web at **panindo.app**, emails, sender name, legal pages, code, and AWS resource names. The old Netlify URL redirects to the new address.
 - Store listing: "Panindo: Stock & Barcode Tracker". The app is English-only. The Philippine listing has Filipino and English text and screenshots with peso prices.
 - **Name clearance (do it yourself):** USPTO is clean. Before committing: check IPOPHL by hand, check a .ph domain, and register **panindo.app** right away (it is not reserved). Social handles use @panindoapp, because @panindo is taken on TikTok. Filing a trademark and getting an attorney review wait until traction.
-- The app is built for phones on iPhone and Android. Tablets run it unoptimized. Tablet layouts come in v1.1.
+- The app is built for Android phones (Android 7+). Tablets run it unoptimized. Tablet layouts come in v1.1.
 - Developer accounts are enrolled **as an individual** (there is no registered business yet).
-  - Apple: the seller name shown is the developer's legal name. Apply for the Small Business Program (15% commission); confirm it covers subscriptions.
+  - (iOS, Phase 6) Apple: the seller name shown is the developer's legal name. Apply for the Small Business Program (15% commission); confirm it covers subscriptions.
   - Google: requires a closed test with ≥12 testers for ≥14 days before production. Use the beta businesses as testers, and start the clock early.
 - The Google Play address is shown publicly for monetized apps. Use a PhilPost P.O. box, with the home address as the fallback if Google rejects the P.O. box.
-- Apple's EU trader declaration: declare "not a trader". There is no EU distribution, so nothing is displayed.
+- (iOS, Phase 6) Apple's EU trader declaration: declare "not a trader". There is no EU distribution, so nothing is displayed.
 - Privacy policy (covering the PH Data Privacy Act and US state laws), terms of service, and a support URL.
-- App Store privacy label and Google Play Data safety form: email, usage data, crash data (Sentry), and purchases.
+- Google Play Data safety form (and the App Store privacy label in Phase 6): email, usage data, crash data (Sentry), and purchases.
 - A demo account with sample inventory for App Review.
 - Export compliance: standard HTTPS only. The Android build targets the API level Google Play currently requires.
 
@@ -148,7 +168,7 @@ Rebrand InventoryIQ as **Panindo** and launch it on iOS and Android for small st
 - **AWS SAM (YAML)** defines everything. The same template deploys **panindo-staging** and **panindo-prod** in the existing AWS account, in **us-east-1**.
 - **DynamoDB stays** at launch (≈$0 under the always-free tier). Aurora is deferred until the spend rule below is met. When it is, use Aurora PostgreSQL with Data API and no RDS Proxy.
 - **Spend rule:** a paid infrastructure upgrade turns on only when monthly subscription revenue is ≥3× its monthly cost. This covers Aurora (≈$44/mo), a separate staging account, paid auth tiers, and a trademark filing. An AWS budget alarm fires at **$10/month**.
-- Known unavoidable costs: Apple $99/yr, Google $25 one-time, panindo.app about $15/yr.
+- Known unavoidable costs: Google $25 one-time and panindo.app about $15/yr. Apple's $99/yr starts only with Phase 6.
 - **Staging** gets beta builds and Playwright runs, and holds only fake sample data.
 
 ### R7. Migration & switchover (Phase 0)
@@ -192,17 +212,17 @@ Each gap below names what exists today and what launch needs.
 **10.2 Account deletion (Phase 0, both stores)**
 - No delete endpoint or UI exists today. `CascadeDeleteUser` covers items, transactions, sessions, and auth records, but **not** orgs, memberships, or invites.
 - Launch needs in-app deletion plus a public web deletion page (its URL goes in Google's Data safety form). Deletion removes the Cognito user, push device tokens, memberships, and invites. It blocks a sole Owner of an org with other members (they transfer ownership first).
-- Before deleting, warn users with an active subscription that they must cancel it in the App Store or Google Play, because the store keeps charging otherwise.
+- Before deleting, warn users with an active subscription that they must cancel it in Google Play, because the store keeps charging otherwise.
 
 **10.3 Subscription backend (Phase 2)**
 - Nothing exists today. Launch needs:
   - An org entitlement record (plan, source store, original buyer, expiry, state).
-  - An App Store Server Notifications V2 endpoint, plus the App Store Server API for status checks.
+  - (iOS, Phase 6) An App Store Server Notifications V2 endpoint, plus the App Store Server API for status checks.
   - Google real-time developer notifications through Cloud Pub/Sub (within the free tier), with purchases verified via the Play Developer API.
 - **Every Google purchase must be acknowledged within 3 days**, or Google refunds it automatically.
 - Handle renewals, failed renewals, grace periods (3/16/28 days), billing retry for up to 60 days, refunds, and revocations.
 - **One org, one subscription:** if the org already has an active plan from either store, the paywall shows "Already subscribed via App Store/Google Play" instead of selling a second subscription.
-- The paywall shows each plan's title, length, and price, plus Terms and Privacy links (Apple 3.1.2), and Restore Purchases.
+- The paywall shows each plan's title, length, and price, plus Terms and Privacy links (also Apple 3.1.2 for Phase 6), and Restore Purchases.
 - The client reads plan limits (items, seats) from the server's entitlement response. Today the seat cap of 5 is hard-coded in `_org.py` and `TeamScreen.tsx`.
 
 **10.4 Offline & sync (Phase 1)**
@@ -215,8 +235,8 @@ Each gap below names what exists today and what launch needs.
 
 **10.5 Sessions, links & CORS (Phase 0/1)**
 - Tokens, the current org, and the role live in `sessionStorage` today, which is cleared when the app closes. Mobile needs Keychain/Keystore secure storage (`@aparajita/capacitor-secure-storage`) for tokens and Capacitor Preferences for non-secret settings. The 401 handler's `login.html` redirect becomes a route change.
-- **Deep links:** reset and invite links are hard-coded to the Netlify domain. panindo.app serves `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json` over HTTPS with no redirects, and the SPA rewrite must not hide them. Android uses the **Play App Signing** SHA-256 fingerprint. Changes can take up to 7 days to re-verify on Android 15+.
-- **Invites accept by token, not by email match**, because Apple "Hide My Email" users sign in with a relay address.
+- **Deep links:** reset and invite links are hard-coded to the Netlify domain. `app.panindo.app` (the web app's domain, used by invite and reset links) serves `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json` over HTTPS with no redirects, and the SPA rewrite must not hide them. Android uses the **Play App Signing** SHA-256 fingerprint. Changes can take up to 7 days to re-verify on Android 15+.
+- **Invites accept by token, not by email match**, which is ready for Phase 6, when Apple "Hide My Email" users sign in with a relay address.
 - **CORS:** allow `capacitor://localhost` (iOS) and `https://localhost` (Android). Use one shared CORS helper; the Auth Lambda currently rejects `Idempotency-Key` and `X-IQ-Org`. Add `Access-Control-Expose-Headers: ETag`, which is missing everywhere, so cross-origin clients can't read item versions.
 - **Web CSP** (`netlify.toml`): add the Cognito domains to `connect-src` and `form-action`. The app bundle gets its own CSP.
 
@@ -230,7 +250,7 @@ Each gap below names what exists today and what launch needs.
 
 | Platform | Requirement (as of 2026-10-12) |
 |---|---|
-| iOS | Xcode 26 + iOS 26 SDK for uploads; privacy manifest (`PrivacyInfo.xcprivacy`) for the app and every plugin; Push capability; app runs on iOS 15+ (Capacitor 8 minimum) |
+| iOS (Phase 6) | Xcode 26 + iOS 26 SDK for uploads; privacy manifest (`PrivacyInfo.xcprivacy`) for the app and every plugin; Push capability; app runs on iOS 15+ (Capacitor 8 minimum) |
 | Android | **Target API 36, which is already overdue (extension ends 2026-11-01)**; Play Billing Library 8 (same deadline); 16 KB memory page support for native libraries by 2027-02-01; edge-to-edge layouts handled (Capacitor SystemBars `--safe-area-inset-*` variables); app runs on Android 7+ (minSdk 24) |
 | Shared | Capacitor 8.5.x, Node 22 |
 
@@ -249,9 +269,9 @@ Each gap below names what exists today and what launch needs.
 
 | Case | Expected behavior |
 |---|---|
-| Same email signs in with Google, Apple, and password | **One account.** A Cognito pre-sign-up hook links the federated sign-in to the existing user. Cognito does not link them by default |
-| Apple "Hide My Email" user is invited by their real email | The invite is accepted by token, and their account joins the org |
-| Owner subscribes on iOS, then tries on Android | The paywall shows "Already subscribed via App Store". No second purchase |
+| Same email signs in with Google and password (Apple in Phase 6) | **One account.** A Cognito pre-sign-up hook links the federated sign-in to the existing user. Cognito does not link them by default |
+| (iOS, Phase 6) Apple "Hide My Email" user is invited by their real email | The invite is accepted by token, and their account joins the org |
+| (Phase 6) Owner subscribes on iOS, then tries on Android | The paywall shows "Already subscribed via App Store". No second purchase |
 | Owner deletes their account with an active subscription | Warning plus cancel instructions first. Billing continues until they cancel in the store |
 | Member removed while their offline changes are queued | Changes go to "Needs attention: you no longer have access" |
 | Plan lapses while offline changes are queued | Stock adjustments still apply. New items and seats stay blocked |
@@ -265,28 +285,31 @@ Each gap below names what exists today and what launch needs.
 
 | Phase | Ships | Exit criteria |
 |---|---|---|
-| **0. Foundations** | Register panindo.app; IPOPHL check; individual developer accounts. SAM stacks (staging and prod); Cognito with Apple, Google, and email, plus account linking; email verification; account deletion (R10.2); per-org rate limits and barcode quotas (R10.1); per-user alert delivery; per-org currency and timezone (R10.8); import bucket (R10.10); CORS and CSP (R10.5); server-side plan limits; org features deployed; data migration rehearsed ×2; switchover; rename to Panindo; legal pages | Production runs on the Panindo stack. Orgs are live. Users have migrated with no data loss. No shared alert channel. AWS ≤$10/mo |
-| **1. Mobile MVP** | Capacitor 8 iOS and Android builds that meet the R10.7 build floor; bottom-tab navigation; native ML Kit scanning; push (SNS + device tokens); deep links (apple-app-site-association / assetlinks); secure token storage; adjust and count endpoints; idempotency on every write; SQLite offline queue; incremental sync; client version gate; Sentry and PostHog; Cognito sign-in through the system browser | The team does real counts for 1 week with no data loss. Duplicate-account and Hide My Email cases tested |
-| **2. Monetization** | Plans, paywall with the required terms, trial, StoreKit 2 and Play Billing Library 8, the R10.3 entitlement backend (App Store Server Notifications V2, Google notifications via Pub/Sub, purchase acknowledgement), one-subscription-per-org guard, Restore Purchases | Sandbox purchase is active on all 3 surfaces. Refund revokes access. Lapse makes the org read-only with no data loss. Every Google purchase is acknowledged in under 3 days |
-| **3. Beta** | TestFlight and Play closed test with 12–20 real stores (US and PH) for ≥14 days. Store listings, screenshots, and forms | Crash-free ≥99.5%. Top issues fixed. Google production access granted |
+| **0. Foundations** | Register panindo.app; IPOPHL check; Google Play developer account (individual). SAM stacks (staging and prod); Cognito with Google and email, plus account linking; email verification; account deletion (R10.2); per-org rate limits and barcode quotas (R10.1); per-user alert delivery; per-org currency and timezone (R10.8); import bucket (R10.10); CORS and CSP (R10.5); server-side plan limits; org features deployed; data migration rehearsed ×2; switchover; rename to Panindo; legal pages | Production runs on the Panindo stack. Orgs are live. Users have migrated with no data loss. No shared alert channel. AWS ≤$10/mo |
+| **1. Mobile MVP** | Capacitor 8 Android build that meets the R10.7 Android build floor; bottom-tab navigation; native ML Kit scanning; push (SNS + device tokens); deep links (apple-app-site-association / assetlinks); secure token storage; adjust and count endpoints; idempotency on every write; SQLite offline queue; incremental sync; client version gate; Sentry and PostHog; Cognito sign-in through the system browser | The team does real counts for 1 week with no data loss. Duplicate-account and Hide My Email cases tested |
+| **2. Monetization** | Plans, paywall with the required terms, trial, Play Billing Library 8, the R10.3 entitlement backend (Google notifications via Pub/Sub, purchase acknowledgement), designed store-agnostic for iOS later, one-subscription-per-org guard, Restore Purchases | Test purchase is active on Android and web. Refund revokes access. Lapse makes the org read-only with no data loss. Every Google purchase is acknowledged in under 3 days |
+| **3. Beta** | Play closed test with 12–20 real stores (US and PH) for ≥14 days. Store listings, screenshots, and forms | Crash-free ≥99.5%. Top issues fixed. Google production access granted |
 | **4. Launch** | Submit to both stores. Phased rollout | Approved on both. Metrics dashboard live |
 | **5. v1.1** | Tablet layouts, shared-device mode, biometric unlock, offline item editing, low-stock widget | Driven by launch metrics |
+| **6. iOS** | Apple Developer enrollment; Sign in with Apple; StoreKit 2 + App Store Server Notifications V2; APNs; iOS build floor (Xcode 26, privacy manifest); TestFlight beta; App Store listing and privacy label; EULA clauses on the site | Starts when O1's trigger is met |
 
 ## Risks
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
-| Apple rejects it as a "repackaged website" (4.2) | Med | Native scanning, push, offline, haptics, and navigation that feels native |
+| (Phase 6) Apple rejects it as a "repackaged website" (4.2) | Med | Native scanning, push, offline, haptics, and navigation that feels native |
 | Cognito sign-in inside Capacitor (no official guide; Amplify reportedly breaks with deep links) | Med | Hand-built system-browser + deep-link PKCE flow. Prove it first in Phase 1 |
 | Big-bang Phase 0 switchover (rename + SAM + Cognito + orgs at once) | Med | Two clean rehearsals, matching row counts, old stack read-only for 30 days for rollback |
 | Offline double-counts or lost changes | Med | Delta adjustments, count conflict prompt, exactly-once sync, "Needs attention" list, two-device tests |
+| Android back button closes the app or returns to login instead of closing sheets and dialogs | Med | Back-button handling in the readiness PRD (E18) |
+| Low-end Android phones (2–3 GB RAM, old WebView) are slow | Med | Test on a low-end device. Keep the JS budget under 300 KB |
 | IAP rejection | Low | All upgrades go through store billing. No links to outside payment |
 | Android target API 36 deadline (extension ends 2026-11-01) passes before launch | Certain | Build on Capacitor 8 (target 36) from day one. New apps must meet the current target at submission |
 | Shared 10,000/day API quota exhausted by one user after public signup | High (until fixed) | Per-org and per-user limits in Phase 0 (R10.1) |
 | Duplicate accounts when the same email uses Google, Apple, and password | Med | Cognito pre-sign-up account linking (R11) |
 | Google purchase not acknowledged within 3 days, so it's auto-refunded | Med | Server acknowledges on verification. Alarm on unacknowledged purchases |
 | Barcode lookup rate limits and poor coverage of Philippine products | Med | Cache misses, per-org quota, org's own items first, manual entry |
-| **Selling without a registered business** (PH income tax registration, BIR penalties) | Med | Accepted at launch. Revisit before the first Apple or Google payout |
+| **Selling without a registered business** (PH income tax registration, BIR penalties) | Med | Accepted at launch. Revisit before the first Google Play payout |
 | Google Play shows the developer's address publicly | High | PhilPost P.O. box first, home address as fallback |
 | Name conflict found later in the Philippines (IPOPHL unverified) | Low–Med | Manual IPOPHL check before announcing. File the trademark after traction |
 | Public signup spam or cost spikes | Med | Email verification, plan quotas, existing rate limits, $10 budget alarm |
@@ -304,6 +327,13 @@ Each gap below names what exists today and what launch needs.
 - Multi-location stock, suppliers, purchase orders, forecasting, accounting sync.
 - Markets beyond the US and Philippines. Languages other than English inside the app.
 
+## Open Questions
+
+| # | Question | Recommendation |
+|---|---|---|
+| O1 | When does the iOS phase start? | When **10 orgs are paying** or **≥25% of active web users are on iPhone**, whichever comes first |
+| O2 | What does an iPhone-only Owner see when they hit a plan limit on the web? | "Upgrade from the Panindo Android app. iPhone app coming soon." No web checkout. Demand from US iPhone owners is a signal to start O1 sooner |
+
 ## Decision Log (grilling, 2026-10-11 → 2026-10-12)
 
 | Topic | Decision | Rejected |
@@ -319,6 +349,8 @@ Each gap below names what exists today and what launch needs.
 | Alert leak (2026-10-12) | Removed shared-topic subscriptions now; per-user push and SES email later | Waiting for Phase 0 |
 | Locale | Per-org currency (₱/$) and timezone, set at signup | Fixed USD and UTC |
 | Analytics | PostHog free tier + Sentry | None, or paid analytics |
+| Platform | Android (Google Play) + web first; iOS in Phase 6 | iOS + Android at once |
+| Marketing copy | "Coming soon to Google Play" | Mentioning iPhone or the web app |
 
 ## Engineering Notes (for the follow-up design doc)
 
