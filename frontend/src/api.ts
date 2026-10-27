@@ -329,8 +329,10 @@ export async function getInsights(): Promise<Record<string, unknown>> {
   return data as Record<string, unknown>;
 }
 
-export async function getTransactions(): Promise<unknown[]> {
-  const url = `${CONFIG.API_ENDPOINT}/transactions`;
+/** Newest 200 rows; with `since` (UTC ISO), every row on or after it. */
+export async function getTransactions(since?: string): Promise<unknown[]> {
+  const query = since ? `?since=${encodeURIComponent(since)}` : "";
+  const url = `${CONFIG.API_ENDPOINT}/transactions${query}`;
   const res = await fetch(url, { headers: await readyHeaders() });
   checkQuota(res);
   check401(res);

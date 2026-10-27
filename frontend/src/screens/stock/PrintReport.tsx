@@ -1,47 +1,49 @@
-import type { InventoryItem } from "@/api";
-import { deriveDashStats, priceOf, quantityOf, stockLevelOf } from "@/lib/dashboardStats";
 import { formatMoney } from "@/lib/format";
-import { LEVEL_LABEL } from "@/components/status-badge";
-import { getUserEmail } from "@/session";
+import { REPORT_HEADERS, type ReportGroup } from "@/lib/stock-report";
 
-/** Hidden on screen; index.css shows it when <html data-iq-print="inventory"> prints. */
-export function PrintReport({ items }: { items: readonly InventoryItem[] }) {
-  const stats = deriveDashStats(items);
-  const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+type PrintReportProps = { groups: readonly ReportGroup[]; start: Date; asOf: Date; storeName: string };
+
+const longDate = (date: Date) => date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+
+/** The paper "Inventory of Stocks" sheet. Hidden on screen; index.css shows it when <html data-iq-print="inventory"> prints. */
+export function PrintReport({ groups, start, asOf, storeName }: PrintReportProps) {
   return (
     <section id="print-section" data-print-region aria-hidden>
-      <h1 className="print-title">Panindo — Inventory Report</h1>
+      <h1 className="print-title">{storeName}</h1>
+      <p className="print-subtitle">Inventory of Stocks</p>
       <p className="print-meta">
-        Generated: {date} | User: {getUserEmail()}
+        As of {longDate(asOf)} · from {longDate(start)}
       </p>
       <table id="print-table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th className="num">Qty</th>
-            <th className="num">Price</th>
-            <th>Status</th>
+            {REPORT_HEADERS.map((header, index) => (
+              <th key={header} className={index >= 2 ? "num" : undefined}>
+                {header}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {items.map((item, index) => (
-            <tr key={item.itemID ?? index}>
-              <td>{item.name}</td>
-              <td>{item.category || "—"}</td>
-              <td className="num">{quantityOf(item)}</td>
-              <td className="num">{formatMoney(priceOf(item))}</td>
-              <td>{LEVEL_LABEL[stockLevelOf(item)]}</td>
-            </tr>
-          ))}
+          {groups.flatMap((group) => [
+            <tr key={`group-${group.category}`} className="print-category">
+              <th colSpan={REPORT_HEADERS.length} scope="colgroup">
+                {group.category.toUpperCase()}:
+              </th>
+            </tr>,
+            ...group.rows.map((row, index) => (
+              <tr key={`${group.category}-${row.name}-${index}`}>
+                <td>{row.name}</td>
+                <td>{row.size}</td>
+                <td className="num">{formatMoney(row.price)}</td>
+                <td className="num">{row.starting}</td>
+                <td className="num">{row.stockIn}</td>
+                <td className="num">{row.now}</td>
+              </tr>
+            )),
+          ])}
         </tbody>
       </table>
-      <p id="print-summary" className="print-summary">
-        <strong>Total Products:</strong> {stats.totalProducts} | <strong>In Stock:</strong>{" "}
-        {stats.totalProducts - stats.lowStockCount - stats.outOfStockCount} | <strong>Low Stock:</strong>{" "}
-        {stats.lowStockCount} | <strong>Out of Stock:</strong> {stats.outOfStockCount} |{" "}
-        <strong>Total Value:</strong> {formatMoney(stats.estimatedInventoryValue)}
-      </p>
     </section>
   );
 }

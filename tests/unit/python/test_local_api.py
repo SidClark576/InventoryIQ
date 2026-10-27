@@ -88,3 +88,10 @@ def test_setup_installs_offline_barcode_lookups(monkeypatch):
     assert os.environ['AWS_ENDPOINT_URL'] == 'http://localhost:4566'
     assert not any('moto' in k.lower() or 'moto' in v.lower() for k, v in local_api.AWS_ENV.items())
     assert 'SENTRY_DSN' not in os.environ and 'AWS_PROFILE' not in os.environ
+
+
+def test_backend_route_passes_query_string_parameters(monkeypatch):
+    calls = _calls(monkeypatch)
+    local_api.route('GET', '/_backend/transactions', {'x-api-key': 'k'}, None, {'since': '2026-10-01T00:00:00Z'})
+    module, event = calls[-1]
+    assert module == 'GetTransactions' and event['queryStringParameters'] == {'since': '2026-10-01T00:00:00Z'}

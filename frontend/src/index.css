@@ -213,13 +213,15 @@
     margin: 0 0 4px;
   }
 
-  html[data-iq-print="inventory"] #print-section .print-meta {
-    margin: 0 0 16px;
+  html[data-iq-print="inventory"] #print-section .print-subtitle {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
   }
 
-  html[data-iq-print="inventory"] #print-section .print-summary {
-    margin-top: 12px;
-    font-size: 12px;
+  html[data-iq-print="inventory"] #print-section .print-meta {
+    margin: 0 0 16px;
   }
 
   html[data-iq-print="inventory"] #print-section table {
@@ -230,14 +232,19 @@
 
   html[data-iq-print="inventory"] #print-section th,
   html[data-iq-print="inventory"] #print-section td {
-    border: 1px solid #ddd !important;
+    border: 1px solid #111 !important;
     padding: 6px 8px !important;
     text-align: left !important;
   }
 
   html[data-iq-print="inventory"] #print-section thead th {
-    background: #f0f0f0 !important;
     font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  html[data-iq-print="inventory"] #print-section .print-category th {
+    font-weight: 700;
+    padding-top: 10px !important;
   }
 
   html[data-iq-print="inventory"] #print-section td.num,

@@ -2,6 +2,7 @@ import json
 import os
 import boto3
 from boto3.dynamodb.conditions import Attr
+from datetime import datetime, timezone
 from decimal import Decimal
 import time as _time
 import _logging
@@ -35,6 +36,15 @@ def lambda_handler(event, context):
     return res
 
 
+def _since(event):
+    """`since` query param as stored-format UTC ISO (createdAt is datetime.isoformat() +00:00), or None. Raises ValueError or OverflowError."""
+    since = (event.get('queryStringParameters') or {}).get('since')
+    if not since:
+        return None
+    dt = datetime.fromisoformat(since.replace('Z', '+00:00'))
+    return (dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)).astimezone(timezone.utc).isoformat()
+
+
 def _handle(event, context):
     """
     Retrieves transaction history (audit log) for a specific user.
@@ -49,9 +59,9 @@ def _handle(event, context):
     7. Return up to 200 most recent transactions
 
     Query Parameters:
-    - userID: Required. Email of user to filter transactions by.
+    - since: Optional UTC ISO date. Only rows with createdAt >= since, and no 200 cap.
 
-    Response: Array of transaction objects sorted newest-first, max 200 items
+    Response: Array of transaction objects sorted newest-first, max 200 items unless `since` is given
 
     Transaction Types:
     - create: Item added to inventory
@@ -70,10 +80,18 @@ def _handle(event, context):
         return err
 
     try:
+        since = _since(event)
+    except (ValueError, OverflowError):
+        return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'since must be an ISO date'})}
+    since_filt = Attr('createdAt').gte(since) if since else None
+
+    try:
         try:
-            items = _org.list_scoped_items(table, ctx['org_id'], ctx['user_id'])
+            items = _org.list_scoped_items(table, ctx['org_id'], ctx['user_id'], since_filt)
         except Exception:
             filt = Attr('orgID').eq(ctx['org_id']) if ctx['org_id'] else Attr('userID').eq(ctx['user_id'])
+            if since_filt is not None:
+                filt = filt & since_filt
             result = table.scan(FilterExpression=filt)
             items = result.get('Items', [])
             while 'LastEvaluatedKey' in result:
@@ -94,9 +112,8 @@ def _handle(event, context):
         # This provides a reverse-chronological view of activity
         items.sort(key=lambda x: x.get('createdAt', ''), reverse=True)
 
-        # Return up to 200 most recent transactions
-        # This limits response size and provides the most useful data (recent changes)
-        return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(items[:200])}
+        # Up to 200 most recent for the activity feed; a `since` range (stock report) is returned whole
+        return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(items if since else items[:200])}
 
     except Exception as e:
         return {'statusCode': 500, 'headers': CORS, 'body': json.dumps({'error': 'Internal Server Error'})}

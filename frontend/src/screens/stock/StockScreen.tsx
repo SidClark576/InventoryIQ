@@ -15,16 +15,16 @@ import { Button } from "@/components/ui/button";
 import { useIsDesktop } from "@/hooks/use-media-query";
 import { countByLevel, deriveDashStats } from "@/lib/dashboardStats";
 import { plural } from "@/lib/format";
-import { setEditItem } from "@/session";
+import { getCurrentOrgName, setEditItem } from "@/session";
 import { CategoriesDialog } from "./CategoriesDialog";
 import { summarizeCount, type Counts } from "./count";
 import { CountCards } from "./CountCards";
 import { CountReviewDialog } from "./CountReviewDialog";
-import { downloadItemsCsv } from "./export";
 import { CountBar, SelectionBar } from "./FloatingBar";
 import { HealthBar } from "./HealthBar";
 import { ImportDialog } from "./ImportDialog";
 import { PrintReport } from "./PrintReport";
+import { ReportDialog, type StockReport } from "./ReportDialog";
 import { EmptyShelf, NoMatches, StockError, StockSkeleton } from "./StockStates";
 import { StockTable } from "./StockTable";
 import { StockToolbar } from "./StockToolbar";
@@ -32,7 +32,7 @@ import { filterItems, groupItems, useStockView } from "./stock-view";
 import { TrashView } from "./TrashView";
 import { useRowStepper } from "./use-row-stepper";
 
-type DialogName = "scan" | "categories" | "import" | "review" | "bulk-delete" | "stop-count" | null;
+type DialogName = "scan" | "categories" | "import" | "review" | "bulk-delete" | "stop-count" | "report" | null;
 
 export function StockScreen() {
   const { items, itemsStatus, reloadItems } = useInventory();
@@ -49,7 +49,8 @@ export function StockScreen() {
   const [dialog, setDialog] = useState<DialogName>(null);
   const [busy, setBusy] = useState(false);
   const [importAvailable, setImportAvailable] = useState(true);
-  const [printing, setPrinting] = useState(false);
+  const [report, setReport] = useState<StockReport | null>(null);
+  const [reportFor, setReportFor] = useState<{ items: readonly InventoryItem[]; selected: boolean }>({ items: [], selected: false });
 
   useEffect(() => {
     document.title = "Stock | Panindo";
@@ -60,23 +61,17 @@ export function StockScreen() {
     setImportAvailable(true);
   }, [orgEpoch]);
 
-  // Print styles key off this attribute (index.css); keep it set, and the report mounted, only while printing.
-  // flushSync renders the report before the browser snapshots the page.
+  // Print styles key off this attribute (index.css), set by print() only. After printing, drop the report so a
+  // later Ctrl+P prints the page as is, never a stale report.
   useEffect(() => {
-    const arm = () => {
-      document.documentElement.dataset.iqPrint = "inventory";
-      flushSync(() => setPrinting(true));
-    };
     const clear = () => {
       delete document.documentElement.dataset.iqPrint;
-      setPrinting(false);
+      setReport(null);
     };
-    window.addEventListener("beforeprint", arm);
     window.addEventListener("afterprint", clear);
     return () => {
-      window.removeEventListener("beforeprint", arm);
       window.removeEventListener("afterprint", clear);
-      clear();
+      delete document.documentElement.dataset.iqPrint;
     };
   }, []);
 
@@ -139,22 +134,19 @@ export function StockScreen() {
     setCounting(true);
   }
 
-  function exportCsv(targets: readonly InventoryItem[], suffix = "") {
+  function openReport(targets: readonly InventoryItem[], selected = false) {
     if (targets.length === 0) {
-      toast.warning("Nothing to export", { description: "Add items first." });
+      toast.warning("Nothing to report", { description: "Add items first." });
       return;
     }
-    downloadItemsCsv(targets, suffix);
-    toast.success(`Exported ${plural(targets.length, "item")}`);
+    setReportFor({ items: targets, selected });
+    setDialog("report");
   }
 
-  function print() {
-    if (items.length === 0) {
-      toast.warning("Nothing to print", { description: "Add items first." });
-      return;
-    }
+  function print(next: StockReport) {
     document.documentElement.dataset.iqPrint = "inventory";
-    flushSync(() => setPrinting(true));
+    // flushSync renders the report before the browser snapshots the page.
+    flushSync(() => setReport(next));
     window.print();
   }
 
@@ -239,8 +231,8 @@ export function StockScreen() {
           onCategories={() => setDialog("categories")}
           onImport={() => setDialog("import")}
           importAvailable={importAvailable}
-          onExport={() => exportCsv(items)}
-          onPrint={print}
+          onExport={() => openReport(items)}
+          onPrint={() => openReport(items)}
           onTrash={() => view.setTrash(true)}
           canEdit={canEdit}
         />
@@ -316,20 +308,29 @@ export function StockScreen() {
           <SelectionBar
             count={selectedItems.length}
             canEdit={canEdit}
-            onExport={() => exportCsv(selectedItems, "_selected")}
+            onExport={() => openReport(selectedItems, true)}
             onDelete={() => setDialog("bulk-delete")}
             onClear={() => setSelected(new Set())}
           />
         ) : null}
       </div>
 
-      {printing ? <PrintReport items={items} /> : null}
+      {report ? (
+        <PrintReport groups={report.groups} start={report.start} asOf={report.asOf} storeName={getCurrentOrgName() || "Panindo"} />
+      ) : null}
 
       <BarcodeScanDialog
         open={dialog === "scan"}
         onOpenChange={(open) => setDialog(open ? "scan" : null)}
         description="Find an item by barcode, or start adding a new one."
         onCode={onScanCode}
+      />
+      <ReportDialog
+        open={dialog === "report"}
+        onOpenChange={(open) => setDialog(open ? "report" : null)}
+        items={reportFor.items}
+        selected={reportFor.selected}
+        onPrint={print}
       />
       <CategoriesDialog open={dialog === "categories"} onOpenChange={(open) => setDialog(open ? "categories" : null)} />
       <ImportDialog
