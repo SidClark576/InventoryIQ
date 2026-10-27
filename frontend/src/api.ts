@@ -72,9 +72,9 @@ export function checkQuota(res: Response): void {
   }
 }
 
-/** Preview sign-in is for `npm run dev` only: a production build or the app shell (https://localhost) must show the login form. */
+/** Preview sign-in is for `npm run dev` only (not `dev:local`, which has a real local backend): a production build or the app shell (https://localhost) must show the login form. */
 export function isLocalPreview(): boolean {
-  return import.meta.env.DEV;
+  return import.meta.env.DEV && !import.meta.env.VITE_API_BASE;
 }
 
 /** api.ts can't reach the router; App.tsx listens for this and navigates to /login?expired=1. */

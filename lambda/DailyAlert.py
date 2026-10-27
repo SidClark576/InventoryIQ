@@ -230,7 +230,7 @@ def _handle(event, context):
         # Footer
         lines += [
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-            "  This is an automated daily report from InventoryIQ.",
+            "  This is an automated daily report from Panindo.",
             "  Log in to your dashboard to take action.",
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
         ]

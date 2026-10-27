@@ -396,11 +396,11 @@ export const handler = Sentry.wrapHandler(async (event) => {
                         Source: SES_SENDER,
                         Destination: { ToAddresses: [email] },
                         Message: {
-                            Subject: { Data: 'InventoryIQ — Password Reset' },
+                            Subject: { Data: 'Panindo — Password Reset' },
                             Body: {
                                 Text: {
                                     Data: [
-                                        `You requested a password reset for your InventoryIQ account.`,
+                                        `You requested a password reset for your Panindo account.`,
                                         ``,
                                         `Reset link (valid 1 hour):`,
                                         `${baseUrl}/reset-password.html?token=${resetToken}`,

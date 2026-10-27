@@ -220,9 +220,9 @@ def _send_invite_email(email, token, org_id):
             Source=SES_SENDER,
             Destination={'ToAddresses': [email]},
             Message={
-                'Subject': {'Data': 'You have been invited to InventoryIQ'},
+                'Subject': {'Data': 'You have been invited to Panindo'},
                 'Body': {'Text': {'Data':
-                    'You have been invited to a shared inventory on InventoryIQ.\n\n'
+                    'You have been invited to a shared inventory on Panindo.\n\n'
                     f'Accept (valid 72h): {link}\n\n'
                     'If you did not expect this, ignore this email.'}}})
     except Exception as e:

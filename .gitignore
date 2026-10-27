@@ -25,6 +25,9 @@ test-results
 # Env
 .env*
 
+# Local backend test login (scripts/local_seed.py)
+.local/
+
 # OS
 .DS_Store
 

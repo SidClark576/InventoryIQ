@@ -257,7 +257,7 @@ def _handle(event, context):
         # This sends email/SMS notifications to configured recipients
         alert_items = out_of_stock + low_stock
         if alert_items and SNS_TOPIC_ARN and _should_send_alert(user_id, table):
-            lines = [f"InventoryIQ Stock Alert — {len(alert_items)} item(s) need attention:\n"]
+            lines = [f"Panindo Stock Alert — {len(alert_items)} item(s) need attention:\n"]
             for a in out_of_stock:
                 lines.append(f"🚨 OUT OF STOCK: {a['name']} ({a['category']})")
             for a in low_stock:

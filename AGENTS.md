@@ -54,6 +54,15 @@ Authentication.mjs (Node) · Python CRUD/org Lambdas · SQS/SNS alerts
 - `JWT_SECRET` env var MUST match across `Authentication`, `Proxy`, and `Authorizer` Lambdas or all logins 401.
 - The `Sessions` table is now audit-trail + logout cleanup only — never used for token validation.
 
+**Local backend — test locally before any deploy.** Every Lambda change runs on the Mac first; never push an untested handler to AWS.
+
+- Start: `npm run dev:local` (needs Docker running; one-time setup: `npm ci`, `.venv/bin/pip install -r scripts/requirements.txt` and `docker pull floci/floci:2.3.0`). It starts Floci (`floci/floci:2.3.0` container `panindo-floci`, in-memory, fake DynamoDB, SES, SNS, SQS, S3, Secrets Manager) on :4566, `scripts/local_api.py` on :3001 (the real handlers behind `/auth`, `/proxy` and Proxy's `/_backend` target), seeds a test store with `scripts/local_seed.py`, then Vite on :8000 pointed at :3001 via `VITE_API_BASE`. Ports: `LOCAL_FLOCI_PORT`, `LOCAL_API_PORT`, `LOCAL_DEV_PORT`.
+- Stop: Ctrl-C stops all four and removes the container. Reseed = restart (Floci keeps nothing).
+- Test login: `.local/test-login.json` (gitignored; owner, staff (editor), shared generated password). Never commit it or copy the password anywhere.
+- Emails are never sent: the runner prints each SES message Floci captured (read from Floci's `GET /_aws/ses`). Barcode lookups never reach the internet: seeded barcodes answer from `BarcodeCache`, any other code is "not found".
+- Gap: `ImportJobs` (used by `BulkImport*.py`) exists only locally; it has no live table yet.
+- Table layouts in `scripts/local/tables.json` are a copy of the live ones; update it when a live table changes. `npm run dev` and builds still use the live API.
+
 ---
 
 ## 2. Directory Layout
