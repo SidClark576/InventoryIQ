@@ -1,5 +1,6 @@
 import type { InventoryItem } from "@/api";
 import { deriveDashStats, priceOf, quantityOf, stockLevelOf } from "@/lib/dashboardStats";
+import { formatMoney } from "@/lib/format";
 import { LEVEL_LABEL } from "@/components/status-badge";
 import { getUserEmail } from "@/session";
 
@@ -29,7 +30,7 @@ export function PrintReport({ items }: { items: readonly InventoryItem[] }) {
               <td>{item.name}</td>
               <td>{item.category || "—"}</td>
               <td className="num">{quantityOf(item)}</td>
-              <td className="num">${priceOf(item).toFixed(2)}</td>
+              <td className="num">{formatMoney(priceOf(item))}</td>
               <td>{LEVEL_LABEL[stockLevelOf(item)]}</td>
             </tr>
           ))}
@@ -39,7 +40,7 @@ export function PrintReport({ items }: { items: readonly InventoryItem[] }) {
         <strong>Total Products:</strong> {stats.totalProducts} | <strong>In Stock:</strong>{" "}
         {stats.totalProducts - stats.lowStockCount - stats.outOfStockCount} | <strong>Low Stock:</strong>{" "}
         {stats.lowStockCount} | <strong>Out of Stock:</strong> {stats.outOfStockCount} |{" "}
-        <strong>Total Value:</strong> ${stats.estimatedInventoryValue.toFixed(2)}
+        <strong>Total Value:</strong> {formatMoney(stats.estimatedInventoryValue)}
       </p>
     </section>
   );

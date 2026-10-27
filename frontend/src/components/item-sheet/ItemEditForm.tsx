@@ -6,6 +6,7 @@ import { Field, TEXTAREA_CLASS } from "@/components/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { priceOf, thresholdOf } from "@/lib/dashboardStats";
+import { CURRENCY_SYMBOL } from "@/lib/format";
 
 type Draft = {
   name: string;
@@ -113,7 +114,7 @@ export function ItemEditForm({ item }: { item: InventoryItem }) {
           ))}
         </datalist>
       </Field>
-      <Field id="e-price" label="Unit price ($)" className="col-span-1">
+      <Field id="e-price" label={`Unit price (${CURRENCY_SYMBOL})`} className="col-span-1">
         <Input
           id="e-price"
           type="number"

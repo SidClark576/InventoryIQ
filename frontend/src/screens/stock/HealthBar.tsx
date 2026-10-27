@@ -34,7 +34,7 @@ function LegendButton({
       aria-pressed={pressed}
       onClick={onClick}
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-sm sm:gap-2 sm:px-3 transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "inline-flex h-8 touch:min-h-11 items-center gap-1.5 rounded-full border px-2.5 text-sm sm:gap-2 sm:px-3 transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
         pressed
           ? "border-foreground/80 bg-foreground text-background"
           : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",

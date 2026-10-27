@@ -88,7 +88,7 @@ export function StockTable({
                     aria-expanded={open}
                     disabled={counting}
                     onClick={() => onToggleGroup(group.key)}
-                    className="flex h-10 w-full items-center gap-2 px-4 text-sm font-semibold outline-none hover:bg-muted/60 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset disabled:cursor-default disabled:hover:bg-transparent"
+                    className="flex h-10 w-full touch:min-h-11 items-center gap-2 px-4 text-sm font-semibold outline-none hover:bg-muted/60 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset disabled:cursor-default disabled:hover:bg-transparent"
                   >
                     <CaretRightIcon
                       aria-hidden
@@ -207,7 +207,7 @@ function StockRow({ item, selected, onSelect, counting, counted, onCount, itemHr
           <Link
             to={itemHref(id)} state={SHEET_LINK_STATE}
             aria-label={`${name}: ${quantity} on hand. Open item`}
-            className="inline-flex h-8 min-w-10 items-center justify-end rounded-xl px-2 text-base font-semibold tabular-nums outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="inline-flex h-8 min-w-10 touch:min-h-11 items-center justify-end rounded-xl px-2 text-base font-semibold tabular-nums outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             {quantity}
           </Link>

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { clearEditItem, getEditItem } from "@/session";
+import { CURRENCY_SYMBOL } from "@/lib/format";
 
 type Draft = {
   name: string;
@@ -188,7 +189,7 @@ export function AddItemForm({ onDone }: AddItemFormProps) {
             ))}
           </datalist>
         </Field>
-        <Field id="n-price" label="Unit price ($)" className="col-span-1">
+        <Field id="n-price" label={`Unit price (${CURRENCY_SYMBOL})`} className="col-span-1">
           <Input
             id="n-price"
             type="number"
