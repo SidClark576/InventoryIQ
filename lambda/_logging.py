@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import uuid
+from decimal import Decimal
 
 # Add python_vendor to path for sentry-sdk
 sys.path.append(os.path.join(os.path.dirname(__file__), 'python_vendor'))
@@ -20,7 +21,18 @@ def _scrub_event(event, hint):
     for key in ('url', 'query_string'):
         if isinstance(req.get(key), str):
             req[key] = redact_path(req[key])
+    _scrub_breadcrumbs(event)
     return event
+
+
+def _scrub_breadcrumbs(event):
+    """httplib/stdlib breadcrumbs carry the request URL; redact invite tokens there too."""
+    for crumb in (event.get('breadcrumbs') or {}).get('values') or []:
+        data = crumb.get('data') or {}
+        if isinstance(data.get('url'), str):
+            data['url'] = redact_path(data['url'])
+        if isinstance(crumb.get('message'), str):
+            crumb['message'] = redact_path(crumb['message'])
 
 
 try:
@@ -179,3 +191,39 @@ def hash_user(user_id):
     if not user_id:
         return None
     return hashlib.sha256(user_id.encode()).hexdigest()[:12]
+
+
+def plain(row):
+    """DynamoDB row -> JSON-ready dict: integral Decimals become int, others float (B4)."""
+    return {k: (int(v) if v == v.to_integral_value() else float(v)) if isinstance(v, Decimal) else v
+            for k, v in row.items()}
+
+
+def json_body(event):
+    """Parse the request body as a JSON object: (dict, None) or (None, 400 INVALID_JSON)."""
+    try:
+        body = json.loads((event or {}).get('body') or '{}')
+    except ValueError:
+        body = None
+    if not isinstance(body, dict):
+        return None, response(400, {'error': 'Invalid JSON body', 'code': 'INVALID_JSON'})
+    return body, None
+
+
+def number_field(body, name, integer=False, default=None):
+    """Non-negative number from `body[name]` (numeric strings accepted): (value, None) or (None, 400).
+    Absent -> (default, None). Integers come back as int, other numbers as Decimal (A9)."""
+    if name not in body:
+        return default, None
+    raw = body[name]
+    try:
+        num = Decimal(str(raw).strip())
+        bad = (isinstance(raw, bool) or not num.is_finite() or num < 0 or num.adjusted() > 15  # SEC-1: int(1e10000000) pins the CPU
+               or (integer and num != num.to_integral_value()))
+    except ArithmeticError:  # decimal.InvalidOperation: not a number
+        bad = True
+    if bad:
+        kind = 'integer' if integer else 'number'
+        return None, response(400, {'error': f'{name} must be a non-negative {kind}',
+                                    'code': 'INVALID_FIELD', 'field': name})
+    return (int(num) if integer else num), None

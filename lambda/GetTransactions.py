@@ -3,7 +3,6 @@ import os
 import boto3
 from boto3.dynamodb.conditions import Attr
 from datetime import datetime, timezone
-from decimal import Decimal
 import time as _time
 import _logging
 import _org
@@ -54,7 +53,7 @@ def _handle(event, context):
     2. Extract and validate userID from query parameters
     3. Scan InventoryTransactions table filtering by userID
     4. Handle pagination (DynamoDB returns up to 1MB per scan)
-    5. Convert Decimal types to float for JSON
+    5. Convert Decimals to JSON numbers
     6. Sort transactions by date (newest first)
     7. Return up to 200 most recent transactions
 
@@ -101,12 +100,8 @@ def _handle(event, context):
                 )
                 items.extend(result.get('Items', []))
 
-        # Convert Decimal types to float for JSON serialization
-        # DynamoDB returns Decimal objects which JSON cannot serialize by default
-        for item in items:
-            for k, v in item.items():
-                if isinstance(v, Decimal):
-                    item[k] = float(v)
+        # DynamoDB returns Decimals; integers stay JSON integers (B4)
+        items = [_logging.plain(item) for item in items]
 
         # Sort by creation date, newest transactions first
         # This provides a reverse-chronological view of activity

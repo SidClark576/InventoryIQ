@@ -69,12 +69,17 @@ def _list(org_id):
     invites = _org._invites.query(IndexName='orgID-index',
                                   KeyConditionExpression=Key('orgID').eq(org_id)).get('Items', [])
     pending = [{'email': i.get('email'), 'role': i.get('role'),
-                'status': i.get('status'), 'expiresAt': i.get('expiresAt')}
+                'status': i.get('status'), 'expiresAt': _iso(i.get('expiresAt'))}
                for i in invites if i.get('status') == 'pending']
     return response(200, {
         'members': [{'userID': m['userID'], 'role': m.get('role'),
                      'status': m.get('status'), 'joinedAt': m.get('joinedAt')} for m in members],
         'pendingInvites': pending})
+
+
+def _iso(epoch):
+    """Stored epoch seconds -> ISO 8601 UTC (C2); storage stays epoch for the accept check."""
+    return datetime.fromtimestamp(int(epoch), timezone.utc).isoformat() if epoch else None
 
 
 def _change_role(event, org_id, actor, actor_role, target):

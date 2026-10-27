@@ -76,3 +76,13 @@ def test_bad_since_is_400(tables):
 
 def test_out_of_range_since_is_400(tables):
     assert _call({'since': '0001-01-01T00:00:00+05:00'})['statusCode'] == 400
+
+
+def test_transactions_return_json_integers(load, ddb):
+    ddb.Table('InventoryTransactions').put_item(Item={
+        'transactionID': 't1', 'orgID': 'o1', 'userID': 'a@b.co', 'createdAt': '2026-01-01T00:00:00+00:00',
+        'quantityBefore': 5, 'quantityAfter': 3, 'quantityDelta': -2})
+    res = load('GetTransactions').lambda_handler({'headers': {"x-iq-user": "a@b.co", "x-iq-org": "o1"}}, {})
+    assert res['statusCode'] == 200
+    tx = json.loads(res['body'])[0]
+    assert [type(tx[k]) for k in ('quantityBefore', 'quantityAfter', 'quantityDelta')] == [int] * 3

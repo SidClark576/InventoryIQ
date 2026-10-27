@@ -64,11 +64,18 @@ def _handle(event, context):
     Returns 409 if TransactionCanceledException (rare: UUID collision or idem conflict).
     """
     try:
-        body    = json.loads(event.get('body', '{}'))
+        body, err = _logging.json_body(event)
+        if err:
+            return err
         headers = event.get('headers') or {}
 
         if not body.get('name'):
             return response(400, {'error': 'Product name is required'})
+        nums = {}
+        for name, integer, default in (('quantity', True, 0), ('price', False, Decimal(0)), ('lowStockThreshold', True, 10)):
+            nums[name], err = _logging.number_field(body, name, integer, default)
+            if err:
+                return err
 
         # Idempotency: check for duplicate request before doing any writes
         idem_key = (
@@ -99,9 +106,9 @@ def _handle(event, context):
             'description'      : body.get('description', ''),
             'category'         : body.get('category', 'Uncategorized'),
             'supplierID'       : body.get('supplierID', ''),
-            'quantity'         : int(body.get('quantity', 0)),
-            'price'            : Decimal(str(body.get('price', 0))),
-            'lowStockThreshold': int(body.get('lowStockThreshold', 10)),
+            'quantity'         : nums['quantity'],
+            'price'            : nums['price'],
+            'lowStockThreshold': nums['lowStockThreshold'],
             'barcode'          : body.get('barcode', ''),
             'version'          : 1,
             'createdAt'        : timestamp,
@@ -143,17 +150,15 @@ def _handle(event, context):
         ])
 
         # Store idempotency record after successful write (TTL = 24 hours)
+        resp_body = {'message': 'Item added successfully', 'item': _logging.plain(item)}
         if idem_key:
-            item_for_resp = {k: float(v) if isinstance(v, Decimal) else v for k, v in item.items()}
-            resp_body = {'message': 'Item added successfully', 'item': item_for_resp}
             idem_table.put_item(Item={
                 'key'         : idem_key,
                 'responseBody': json.dumps(resp_body),
                 'expiresAt'   : int(datetime.now(timezone.utc).timestamp()) + 86400,
             })
 
-        item['price'] = float(item['price'])
-        return response(201, {'message': 'Item added successfully', 'item': item})
+        return response(201, resp_body)
 
     except ClientError as e:
         if e.response['Error']['Code'] == 'TransactionCanceledException':

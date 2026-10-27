@@ -22,3 +22,10 @@ def test_require_member_without_members_table_is_403(monkeypatch):
     assert ctx is None
     assert err['statusCode'] == 403
     assert 'owner' not in json.dumps(err)
+
+
+def test_pending_invite_expires_at_is_iso(load, ddb):
+    ddb.Table('OrgInvites').put_item(Item={'inviteTokenHash': 'h', 'orgID': 'o1', 'email': 'c@d.co',
+                                           'role': 'viewer', 'status': 'pending', 'expiresAt': 1798761600})
+    res = load('OrgMembers')._list('o1')
+    assert json.loads(res['body'])['pendingInvites'][0]['expiresAt'] == '2027-01-01T00:00:00+00:00'

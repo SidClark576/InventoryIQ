@@ -3,7 +3,6 @@ import uuid
 import boto3
 import os
 from datetime import datetime, timezone
-from decimal import Decimal
 from boto3.dynamodb.types import TypeSerializer
 from botocore.exceptions import ClientError
 import time as _time
@@ -66,7 +65,9 @@ def _handle(event, context):
         if not item_id:
             return response(400, {'error': 'itemID is required in path'})
 
-        body      = json.loads(event.get('body', '{}'))
+        body, err = _logging.json_body(event)
+        if err:
+            return err
         headers   = event.get('headers') or {}
         timestamp = datetime.now(timezone.utc).isoformat()
 
@@ -75,6 +76,14 @@ def _handle(event, context):
             return err
         user_id = ctx['user_id']
         org_id = ctx['org_id']
+
+        changes = {k: body[k] for k in _TEXT_FIELDS if k in body}
+        for name, integer in _NUMBER_FIELDS:
+            value, err = _logging.number_field(body, name, integer=integer)
+            if err:
+                return err
+            if name in body:
+                changes[name] = value
 
         # Sprint 3: If-Match header required for all updates (optimistic locking)
         if_match_raw = (
@@ -98,6 +107,8 @@ def _handle(event, context):
 
         if not _org.item_in_scope(existing, org_id, user_id):
             return response(403, {'error': 'Forbidden: item is outside this organization'})
+        if existing.get('deletedAt'):
+            return response(410, ITEM_DELETED)
 
         # Fast-fail version check before touching the DB
         # TransactWriteItems ConditionExpression below handles the concurrent race case
@@ -108,45 +119,21 @@ def _handle(event, context):
 
         new_version = current_version + 1
 
-        # Build UpdateExpression — only include fields present in the request body
-        # '#ver' alias needed because 'version' is not reserved but consistent with '#nm' pattern
+        # Build UpdateExpression — only the fields present in the body; every field aliased (B9 '#nm' pattern)
         update_parts = ['updatedAt = :ts', '#ver = :newv']
         expr_values  = {':ts': timestamp, ':newv': new_version, ':v': current_version}
         expr_names   = {'#ver': 'version'}
-
-        if 'quantity' in body:
-            update_parts.append('quantity = :qty')
-            expr_values[':qty'] = int(body['quantity'])
-        if 'name' in body:
-            # 'name' is a DynamoDB reserved word — must use expression alias
-            update_parts.append('#nm = :name')
-            expr_values[':name'] = body['name']
-            expr_names['#nm'] = 'name'
-        if 'price' in body:
-            update_parts.append('price = :price')
-            expr_values[':price'] = Decimal(str(body['price']))
-        if 'category' in body:
-            update_parts.append('category = :cat')
-            expr_values[':cat'] = body['category']
-        if 'description' in body:
-            update_parts.append('description = :desc')
-            expr_values[':desc'] = body['description']
-        if 'lowStockThreshold' in body:
-            update_parts.append('lowStockThreshold = :lst')
-            expr_values[':lst'] = int(body['lowStockThreshold'])
-        if 'barcode' in body:
-            update_parts.append('barcode = :barcode')
-            expr_values[':barcode'] = body['barcode']
-        if 'supplierID' in body:
-            update_parts.append('supplierID = :supplierID')
-            expr_values[':supplierID'] = body['supplierID']
+        for field, value in changes.items():
+            update_parts.append(f'#{field} = :{field}')
+            expr_names[f'#{field}'] = field
+            expr_values[f':{field}'] = value
 
         update_expr     = 'SET ' + ', '.join(update_parts)
         ddb_expr_values = {k: serializer.serialize(v) for k, v in expr_values.items()}
 
         # Determine transaction type for audit log
         qty_before = int(existing.get('quantity', 0))
-        qty_after  = int(body['quantity']) if 'quantity' in body else qty_before
+        qty_after  = changes.get('quantity', qty_before)
         if   qty_after > qty_before: change_type = 'stock_in'
         elif qty_after < qty_before: change_type = 'stock_out'
         else:                         change_type = 'update'
@@ -175,7 +162,7 @@ def _handle(event, context):
                     'TableName'                : TABLE,
                     'Key'                      : {'itemID': {'S': item_id}},
                     'UpdateExpression'         : update_expr,
-                    'ConditionExpression'      : '#ver = :v',
+                    'ConditionExpression'      : '#ver = :v AND attribute_not_exists(deletedAt)',
                     'ExpressionAttributeNames' : expr_names,
                     'ExpressionAttributeValues': ddb_expr_values,
                 }
@@ -190,16 +177,7 @@ def _handle(event, context):
 
         # Reconstruct updated item for response
         # TransactWriteItems does not support ReturnValues, so we apply changes to existing
-        updated = _plain(existing)
-        updated['updatedAt'] = timestamp
-        updated['version']   = new_version
-        if 'quantity'          in body: updated['quantity']           = int(body['quantity'])
-        if 'name'              in body: updated['name']               = body['name']
-        if 'price'             in body: updated['price']              = float(body['price'])
-        if 'category'          in body: updated['category']           = body['category']
-        if 'description'       in body: updated['description']        = body['description']
-        if 'lowStockThreshold' in body: updated['lowStockThreshold']  = int(body['lowStockThreshold'])
-        if 'barcode'           in body: updated['barcode']            = body['barcode']
+        updated = _logging.plain({**existing, **changes, 'updatedAt': timestamp, 'version': new_version})
 
         return response(200, {'message': 'Item updated', 'item': updated},
                         extra_headers={'ETag': str(new_version)})
@@ -208,6 +186,8 @@ def _handle(event, context):
         if e.response['Error']['Code'] == 'TransactionCanceledException':
             # Concurrent write won the race — client must re-fetch and retry
             current = table.get_item(Key={'itemID': item_id}).get('Item') or {}
+            if current.get('deletedAt'):
+                return response(410, ITEM_DELETED)
             return _conflict(current, 'Version conflict — item was modified concurrently. Re-fetch and retry.')
         raise
     except Exception as e:
@@ -216,13 +196,12 @@ def _handle(event, context):
 
 
 response = _logging.response
-
-
-def _plain(row):
-    return {k: float(v) if isinstance(v, Decimal) else v for k, v in row.items()}
+ITEM_DELETED = {'error': 'Item has been deleted', 'code': 'ITEM_DELETED'}
+_TEXT_FIELDS = ('name', 'category', 'description', 'barcode', 'supplierID')
+_NUMBER_FIELDS = (('quantity', True), ('price', False), ('lowStockThreshold', True))
 
 
 def _conflict(current, message):
     """412 with the current row and its version as ETag, so the client can merge without a re-fetch."""
     version = int(current.get('version', 0))
-    return response(412, {'error': message, 'item': _plain(current)}, extra_headers={'ETag': str(version)})
+    return response(412, {'error': message, 'item': _logging.plain(current)}, extra_headers={'ETag': str(version)})

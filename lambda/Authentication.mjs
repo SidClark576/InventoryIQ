@@ -338,7 +338,7 @@ export const handler = Sentry.wrapHandler(async (event) => {
                     message: "Login successful!",
                     token: sessionToken,
                     email: user.Email,
-                    expiresAt
+                    expiresAt: new Date(expiresAt * 1000).toISOString() // C2: ISO out; Sessions row keeps epoch
                 })
             };
         }

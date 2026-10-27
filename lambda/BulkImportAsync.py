@@ -5,9 +5,12 @@ import uuid
 import csv
 import io
 import math
+from decimal import Decimal
 from datetime import datetime, timezone
 import time as _time
+import urllib.parse
 import _logging
+import _org
 
 FUNCTION_NAME = 'BulkImportAsync'
 
@@ -65,13 +68,13 @@ def _validate_row(row, idx):
         'name': name,
         'category': category,
         'quantity': quantity,
-        'price': str(price),
+        'price': Decimal(str(price)),
         'lowStockThreshold': threshold,
         'barcode': barcode,
     }, None
 
 
-def _write_chunk(valid_rows, user_id, timestamp):
+def _write_chunk(valid_rows, user_id, timestamp, org_id=''):
     transact_items = []
     for row in valid_rows:
         item_id = str(uuid.uuid4())
@@ -89,6 +92,8 @@ def _write_chunk(valid_rows, user_id, timestamp):
             'createdAt': timestamp,
             'updatedAt': timestamp,
         }
+        if org_id:
+            item['orgID'] = org_id
         tx_item = {
             'transactionID': str(uuid.uuid4()),
             'itemID': item_id,
@@ -101,6 +106,8 @@ def _write_chunk(valid_rows, user_id, timestamp):
             'notes': 'Bulk import (async)',
             'createdAt': timestamp,
         }
+        if org_id:
+            tx_item['orgID'] = org_id
         transact_items.append({
             'Put': {
                 'TableName': TABLE,
@@ -140,6 +147,14 @@ def _flush_progress(job_id, done_delta, failed_delta, new_errors):
     )
 
 
+def _may_import(job, user_id, org_id):
+    """SEC-2: a presigned URL outlives removal or demotion and can be replayed, so re-check
+    the job owner, that it is still pending, and live editor+ membership before writing."""
+    if job.get('userID') != user_id or job.get('status') != 'pending':
+        return False
+    return not org_id or _org.has_role((_org.get_membership(org_id, user_id) or {}).get('role'), 'editor')
+
+
 def lambda_handler(event, context):
     t0 = _time.time()
     res = _handle(event, context)
@@ -170,7 +185,7 @@ def _handle(event, context):
     try:
         record = event['Records'][0]
         bucket = record['s3']['bucket']['name']
-        key = record['s3']['object']['key']
+        key = urllib.parse.unquote_plus(record['s3']['object']['key'])  # S3 event keys are URL-encoded
 
         # key = uploads/{userID}/{jobId}.csv
         parts = key.split('/')
@@ -179,6 +194,12 @@ def _handle(event, context):
 
         _, user_id, filename = parts
         job_id = filename.replace('.csv', '')
+
+        # orgID was stored by BulkImport presign after require_member (never from the upload itself)
+        job = jobs_table.get_item(Key={'jobId': job_id}).get('Item') or {}
+        org_id = job.get('orgID', '')
+        if not _may_import(job, user_id, org_id):
+            return {'statusCode': 403, 'body': 'Import rejected'}
 
         # Fetch CSV
         obj = s3_client.get_object(Bucket=bucket, Key=key)
@@ -219,7 +240,7 @@ def _handle(event, context):
         for i in range(num_chunks):
             chunk = valid_rows[i * CHUNK_SIZE:(i + 1) * CHUNK_SIZE]
             try:
-                _write_chunk(chunk, user_id, timestamp)
+                _write_chunk(chunk, user_id, timestamp, org_id)
                 inserted += len(chunk)
                 pending_done += len(chunk)
             except Exception as e:

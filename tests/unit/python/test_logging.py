@@ -102,3 +102,47 @@ def test_sentry_event_drops_secrets(monkeypatch):
     assert event['request']['headers'] == {'Content-Type': 'application/json'}
     assert 'org-invites/{token}/accept' in event['request']['url']
     assert log._scrub_event({'message': 'x'}, {}) == {'message': 'x'}
+
+
+def test_scrub_redacts_breadcrumb_invite_tokens(monkeypatch):
+    log = _load(monkeypatch)
+    event = {'breadcrumbs': {'values': [
+        {'category': 'httplib', 'data': {'url': 'https://api/org-invites/SECRETINVITE/accept'}},
+        {'message': 'POST /org-invites/SECRETINVITE/accept'},
+        {'data': None}]}}
+    out = json.dumps(log._scrub_event(event, {}))
+    assert 'SECRETINVITE' not in out and out.count('org-invites/{token}/accept') == 2
+
+
+def test_plain_keeps_integers_integral(monkeypatch):
+    from decimal import Decimal
+    out = _load(monkeypatch).plain({'quantity': Decimal(10), 'price': Decimal('9.5'), 'name': 'Rice'})
+    assert json.dumps(out) == '{"quantity": 10, "price": 9.5, "name": "Rice"}'
+
+
+def test_number_field(monkeypatch):
+    from decimal import Decimal
+    nf = _load(monkeypatch).number_field
+    assert nf({}, 'price', default=Decimal(0)) == (Decimal(0), None)
+    assert nf({'price': '9.5'}, 'price') == (Decimal('9.5'), None)
+    assert nf({'quantity': 4.0}, 'quantity', integer=True) == (4, None)
+    for value, integer in ((-1, False), ('abc', False), (True, True), (1.5, True), (None, False), ('NaN', False)):
+        val, err = nf({'qty': value}, 'qty', integer=integer)
+        assert val is None and err['statusCode'] == 400, value
+        assert json.loads(err['body'])['code'] == 'INVALID_FIELD' and json.loads(err['body'])['field'] == 'qty'
+
+
+def test_number_field_rejects_huge_exponents(monkeypatch):
+    """SEC-1: int(Decimal('1e10000000')) pins the CPU; huge exponents must fail before int()."""
+    nf = _load(monkeypatch).number_field
+    for value, integer in (('1e16', True), ('1e400', False), ('1e10000000', True)):
+        val, err = nf({'qty': value}, 'qty', integer=integer)
+        assert val is None and err['statusCode'] == 400, value
+
+def test_json_body(monkeypatch):
+    jb = _load(monkeypatch).json_body
+    assert jb({'body': None}) == ({}, None)
+    assert jb({'body': '{"a": 1}'}) == ({'a': 1}, None)
+    for raw in ('{bad', '[1]', '5'):
+        body, err = jb({'body': raw})
+        assert body is None and json.loads(err['body'])['code'] == 'INVALID_JSON', raw

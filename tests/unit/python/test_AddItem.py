@@ -108,3 +108,32 @@ def test_add_item_idempotency_replay(dynamodb_setup):
     response2 = AddItem.lambda_handler(event, {})
     assert response2['statusCode'] == 200 # Replay returns 200
     assert json.loads(response2['body']) == json.loads(response1['body'])
+
+
+@pytest.mark.parametrize('field,value', [('quantity', -3), ('price', 'free'), ('lowStockThreshold', 'x')])
+def test_add_item_bad_number_is_400(load, field, value):
+    _load_idem_table()
+    res = load('AddItem').lambda_handler(
+        {'body': json.dumps({'name': 'Rice', field: value}), 'headers': {'x-iq-user': 'a@b.co'}}, {})
+    body = json.loads(res['body'])
+    assert res['statusCode'] == 400 and body['code'] == 'INVALID_FIELD' and body['field'] == field
+
+
+def test_add_item_bad_json_is_400(load):
+    res = load('AddItem').lambda_handler({'body': 'nope', 'headers': {'x-iq-user': 'a@b.co'}}, {})
+    assert res['statusCode'] == 400 and json.loads(res['body'])['code'] == 'INVALID_JSON'
+
+
+def test_add_item_returns_integers(load):
+    _load_idem_table()
+    res = load('AddItem').lambda_handler(
+        {'body': json.dumps({'name': 'Rice', 'quantity': 4, 'price': 9.5}), 'headers': {'x-iq-user': 'a@b.co'}}, {})
+    assert res['statusCode'] == 201
+    item = json.loads(res['body'])['item']
+    assert type(item['quantity']) is int and type(item['lowStockThreshold']) is int and item['price'] == 9.5
+
+
+def _load_idem_table():
+    boto3.client('dynamodb').create_table(
+        TableName='IdempotencyKeys', KeySchema=[{'AttributeName': 'key', 'KeyType': 'HASH'}],
+        AttributeDefinitions=[{'AttributeName': 'key', 'AttributeType': 'S'}], BillingMode='PAY_PER_REQUEST')

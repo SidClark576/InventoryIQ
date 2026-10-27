@@ -115,7 +115,7 @@ The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` p
 - `Orgs.py` — org CRUD: list/switch/rename/delete/transfer-owner.
 - `OrgMembers.py` — member list, role change, removal.
 - `OrgInvites.py` — invite create/revoke/accept. Tokens emailed raw, stored **only as SHA-256 hash** (`inviteTokenHash` PK) — never store or log a raw invite token.
-- `_logging.py` — shared `log_json`, `capture_error` (→ Sentry), `response` (CORS envelope), `hash_user`. All Python Lambdas use these; don't hand-roll response dicts.
+- `_logging.py` — shared `log_json`, `capture_error` (→ Sentry), `response` (CORS envelope), `hash_user`, `plain` (Decimal → JSON int/float), `json_body` (400 `INVALID_JSON`), `number_field` (400 `INVALID_FIELD` + `field`). All Python Lambdas use these; don't hand-roll response dicts.
 - `AddItem.py` — create item (UUID, `version: 1`), atomic transaction log.
 - `GetAllItems.py` — paginated query (`orgID-index`, fallback `userID-index`), filters soft-deleted.
 - `UpdateItem.py` — optimistic-lock update (`If-Match` → 412 on mismatch, new version in `ETag`).

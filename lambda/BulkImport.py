@@ -80,7 +80,7 @@ def _handle(event, context):
     org_id = ctx['org_id']
 
     if method == 'GET' and 'presign' in path:
-        return _handle_presign(event, user_id)
+        return _handle_presign(event, user_id, org_id)
 
     if method == 'GET':
         return _handle_get_job(event, user_id)
@@ -91,7 +91,7 @@ def _handle(event, context):
     return _err(405, f'Method {method} not allowed')
 
 
-def _handle_presign(event, user_id):
+def _handle_presign(event, user_id, org_id=''):
     """Generate presigned S3 PUT URL for async CSV upload."""
     try:
         job_id = str(uuid.uuid4())
@@ -120,6 +120,7 @@ def _handle_presign(event, user_id):
             'errors': [],
             'createdAt': now.isoformat(),
             'ttl': ttl,
+            **({'orgID': org_id} if org_id else {}),  # BulkImportAsync stamps it on every row
         })
 
         return _ok({'presignedUrl': presigned_url, 'jobId': job_id})
@@ -146,12 +147,7 @@ def _handle_get_job(event, user_id):
         if job.get('userID') != user_id:
             return _err(403, 'Forbidden')
 
-        # Decimal → float
-        for k, v in job.items():
-            if isinstance(v, Decimal):
-                job[k] = float(v)
-
-        return _ok(job)
+        return _ok(_logging.plain(job))
 
     except Exception as e:
         return _logging.server_error(e, event, _headers())
@@ -196,7 +192,7 @@ def _validate_row(row, idx):
         'name': name,
         'category': category,
         'quantity': quantity,
-        'price': str(price),
+        'price': Decimal(str(price)),
         'lowStockThreshold': threshold,
         'barcode': barcode,
     }

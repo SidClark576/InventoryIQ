@@ -1,7 +1,6 @@
 import json
 import boto3
 import os
-from decimal import Decimal
 from boto3.dynamodb.conditions import Key, Attr
 import time as _time
 import _logging
@@ -40,7 +39,7 @@ def _handle(event, context):
     2. Return empty list if userID is missing (user isolation requirement)
     3. Query userID-index GSI filtering by userID + excluding soft-deleted items
     4. Handle pagination (DynamoDB returns max 1MB per page)
-    5. Convert Decimal types to float for JSON serialization
+    5. Convert Decimals to JSON numbers (integers stay integers)
     6. Return items array with count
 
     Query Parameters:
@@ -60,10 +59,7 @@ def _handle(event, context):
         filter_expr = Attr('deletedAt').exists() if show_deleted else Attr('deletedAt').not_exists()
         items = _org.list_scoped_items(table, ctx['org_id'], ctx['user_id'], filter_expr)
 
-        items = [
-            {k: float(v) if isinstance(v, Decimal) else v for k, v in item.items()}
-            for item in items
-        ]
+        items = [_logging.plain(item) for item in items]
 
         return _logging.response(200, {'items': items, 'count': len(items)})
 

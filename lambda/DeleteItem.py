@@ -90,7 +90,7 @@ def _handle(event, context):
             'transactionID' : str(uuid.uuid4()),
             'itemID'        : item_id,
             'itemName'      : existing.get('name', ''),
-            'userID'        : existing.get('userID', ''),
+            'userID'        : user_id,  # actor, not the item's creator (B1)
             'changeType'    : 'delete',
             'quantityBefore': qty,
             'quantityAfter' : 0,
@@ -98,6 +98,8 @@ def _handle(event, context):
             'notes'         : 'Item soft-deleted',
             'createdAt'     : timestamp,
         }
+        if org_id:
+            tx_item['orgID'] = org_id
 
         # Soft delete: stamp deletedAt + deletedBy atomically with transaction log
         # ConditionExpression prevents race where two requests both try to delete
@@ -106,11 +108,13 @@ def _handle(event, context):
                 'Update': {
                     'TableName'                : TABLE,
                     'Key'                      : {'itemID': {'S': item_id}},
-                    'UpdateExpression'         : 'SET deletedAt = :da, deletedBy = :db',
+                    'UpdateExpression'         : 'SET deletedAt = :da, deletedBy = :db, updatedAt = :da ADD #ver :one',
                     'ConditionExpression'      : 'attribute_not_exists(deletedAt)',
+                    'ExpressionAttributeNames' : {'#ver': 'version'},
                     'ExpressionAttributeValues': {
                         ':da': serializer.serialize(timestamp),
                         ':db': serializer.serialize(user_id),
+                        ':one': {'N': '1'},
                     },
                 }
             },

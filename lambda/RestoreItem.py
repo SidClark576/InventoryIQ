@@ -1,4 +1,5 @@
 import json
+import uuid
 import boto3
 import os
 from datetime import datetime, timezone
@@ -12,6 +13,7 @@ FUNCTION_NAME = 'RestoreItem'
 
 # Table name from environment with default
 TABLE = os.environ.get('DYNAMODB_TABLE', 'InventoryIQ')
+TX_TABLE = os.environ.get('TRANSACTIONS_TABLE', 'InventoryTransactions')
 
 # Restore window: items deleted more than this many days ago cannot be restored
 RESTORE_WINDOW_DAYS = int(os.environ.get('RESTORE_WINDOW_DAYS', '30'))
@@ -98,19 +100,37 @@ def _handle(event, context):
             })
 
         timestamp = datetime.now(timezone.utc).isoformat()
+        qty = int(existing.get('quantity', 0))
+        # changeType 'update': main's Activity filters know only the five existing types
+        tx_item = {
+            'transactionID' : str(uuid.uuid4()),
+            'itemID'        : item_id,
+            'itemName'      : existing.get('name', ''),
+            'userID'        : user_id,
+            'changeType'    : 'update',
+            'quantityBefore': qty,
+            'quantityAfter' : qty,
+            'quantityDelta' : 0,
+            'notes'         : 'Item restored',
+            'createdAt'     : timestamp,
+        }
+        if org_id:
+            tx_item['orgID'] = org_id
 
-        # Restore: atomically remove deletedAt + deletedBy, update updatedAt
+        # Restore: atomically remove deletedAt + deletedBy, bump version + updatedAt, log the restore
         # ConditionExpression ensures item is still in deleted state (not already restored)
         ddb_client.transact_write_items(TransactItems=[
             {
                 'Update': {
                     'TableName'                : TABLE,
                     'Key'                      : {'itemID': {'S': item_id}},
-                    'UpdateExpression'         : 'REMOVE deletedAt, deletedBy SET updatedAt = :ts',
+                    'UpdateExpression'         : 'REMOVE deletedAt, deletedBy SET updatedAt = :ts ADD #ver :one',
                     'ConditionExpression'      : 'attribute_exists(deletedAt)',
-                    'ExpressionAttributeValues': {':ts': serializer.serialize(timestamp)},
+                    'ExpressionAttributeNames' : {'#ver': 'version'},
+                    'ExpressionAttributeValues': {':ts': serializer.serialize(timestamp), ':one': {'N': '1'}},
                 }
             },
+            {'Put': {'TableName': TX_TABLE, 'Item': {k: serializer.serialize(v) for k, v in tx_item.items()}}},
         ])
 
         return response(200, {'message': f'Item {item_id} restored successfully'})

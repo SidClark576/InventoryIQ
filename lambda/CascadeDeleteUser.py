@@ -8,6 +8,12 @@ FUNCTION_NAME = 'CascadeDeleteUser'
 
 dynamodb = boto3.resource('dynamodb')
 
+
+def _log(email, step, count=None):
+    """Never log the raw email (PII): hashed user ID only."""
+    _logging.log_json(function=FUNCTION_NAME, userID_hash=_logging.hash_user(email), step=step, count=count)
+
+
 def lambda_handler(event, context):
     try:
         # Tables
@@ -25,7 +31,7 @@ def lambda_handler(event, context):
                 if not email:
                     continue
                 
-                print(f"User {email} was deleted. Starting cascade delete.")
+                _log(email, 'start')
                 
                 # 1. Delete all items from InventoryIQ for this user
                 # Using the userID-index
@@ -46,7 +52,7 @@ def lambda_handler(event, context):
                     with inventory_table.batch_writer() as batch:
                         for item in items:
                             batch.delete_item(Key={'itemID': item['itemID']})
-                    print(f"Deleted {len(items)} items from InventoryIQ for {email}")
+                    _log(email, 'items', len(items))
                 except Exception as e:
                     _logging.capture_error(e, event=event, step='items')
 
@@ -65,7 +71,7 @@ def lambda_handler(event, context):
                     with transactions_table.batch_writer() as batch:
                         for tx in txs:
                             batch.delete_item(Key={'transactionID': tx['transactionID']})
-                    print(f"Deleted {len(txs)} transactions from InventoryTransactions for {email}")
+                    _log(email, 'transactions', len(txs))
                 except Exception as e:
                     _logging.capture_error(e, event=event, step='transactions')
                 
@@ -87,14 +93,14 @@ def lambda_handler(event, context):
                     with sessions_table.batch_writer() as batch:
                         for session in sessions:
                             batch.delete_item(Key={'sessionToken': session['sessionToken']})
-                    print(f"Deleted {len(sessions)} sessions for {email}")
+                    _log(email, 'sessions', len(sessions))
                 except Exception as e:
                     _logging.capture_error(e, event=event, step='sessions')
                 
                 # 4. Delete auth attempts
                 try:
                     auth_attempts_table.delete_item(Key={'email': email.lower()})
-                    print(f"Deleted AuthAttempt record for {email}")
+                    _log(email, 'auth_attempts', 1)
                 except Exception as e:
                     _logging.capture_error(e, event=event, step='auth_attempts')
                     
@@ -112,7 +118,7 @@ def lambda_handler(event, context):
                     with password_resets_table.batch_writer() as batch:
                         for r in resets:
                             batch.delete_item(Key={'resetToken': r['resetToken']})
-                    print(f"Deleted {len(resets)} password resets for {email}")
+                    _log(email, 'password_resets', len(resets))
                 except Exception as e:
                     _logging.capture_error(e, event=event, step='password_resets')
 
