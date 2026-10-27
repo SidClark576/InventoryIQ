@@ -37,3 +37,6 @@ graft/
 
 # Local Netlify folder
 .netlify
+
+# factory (local workflow state, never committed)
+/factory/
