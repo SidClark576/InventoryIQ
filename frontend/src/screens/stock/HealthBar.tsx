@@ -3,7 +3,7 @@ import { LEVEL_FILL } from "@/components/status-badge";
 import type { StockLevel } from "@/lib/dashboardStats";
 import { formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import type { StatusFilter } from "./stock-view";
+import { statusMatches, type StatusFilter } from "./stock-view";
 
 const SEGMENTS: readonly { level: StockLevel; label: string }[] = [
   { level: "out", label: "Out" },
@@ -57,7 +57,7 @@ export function HealthBar({ counts, total, value, status, onStatus }: HealthBarP
               className={cn(
                 "h-full rounded-full transition-opacity",
                 LEVEL_FILL[segment.level],
-                status !== "all" && status !== segment.level && "opacity-25",
+                !statusMatches(segment.level, status) && "opacity-25",
               )}
               style={{ flexGrow: counts[segment.level], flexBasis: 0 }}
             />
@@ -68,6 +68,9 @@ export function HealthBar({ counts, total, value, status, onStatus }: HealthBarP
         <div role="group" aria-label="Filter by status" className="flex flex-wrap items-center gap-0.5 sm:gap-1">
           <LegendButton pressed={status === "all"} onClick={() => onStatus("all")}>
             All <b className="font-semibold tabular-nums">{total}</b>
+          </LegendButton>
+          <LegendButton pressed={status === "order"} onClick={() => onStatus(status === "order" ? "all" : "order")}>
+            Order now <b className="font-semibold tabular-nums">{counts.out + counts.low}</b>
           </LegendButton>
           {SEGMENTS.map((segment) => (
             <LegendButton

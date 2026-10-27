@@ -1,9 +1,11 @@
 import { useCallback } from "react";
 import { useSearchParams } from "react-router";
 import type { InventoryItem } from "@/api";
-import { restockQueue, stockLevelOf, type StockLevel } from "@/lib/dashboardStats";
+// Relative .ts import so node:test can load this module (no `@/` resolution there).
+import { restockQueue, stockLevelOf, type StockLevel } from "../../lib/dashboardStats.ts";
 
-export type StatusFilter = "all" | StockLevel;
+/** "order" = out + low, the HealthBar's "Order now" chip. */
+export type StatusFilter = "all" | "order" | StockLevel;
 export type Grouping = "status" | "category";
 
 export type StockGroup = {
@@ -13,7 +15,7 @@ export type StockGroup = {
   items: InventoryItem[];
 };
 
-const STATUS_FILTERS: readonly StatusFilter[] = ["all", "ok", "low", "out"];
+const STATUS_FILTERS: readonly StatusFilter[] = ["all", "order", "ok", "low", "out"];
 
 function byName(a: InventoryItem, b: InventoryItem): number {
   return String(a.name ?? "").localeCompare(String(b.name ?? ""));
@@ -22,14 +24,23 @@ function byName(a: InventoryItem, b: InventoryItem): number {
 export function matchesQuery(item: InventoryItem, query: string): boolean {
   const needle = query.trim().toLowerCase();
   if (!needle) return true;
-  return [item.name, item.category, item.barcode].some((field) =>
+  return [item.name, item.category, item.barcode, item.description].some((field) =>
     String(field ?? "").toLowerCase().includes(needle),
   );
 }
 
+export function statusMatches(level: StockLevel, status: StatusFilter): boolean {
+  return status === "all" || level === status || (status === "order" && level !== "ok");
+}
+
+/** Category is the default: it matches the shelf. */
+export function groupingFromParam(raw: string | null): Grouping {
+  return raw === "status" ? "status" : "category";
+}
+
 export function filterItems(items: readonly InventoryItem[], status: StatusFilter, query: string): InventoryItem[] {
   return items.filter(
-    (item) => (status === "all" || stockLevelOf(item) === status) && matchesQuery(item, query),
+    (item) => statusMatches(stockLevelOf(item), status) && matchesQuery(item, query),
   );
 }
 
@@ -69,7 +80,7 @@ export function useStockView() {
   const status: StatusFilter = STATUS_FILTERS.includes(rawStatus as StatusFilter)
     ? (rawStatus as StatusFilter)
     : "all";
-  const grouping: Grouping = params.get("group") === "category" ? "category" : "status";
+  const grouping = groupingFromParam(params.get("group"));
   const query = params.get("q") ?? "";
   const trash = params.get("view") === "trash";
 
@@ -94,7 +105,7 @@ export function useStockView() {
     query,
     trash,
     setStatus: (value: StatusFilter) => update("status", value === "all" ? null : value),
-    setGrouping: (value: Grouping) => update("group", value === "status" ? null : value),
+    setGrouping: (value: Grouping) => update("group", value === "category" ? null : value),
     setQuery: (value: string) => update("q", value || null),
     setTrash: (value: boolean) => update("view", value ? "trash" : null),
     clearFilters: () => {

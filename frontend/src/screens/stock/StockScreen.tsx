@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
-import { DownloadSimpleIcon, MagnifyingGlassIcon, PackageIcon, PlusIcon, TrashIcon, XIcon } from "@phosphor-icons/react";
+import { PlusIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { lookupBarcode, type InventoryItem } from "@/api";
 import { useOrgShell } from "@/app/AppLayout";
@@ -12,7 +12,6 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ItemSheetHost } from "@/components/item-sheet/ItemSheetHost";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { countByLevel, deriveDashStats } from "@/lib/dashboardStats";
 import { plural } from "@/lib/format";
 import { setEditItem } from "@/session";
@@ -20,23 +19,26 @@ import { CategoriesDialog } from "./CategoriesDialog";
 import { summarizeCount, type Counts } from "./count";
 import { CountReviewDialog } from "./CountReviewDialog";
 import { downloadItemsCsv } from "./export";
-import { FloatingBar } from "./FloatingBar";
+import { FloatingBar, SelectionBar } from "./FloatingBar";
 import { HealthBar } from "./HealthBar";
 import { ImportDialog } from "./ImportDialog";
 import { PrintReport } from "./PrintReport";
+import { EmptyShelf, NoMatches, StockError, StockSkeleton } from "./StockStates";
 import { StockTable } from "./StockTable";
 import { StockToolbar } from "./StockToolbar";
 import { filterItems, groupItems, useStockView } from "./stock-view";
 import { TrashView } from "./TrashView";
+import { useRowStepper } from "./use-row-stepper";
 
 type DialogName = "scan" | "categories" | "import" | "review" | "bulk-delete" | null;
 
 export function StockScreen() {
-  const { items, itemsStatus, itemsError, reloadItems } = useInventory();
+  const { items, itemsStatus, reloadItems } = useInventory();
   const { deleteItems } = useStockActions();
   const { canEdit, orgEpoch } = useOrgShell();
   const { openItem, openNew, itemHref } = useSheetParams();
   const view = useStockView();
+  const stepper = useRowStepper();
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [counting, setCounting] = useState(false);
@@ -213,13 +215,9 @@ export function StockScreen() {
           }
         />
 
-        <HealthBar
-          counts={levelCounts}
-          total={items.length}
-          value={value}
-          status={view.status}
-          onStatus={view.setStatus}
-        />
+        {itemsStatus === "ready" ? (
+          <HealthBar counts={levelCounts} total={items.length} value={value} status={view.status} onStatus={view.setStatus} />
+        ) : null}
 
         <StockToolbar
           query={view.query}
@@ -238,7 +236,7 @@ export function StockScreen() {
           canEdit={canEdit}
         />
 
-        {filtered && !loading ? (
+        {filtered && !loading && items.length > 0 ? (
           <p className="-mt-2 text-sm text-muted-foreground" aria-live="polite">
             <span id="pagination-text" className="tabular-nums">
               {rows.length} of {plural(items.length, "item")} shown
@@ -254,40 +252,21 @@ export function StockScreen() {
           </p>
         ) : null}
 
-        {itemsStatus === "error" ? (
-          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-3xl border border-destructive/30 bg-destructive/5 px-5 py-4 text-sm">
-            <span className="text-destructive">{itemsError}</span>
-            <Button type="button" variant="outline" size="sm" onClick={() => void reloadItems()}>
-              Try again
-            </Button>
-          </div>
-        ) : loading ? (
-          <div className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-5">
-            {Array.from({ length: 6 }, (_, index) => (
-              <Skeleton key={index} className="h-10 w-full" />
-            ))}
-          </div>
+        {itemsStatus === "error" ? <StockError onRetry={() => void reloadItems()} /> : null}
+        {loading ? (
+          <StockSkeleton />
         ) : rows.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-border px-6 py-14 text-center">
-            {items.length ? (
-              <MagnifyingGlassIcon className="size-8 text-muted-foreground" />
-            ) : (
-              <PackageIcon className="size-8 text-muted-foreground" />
-            )}
-            <p className="font-medium">{items.length ? "No items match" : "No items yet"}</p>
-            <p className="text-sm text-muted-foreground">
-              {items.length
-                ? "Try another search or status."
-                : canEdit
-                  ? "Add your first item, scan a barcode, or import a CSV."
-                  : "Nothing has been added yet."}
-            </p>
-            {items.length || canEdit ? (
-              <Button type="button" variant="outline" onClick={items.length ? view.clearFilters : openNew}>
-                {items.length ? "Clear filters" : "Add item"}
-              </Button>
-            ) : null}
-          </div>
+          items.length ? (
+            <NoMatches onClear={view.clearFilters} />
+          ) : itemsStatus === "error" ? null : (
+            <EmptyShelf
+              canEdit={canEdit}
+              importAvailable={importAvailable}
+              onAdd={openNew}
+              onScan={() => setDialog("scan")}
+              onImport={() => setDialog("import")}
+            />
+          )
         ) : (
           <StockTable
             groups={groups}
@@ -299,6 +278,10 @@ export function StockScreen() {
             counts={counts}
             onCount={(id, raw) => setCounts((prev) => ({ ...prev, [id]: raw }))}
             itemHref={itemHref}
+            canEdit={canEdit}
+            pending={stepper.pending}
+            onStep={stepper.step}
+            selecting={selectedItems.length > 0}
           />
         )}
 
@@ -317,28 +300,13 @@ export function StockScreen() {
             </Button>
           </FloatingBar>
         ) : selectedItems.length > 0 ? (
-          <FloatingBar label="Selection">
-            <span className="mr-auto text-sm font-medium tabular-nums">{selectedItems.length} selected</span>
-            <Button type="button" variant="outline" size="sm" onClick={() => exportCsv(selectedItems, "_selected")}>
-              <DownloadSimpleIcon />
-              Export
-            </Button>
-            {canEdit ? (
-              <Button type="button" variant="destructive" size="sm" onClick={() => setDialog("bulk-delete")}>
-                <TrashIcon />
-                Delete
-              </Button>
-            ) : null}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Clear selection"
-              onClick={() => setSelected(new Set())}
-            >
-              <XIcon />
-            </Button>
-          </FloatingBar>
+          <SelectionBar
+            count={selectedItems.length}
+            canEdit={canEdit}
+            onExport={() => exportCsv(selectedItems, "_selected")}
+            onDelete={() => setDialog("bulk-delete")}
+            onClear={() => setSelected(new Set())}
+          />
         ) : null}
       </div>
 

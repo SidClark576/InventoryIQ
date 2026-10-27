@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { DotsThreeIcon, DownloadSimpleIcon, TrashIcon, XIcon } from "@phosphor-icons/react";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 /** Action bar pinned above the bottom tab bar (mobile) or the page bottom (desktop). */
 export function FloatingBar({ label, children }: { label: string; children: ReactNode }) {
@@ -10,5 +13,44 @@ export function FloatingBar({ label, children }: { label: string; children: Reac
     >
       {children}
     </div>
+  );
+}
+
+type SelectionBarProps = {
+  count: number;
+  canEdit: boolean;
+  onExport: () => void;
+  onDelete: () => void;
+  onClear: () => void;
+};
+
+/** Bulk actions for selected rows. Delete sits behind "…" so a thumb can't hit it by accident. */
+export function SelectionBar({ count, canEdit, onExport, onDelete, onClear }: SelectionBarProps) {
+  return (
+    <FloatingBar label="Selection">
+      <span className="mr-auto text-sm font-medium tabular-nums">{count} selected</span>
+      <Button type="button" variant="outline" size="sm" onClick={onExport}>
+        <DownloadSimpleIcon />
+        Export
+      </Button>
+      {canEdit ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={<Button type="button" variant="outline" size="icon-sm" aria-label="More selection actions" />}
+          >
+            <DotsThreeIcon weight="bold" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="top" className="w-44">
+            <DropdownMenuItem variant="destructive" onClick={onDelete}>
+              <TrashIcon />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : null}
+      <Button type="button" variant="ghost" size="icon-sm" aria-label="Clear selection" onClick={onClear}>
+        <XIcon />
+      </Button>
+    </FloatingBar>
   );
 }
