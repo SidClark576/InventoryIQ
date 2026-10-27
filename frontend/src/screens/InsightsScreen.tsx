@@ -107,7 +107,7 @@ export function InsightsScreen() {
   const [refreshToken, setRefreshToken] = useState(0);
 
   useEffect(() => {
-    document.title = "Insights | InventoryIQ";
+    document.title = "Insights | Panindo";
   }, []);
 
   // Only orgEpoch and an explicit Refresh trigger a load; never `orgs` (it changes right after mount).

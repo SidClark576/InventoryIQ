@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BrandMark } from "@/components/brand-mark";
 
 type MsgKind = "err" | "info" | "ok";
 
@@ -31,7 +32,7 @@ export function ForgotPasswordScreen() {
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    document.title = "InventoryIQ | Forgot Password";
+    document.title = "Panindo | Forgot Password";
   }, []);
 
   async function handleForgotPassword(event: React.FormEvent<HTMLFormElement>): Promise<void> {
@@ -72,7 +73,10 @@ export function ForgotPasswordScreen() {
   return (
     <main className="flex min-h-svh items-center justify-center bg-background px-6 py-10">
       <div className="flex w-full max-w-[400px] flex-col gap-6">
-        <p className="text-center text-base font-semibold tracking-tight">InventoryIQ</p>
+        <p className="flex items-center justify-center gap-2 text-base font-semibold tracking-tight">
+          <BrandMark />
+          Panindo
+        </p>
         <Card>
           <CardHeader>
             <CardTitle>Forgot password</CardTitle>

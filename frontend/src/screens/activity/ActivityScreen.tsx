@@ -34,7 +34,7 @@ export function ActivityScreen() {
   const query = params.get("q") ?? "";
 
   useEffect(() => {
-    document.title = "Activity | InventoryIQ";
+    document.title = "Activity | Panindo";
     void loadTransactions();
   }, [loadTransactions]);
 

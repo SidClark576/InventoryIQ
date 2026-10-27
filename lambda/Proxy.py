@@ -9,7 +9,7 @@ API_KEY_SECRET   = os.environ.get('API_KEY_SECRET', 'inventoryiq/api-key')
 # Fallback: read API_KEY directly from env (used if Secrets Manager not configured)
 _API_KEY_ENV     = os.environ.get('API_KEY', '')
 # CORS_ORIGIN: comma-separated list of allowed origins, or '*' for open
-CORS_ORIGIN      = os.environ.get('CORS_ORIGIN', 'https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500')
+CORS_ORIGIN      = os.environ.get('CORS_ORIGIN', _logging.DEFAULT_CORS_ORIGINS)
 _CORS_ORIGINS    = {o.strip() for o in CORS_ORIGIN.split(',') if o.strip()} if CORS_ORIGIN != '*' else None
 # JWT secret — must match Authentication Lambda
 _JWT_SECRET      = os.environ.get('JWT_SECRET', '').encode()

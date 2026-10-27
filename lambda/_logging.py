@@ -79,8 +79,9 @@ def capture_error(exc=None, **context):
             sentry_sdk.capture_message(context.get('message', 'error'), level='error')
 
 
-_DEFAULT_CORS = 'https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500'
-_CORS_ORIGIN = os.environ.get('CORS_ORIGIN', _DEFAULT_CORS)
+# One shared list; Authentication.mjs repeats it (Node can't import this) and tests/unit/python/test_cors.py keeps them equal.
+DEFAULT_CORS_ORIGINS = 'https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500,capacitor://localhost,https://localhost'
+_CORS_ORIGIN = os.environ.get('CORS_ORIGIN', DEFAULT_CORS_ORIGINS)
 _CORS_ORIGINS = (
     None if _CORS_ORIGIN == '*'
     else {o.strip() for o in _CORS_ORIGIN.split(',') if o.strip()}

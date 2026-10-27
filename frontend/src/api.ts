@@ -6,6 +6,7 @@ import {
   setCurrentOrg,
   setCurrentOrgName,
   setCurrentRole,
+  setLocalLogout,
   type Role,
 } from './session';
 
@@ -71,10 +72,13 @@ export function checkQuota(res: Response): void {
   }
 }
 
+/** Preview sign-in is for `npm run dev` only: a production build or the app shell (https://localhost) must show the login form. */
 export function isLocalPreview(): boolean {
-  const host = location.hostname;
-  return host === 'localhost' || host === '127.0.0.1' || host === '[::1]';
+  return import.meta.env.DEV;
 }
+
+/** api.ts can't reach the router; App.tsx listens for this and navigates to /login?expired=1. */
+export const SESSION_EXPIRED_EVENT = 'iq:session-expired';
 
 export function check401(res: Response): void {
   if (res.status === 401) {
@@ -82,7 +86,9 @@ export function check401(res: Response): void {
       throw new Error('Local preview has no session. Sign in to load live data.');
     }
     clearSession();
-    window.location.href = 'login.html?expired=1';
+    // A real session expired during local preview: show the login form, not the fake preview user.
+    if (isLocalPreview()) setLocalLogout();
+    window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
     throw new Error('Session expired. Please log in again.');
   }
 }

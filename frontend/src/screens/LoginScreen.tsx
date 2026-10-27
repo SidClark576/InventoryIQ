@@ -24,6 +24,7 @@ import {
   setUserEmail,
 } from "@/session";
 import { HOME_ROUTE } from "@/app/routes";
+import { BrandMark } from "@/components/brand-mark";
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -115,7 +116,7 @@ export function LoginScreen() {
   const switchTimer = useRef<number | null>(null);
 
   useEffect(() => {
-    const title = tab === "login" ? "InventoryIQ | Login" : "InventoryIQ | Sign up";
+    const title = tab === "login" ? "Panindo | Login" : "Panindo | Sign up";
     document.title = title;
   }, [tab]);
 
@@ -222,7 +223,10 @@ export function LoginScreen() {
   return (
     <main className="flex min-h-svh items-center justify-center bg-background px-6 py-10">
       <div className="flex w-full max-w-[400px] flex-col gap-6">
-        <p className="text-center text-base font-semibold tracking-tight">InventoryIQ</p>
+        <p className="flex items-center justify-center gap-2 text-base font-semibold tracking-tight">
+          <BrandMark />
+          Panindo
+        </p>
         <Card>
           <CardHeader>
             <CardTitle id="auth-title">{title}</CardTitle>

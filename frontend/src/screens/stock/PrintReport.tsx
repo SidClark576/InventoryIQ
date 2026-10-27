@@ -9,7 +9,7 @@ export function PrintReport({ items }: { items: readonly InventoryItem[] }) {
   const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
   return (
     <section id="print-section" data-print-region aria-hidden>
-      <h1 className="print-title">InventoryIQ — Inventory Report</h1>
+      <h1 className="print-title">Panindo — Inventory Report</h1>
       <p className="print-meta">
         Generated: {date} | User: {getUserEmail()}
       </p>

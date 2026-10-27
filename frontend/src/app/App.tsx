@@ -1,12 +1,12 @@
-import { Navigate, Route, BrowserRouter, Routes, useLocation } from "react-router";
+import { Navigate, Route, BrowserRouter, Routes, useLocation, useNavigate } from "react-router";
 import { AppLayout } from "@/app/AppLayout";
 import { legacyRouteForPath, RENAMED_ROUTES } from "@/app/legacyHtml";
 import { HOME_ROUTE } from "@/app/routes";
-import { isLocalPreview } from "@/api";
+import { isLocalPreview, SESSION_EXPIRED_EVENT } from "@/api";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 
 // Each screen is its own chunk, so sign-in does not download the stock screen.
 const AcceptScreen = lazy(() => import("@/screens/AcceptScreen").then((m) => ({ default: m.AcceptScreen })));
@@ -68,6 +68,17 @@ function AddItemRedirect() {
   return <Navigate to={{ pathname: "/stock", search }} replace />;
 }
 
+/** A 401 in api.ts clears the session; this sends the user to the login form without a full page load. */
+function SessionExpiredRedirect() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const onExpired = () => void navigate("/login?expired=1", { replace: true });
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
+  }, [navigate]);
+  return null;
+}
+
 function HomeRedirect() {
   applyLocalPreview();
   return <Navigate to={getUserEmail() ? HOME_ROUTE : "/login"} replace />;
@@ -126,6 +137,7 @@ export function App() {
       scriptProps={{ type: "application/json" }}
     >
       <BrowserRouter>
+        <SessionExpiredRedirect />
         <ErrorBoundary>
           {/* Signed-out screens only; the app layout has its own skeleton fallback around its Outlet. */}
           <Suspense fallback={null}>

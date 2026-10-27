@@ -47,7 +47,7 @@ export function StockScreen() {
   const [printing, setPrinting] = useState(false);
 
   useEffect(() => {
-    document.title = "Stock | InventoryIQ";
+    document.title = "Stock | Panindo";
   }, []);
 
   // A 403/404 from the import routes is per org; another org may have them.

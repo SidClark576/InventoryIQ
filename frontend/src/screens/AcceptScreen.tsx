@@ -27,7 +27,7 @@ export function AcceptScreen() {
   const [message, setMessage] = useState("Checking invite…");
 
   useEffect(() => {
-    document.title = "InventoryIQ | Accept invite";
+    document.title = "Panindo | Accept invite";
   }, []);
 
   useEffect(() => {

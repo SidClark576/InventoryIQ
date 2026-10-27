@@ -54,7 +54,7 @@ export function TodayScreen() {
   const now = new Date();
 
   useEffect(() => {
-    document.title = "Today | InventoryIQ";
+    document.title = "Today | Panindo";
   }, []);
 
   const stats = useMemo(() => deriveDashStats(items), [items]);

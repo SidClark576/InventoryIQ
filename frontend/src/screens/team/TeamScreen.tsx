@@ -70,7 +70,7 @@ export function TeamScreen() {
   const canManage = !myRole || CAN_INVITE.has(myRole);
 
   useEffect(() => {
-    document.title = "Team | InventoryIQ";
+    document.title = "Team | Panindo";
   }, []);
 
   useEffect(() => {

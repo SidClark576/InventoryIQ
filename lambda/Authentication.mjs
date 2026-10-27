@@ -65,7 +65,7 @@ const MAX_FAILURES        = 5;              // max failed logins before 429
 // Password must have lowercase, uppercase, digit, min 8 chars
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-const _CORS_ORIGIN = process.env.CORS_ORIGIN || 'https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500';
+const _CORS_ORIGIN = process.env.CORS_ORIGIN || 'https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500,capacitor://localhost,https://localhost';
 const _CORS_ORIGINS = _CORS_ORIGIN !== '*'
     ? new Set(_CORS_ORIGIN.split(',').map(o => o.trim()).filter(Boolean))
     : null;

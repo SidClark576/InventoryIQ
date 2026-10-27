@@ -49,6 +49,7 @@ import {
   setLocalLogout,
 } from "@/session";
 import { errorText } from "@/lib/errors";
+import { BrandMark } from "@/components/brand-mark";
 
 export type OrgShellContextValue = {
   orgs: OrgRecord[];
@@ -206,7 +207,7 @@ export function AppLayout() {
             </div>
           </aside>
           <div className="flex min-w-0 flex-1 flex-col">
-            <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background/90 px-4 backdrop-blur-md md:hidden">
+            <header className="sticky top-0 z-30 flex min-h-14 pt-[env(safe-area-inset-top)] items-center gap-2 border-b border-border bg-background/90 px-4 backdrop-blur-md md:hidden">
               <Brand />
               <div className="ml-auto min-w-0">
                 <AccountMenu
@@ -257,13 +258,8 @@ function ScreenSkeleton() {
 function Brand() {
   return (
     <span className="flex items-center gap-2.5 font-heading text-base font-semibold tracking-tight">
-      <svg viewBox="0 0 24 24" aria-hidden className="size-7 shrink-0">
-        <rect width="24" height="24" rx="7" className="fill-primary" />
-        <rect x="5.5" y="13" width="3" height="5.5" rx="1" className="fill-primary-foreground" />
-        <rect x="10.5" y="9" width="3" height="9.5" rx="1" className="fill-primary-foreground" />
-        <rect x="15.5" y="5.5" width="3" height="13" rx="1" className="fill-primary-foreground" />
-      </svg>
-      InventoryIQ
+      <BrandMark />
+      Panindo
     </span>
   );
 }

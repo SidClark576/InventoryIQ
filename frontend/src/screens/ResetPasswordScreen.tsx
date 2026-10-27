@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BrandMark } from "@/components/brand-mark";
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -81,7 +82,7 @@ export function ResetPasswordScreen() {
   const redirectTimer = useRef<number | null>(null);
 
   useEffect(() => {
-    document.title = "InventoryIQ | Reset Password";
+    document.title = "Panindo | Reset Password";
     return () => {
       if (redirectTimer.current !== null) window.clearTimeout(redirectTimer.current);
     };
@@ -144,7 +145,10 @@ export function ResetPasswordScreen() {
   return (
     <main className="flex min-h-svh items-center justify-center bg-background px-6 py-10">
       <div className="flex w-full max-w-[400px] flex-col gap-6">
-        <p className="text-center text-base font-semibold tracking-tight">InventoryIQ</p>
+        <p className="flex items-center justify-center gap-2 text-base font-semibold tracking-tight">
+          <BrandMark />
+          Panindo
+        </p>
         <Card>
           {invalid ? (
             <CardHeader className="items-center text-center">
