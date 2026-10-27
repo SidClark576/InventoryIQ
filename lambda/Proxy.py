@@ -22,9 +22,12 @@ _API_KEY_TTL   = 300  # 5 minutes
 
 _CORS_STATIC = {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Headers': 'Content-Type,x-api-key,X-Session-Token,If-Match,Idempotency-Key,X-IQ-Org',
-    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+    'Access-Control-Allow-Headers': 'Content-Type,x-api-key,X-Session-Token,If-Match,Idempotency-Key,X-IQ-Org,X-Request-Id',
+    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE',
+    'Access-Control-Expose-Headers': 'ETag,X-Request-Id',
 }
+# Only these are re-sent after a 5xx/timeout; a retried write could apply twice (PRD A3).
+_RETRY_METHODS = ('GET', 'HEAD', 'OPTIONS')
 
 
 def _cors_headers(request_origin=''):
@@ -102,18 +105,21 @@ def _verify_jwt(token: str):
 
 def lambda_handler(event, context):
     t0 = time.time()
-    res = _handle(event, context)
+    rid = _logging.request_id(event)
+    res = _handle(event, context, rid)
+    res.setdefault('headers', {})['X-Request-Id'] = rid
     _logging.log_json(
         event=event,
         function=FUNCTION_NAME,
         latency_ms=(time.time() - t0) * 1000,
         status=res.get('statusCode'),
         is_error=res.get('statusCode', 200) >= 500,
+        requestId=rid,
     )
     return res
 
 
-def _handle(event, context):
+def _handle(event, context, rid):
     method = event.get('httpMethod', 'GET')
     raw_headers = event.get('headers') or {}
     origin = raw_headers.get('origin') or raw_headers.get('Origin') or ''
@@ -130,7 +136,7 @@ def _handle(event, context):
 
     # Auth endpoints bypass session validation — they create or destroy sessions
     if path.startswith('/auth/'):
-        return _forward(event, path, method, user_id=None, origin=origin)
+        return _forward(event, path, method, user_id=None, origin=origin, rid=rid)
 
     # ── Session validation ──────────────────────────────────────
     # API Gateway lowercases header names; handle both cases defensively
@@ -142,14 +148,14 @@ def _handle(event, context):
 
     if not token:
         _logging.log_json(event=event, function=FUNCTION_NAME,
-                          level='WARN', count_request=False,
+                          level='WARN', count_request=False, requestId=rid,
                           extra_metric=('iq.auth.invalid_session', 'Count'))
         return _unauthorized('Missing X-Session-Token header', origin)
 
     user_id = _verify_jwt(token)
     if not user_id:
         _logging.log_json(event=event, function=FUNCTION_NAME,
-                          level='WARN', count_request=False,
+                          level='WARN', count_request=False, requestId=rid,
                           extra_metric=('iq.auth.invalid_session', 'Count'))
         return _unauthorized('Invalid or expired session', origin)
 
@@ -163,10 +169,10 @@ def _handle(event, context):
             return _forbidden('Not a member of the selected organization', origin)
         role = member.get('role')
 
-    return _forward(event, path, method, user_id=user_id, origin=origin, org_id=org_id, role=role)
+    return _forward(event, path, method, user_id=user_id, origin=origin, org_id=org_id, role=role, rid=rid)
 
 
-def _forward(event, path, method, user_id, origin='', org_id='', role=None):
+def _forward(event, path, method, user_id, origin='', org_id='', role=None, rid=''):
     """Forward the request to the real API Gateway stage."""
     body = event.get('body') or ''
 
@@ -186,7 +192,8 @@ def _forward(event, path, method, user_id, origin='', org_id='', role=None):
     cors = _cors_headers(origin)
     fwd_headers = {
         'Content-Type': 'application/json',
-        'x-api-key': _get_api_key()
+        'x-api-key': _get_api_key(),
+        'x-request-id': rid,
     }
     # Trusted identity headers built fresh here, so any client-supplied
     # x-iq-user / x-iq-org / x-iq-role are dropped (anti-spoofing).
@@ -207,8 +214,9 @@ def _forward(event, path, method, user_id, origin='', org_id='', role=None):
 
     url = f"{API_ENDPOINT}{full_path}"
 
-    # One retry on 5xx (transient backend errors); no retry on 4xx (client errors)
-    for attempt in range(2):
+    # Safe methods get one retry on 5xx/network errors; writes and 4xx never retry
+    last = 1 if method in _RETRY_METHODS else 0
+    for attempt in range(last + 1):
         try:
             req = urllib.request.Request(
                 url,
@@ -219,19 +227,27 @@ def _forward(event, path, method, user_id, origin='', org_id='', role=None):
             with urllib.request.urlopen(req, timeout=10) as res:
                 status    = res.status
                 resp_body = res.read().decode()
-            if status >= 500 and attempt == 0:
-                continue  # Retry once on 5xx
-            return {'statusCode': status, 'headers': cors, 'body': resp_body}
+                etag      = res.headers.get('ETag')
+            if status >= 500 and attempt < last:
+                continue
+            return {'statusCode': status, 'headers': _with_etag(cors, etag), 'body': resp_body}
         except urllib.error.HTTPError as e:
             err_code = e.code
             err_body = e.read().decode()
-            if err_code >= 500 and attempt == 0:
-                continue  # Retry once on 5xx
-            return {'statusCode': err_code, 'headers': cors, 'body': err_body}
+            if err_code >= 500 and attempt < last:
+                continue
+            return {'statusCode': err_code, 'headers': _with_etag(cors, e.headers.get('ETag')), 'body': err_body}
         except Exception as e:
-            if attempt == 0:
-                continue  # Retry once on network/timeout errors
+            if attempt < last:
+                continue
+            _logging.capture_error(e, requestId=rid, userID_hash=_logging.hash_user(user_id),
+                                   orgID=org_id, path=path)
             return {'statusCode': 500, 'headers': cors, 'body': json.dumps({'error': 'Internal Server Error'})}
 
-    # Safety net — should not be reached
+    # Safety net — should not be reached (every last attempt returns)
     return {'statusCode': 502, 'headers': cors, 'body': json.dumps({'error': 'Bad Gateway'})}
+
+
+def _with_etag(headers, etag):
+    """Pass the upstream ETag (item version) through; no other upstream header is forwarded."""
+    return {**headers, 'ETag': etag} if etag else headers

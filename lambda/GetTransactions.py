@@ -116,4 +116,4 @@ def _handle(event, context):
         return {'statusCode': 200, 'headers': CORS, 'body': json.dumps(items if since else items[:200])}
 
     except Exception as e:
-        return {'statusCode': 500, 'headers': CORS, 'body': json.dumps({'error': 'Internal Server Error'})}
+        return _logging.server_error(e, event, CORS)

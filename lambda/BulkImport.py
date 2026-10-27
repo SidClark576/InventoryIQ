@@ -125,7 +125,7 @@ def _handle_presign(event, user_id):
         return _ok({'presignedUrl': presigned_url, 'jobId': job_id})
 
     except Exception as e:
-        return _err(500, str(e))
+        return _logging.server_error(e, event, _headers())
 
 
 def _handle_get_job(event, user_id):
@@ -154,7 +154,7 @@ def _handle_get_job(event, user_id):
         return _ok(job)
 
     except Exception as e:
-        return _err(500, str(e))
+        return _logging.server_error(e, event, _headers())
 
 
 def _validate_row(row, idx):
@@ -299,8 +299,10 @@ def _handle_sync_import(event, headers, user_id, org_id=''):
                 _write_chunk(chunk, user_id, timestamp, org_id)
                 inserted += len(chunk)
             except Exception as e:
+                _logging.capture_error(e, event=event, step='write_chunk')
                 for row in chunk:
-                    chunk_errors.append({'row': 'unknown', 'field': 'write', 'message': str(e)})
+                    chunk_errors.append({'row': 'unknown', 'field': 'write',
+                                         'message': 'write failed', 'code': 'WRITE_FAILED'})
 
         errors.extend(chunk_errors)
         result = {
@@ -321,4 +323,4 @@ def _handle_sync_import(event, headers, user_id, org_id=''):
         return _ok(result)
 
     except Exception as e:
-        return _err(500, str(e))
+        return _logging.server_error(e, event, _headers())

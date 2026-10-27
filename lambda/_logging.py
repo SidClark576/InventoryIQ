@@ -2,10 +2,26 @@ import json
 import time
 import hashlib
 import os
+import re
 import sys
+import uuid
 
 # Add python_vendor to path for sentry-sdk
 sys.path.append(os.path.join(os.path.dirname(__file__), 'python_vendor'))
+
+_SECRET_HEADERS = {'x-session-token', 'authorization', 'cookie'}
+
+
+def _scrub_event(event, hint):
+    """Sentry before_send: AwsLambdaIntegration attaches request.url/headers; drop auth headers, redact invite tokens."""
+    req = event.get('request') or {}
+    if isinstance(req.get('headers'), dict):
+        req['headers'] = {k: v for k, v in req['headers'].items() if k.lower() not in _SECRET_HEADERS}
+    for key in ('url', 'query_string'):
+        if isinstance(req.get(key), str):
+            req[key] = redact_path(req[key])
+    return event
+
 
 try:
     import sentry_sdk  # type: ignore[import-not-found]  # vendored in python_vendor/ (see sys.path above)
@@ -15,16 +31,41 @@ try:
         sentry_sdk.init(
             dsn=_dsn,
             integrations=[AwsLambdaIntegration()],
-            traces_sample_rate=1.0,
+            before_send=_scrub_event,
+            before_send_transaction=_scrub_event,  # guard: tracing is off, scrub if re-enabled
         )
 except ImportError:
     sentry_sdk = None
 
 FUNCTION_NAME = os.environ.get('AWS_LAMBDA_FUNCTION_NAME', 'unknown')
 
-# ponytail: stdout off by default to keep CloudWatch ingestion ~$0; errors go to Sentry.
-# Set LOG_STDOUT=1 to re-enable structured stdout logs (e.g. local debugging).
-_LOG_STDOUT = os.environ.get('LOG_STDOUT', '').lower() in ('1', 'true', 'yes')
+# Structured stdout logs are on (PRD H5); LOG_STDOUT=0/false/no silences them.
+# CloudWatch retention (30 days) is set per log group outside code.
+_LOG_STDOUT = os.environ.get('LOG_STDOUT', '').lower() not in ('0', 'false', 'no')
+
+_REQUEST_ID_RE = re.compile(r'[A-Za-z0-9-]{1,64}')
+INTERNAL_ERROR = {'error': 'Internal Server Error', 'code': 'INTERNAL'}
+_INVITE_TOKEN_RE = re.compile(r'(org-invites/)[^/?]+')
+
+
+def redact_path(path):
+    """Never log a raw invite token (AGENTS.md): org-invites/<token>/accept → org-invites/{token}/accept."""
+    return _INVITE_TOKEN_RE.sub(r'\1{token}', path or '')
+
+
+def _header(event, name):
+    for key, value in ((event or {}).get('headers') or {}).items():
+        if key.lower() == name:
+            return (value or '').strip()
+    return ''
+
+
+def request_id(event):
+    """Client X-Request-Id (<=64 chars of [A-Za-z0-9-]), else API Gateway's ID, else a new UUID."""
+    rid = _header(event, 'x-request-id')
+    if _REQUEST_ID_RE.fullmatch(rid):
+        return rid
+    return ((event or {}).get('requestContext') or {}).get('requestId') or str(uuid.uuid4())
 
 
 def log_json(event=None, level='INFO', function=None, latency_ms=None,
@@ -56,18 +97,27 @@ def log_json(event=None, level='INFO', function=None, latency_ms=None,
         record["httpMethod"] = event.get("httpMethod", "")
         path_params = event.get("pathParameters") or {}
         record["path"] = path_params.get("proxy", event.get("resource", ""))
-        req_ctx = event.get("requestContext") or {}
-        record["requestId"] = req_ctx.get("requestId", "")
+        record["requestId"] = request_id(event)
 
     record.update(kwargs)
+    if 'path' in record:
+        record['path'] = redact_path(record['path'])
     if _LOG_STDOUT:
         print(json.dumps(record))
 
 
-def capture_error(exc=None, **context):
-    """Send an error to Sentry. Pass the caught exception for a full stack
-    trace, plus optional context (userID_hash, requestId, etc.). No-op if
-    sentry_sdk is unavailable or SENTRY_DSN is unset."""
+def capture_error(exc=None, event=None, **context):
+    """Send an error to Sentry and log one ERROR line (type only, never the message).
+    With `event`, tags requestId, userID_hash and orgID from it; extra context overrides.
+    Sentry is a no-op if sentry_sdk is unavailable or SENTRY_DSN is unset."""
+    if event is not None:
+        context = {'requestId': request_id(event),
+                   'userID_hash': hash_user(_header(event, 'x-iq-user')),
+                   'orgID': _header(event, 'x-iq-org'), **context}
+    context = {k: v for k, v in context.items() if v not in (None, '')}
+    if 'path' in context:
+        context['path'] = redact_path(context['path'])
+    log_json(level='ERROR', is_error=True, error=type(exc).__name__ if exc else 'error', **context)
     if sentry_sdk is None:
         return
     with sentry_sdk.push_scope() as scope:
@@ -77,6 +127,12 @@ def capture_error(exc=None, **context):
             sentry_sdk.capture_exception(exc)
         else:
             sentry_sdk.capture_message(context.get('message', 'error'), level='error')
+
+
+def server_error(exc, event=None, headers=None):
+    """Report `exc` with request context and return a generic 500 (never str(exc))."""
+    capture_error(exc, event=event)
+    return {'statusCode': 500, 'headers': headers or {}, 'body': json.dumps(INTERNAL_ERROR)}
 
 
 # One shared list; Authentication.mjs repeats it (Node can't import this) and tests/unit/python/test_cors.py keeps them equal.

@@ -48,7 +48,7 @@ def lambda_handler(event, context):
                             batch.delete_item(Key={'itemID': item['itemID']})
                     print(f"Deleted {len(items)} items from InventoryIQ for {email}")
                 except Exception as e:
-                    print(f"Error deleting items from InventoryIQ: {str(e)}")
+                    _logging.capture_error(e, event=event, step='items')
 
                 # 2. Delete all transactions for this user
                 # No GSI, requires scan
@@ -67,7 +67,7 @@ def lambda_handler(event, context):
                             batch.delete_item(Key={'transactionID': tx['transactionID']})
                     print(f"Deleted {len(txs)} transactions from InventoryTransactions for {email}")
                 except Exception as e:
-                    print(f"Error deleting transactions: {str(e)}")
+                    _logging.capture_error(e, event=event, step='transactions')
                 
                 # 3. Delete sessions
                 try:
@@ -89,14 +89,14 @@ def lambda_handler(event, context):
                             batch.delete_item(Key={'sessionToken': session['sessionToken']})
                     print(f"Deleted {len(sessions)} sessions for {email}")
                 except Exception as e:
-                    print(f"Error deleting sessions: {str(e)}")
+                    _logging.capture_error(e, event=event, step='sessions')
                 
                 # 4. Delete auth attempts
                 try:
                     auth_attempts_table.delete_item(Key={'email': email.lower()})
                     print(f"Deleted AuthAttempt record for {email}")
                 except Exception as e:
-                    print(f"Error deleting auth attempts: {str(e)}")
+                    _logging.capture_error(e, event=event, step='auth_attempts')
                     
                 # 5. Delete Password Resets (scan)
                 try:
@@ -114,9 +114,8 @@ def lambda_handler(event, context):
                             batch.delete_item(Key={'resetToken': r['resetToken']})
                     print(f"Deleted {len(resets)} password resets for {email}")
                 except Exception as e:
-                    print(f"Error deleting password resets: {str(e)}")
+                    _logging.capture_error(e, event=event, step='password_resets')
 
         return {'statusCode': 200, 'body': 'Cascade delete completed successfully'}
     except Exception as e:
-        print(f"Critical Error in CascadeDeleteUser: {str(e)}")
-        return {'statusCode': 500, 'body': 'Internal Server Error'}
+        return _logging.server_error(e, event)

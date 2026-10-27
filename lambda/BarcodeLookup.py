@@ -174,4 +174,4 @@ def _handle(event, context):
         return _ok(product)
 
     except Exception as e:
-        return _err(500, str(e))
+        return _logging.server_error(e, event, _headers())

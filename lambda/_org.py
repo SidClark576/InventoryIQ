@@ -66,15 +66,8 @@ def require_member(headers, minimum=None):
     if not user_id:
         return None, _logging.response(401, {'error': 'Unauthorized'})
 
-    membership = None
-    try:
-        if org_id:
-            membership = get_membership(org_id, user_id)
-    except ClientError as e:
-        if e.response['Error']['Code'] == 'ResourceNotFoundException':
-            return {'user_id': user_id, 'org_id': org_id, 'role': 'owner', 'legacy': True}, None
-        raise
-
+    # Fail closed (PRD A6): get_membership returns None for a missing OrgMembers table → 403
+    membership = get_membership(org_id, user_id)
     if org_id and not membership:
         return None, _logging.response(403, {'error': 'Not a member of this organization'})
 

@@ -103,9 +103,8 @@ def _handle(event, context):
         # TransactWriteItems ConditionExpression below handles the concurrent race case
         current_version = int(existing.get('version', 0))
         if client_version != current_version:
-            return response(412, {
-                'error': f'Version conflict: client sent {client_version}, item is at {current_version}. Re-fetch and retry.'
-            })
+            return _conflict(existing,
+                             f'Version conflict: client sent {client_version}, item is at {current_version}. Re-fetch and retry.')
 
         new_version = current_version + 1
 
@@ -191,7 +190,7 @@ def _handle(event, context):
 
         # Reconstruct updated item for response
         # TransactWriteItems does not support ReturnValues, so we apply changes to existing
-        updated = {k: float(v) if isinstance(v, Decimal) else v for k, v in existing.items()}
+        updated = _plain(existing)
         updated['updatedAt'] = timestamp
         updated['version']   = new_version
         if 'quantity'          in body: updated['quantity']           = int(body['quantity'])
@@ -208,11 +207,22 @@ def _handle(event, context):
     except ClientError as e:
         if e.response['Error']['Code'] == 'TransactionCanceledException':
             # Concurrent write won the race — client must re-fetch and retry
-            return response(412, {'error': 'Version conflict — item was modified concurrently. Re-fetch and retry.'})
+            current = table.get_item(Key={'itemID': item_id}).get('Item') or {}
+            return _conflict(current, 'Version conflict — item was modified concurrently. Re-fetch and retry.')
         raise
     except Exception as e:
-        _logging.capture_error(e)
+        _logging.capture_error(e, event=event)
         return response(500, {'error': 'Internal Server Error'})
 
 
 response = _logging.response
+
+
+def _plain(row):
+    return {k: float(v) if isinstance(v, Decimal) else v for k, v in row.items()}
+
+
+def _conflict(current, message):
+    """412 with the current row and its version as ETag, so the client can merge without a re-fetch."""
+    version = int(current.get('version', 0))
+    return response(412, {'error': message, 'item': _plain(current)}, extra_headers={'ETag': str(version)})

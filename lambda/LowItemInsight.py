@@ -264,7 +264,7 @@ def _handle(event, context):
                 lines.append(f"⚠️ LOW STOCK: {a['name']} — {a['quantity']} units left (threshold: {a['threshold']})")
             sns.publish(
                 TopicArn=SNS_TOPIC_ARN,
-                Subject='InventoryIQ — Stock Alert',
+                Subject='Panindo — Stock Alert',
                 Message="\n".join(lines)
             )
 
@@ -295,9 +295,4 @@ def _handle(event, context):
         }
 
     except Exception as e:
-        # Return error with CORS headers
-        return {
-            'statusCode': 500,
-            'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': 'Internal Server Error'})
-        }
+        return _logging.server_error(e, event, {'Access-Control-Allow-Origin': '*'})

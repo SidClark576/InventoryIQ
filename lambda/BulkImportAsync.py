@@ -223,7 +223,8 @@ def _handle(event, context):
                 inserted += len(chunk)
                 pending_done += len(chunk)
             except Exception as e:
-                errs = [{'row': 'chunk', 'field': 'write', 'message': str(e)[:200]}] * len(chunk)
+                _logging.capture_error(e, event=event, step='write_chunk', jobId=job_id)
+                errs = [{'row': 'chunk', 'field': 'write', 'message': 'write failed', 'code': 'WRITE_FAILED'}] * len(chunk)
                 write_errors.extend(errs)
                 pending_failed += len(chunk)
                 pending_errors.extend(errs)
@@ -264,4 +265,4 @@ def _handle(event, context):
         return {'statusCode': 200, 'body': json.dumps({'inserted': inserted, 'failed': total_failed})}
 
     except Exception as e:
-        return {'statusCode': 500, 'body': str(e)}
+        return _logging.server_error(e, event)

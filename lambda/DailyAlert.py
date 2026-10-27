@@ -238,7 +238,7 @@ def _handle(event, context):
         # ── STEP 5: BUILD THE EMAIL SUBJECT LINE ─────────────────────────────
         # The subject adapts based on what problems exist so the recipient
         # can gauge urgency before even opening the email.
-        subject = f"InventoryIQ Daily Report — {now.strftime('%b %d')} | "
+        subject = f"Panindo Daily Report — {now.strftime('%b %d')} | "
         if out_of_stock:
             subject += f"🚨 {len(out_of_stock)} Out of Stock"
             if low_stock:
@@ -271,4 +271,4 @@ def _handle(event, context):
         }
 
     except Exception as e:
-        return {'statusCode': 500, 'body': json.dumps({'error': str(e)})}
+        return _logging.server_error(e, event)

@@ -143,10 +143,10 @@ async function _clearAttempts(email) {
 }
 
 export const handler = Sentry.wrapHandler(async (event) => {
+    // Outside try so the catch below can still answer with CORS headers.
+    const requestOrigin = (event.headers && (event.headers['Origin'] || event.headers['origin'])) || '';
+    const headers = _corsHeaders(requestOrigin);
     try {
-
-        const requestOrigin = (event.headers && (event.headers['Origin'] || event.headers['origin'])) || '';
-        const headers = _corsHeaders(requestOrigin);
 
         if (event.httpMethod === "OPTIONS") {
             return { statusCode: 200, headers, body: JSON.stringify({}) };
@@ -522,6 +522,8 @@ export const handler = Sentry.wrapHandler(async (event) => {
             };
         }
 
+        const requestId = event.headers?.['x-request-id'] || event.headers?.['X-Request-Id'] || event.requestContext?.requestId;
+        Sentry.captureException(error, { tags: { requestId, path: event.path || event.rawPath || "" } });
         return {
             statusCode: 500,
             headers,

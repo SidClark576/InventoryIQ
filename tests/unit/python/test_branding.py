@@ -5,8 +5,8 @@ LAMBDA = Path(__file__).resolve().parents[3] / 'lambda'
 RENAMED = {
     'Authentication.mjs': ['InventoryIQ — Password Reset', 'your InventoryIQ account'],
     'OrgInvites.py': ['invited to InventoryIQ', 'inventory on InventoryIQ'],
-    'LowItemInsight.py': ['InventoryIQ Stock Alert'],
-    'DailyAlert.py': ['report from InventoryIQ'],
+    'LowItemInsight.py': ['InventoryIQ Stock Alert', 'InventoryIQ — Stock Alert'],
+    'DailyAlert.py': ['report from InventoryIQ', 'InventoryIQ Daily Report'],
 }
 
 

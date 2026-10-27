@@ -64,8 +64,8 @@ def _handle(event, context):
                 purged += 1
                 print(f"Purged item {item['itemID']} (deletedAt={item.get('deletedAt')})")
             except Exception as e:
-                errors.append({'itemID': item['itemID'], 'error': str(e)})
-                print(f"ERROR purging {item['itemID']}: {e}")
+                errors.append(item['itemID'])
+                _logging.capture_error(e, event=event, itemID=item['itemID'])
 
         if 'LastEvaluatedKey' not in result:
             break
