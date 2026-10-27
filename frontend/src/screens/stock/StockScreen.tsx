@@ -12,14 +12,16 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ItemSheetHost } from "@/components/item-sheet/ItemSheetHost";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
+import { useIsDesktop } from "@/hooks/use-media-query";
 import { countByLevel, deriveDashStats } from "@/lib/dashboardStats";
 import { plural } from "@/lib/format";
 import { setEditItem } from "@/session";
 import { CategoriesDialog } from "./CategoriesDialog";
 import { summarizeCount, type Counts } from "./count";
+import { CountCards } from "./CountCards";
 import { CountReviewDialog } from "./CountReviewDialog";
 import { downloadItemsCsv } from "./export";
-import { FloatingBar, SelectionBar } from "./FloatingBar";
+import { CountBar, SelectionBar } from "./FloatingBar";
 import { HealthBar } from "./HealthBar";
 import { ImportDialog } from "./ImportDialog";
 import { PrintReport } from "./PrintReport";
@@ -30,7 +32,7 @@ import { filterItems, groupItems, useStockView } from "./stock-view";
 import { TrashView } from "./TrashView";
 import { useRowStepper } from "./use-row-stepper";
 
-type DialogName = "scan" | "categories" | "import" | "review" | "bulk-delete" | null;
+type DialogName = "scan" | "categories" | "import" | "review" | "bulk-delete" | "stop-count" | null;
 
 export function StockScreen() {
   const { items, itemsStatus, reloadItems } = useInventory();
@@ -39,6 +41,7 @@ export function StockScreen() {
   const { openItem, openNew, itemHref } = useSheetParams();
   const view = useStockView();
   const stepper = useRowStepper();
+  const isDesktop = useIsDesktop();
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [counting, setCounting] = useState(false);
@@ -119,10 +122,16 @@ export function StockScreen() {
     });
   }
 
+  function stopCounting() {
+    setDialog(null);
+    setCounting(false);
+    setCounts({});
+  }
+
   function toggleCounting() {
     if (counting) {
-      setCounting(false);
-      setCounts({});
+      if (countSummary.counted > 0) setDialog("stop-count");
+      else stopCounting();
       return;
     }
     setSelected(new Set());
@@ -267,6 +276,15 @@ export function StockScreen() {
               onImport={() => setDialog("import")}
             />
           )
+        ) : counting && !isDesktop ? (
+          <CountCards
+            groups={groups}
+            counts={counts}
+            onCount={(id, raw) => setCounts((prev) => ({ ...prev, [id]: raw }))}
+            onReview={() => {
+              if (countSummary.counted > 0) setDialog("review");
+            }}
+          />
         ) : (
           <StockTable
             groups={groups}
@@ -288,17 +306,12 @@ export function StockScreen() {
         {counting || selectedItems.length > 0 ? <div aria-hidden className="h-16" /> : null}
 
         {counting ? (
-          <FloatingBar label="Stock count">
-            <span className="mr-auto min-w-0 truncate text-sm font-medium tabular-nums">
-              {countSummary.counted}/{items.length} counted · {countSummary.changes.length} differ
-            </span>
-            <Button type="button" variant="ghost" size="sm" onClick={toggleCounting}>
-              Cancel
-            </Button>
-            <Button type="button" size="sm" disabled={countSummary.counted === 0} onClick={() => setDialog("review")}>
-              Review
-            </Button>
-          </FloatingBar>
+          <CountBar
+            counted={countSummary.counted}
+            total={items.length}
+            onCancel={toggleCounting}
+            onReview={() => setDialog("review")}
+          />
         ) : selectedItems.length > 0 ? (
           <SelectionBar
             count={selectedItems.length}
@@ -340,6 +353,14 @@ export function StockScreen() {
         confirmLabel="Delete"
         busy={busy}
         onConfirm={() => void bulkDelete()}
+      />
+      <ConfirmDialog
+        open={dialog === "stop-count"}
+        onOpenChange={(open) => setDialog(open ? "stop-count" : null)}
+        title="Stop counting?"
+        description={`The ${plural(countSummary.counted, "count")} you entered will be lost.`}
+        confirmLabel="Discard counts"
+        onConfirm={stopCounting}
       />
       <ItemSheetHost />
     </>

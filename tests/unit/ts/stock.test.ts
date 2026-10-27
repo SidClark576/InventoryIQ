@@ -8,6 +8,7 @@ import {
 } from "../../../frontend/src/lib/dashboardStats.ts";
 import { nextQuantity, reasonAllows, reasonNote } from "../../../frontend/src/lib/reasons.ts";
 import { parseCsv, toCsv } from "../../../frontend/src/lib/csv.ts";
+import { nextUncounted } from "../../../frontend/src/screens/stock/count.ts";
 
 const asNumber = (value: string): number => value as unknown as number;
 
@@ -94,5 +95,20 @@ describe("csv", () => {
   test("skips blank lines and handles CRLF", () => {
     assert.deepEqual(parseCsv("name,quantity\r\nCups,4\r\n\r\n"), [{ name: "Cups", quantity: "4" }]);
     assert.deepEqual(parseCsv(""), []);
+  });
+});
+
+describe("nextUncounted", () => {
+  const items = [{ itemID: "a" }, { itemID: "b" }, { itemID: "c" }, { itemID: "d" }];
+  test("skips counted items after from", () => {
+    assert.equal(nextUncounted(items, { b: "3", c: "" }, 0), 2);
+  });
+  test("wraps past the end and excludes from", () => {
+    assert.equal(nextUncounted(items, { a: "1" }, 3), 1);
+    assert.equal(nextUncounted(items, { a: "1", b: "1", c: "1" }, 3), null);
+  });
+  test("treats invalid entries as uncounted and returns null when all counted", () => {
+    assert.equal(nextUncounted(items, { b: "1", c: "1", d: "-2" }, 1), 3);
+    assert.equal(nextUncounted(items, { a: "0", b: "1", c: "1", d: "2" }, 0), null);
   });
 });

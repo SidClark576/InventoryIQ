@@ -16,6 +16,41 @@ export function FloatingBar({ label, children }: { label: string; children: Reac
   );
 }
 
+type CountBarProps = {
+  counted: number;
+  total: number;
+  onCancel: () => void;
+  onReview: () => void;
+};
+
+/** Count progress "k/M" with a thin line; Review needs at least one count and says so. */
+export function CountBar({ counted, total, onCancel, onReview }: CountBarProps) {
+  return (
+    <FloatingBar label="Stock count">
+      <div className="mr-auto flex min-w-0 flex-1 flex-col gap-1.5">
+        <span className="text-sm font-medium tabular-nums">
+          {counted}/{total}
+          {counted === 0 ? (
+            <span className="block text-xs font-normal text-muted-foreground">Count at least one item</span>
+          ) : null}
+        </span>
+        <div aria-hidden className="h-1 overflow-hidden rounded-full bg-foreground/10">
+          <div
+            className="h-full rounded-full bg-primary transition-[width]"
+            style={{ width: `${total ? (counted / total) * 100 : 0}%` }}
+          />
+        </div>
+      </div>
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+        Cancel
+      </Button>
+      <Button type="button" size="sm" disabled={counted === 0} onClick={onReview}>
+        Review
+      </Button>
+    </FloatingBar>
+  );
+}
+
 type SelectionBarProps = {
   count: number;
   canEdit: boolean;

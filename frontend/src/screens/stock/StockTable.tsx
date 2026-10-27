@@ -213,7 +213,7 @@ type StockRowProps = {
   selectMode: boolean;
 };
 
-function Variance({ expected, counted }: { expected: number; counted: number | null }) {
+export function Variance({ expected, counted }: { expected: number; counted: number | null }) {
   if (counted === null) {
     return (
       <span className="text-xs whitespace-nowrap text-muted-foreground">
@@ -305,7 +305,6 @@ function StockRow(props: StockRowProps) {
             step={1}
             inputMode="numeric"
             aria-label={`Counted ${name}`}
-            placeholder={String(quantity)}
             value={counted}
             onChange={(event) => onCount(id, event.target.value)}
             className="ml-auto h-8 w-20 text-right tabular-nums"
