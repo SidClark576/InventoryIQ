@@ -154,6 +154,7 @@ The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` p
    ```
    Lambdas importing `sentry_sdk` need `python_vendor/` contents in the zip.
 3. **Sentry stays.** Node: `@sentry/aws-serverless` + `Sentry.wrapHandler`. Python: `sentry-sdk` via `_logging.capture_error`. `SENTRY_DSN` from env. Never remove instrumentation, never let a handler swallow an exception without `capture_error`.
+4. **Unfamiliar feature? Don't write from scratch.** First search GitHub for open-source projects that solve it (same stack where possible), compare two or three approaches, then start — borrowing the proven shape, not the code wholesale, and respecting the ladder above.
 
 ### B. Backend
 
