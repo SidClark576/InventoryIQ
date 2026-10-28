@@ -2,8 +2,29 @@
    Direction: neighborhood corner store. Kraft-paper page, day-glo price-tag
    yellow, painted-green counter, receipt paper. Dark theme = the store after
    closing: same props under one warm bulb.
-   Type: Bricolage Grotesque (everything) + Kalam (hand-lettered tags only).
+   Type: Bricolage Grotesque (self-hosted, everything); hand-lettered tags use
+   the system handwriting stack (no webfont, no third-party requests).
    Radius rule: UI controls 8px, paper props 3px, device 44px, tags clipped. */
+
+/* Variable woff2 from @fontsource-variable/bricolage-grotesque (wght, wdth, opsz). */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
+  font-display: swap;
+  src: url(/fonts/bricolage-grotesque-latin-standard-normal.woff2) format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
+  font-display: swap;
+  src: url(/fonts/bricolage-grotesque-latin-ext-standard-normal.woff2) format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
 
 :root {
   color-scheme: light dark;
@@ -32,7 +53,7 @@
   --grain-opacity: 0.55;
 
   --font-sans: "Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-hand: "Kalam", "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive;
+  --font-hand: "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive;
 
   --step--1: clamp(0.875rem, 0.85rem + 0.12vw, 0.94rem);
   --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
@@ -191,8 +212,9 @@ a:hover { text-decoration-thickness: 2px; }
 .site-header .wrap {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  height: 68px;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
+  min-height: 68px;
 }
 
 .brand {
@@ -206,12 +228,9 @@ a:hover { text-decoration-thickness: 2px; }
   text-decoration: none;
 }
 .brand svg { flex: none; }
-.mark-tag { fill: var(--tag); stroke: var(--paper-ink); }
-.mark-ink { fill: var(--paper-ink); }
-.mark-p { fill: none; stroke: var(--paper-ink); }
 
 .nav-links {
-  display: none;
+  display: flex;
   gap: 0.25rem;
   margin: 0 0 0 auto;
   padding: 0;
@@ -231,8 +250,13 @@ a:hover { text-decoration-thickness: 2px; }
 .site-header .btn { margin-left: auto; }
 .nav-links + .btn { margin-left: 0.5rem; }
 
-@media (min-width: 820px) {
-  .nav-links { display: flex; }
+/* Phones: the links drop to their own full-width row and scroll sideways if needed. */
+@media (max-width: 759.98px) {
+  .site-header .wrap { padding-top: 0.6rem; }
+  .site-header nav { order: 3; flex-basis: 100%; min-width: 0; }
+  .nav-links { gap: 0; margin: 0 -0.75rem; overflow-x: auto; }
+  .nav-links a { white-space: nowrap; }
+  html { scroll-padding-top: 132px; }
 }
 
 /* ---------- Buttons ---------- */
@@ -315,6 +339,7 @@ a:hover { text-decoration-thickness: 2px; }
   color: var(--ink-soft);
 }
 .cta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+.cta-note { margin: 0.75rem 0 0; font-size: var(--step--1); color: var(--ink-soft); }
 
 @media (min-width: 900px) {
   .hero-grid { grid-template-columns: 1.08fr 0.92fr; gap: 2rem; }
@@ -386,7 +411,7 @@ a:hover { text-decoration-thickness: 2px; }
   font-size: 0.85em;
   font-weight: 700;
 }
-.island { width: 30%; height: 1.55em; border-radius: 99px; background: var(--device); }
+.island { width: 0.9em; height: 0.9em; border-radius: 50%; background: var(--device); }
 .status span:last-child { width: 2.2em; height: 0.95em; border-radius: 0.3em; border: 2px solid currentColor; opacity: 0.8; }
 
 .app-bar { display: flex; align-items: baseline; justify-content: space-between; padding: 0.6em 1.1em 0.5em; }
@@ -523,6 +548,7 @@ a:hover { text-decoration-thickness: 2px; }
   height: 38px;
   border-radius: 10px;
   background: var(--tag);
+  color: var(--tag-ink);
 }
 .push .head { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.78rem; color: var(--ink-soft); }
 .push .head b { color: var(--ink); }
@@ -1039,7 +1065,6 @@ a:hover { text-decoration-thickness: 2px; }
   box-shadow: inset 0 7px 0 var(--counter-top);
 }
 .site-footer .wrap { display: grid; gap: 1.5rem; }
-.site-footer .brand .mark-tag { stroke: #1b2420; }
 .site-footer nav ul { display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; margin: 0; padding: 0; list-style: none; }
 .site-footer nav a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 0.5rem; font-weight: 600; }
 .site-footer nav li:first-child a { padding-left: 0; }

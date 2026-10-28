@@ -1,6 +1,6 @@
 # panindo.app (marketing + legal site)
 
-Plain static HTML and one stylesheet. No build step, no JavaScript, no cookies, no analytics. The only third-party requests are to Google Fonts.
+Plain static HTML and one stylesheet. No build step, no JavaScript, no cookies, no analytics, and no third-party requests: the Bricolage Grotesque font is self-hosted in `fonts/`.
 
 ```
 site/
@@ -11,6 +11,8 @@ site/
   support/index.html      support page
   404.html                not-found page (Netlify serves it automatically)
   styles.css              all styles; light and dark themes follow the system
+  favicon.svg             logo mark (copy of frontend/public/favicon.svg)
+  fonts/                  Bricolage Grotesque variable woff2 (latin, latin-ext) from @fontsource-variable
   og.jpg                  1200x630 Open Graph image
   robots.txt
   netlify.toml            headers (CSP, HSTS, ...) and a few redirects
@@ -57,7 +59,7 @@ No environment variables or secrets are needed.
 ### Notes
 
 - Clean URLs come from the folder layout (`/privacy/`, `/terms/`, ...), not from Netlify's Pretty URLs setting.
-- The CSP allows only this site plus `fonts.googleapis.com` (styles) and `fonts.gstatic.com` (fonts). `img-src` also allows `data:` for the inline SVG favicon and the CSS paper texture. Inline `style="..."` attributes are blocked, so keep all styling in `styles.css`.
+- The CSP allows only this site (`style-src 'self'; font-src 'self'`). `img-src` also allows `data:` for the CSS paper texture. Inline `style="..."` attributes are blocked, so keep all styling in `styles.css`.
 - HSTS is set without `preload`. Add `preload` and submit to hstspreload.org only once every subdomain (including app.panindo.app) is HTTPS-only for good.
 - Deep links (PRD R10.5) need `/.well-known/assetlinks.json` (and `apple-app-site-association` once iOS exists) on `app.panindo.app`, the web app's domain, not on this site. They must be served without redirects and with `Content-Type: application/json`.
 - To update `og.jpg`, render a 1200x630 card and save it as a JPEG under about 200 KB.
