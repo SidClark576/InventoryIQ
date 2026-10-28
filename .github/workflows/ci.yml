@@ -2,11 +2,14 @@ name: ci
 
 on:
   push:
-    branches: [main]
+    branches: [main, development]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  e2e:
+  node:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,24 +18,57 @@ jobs:
           node-version: '20'
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - name: Playwright
-        if: ${{ secrets.EVAL_EMAIL != '' }}
-        env:
-          BASE_URL: ${{ secrets.BASE_URL || 'https://theinventoryiq.netlify.app' }}
-          EVAL_EMAIL: ${{ secrets.EVAL_EMAIL }}
-          EVAL_PASSWORD: ${{ secrets.EVAL_PASSWORD }}
-        run: npx playwright test
-      - name: Skip notice
-        if: ${{ secrets.EVAL_EMAIL == '' }}
-        run: echo "No EVAL_EMAIL secret — skipping live E2E."
+      - run: npm run typecheck
+      - run: npm run test:unit
+      - run: npm run build
 
-  python-syntax:
+  python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - run: pip install -r scripts/requirements.txt
       - name: Compile Lambdas
         run: python3 -m py_compile lambda/*.py
+      - name: Unit tests (moto, no AWS)
+        run: python -m pytest tests/unit/python -q
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan tracked files for AWS keys and private keys
+        # ponytail: two regexes, no tool; gitleaks is the upgrade if broader coverage is wanted
+        run: |
+          if git grep -nE 'AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----' -- . ':!package-lock.json'; then
+            echo "Possible secret committed (see matches above)."
+            exit 1
+          fi
+
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      HAS_EVAL: ${{ secrets.EVAL_EMAIL != '' && secrets.BASE_URL != '' }}
+      BASE_URL: ${{ secrets.BASE_URL }}
+      EVAL_EMAIL: ${{ secrets.EVAL_EMAIL }}
+      EVAL_PASSWORD: ${{ secrets.EVAL_PASSWORD }}
+    steps:
+      - name: Skip notice
+        if: env.HAS_EVAL != 'true'
+        run: echo "No EVAL_EMAIL or BASE_URL secret (no staging yet), skipping E2E."
+      - uses: actions/checkout@v4
+        if: env.HAS_EVAL == 'true'
+      - uses: actions/setup-node@v4
+        if: env.HAS_EVAL == 'true'
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+        if: env.HAS_EVAL == 'true'
+      - run: npx playwright install --with-deps chromium
+        if: env.HAS_EVAL == 'true'
+      - name: Playwright
+        if: env.HAS_EVAL == 'true'
+        run: npx playwright test
