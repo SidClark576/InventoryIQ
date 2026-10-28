@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
+import type { InventoryItem } from "../../../frontend/src/api.ts";
 import { activeCurrency } from "../../../frontend/src/lib/format.ts";
-import { addInOrder, needsOnboarding } from "../../../frontend/src/lib/onboarding.ts";
+import { addInOrder, doneText, needsOnboarding, skipStarterItems } from "../../../frontend/src/lib/onboarding.ts";
 import { DEEP_LINK_DIALOGS, dialogFromParams } from "../../../frontend/src/screens/stock/stock-view.ts";
 
 describe("needsOnboarding", () => {
@@ -10,6 +11,25 @@ describe("needsOnboarding", () => {
     assert.equal(needsOnboarding({ orgID: "o", role: "editor", name: "My Inventory" }), false);
     assert.equal(needsOnboarding({ orgID: "o", role: "owner", name: "SC3 Store" }), false);
     assert.equal(needsOnboarding({ orgID: "o", role: "owner", name: "My Inventory", onboardedAt: "2026-10-28" }), false);
+  });
+});
+
+describe("skipStarterItems", () => {
+  test("skips when the store has items or the load failed", () => {
+    const item: InventoryItem = { itemID: "i", name: "Rice", quantity: 1, price: 1 };
+    assert.equal(skipStarterItems([item]), true);
+    assert.equal(skipStarterItems(null), true);
+    assert.equal(skipStarterItems([]), false);
+  });
+});
+
+describe("doneText", () => {
+  test("names existing items first, then added ones", () => {
+    assert.equal(doneText(0, null), "Find your items in Stock.");
+    assert.equal(doneText(0, 3), "You already have 3 items. Find them in Stock.");
+    assert.equal(doneText(0, 1), "You already have 1 item. Find them in Stock.");
+    assert.equal(doneText(3, 0), "Added 3 items. Count them and set prices in Stock.");
+    assert.equal(doneText(0, 0), "Add items from Stock whenever you're ready.");
   });
 });
 

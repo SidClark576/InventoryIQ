@@ -2,7 +2,7 @@ import { Fragment, useEffect, useRef, useState, type FormEvent, type RefObject }
 import { Navigate, useNavigate } from "react-router";
 import { CheckIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { addItem, updateOrg } from "@/api";
+import { addItem, getAllItems, updateOrg, type InventoryItem } from "@/api";
 import { HOME_ROUTE } from "@/app/routes";
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
@@ -12,24 +12,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { errorText } from "@/lib/errors";
-import { addInOrder, COUNTRIES, STORE_TYPES } from "@/lib/onboarding";
+import { addInOrder, COUNTRIES, doneText, skipStarterItems, STORE_TYPES } from "@/lib/onboarding";
 import { STARTER_ITEMS } from "@/lib/starter-items";
 import { cn } from "@/lib/utils";
 import { getCurrentOrg, getCurrentRole } from "@/session";
 
 type Step = "store" | "items" | "done";
 
-const STEPS: { id: Step; label: string }[] = [
+type StepInfo = { id: Step; label: string };
+
+const STEPS: StepInfo[] = [
   { id: "store", label: "Your store" },
   { id: "items", label: "First items" },
   { id: "done", label: "Done" },
 ];
 
-function StepIndicator({ step }: { step: Step }) {
-  const current = STEPS.findIndex((s) => s.id === step);
+const STEPS_WITHOUT_ITEMS = STEPS.filter((s) => s.id !== "items");
+
+function StepIndicator({ step, skipItems }: { step: Step; skipItems: boolean }) {
+  const steps = skipItems ? STEPS_WITHOUT_ITEMS : STEPS;
+  const current = steps.findIndex((s) => s.id === step);
   return (
     <ol className="flex items-start" aria-label="Setup steps">
-      {STEPS.map((s, idx) => {
+      {steps.map((s, idx) => {
         const complete = idx < current;
         const active = idx === current;
         return (
@@ -49,7 +54,7 @@ function StepIndicator({ step }: { step: Step }) {
                 {s.label}
               </span>
             </li>
-            {idx < STEPS.length - 1 ? (
+            {idx < steps.length - 1 ? (
               <li aria-hidden className={cn("mx-2 mt-4 h-px flex-1", complete ? "bg-primary" : "bg-border")} />
             ) : null}
           </Fragment>
@@ -57,10 +62,6 @@ function StepIndicator({ step }: { step: Step }) {
       })}
     </ol>
   );
-}
-
-function doneText(added: number): string {
-  return added ? `Added ${added} items. Count them and set prices in Stock.` : "Add items from Stock whenever you're ready.";
 }
 
 type ItemsStepProps = {
@@ -142,9 +143,18 @@ export function OnboardingScreen() {
   const [added, setAdded] = useState(0);
   const [progress, setProgress] = useState("");
   const titleRef = useRef<HTMLDivElement>(null);
+  // Empty while loading; null when the load failed.
+  const [existing, setExisting] = useState<InventoryItem[] | null>([]);
+  const itemsLoad = useRef<Promise<InventoryItem[] | null>>(Promise.resolve(null));
 
   useEffect(() => {
     document.title = "Panindo | Set up your store";
+  }, []);
+
+  // Stores that already hold stock (migrated users) must not be offered starter items on top of it.
+  useEffect(() => {
+    itemsLoad.current = getAllItems().catch(() => null);
+    void itemsLoad.current.then(setExisting);
   }, []);
 
   // Move focus to the new step's title so keyboard and screen-reader users aren't left on a removed button.
@@ -164,6 +174,7 @@ export function OnboardingScreen() {
     try {
       const currency = COUNTRIES.find((c) => c.code === country)?.currency;
       await updateOrg(orgID, { name: trimmed, storeType: storeType || undefined, country, currency });
+      if (skipStarterItems(await itemsLoad.current)) return setStep("done");
       // Starter list fits sari-sari stores; other types start with nothing picked.
       setChecked(STARTER_ITEMS.map(() => storeType === "" || storeType === "sari-sari"));
       setStep("items");
@@ -199,7 +210,7 @@ export function OnboardingScreen() {
           <BrandMark />
           Panindo
         </p>
-        <StepIndicator step={step} />
+        <StepIndicator step={step} skipItems={skipStarterItems(existing)} />
         <Card>
           {step === "store" ? (
             <>
@@ -292,7 +303,7 @@ export function OnboardingScreen() {
                 <CardTitle ref={titleRef} tabIndex={-1} className="outline-none">
                   {name.trim()} is ready
                 </CardTitle>
-                <CardDescription>{doneText(added)}</CardDescription>
+                <CardDescription>{doneText(added, existing && existing.length)}</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button size="lg" className="w-full" onClick={() => void navigate("/stock", { replace: true })}>

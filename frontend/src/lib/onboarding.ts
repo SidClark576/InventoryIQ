@@ -1,4 +1,4 @@
-import type { OrgSwitchResponse } from "@/api";
+import type { InventoryItem, OrgSwitchResponse } from "@/api";
 import { REGION_CURRENCY } from "./format.ts";
 
 /** Signup creates every store as "My Inventory" (Authentication.mjs, migrate_orgs.py); only its owner is asked to name it. */
@@ -39,4 +39,16 @@ export async function addInOrder<T>(
     }
   }
   return failed;
+}
+
+/** `null` = the items load failed. Never offer starter items when unsure. */
+export function skipStarterItems(existing: readonly InventoryItem[] | null): boolean {
+  return existing === null || existing.length > 0;
+}
+
+/** existing: active items found before onboarding; null when the load failed. */
+export function doneText(added: number, existing: number | null): string {
+  if (existing === null) return "Find your items in Stock.";
+  if (existing > 0) return `You already have ${existing} ${existing === 1 ? "item" : "items"}. Find them in Stock.`;
+  return added ? `Added ${added} items. Count them and set prices in Stock.` : "Add items from Stock whenever you're ready.";
 }
