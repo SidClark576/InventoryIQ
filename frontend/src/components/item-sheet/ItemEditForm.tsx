@@ -6,7 +6,7 @@ import { Field, TEXTAREA_CLASS } from "@/components/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { priceOf, thresholdOf } from "@/lib/dashboardStats";
-import { CURRENCY_SYMBOL } from "@/lib/format";
+import { currencySymbol } from "@/lib/format";
 
 type Draft = {
   name: string;
@@ -114,7 +114,7 @@ export function ItemEditForm({ item }: { item: InventoryItem }) {
           ))}
         </datalist>
       </Field>
-      <Field id="e-price" label={`Unit price (${CURRENCY_SYMBOL})`} className="col-span-1">
+      <Field id="e-price" label={`Unit price (${currencySymbol()})`} className="col-span-1">
         <Input
           id="e-price"
           type="number"
@@ -147,10 +147,11 @@ export function ItemEditForm({ item }: { item: InventoryItem }) {
           onChange={(event) => patch({ barcode: event.target.value })}
         />
       </Field>
-      <Field id="e-description" label="Description" className="col-span-2">
+      <Field id="e-description" label="Size / description" className="col-span-2">
         <textarea
           id="e-description"
           className={TEXTAREA_CLASS}
+          placeholder="e.g. 150g"
           value={draft.description}
           onChange={(event) => patch({ description: event.target.value })}
         />

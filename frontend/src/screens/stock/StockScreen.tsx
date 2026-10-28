@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
+import { useSearchParams } from "react-router";
 import { PlusIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { lookupBarcode, type InventoryItem } from "@/api";
@@ -28,7 +29,7 @@ import { ReportDialog, type StockReport } from "./ReportDialog";
 import { EmptyShelf, NoMatches, StockError, StockSkeleton } from "./StockStates";
 import { StockTable } from "./StockTable";
 import { StockToolbar } from "./StockToolbar";
-import { filterItems, groupItems, useStockView } from "./stock-view";
+import { DEEP_LINK_DIALOGS, dialogFromParams, filterItems, groupItems, useStockView } from "./stock-view";
 import { TrashView } from "./TrashView";
 import { useRowStepper } from "./use-row-stepper";
 
@@ -42,6 +43,7 @@ export function StockScreen() {
   const view = useStockView();
   const stepper = useRowStepper();
   const isDesktop = useIsDesktop();
+  const [params, setParams] = useSearchParams();
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [counting, setCounting] = useState(false);
@@ -60,6 +62,16 @@ export function StockScreen() {
   useEffect(() => {
     setImportAvailable(true);
   }, [orgEpoch]);
+
+  // Onboarding links here with ?scan=1 / ?import=1: open that dialog once, then drop the param so Back/refresh don't reopen it.
+  useEffect(() => {
+    const linked = dialogFromParams(params);
+    if (!linked) return;
+    if (linked === "scan" || canEdit) setDialog(linked); // same gate as the toolbar: viewers can scan, not import
+    const next = new URLSearchParams(params);
+    for (const key of DEEP_LINK_DIALOGS) next.delete(key);
+    setParams(next, { replace: true });
+  }, [params, setParams, canEdit]);
 
   // Print styles key off this attribute (index.css), set by print() only. After printing, drop the report so a
   // later Ctrl+P prints the page as is, never a stale report.

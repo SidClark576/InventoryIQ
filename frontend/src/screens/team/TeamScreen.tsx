@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { ArrowClockwiseIcon, EnvelopeSimpleIcon, UsersThreeIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { getMembers, inviteMember } from "@/api";
+import { getMembers, inviteMember, updateOrg } from "@/api";
 import { useOrgShell } from "@/app/AppLayout";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -54,8 +54,65 @@ function roleLabel(role: string | undefined): string {
   return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
+function StoreNameSection({ orgID, current, isOwner, onSaved }: { orgID: string; current: string; isOwner: boolean; onSaved: () => Promise<void> }) {
+  const [name, setName] = useState(current);
+  const [saving, setSaving] = useState(false);
+  const trimmed = name.trim();
+
+  async function onSave(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (saving || !trimmed) return;
+    setSaving(true);
+    try {
+      // updateOrg stores the new name in the session (print header); onSaved reloads the org list (sidebar).
+      await updateOrg(orgID, { name: trimmed });
+      await onSaved();
+      toast.success("Store name saved");
+    } catch (err: unknown) {
+      toast.error("Couldn't save the store name", { description: errorText(err) || "Try again." });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <section aria-labelledby="store-heading" className="flex flex-col gap-3 rounded-3xl border border-border bg-card px-5 py-5">
+      <h2 id="store-heading" className="font-heading text-base font-semibold">
+        Store
+      </h2>
+      {isOwner ? (
+        <form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={(event) => void onSave(event)}>
+          <div className="flex flex-1 flex-col gap-1.5">
+            <Label htmlFor="store-name" className="text-xs text-muted-foreground">
+              Store name
+            </Label>
+            <Input
+              id="store-name"
+              required
+              maxLength={80}
+              autoComplete="organization"
+              value={name}
+              disabled={saving}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </div>
+          <Button type="submit" disabled={saving || !trimmed || trimmed === current}>
+            {saving ? "Saving…" : "Save"}
+          </Button>
+        </form>
+      ) : (
+        <p className="text-sm">
+          <span className="block text-xs text-muted-foreground">Store name</span>
+          {current || "Not set"}
+        </p>
+      )}
+      <p className="text-xs text-muted-foreground">Prints at the top of your stock sheet.{isOwner ? "" : " Only the owner can change it."}</p>
+    </section>
+  );
+}
+
 export function TeamScreen() {
-  const { orgEpoch, orgsAvailable, orgsReady } = useOrgShell();
+  const { orgs, orgEpoch, orgsAvailable, orgsReady, refreshOrgs } = useOrgShell();
   const [members, setMembers] = useState<Member[]>([]);
   const [invites, setInvites] = useState<PendingInvite[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,6 +159,7 @@ export function TeamScreen() {
     };
   }, [orgEpoch, reloadToken, canManage]);
 
+  const storeName = orgs.find((org) => org.orgID === orgID)?.name || getCurrentOrgName();
   const used = members.length + invites.length;
   const full = used >= SEAT_CAP;
 
@@ -153,7 +211,7 @@ export function TeamScreen() {
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <PageHeader
         title="Team"
-        description={getCurrentOrgName() || "Who can see and change this organization's stock."}
+        description={storeName || "Who can see and change this organization's stock."}
         actions={
           <Button type="button" variant="outline" disabled={loading} onClick={() => setReloadToken((token) => token + 1)}>
             <ArrowClockwiseIcon />
@@ -161,6 +219,9 @@ export function TeamScreen() {
           </Button>
         }
       />
+
+      {/* key resets the field after a save or an org switch */}
+      <StoreNameSection key={`${orgID}:${storeName}`} orgID={orgID} current={storeName} isOwner={myRole === "owner"} onSaved={refreshOrgs} />
 
       {canManage ? (
       <section aria-labelledby="seats-heading" className="flex flex-col gap-2 rounded-3xl border border-border bg-card px-5 py-4">

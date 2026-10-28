@@ -6,6 +6,7 @@ export const SESSION_KEYS = {
   currentOrg: 'currentOrg',
   currentOrgName: 'currentOrgName',
   currentRole: 'currentRole',
+  currentCurrency: 'currentCurrency',
   editItem: 'iq_editItem',
   localLogout: 'iq_local_logout',
   inviteToken: 'iq_inviteToken',
@@ -49,6 +50,15 @@ export function getCurrentRole(): string {
 
 export function setCurrentRole(role: string): void {
   sessionStorage.setItem(SESSION_KEYS.currentRole, role);
+}
+
+export function getCurrentCurrency(): string {
+  return sessionStorage.getItem(SESSION_KEYS.currentCurrency) || '';
+}
+
+export function setCurrentCurrency(currency: string): void {
+  if (currency) sessionStorage.setItem(SESSION_KEYS.currentCurrency, currency);
+  else sessionStorage.removeItem(SESSION_KEYS.currentCurrency);
 }
 
 export function getEditItem(): string | null {

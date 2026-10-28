@@ -83,7 +83,7 @@ Authentication.mjs (Node) · Python CRUD/org Lambdas · SQS/SNS alerts
 
 The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` plus `/src/main.tsx`). Toasts are sonner, mounted by `src/components/ui/sonner.tsx`.
 
-**Routes.** Public: `/login`, `/forgot-password`, `/reset-password`, `/accept`. Signed in (inside `AppLayout`): `/today`, `/stock`, `/activity`, `/team`, `/insights` (linked from Today, not in the nav). Old routes redirect and keep the query string: `/dashboard` → `/today`, `/inventory` → `/stock`, `/transactions` → `/activity`, `/org` → `/team`, `/add-item` → `/stock?new=1` (or `/stock?item=<id>` when `iq_editItem` holds an existing item). Old `*.html` URLs map through `src/app/legacyHtml.ts`; invite and reset emails still use `/accept.html?token=` and `/reset-password.html?token=`. Netlify 200-rewrites every legacy `*.html` to `/index.html` with `force = true`, so the token stays, and React replace-navigates to the new route.
+**Routes.** Public: `/login`, `/forgot-password`, `/reset-password`, `/accept`. Signed in, full screen: `/onboarding` (login sends an owner whose store is still "My Inventory" and not onboarded there). Signed in (inside `AppLayout`): `/today`, `/stock`, `/activity`, `/team`, `/insights` (linked from Today, not in the nav). Old routes redirect and keep the query string: `/dashboard` → `/today`, `/inventory` → `/stock`, `/transactions` → `/activity`, `/org` → `/team`, `/add-item` → `/stock?new=1` (or `/stock?item=<id>` when `iq_editItem` holds an existing item). Old `*.html` URLs map through `src/app/legacyHtml.ts`; invite and reset emails still use `/accept.html?token=` and `/reset-password.html?token=`. Netlify 200-rewrites every legacy `*.html` to `/index.html` with `force = true`, so the token stays, and React replace-navigates to the new route.
 
 **Shell.** Desktop: sidebar with brand, org switcher, nav (Today, Stock, Activity, Team) and the account menu at the bottom. Mobile (<768px): top bar (brand + account menu, which also holds the org picker) and a bottom tab bar. Team shows only when `GET /orgs` returned orgs (`useOrgShell().orgsAvailable`); 403/404 from org routes means legacy mode (no `X-IQ-Org`).
 
@@ -97,7 +97,7 @@ The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` p
 - `src/screens/LoginScreen.tsx`, `ForgotPasswordScreen.tsx`, `ResetPasswordScreen.tsx`, `AcceptScreen.tsx` — auth. Inputs stay `#login-email` and `#login-password`.
 - `src/lib/` — pure helpers with node unit tests in `tests/unit/ts/`: `dashboardStats.ts` (levels, counts, restock queue), `activity.ts` (transaction filters, day groups), `reasons.ts` (adjust reasons → notes), `csv.ts`, `format.ts`.
 - `src/config.ts` — `API_ENDPOINT` (`/prod/proxy`) and `AUTH_ENDPOINT` (`/prod/auth`). No API key in the client.
-- `src/session.ts` — typed `sessionStorage` keys (`sessionToken`, `userEmail`, `currentOrg`, `currentOrgName`, `currentRole`, `iq_editItem`, `iq_local_logout`).
+- `src/session.ts` — typed `sessionStorage` keys (`sessionToken`, `userEmail`, `currentOrg`, `currentOrgName`, `currentRole`, `currentCurrency`, `iq_editItem`, `iq_local_logout`).
 - `src/api.ts` — the only API client: `checkQuota()` (429), `check401()`, `authHeaders()` (omit `X-IQ-Org` when no org is selected), `If-Match` / 412, idempotency. Throws `ApiError` (with `status`) for item writes and import.
 - `src/components/` — `page-header.tsx`, `text-link.ts` (the one inline-link style), `account-menu.tsx`, `status-badge.tsx`, `charts/` (`level-gauge.tsx`, `radial-gauge.tsx`, `stock-bar.tsx`), `barcode-scan-dialog.tsx` (Quagga from jsDelivr, pinned), `confirm-dialog.tsx` (use it instead of `confirm()`), `activity-row.tsx`.
 - `src/index.css` — shadcn preset `b1e6VsioIy` theme plus the inventory print sheet.
@@ -112,7 +112,7 @@ The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` p
 - `Authorizer.mjs` — API Gateway TOKEN authorizer; validates X-Session-Token JWT, no DB lookup.
 - `Authentication.mjs` — register/login/logout, JWT signing, SES password reset, AuthAttempts rate limiting (15-min lockout), SNS subscription, Sentry (`Sentry.wrapHandler`). Lowercases all emails.
 - `_org.py` — shared org/RBAC helpers: `get_membership`, `has_role`, `ROLE_RANK`, `list_user_orgs`, seat cap (`ORG_SEAT_CAP`, default 5). Imported by Proxy + org Lambdas.
-- `Orgs.py` — org CRUD: list/switch/rename/delete/transfer-owner.
+- `Orgs.py` — org CRUD: list/switch/update (`PUT /orgs/{id}`: name + store fields, owner only)/delete/transfer-owner.
 - `OrgMembers.py` — member list, role change, removal.
 - `OrgInvites.py` — invite create/revoke/accept. Tokens emailed raw, stored **only as SHA-256 hash** (`inviteTokenHash` PK) — never store or log a raw invite token.
 - `_logging.py` — shared `log_json`, `capture_error` (→ Sentry), `response` (CORS envelope), `hash_user`, `plain` (Decimal → JSON int/float), `json_body` (400 `INVALID_JSON`), `number_field` (400 `INVALID_FIELD` + `field`). All Python Lambdas use these; don't hand-roll response dicts.
@@ -146,7 +146,7 @@ The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` p
 | `InventoryTransactions` | `transactionID` | — | `orgID-index` | — | Audit trail: `changeType` (`create`/`stock_in`/`stock_out`/`update`/`delete`), before/after/delta quantities |
 | `IdempotencyKeys` | `key` | — | — | `expiresAt` | 24h replay cache: stores `responseBody` |
 | `Suppliers` | `supplierID` | — | `userID-index`, `orgID-index` | — | Supplier records |
-| `Organizations` | `orgID` | — | — | — | `name`, `memberCount`, soft-delete via `deletedAt` |
+| `Organizations` | `orgID` | — | — | — | `name`, `memberCount`, soft-delete via `deletedAt`; store fields (all optional): `storeType`, `country`, `currency` (ISO 4217, drives money formatting), `onboardedAt` (set once by `PUT /orgs/{id}`) |
 | `OrgMembers` | `orgID` | `userID` | `userID-index` | — | `role`, `status` (`active`); the live-lookup table for instant revoke |
 | `OrgInvites` | `inviteTokenHash` | — | `orgID-index`, `email-index` | — | SHA-256 of invite token, `role`, invited email |
 

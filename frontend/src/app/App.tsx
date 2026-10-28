@@ -14,6 +14,7 @@ const ActivityScreen = lazy(() => import("@/screens/activity/ActivityScreen").th
 const ForgotPasswordScreen = lazy(() => import("@/screens/ForgotPasswordScreen").then((m) => ({ default: m.ForgotPasswordScreen })));
 const InsightsScreen = lazy(() => import("@/screens/InsightsScreen").then((m) => ({ default: m.InsightsScreen })));
 const LoginScreen = lazy(() => import("@/screens/LoginScreen").then((m) => ({ default: m.LoginScreen })));
+const OnboardingScreen = lazy(() => import("@/screens/onboarding/OnboardingScreen").then((m) => ({ default: m.OnboardingScreen })));
 const ResetPasswordScreen = lazy(() => import("@/screens/ResetPasswordScreen").then((m) => ({ default: m.ResetPasswordScreen })));
 const StockScreen = lazy(() => import("@/screens/stock/StockScreen").then((m) => ({ default: m.StockScreen })));
 const TeamScreen = lazy(() => import("@/screens/team/TeamScreen").then((m) => ({ default: m.TeamScreen })));
@@ -98,6 +99,13 @@ function RequireAuth() {
   return <AppLayout />;
 }
 
+/** Signed in, but full screen: onboarding runs before the app shell. */
+function OnboardingRoute() {
+  applyLocalPreview();
+  if (!getUserEmail()) return <Navigate to="/login" replace />;
+  return <OnboardingScreen />;
+}
+
 function AppRoutes() {
   const location = useLocation();
   if (legacyRouteForPath(location.pathname)) {
@@ -110,6 +118,7 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
       <Route path="/reset-password" element={<ResetPasswordScreen />} />
       <Route path="/accept" element={<AcceptScreen />} />
+      <Route path="/onboarding" element={<OnboardingRoute />} />
       <Route element={<RequireAuth />}>
         <Route path="/today" element={<TodayScreen />} />
         <Route path="/stock" element={<StockScreen />} />

@@ -25,6 +25,7 @@ import {
 } from "@/session";
 import { HOME_ROUTE } from "@/app/routes";
 import { BrandMark } from "@/components/brand-mark";
+import { needsOnboarding } from "@/lib/onboarding";
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -97,6 +98,19 @@ function PasswordField({
   );
 }
 
+/** Selects the user's first org and returns where to go next: onboarding for an unnamed new store, else home. */
+async function openFirstOrg(): Promise<string> {
+  try {
+    const first = (await getOrgs()).orgs?.[0];
+    if (!first) return HOME_ROUTE;
+    const org = await switchOrg(first.orgID);
+    if (first.name) setCurrentOrgName(first.name);
+    return needsOnboarding(org) ? "/onboarding" : HOME_ROUTE;
+  } catch {
+    return HOME_ROUTE; // org endpoints not deployed yet
+  }
+}
+
 export function LoginScreen() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -148,24 +162,14 @@ export function LoginScreen() {
         signedIn = true;
         setSessionToken(String(data.token));
         setUserEmail(String(data.email));
-        try {
-          const orgData = await getOrgs();
-          const orgs = (orgData && orgData.orgs) || [];
-          const first = orgs[0];
-          if (first) {
-            await switchOrg(first.orgID);
-            if (first.name) setCurrentOrgName(first.name);
-          }
-        } catch {
-          /* org endpoints not deployed yet */
-        }
+        const next = await openFirstOrg();
         const pendingInvite = getInviteToken();
         if (pendingInvite) {
           clearInviteToken();
           navigate(`/accept?token=${encodeURIComponent(pendingInvite)}`, { replace: true });
           return;
         }
-        navigate(HOME_ROUTE, { replace: true });
+        navigate(next, { replace: true });
         return;
       }
       const text = serverMessage(data, "Login failed.");

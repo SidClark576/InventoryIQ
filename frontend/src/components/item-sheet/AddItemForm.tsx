@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { clearEditItem, getEditItem } from "@/session";
-import { CURRENCY_SYMBOL } from "@/lib/format";
+import { currencySymbol } from "@/lib/format";
 
 type Draft = {
   name: string;
@@ -189,7 +189,7 @@ export function AddItemForm({ onDone }: AddItemFormProps) {
             ))}
           </datalist>
         </Field>
-        <Field id="n-price" label={`Unit price (${CURRENCY_SYMBOL})`} className="col-span-1">
+        <Field id="n-price" label={`Unit price (${currencySymbol()})`} className="col-span-1">
           <Input
             id="n-price"
             type="number"
@@ -202,11 +202,11 @@ export function AddItemForm({ onDone }: AddItemFormProps) {
             onChange={(event) => patch({ price: event.target.value })}
           />
         </Field>
-        <Field id="n-description" label="Description" className="col-span-2">
+        <Field id="n-description" label="Size / description" className="col-span-2">
           <textarea
             id="n-description"
             className={TEXTAREA_CLASS}
-            placeholder="Optional"
+            placeholder="e.g. 150g"
             value={draft.description}
             onChange={(event) => patch({ description: event.target.value })}
           />

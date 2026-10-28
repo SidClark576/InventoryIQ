@@ -5,6 +5,7 @@ import {
   getSessionToken,
   setCurrentOrg,
   setCurrentOrgName,
+  setCurrentCurrency,
   setCurrentRole,
   setLocalLogout,
   type Role,
@@ -445,6 +446,33 @@ export type OrgRecord = {
   role?: Role | string;
 };
 
+/** POST /orgs/{id}/switch and PUT /orgs/{id}: the org plus its store fields (all optional on old Lambdas). */
+export type OrgSwitchResponse = {
+  orgID: string;
+  role?: string;
+  name?: string;
+  storeType?: string;
+  country?: string;
+  currency?: string;
+  onboardedAt?: string;
+};
+
+function str(value: unknown): string | undefined {
+  return typeof value === 'string' && value ? value : undefined;
+}
+
+function parseOrg(orgID: string, data: Record<string, unknown>): OrgSwitchResponse {
+  return {
+    orgID,
+    role: str(data.role),
+    name: str(data.name),
+    storeType: str(data.storeType),
+    country: str(data.country),
+    currency: str(data.currency),
+    onboardedAt: str(data.onboardedAt),
+  };
+}
+
 export type OrgsResponse = {
   orgs?: OrgRecord[];
   [key: string]: unknown;
@@ -472,15 +500,32 @@ export async function getOrgs(): Promise<OrgsResponse> {
   return orgJson<OrgsResponse>(`${CONFIG.API_ENDPOINT}/orgs`, {}, 'Failed to load organizations');
 }
 
-export async function switchOrg(orgID: string): Promise<Record<string, unknown>> {
+export async function switchOrg(orgID: string): Promise<OrgSwitchResponse> {
   const data = await orgJson<Record<string, unknown>>(
     `${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}/switch`,
     { method: 'POST' },
     'Failed to switch organization',
   );
+  const org = parseOrg(orgID, data);
   setCurrentOrg(orgID);
-  if (typeof data.role === 'string' && data.role) setCurrentRole(data.role);
-  return data;
+  if (org.role) setCurrentRole(org.role);
+  setCurrentCurrency(org.currency ?? '');
+  return org;
+}
+
+export async function updateOrg(
+  orgID: string,
+  body: { name: string; storeType?: string; country?: string; currency?: string },
+): Promise<OrgSwitchResponse> {
+  const data = await orgJson<Record<string, unknown>>(
+    `${CONFIG.API_ENDPOINT}/orgs/${encodeURIComponent(orgID)}`,
+    { method: 'PUT', body: JSON.stringify(body) },
+    'Failed to save the store',
+  );
+  const org = parseOrg(orgID, data);
+  if (org.name) setCurrentOrgName(org.name);
+  setCurrentCurrency(org.currency ?? '');
+  return org;
 }
 
 export async function getMembers(orgID: string): Promise<Record<string, unknown>> {

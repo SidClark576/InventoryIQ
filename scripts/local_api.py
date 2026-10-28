@@ -61,6 +61,7 @@ ROUTES = [
     ('GET', '/barcode/{code}', 'BarcodeLookup'),
     ('GET', '/orgs', 'Orgs'),
     ('POST', '/orgs/{id}/switch', 'Orgs'),
+    ('PUT', '/orgs/{id}', 'Orgs'),
     ('GET', '/orgs/{id}/members', 'OrgMembers'),
     ('POST', '/orgs/{id}/invites', 'OrgInvites'),
     ('POST', '/org-invites/{token}/accept', 'OrgInvites'),

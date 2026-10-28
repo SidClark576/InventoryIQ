@@ -4,6 +4,13 @@ import type { InventoryItem } from "@/api";
 // Relative .ts import so node:test can load this module (no `@/` resolution there).
 import { restockQueue, stockLevelOf, type StockLevel } from "../../lib/dashboardStats.ts";
 
+/** Onboarding deep links (`/stock?scan=1`, `?import=1`) that open a Stock dialog once. */
+export const DEEP_LINK_DIALOGS = ["scan", "import"] as const;
+
+export function dialogFromParams(params: URLSearchParams): (typeof DEEP_LINK_DIALOGS)[number] | null {
+  return DEEP_LINK_DIALOGS.find((key) => params.get(key) === "1") ?? null;
+}
+
 /** "order" = out + low, the HealthBar's "Order now" chip. */
 export type StatusFilter = "all" | "order" | StockLevel;
 export type Grouping = "status" | "category";
