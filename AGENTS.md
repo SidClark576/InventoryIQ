@@ -61,6 +61,7 @@ Authentication.mjs (Node) · Python CRUD/org Lambdas · SQS/SNS alerts
 - Test login: `.local/test-login.json` (gitignored; owner, staff (editor), shared generated password). Never commit it or copy the password anywhere.
 - Emails are never sent: the runner prints each SES message Floci captured (read from Floci's `GET /_aws/ses`). Barcode lookups never reach the internet: seeded barcodes answer from `BarcodeCache`, any other code is "not found".
 - Gap: `ImportJobs` (used by `BulkImport*.py`) exists only locally; it has no live table yet.
+- Rollout rehearsal: `bash scripts/local/rehearse_rollout.sh` mirrors the live Lambdas and `InventoryIQ-API` routes into its own Floci (`panindo-floci-rollout` on :4567, runner on :3101 with `LOCAL_API_GATEWAY=1`, which serves only routes deployed to Floci's `prod` stage), runs every `scripts/rollout_orgs.py` step with `--apply` and, after each, replays main's `ensureOrgContext` (GET /orgs, switch, `X-IQ-Org`), lists and edits items; exits non-zero on 0 items or a failed edit. `--copy-from-live <email>` copies that live store first (read-only scan with your `AWS_PROFILE`; user-run only). `rollout_orgs.py` is dry run by default; a live `--apply` needs `ROLLOUT_LIVE=1`.
 - Table layouts in `scripts/local/tables.json` are a copy of the live ones; update it when a live table changes. `npm run dev` and builds still use the live API.
 
 ---

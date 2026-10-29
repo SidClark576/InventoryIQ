@@ -3,11 +3,13 @@
 
   /auth/*      -> lambda/Authentication.mjs (one `node` child per request)
   /proxy/*     -> lambda/Proxy.py, whose API_ENDPOINT points back at /_backend
-  /_backend/*  -> the Python handler for each route frontend/src/api.ts calls (needs the seeded x-api-key)
+  /_backend/*  -> the Python handler for each route frontend/src/api.ts calls (needs the seeded x-api-key);
+                  with LOCAL_API_GATEWAY=1 only the routes deployed to Floci's InventoryIQ-API `prod` stage
 
 Every AWS call goes to Floci (AWS_ENDPOINT_URL) with fake keys, and barcode lookups never reach the
 internet. Started by scripts/dev_local.sh (`npm run dev:local`); see AGENTS.md "Local backend".
 """
+import functools
 import hmac
 import importlib
 import json
@@ -27,6 +29,7 @@ PORT = int(os.environ.get('LOCAL_API_PORT', '3001'))
 DEV_PORT = os.environ.get('LOCAL_DEV_PORT', '8000')
 AWS_URL = os.environ.get('LOCAL_AWS_URL', 'http://localhost:4566')  # Floci container (scripts/dev_local.sh)
 ACCOUNT = '000000000000'  # Floci's default account
+API_NAME = 'InventoryIQ-API'  # the live REST API; LOCAL_API_GATEWAY=1 mirrors it from Floci
 
 # Fake AWS: everything points at Floci, so nothing can reach real AWS. Shared with local_seed.py.
 AWS_ENV = {
@@ -121,10 +124,51 @@ def api_key():
     return _api_key
 
 
-def match_route(method, path):
+def routes_from_gateway(resources, handlers):
+    """(method, resource, module) per Lambda (AWS_PROXY) method of get_resources(embed=['methods']) items.
+
+    module = the Handler prefix of the integration's function ('' if the function is missing); MOCK/OPTIONS skipped.
+    """
+    routes = []
+    for res in resources:
+        for method, spec in (res.get('resourceMethods') or {}).items():
+            integration = spec.get('methodIntegration') or {}
+            if method == 'OPTIONS' or integration.get('type') != 'AWS_PROXY':
+                continue
+            function = integration.get('uri', '').split(':function:')[-1].split('/')[0]
+            routes.append((method, res['path'], (handlers.get(function) or '').rsplit('.', 1)[0]))
+    return routes
+
+
+@functools.cache
+def _aws(service):
+    import boto3
+    return boto3.client(service)
+
+
+_deployed = {'id': None, 'resources': []}
+
+
+def gateway_routes():
+    """Routes of Floci's API_NAME `prod` stage: resources refetched when its deploymentId changes; handlers
+    read on every call, since a handler change is live at once (no redeploy), as on AWS."""
+    gw = _aws('apigateway')
+    api = next((a['id'] for a in gw.get_rest_apis(limit=500)['items'] if a['name'] == API_NAME), None)
+    if not api:
+        return []
+    deployment = gw.get_stage(restApiId=api, stageName='prod').get('deploymentId')
+    if deployment != _deployed['id']:  # ponytail: no lock; two threads may both refetch the same deployment
+        _deployed.update(id=deployment, resources=gw.get_resources(
+            restApiId=api, embed=['methods'], limit=500)['items'])
+    # ponytail: one page (50) of list_functions covers the 18 functions; paginate if that grows
+    handlers = {f['FunctionName']: f['Handler'] for f in _aws('lambda').list_functions()['Functions']}
+    return routes_from_gateway(_deployed['resources'], handlers)
+
+
+def match_route(method, path, routes):
     """Return (module, resource, decoded pathParameters or None) for a backend path, or None."""
     parts = path.strip('/').split('/')
-    for route_method, resource, module in ROUTES:
+    for route_method, resource, module in routes:
         segs = resource.strip('/').split('/')
         if route_method != method or len(segs) != len(parts):
             continue
@@ -170,10 +214,15 @@ def route(method, path, headers, body, query):
         if not key or not hmac.compare_digest(headers.get('x-api-key', ''), key):
             return _json(403, {'message': 'Forbidden'})
         sub = path[len('/_backend'):]
-        hit = match_route(method, sub)
+        gateway = os.environ.get('LOCAL_API_GATEWAY') == '1'
+        hit = match_route(method, sub, gateway_routes() if gateway else ROUTES)
         if hit:
             module, resource, params = hit
-            return handler(module)(_event(method, sub, headers, body, query, resource, params), None)
+            try:
+                fn = handler(module)
+            except (ImportError, ValueError):  # live: Runtime.ImportModuleError -> API Gateway 502
+                return _json(502, {'message': 'Internal server error'})
+            return fn(_event(method, sub, headers, body, query, resource, params), None)
     return _json(404, {'message': 'Not Found'})
 
 
