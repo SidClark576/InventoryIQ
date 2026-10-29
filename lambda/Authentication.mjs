@@ -52,7 +52,8 @@ const SESSIONS_TABLE       = process.env.SESSIONS_TABLE        || "Sessions";
 const AUTH_ATTEMPTS_TABLE  = process.env.AUTH_ATTEMPTS_TABLE   || "AuthAttempts";
 const PASSWORD_RESETS_TABLE = process.env.PASSWORD_RESETS_TABLE || "PasswordResets";
 const SES_SENDER           = process.env.SES_SENDER            || "";  // verified SES sender email
-const APP_URL              = process.env.APP_URL               || "https://theinventoryiq.netlify.app";
+const APP_URL              = process.env.APP_URL               || "https://app.panindo.app";
+const REPLY_TO             = "support@panindo.app";
 const ORGS_TABLE           = process.env.ORGS_TABLE            || "Organizations";
 const MEMBERS_TABLE        = process.env.MEMBERS_TABLE         || "OrgMembers";
 
@@ -65,7 +66,7 @@ const MAX_FAILURES        = 5;              // max failed logins before 429
 // Password must have lowercase, uppercase, digit, min 8 chars
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-const _CORS_ORIGIN = process.env.CORS_ORIGIN || 'https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500,capacitor://localhost,https://localhost';
+const _CORS_ORIGIN = process.env.CORS_ORIGIN || 'https://app.panindo.app,https://development.panindo-app.pages.dev,https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500,capacitor://localhost,https://localhost';
 const _CORS_ORIGINS = _CORS_ORIGIN !== '*'
     ? new Set(_CORS_ORIGIN.split(',').map(o => o.trim()).filter(Boolean))
     : null;
@@ -394,6 +395,7 @@ export const handler = Sentry.wrapHandler(async (event) => {
                     const baseUrl = APP_URL.replace(/\/$/, '');
                     await sesClient.send(new SendEmailCommand({
                         Source: SES_SENDER,
+                        ReplyToAddresses: [REPLY_TO],
                         Destination: { ToAddresses: [email] },
                         Message: {
                             Subject: { Data: 'Panindo — Password Reset' },

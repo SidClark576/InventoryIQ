@@ -141,7 +141,7 @@ def _handle(event, context):
         # Header banner
         lines += [
             "╔══════════════════════════════════════════════════════╗",
-            "║           INVENTORYIQ — DAILY STOCK REPORT           ║",
+            "║             PANINDO — DAILY STOCK REPORT             ║",
             "╚══════════════════════════════════════════════════════╝",
             "",
             f"  Date  : {date_str}",

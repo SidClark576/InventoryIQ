@@ -184,6 +184,8 @@ def rehearse(token, base):
     stamped = re.findall(r'(\d+) items to stamp', step('remigrate'))
     r.check('remigrate', 'stamped', int(stamped[-1]) if stamped else None, 0)
     r.look('remigrate', token, 'org', base + 1)
+    step('domain')
+    r.look('domain', token, 'org', base + 1)
     return r.print()
 
 

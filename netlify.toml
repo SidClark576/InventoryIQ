@@ -1,115 +1,12 @@
-# Vite builds frontend/ → frontend/dist. Endpoints live in frontend/src/config.ts.
+# The app moved to Cloudflare Pages (app.panindo.app). This Netlify site (theinventoryiq.netlify.app) only
+# redirects: every path goes to the same path on the new address. Netlify forwards the query string, so
+# old invite and reset links (/accept.html?token=...) keep their token. No build.
 [build]
-  command = "npm run build"
-  publish = "frontend/dist"
-
-# Legacy *.html URLs (invite and reset emails use /accept.html?token= and
-# /reset-password.html?token=). Status 200 is a rewrite: Netlify serves
-# /index.html and does not change the browser address bar, so ?token= stays
-# on the original URL. Docs also auto-forward query strings for 200, 301,
-# and 302, but a 301 replaces the address bar and Pretty URLs (on by default)
-# sends /page.html to /page/ — that address-bar change is what drops ?token=.
-# force = true beats Pretty URLs and any published HTML file.
-#
-# The target is /index.html, not /accept. A 200 rewrite is one hop and is
-# not matched against later rules, so `to = "/accept"` would 404 (no such
-# file) and the SPA splat below would never run. The React app reads
-# window.location and replace-navigates each old page to its current route
-# (frontend/src/app/legacyHtml.ts), copying location.search:
-#   accept.html -> /accept, reset-password.html -> /reset-password (token kept)
-#   dashboard.html -> /today, inventory.html -> /stock, add-item.html -> /stock?new=1,
-#   transactions.html -> /activity, org.html -> /team, insights.html -> /insights,
-#   suppliers.html -> /stock, forecast.html -> /insights
-[[redirects]]
-  from = "/accept.html"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/reset-password.html"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/login.html"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/dashboard.html"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/inventory.html"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/forgot-password.html"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/add-item.html"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/insights.html"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/transactions.html"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/org.html"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/suppliers.html"
-  to = "/index.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/forecast.html"
-  to = "/index.html"
-  status = 200
-  force = true
+  publish = "netlify-redirect"  # not frontend/public: its _redirects (Pages rewrites) would shadow the 301
+  command = ""
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
-  status = 200
-
-# Security headers. The SPA ships bundled modules and one stylesheet.
-# script-src allows 'self' plus cdn.jsdelivr.net, which Inventory and Add Item
-# use to load Quagga. No Tailwind CDN and no 'unsafe-inline' for scripts.
-# style-src keeps 'unsafe-inline' because sonner and Base UI set style
-# attributes. Fonts are @fontsource files emitted with the bundle, so
-# font-src 'self' covers Inter Variable and Roboto Variable.
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "DENY"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    # camera=(self) keeps barcode scanning working.
-    Permissions-Policy = "camera=(self), microphone=(), geolocation=()"
-    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' blob: https://*.execute-api.us-east-1.amazonaws.com https://*.s3.amazonaws.com https://*.s3.us-east-1.amazonaws.com;"
+  to = "https://app.panindo.app/:splat"
+  status = 301
+  force = true

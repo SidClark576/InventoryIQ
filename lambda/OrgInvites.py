@@ -27,6 +27,7 @@ _ASSIGNABLE = ('viewer', 'editor', 'admin')
 
 SES_SENDER = os.environ.get('SES_SENDER', '')
 APP_URL    = os.environ.get('APP_URL', '')
+REPLY_TO   = 'support@panindo.app'
 
 _client = boto3.client('dynamodb')
 _ses    = boto3.client('ses')
@@ -218,6 +219,7 @@ def _send_invite_email(email, token, org_id):
     try:
         _ses.send_email(
             Source=SES_SENDER,
+            ReplyToAddresses=[REPLY_TO],
             Destination={'ToAddresses': [email]},
             Message={
                 'Subject': {'Data': 'You have been invited to Panindo'},

@@ -6,6 +6,8 @@
   migrate-routes  migrate_orgs --apply, add the /orgs* routes + invoke permissions, redeploy `prod`,
                   migrate_orgs --apply again (stamps rows written in between). Run in one sitting.
   remigrate       migrate_orgs --apply only.
+  domain          app.panindo.app: update every Lambda's code (new CORS defaults), then merge CORS_ORIGIN, APP_URL
+                  and SES_SENDER into the env of the functions in DOMAIN_ENV. Other env keys stay; no value is printed.
 
   .venv/bin/python scripts/rollout_orgs.py --step deploy --endpoint http://localhost:4567 --apply   # Floci
   ROLLOUT_LIVE=1 AWS_PROFILE=inventoryiq .venv/bin/python scripts/rollout_orgs.py --step deploy --apply  # live
@@ -20,10 +22,14 @@ from pathlib import Path
 
 SCRIPTS = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPTS))
+os.environ.pop('SENTRY_DSN', None)  # Sentry must never get a crash frame holding Lambda env values (_merge_env)
 import local_api  # noqa: E402
 import migrate_orgs  # noqa: E402
 
-STEPS = ('deploy', 'migrate-routes', 'remigrate')
+sys.path.insert(0, str(local_api.LAMBDA))
+import _logging  # noqa: E402
+
+STEPS = ('deploy', 'migrate-routes', 'remigrate', 'domain')
 STAGE = 'prod'
 LIVE_FUNCTIONS = (
     'Proxy', 'AddItem', 'GetAllItems', 'UpdateItem', 'DeleteItem', 'RestoreItem', 'GetCategories',
@@ -40,6 +46,14 @@ ORG_ROUTES = [
     ('POST', '/orgs/{id}/invites', 'OrgInvites'),
     ('POST', '/org-invites/{token}/accept', 'OrgInvites'),
 ]
+CORS_ORIGIN = _logging.DEFAULT_CORS_ORIGINS
+APP_URL = 'https://app.panindo.app'
+SES_SENDER = 'noreply@panindo.app'
+DOMAIN_ENV = {
+    'Proxy': {'CORS_ORIGIN': CORS_ORIGIN},
+    'Authentication': {'CORS_ORIGIN': CORS_ORIGIN, 'APP_URL': APP_URL, 'SES_SENDER': SES_SENDER},
+    'OrgInvites': {'APP_URL': APP_URL, 'SES_SENDER': SES_SENDER},
+}
 
 
 def pack():
@@ -62,6 +76,10 @@ def _update_code(lam, name, apply):
         _wait(lam, name)
 
 
+def _vars(conf):
+    return (conf.get('Environment') or {}).get('Variables') or {}
+
+
 def _exists(lam, name):
     try:
         lam.get_function_configuration(FunctionName=name)
@@ -82,7 +100,7 @@ def deploy(clients, apply):
                 lam.update_function_configuration(FunctionName=name, Handler=want)
                 _wait(lam, name)
     base = lam.get_function_configuration(FunctionName='AddItem')
-    dsn = ((base.get('Environment') or {}).get('Variables') or {}).get('SENTRY_DSN')
+    dsn = _vars(base).get('SENTRY_DSN')
     for name in ORG_FUNCTIONS:
         if _exists(lam, name):
             _update_code(lam, name, apply)
@@ -166,7 +184,29 @@ def remigrate(clients, apply):
     migrate_orgs.run(apply)
 
 
-STEP_FNS = {'deploy': deploy, 'migrate-routes': migrate_routes, 'remigrate': remigrate}
+def _merge_env(lam, name, updates, apply):
+    """Overlay `updates` on the function's env; every other key stays. Prints key names only, never values."""
+    variables = {**_vars(lam.get_function_configuration(FunctionName=name)), **updates}
+    print(f"  set env {name}: {', '.join(sorted(updates))}")
+    if apply:
+        lam.update_function_configuration(FunctionName=name, Environment={'Variables': variables})
+        _wait(lam, name)
+
+
+def domain(clients, apply):
+    lam = clients['lambda']
+    pack()
+    for name in LIVE_FUNCTIONS + ORG_FUNCTIONS:  # _logging.py (CORS defaults) ships in every Python zip
+        if _exists(lam, name):
+            _update_code(lam, name, apply)
+    for name, updates in DOMAIN_ENV.items():
+        if _exists(lam, name):
+            _merge_env(lam, name, updates, apply)
+        else:
+            print(f'  skip env {name} (no such function; run --step deploy first)')
+
+
+STEP_FNS = {'deploy': deploy, 'migrate-routes': migrate_routes, 'remigrate': remigrate, 'domain': domain}
 
 
 def main(argv=None):

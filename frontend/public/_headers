@@ -1,0 +1,11 @@
+# Cloudflare Pages (panindo-app). Vite copies this file into frontend/dist.
+# script-src allows cdn.jsdelivr.net for Quagga (Inventory, Add Item); no 'unsafe-inline' for scripts.
+# style-src keeps 'unsafe-inline' because sonner and Base UI set style attributes. Fonts ship in the bundle.
+# camera=(self) keeps barcode scanning working.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Permissions-Policy: camera=(self), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' blob: https://*.execute-api.us-east-1.amazonaws.com https://*.s3.amazonaws.com https://*.s3.us-east-1.amazonaws.com;

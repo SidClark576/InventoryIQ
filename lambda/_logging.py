@@ -148,7 +148,7 @@ def server_error(exc, event=None, headers=None):
 
 
 # One shared list; Authentication.mjs repeats it (Node can't import this) and tests/unit/python/test_cors.py keeps them equal.
-DEFAULT_CORS_ORIGINS = 'https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500,capacitor://localhost,https://localhost'
+DEFAULT_CORS_ORIGINS = 'https://app.panindo.app,https://development.panindo-app.pages.dev,https://theinventoryiq.netlify.app,http://localhost:8000,http://127.0.0.1:8000,http://localhost:5500,capacitor://localhost,https://localhost'
 _CORS_ORIGIN = os.environ.get('CORS_ORIGIN', DEFAULT_CORS_ORIGINS)
 _CORS_ORIGINS = (
     None if _CORS_ORIGIN == '*'
@@ -157,7 +157,7 @@ _CORS_ORIGINS = (
 
 
 def cors_headers(methods='OPTIONS,POST,GET,PUT,DELETE', extra_headers=None, request_origin=''):
-    """CORS headers locked to Netlify + local Playwright unless CORS_ORIGIN=*."""
+    """CORS headers locked to the app origins + local Playwright unless CORS_ORIGIN=*."""
     headers = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Headers': 'Content-Type,x-api-key,X-Session-Token,If-Match,Idempotency-Key,X-IQ-Org',
@@ -169,7 +169,7 @@ def cors_headers(methods='OPTIONS,POST,GET,PUT,DELETE', extra_headers=None, requ
         headers['Access-Control-Allow-Origin'] = request_origin
         headers['Vary'] = 'Origin'
     else:
-        headers['Access-Control-Allow-Origin'] = 'https://theinventoryiq.netlify.app'
+        headers['Access-Control-Allow-Origin'] = 'https://app.panindo.app'
     if extra_headers:
         headers.update(extra_headers)
     return headers

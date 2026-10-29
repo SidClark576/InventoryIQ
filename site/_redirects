@@ -1,0 +1,7 @@
+# Cloudflare Pages (panindo-site). Folder-per-page (privacy/index.html) gives clean URLs; these cover common guesses.
+/privacy-policy /privacy/ 301
+/tos /terms/ 301
+/delete /delete-account/ 301
+/help /support/ 301
+# www.panindo.app -> panindo.app is not here: Pages _redirects only match paths (domain-level redirects are
+# unsupported). It is a Cloudflare Redirect Rule on the zone: www.panindo.app/* -> https://panindo.app/${1}, 301.

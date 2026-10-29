@@ -41,7 +41,7 @@ def _lookup_off(code):
     """Call Open Food Facts API. Returns normalized dict or None."""
     try:
         url = f'https://world.openfoodfacts.org/api/v0/product/{code}.json'
-        req = urllib.request.Request(url, headers={'User-Agent': 'InventoryIQ/1.0'})
+        req = urllib.request.Request(url, headers={'User-Agent': 'Panindo/1.0'})
         with urllib.request.urlopen(req, timeout=5) as r:
             data = json.loads(r.read())
         if data.get('status') != 1:
@@ -77,7 +77,7 @@ def _lookup_upc(code):
     """Call UPC Item DB API. Returns normalized dict or None."""
     try:
         url = f'https://api.upcitemdb.com/prod/trial/lookup?upc={code}'
-        req_headers = {'User-Agent': 'InventoryIQ/1.0', 'Accept': 'application/json'}
+        req_headers = {'User-Agent': 'Panindo/1.0', 'Accept': 'application/json'}
         if UPCITEMDB_API_KEY:
             req_headers['user_key'] = UPCITEMDB_API_KEY
         req = urllib.request.Request(url, headers=req_headers)

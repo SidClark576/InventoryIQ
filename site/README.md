@@ -9,13 +9,14 @@ site/
   terms/index.html        Terms of Service (draft)
   delete-account/index.html  account deletion page (Google Play requirement, draft)
   support/index.html      support page
-  404.html                not-found page (Netlify serves it automatically)
+  404.html                not-found page (Pages serves it automatically)
   styles.css              all styles; light and dark themes follow the system
   favicon.svg             logo mark (copy of frontend/public/favicon.svg)
   fonts/                  Bricolage Grotesque variable woff2 (latin, latin-ext) from @fontsource-variable
   og.jpg                  1200x630 Open Graph image
   robots.txt
-  netlify.toml            headers (CSP, HSTS, ...) and a few redirects
+  _headers                headers (CSP, HSTS, ...)
+  _redirects              a few redirects
 ```
 
 ## Legal text is a draft
@@ -47,18 +48,18 @@ grep -rn "\[OPERATOR LEGAL NAME\]\|\[MAILING ADDRESS\]\|\[EFFECTIVE DATE\]\|\[CI
 - **FAQ and support:** Android 7+ comes from the PRD build floor. Update them if the floor changes.
 - Prices on the home page and in the terms must match the Play Console price points.
 
-## Deploy (Netlify)
+## Deploy (Cloudflare Pages)
 
-1. In Netlify, add a new site from this Git repository. It's a separate site from the web app.
-2. Set **Base directory** to `site`. Leave the build command empty. Netlify reads `site/netlify.toml`, which sets the publish directory to the base directory.
-3. Add the custom domain `panindo.app` (and `www.panindo.app`, redirected to the apex) and let Netlify issue the HTTPS certificate.
+1. The Cloudflare Pages project `panindo-site` builds from this repository. It's a separate project from the web app (`panindo-app`).
+2. No build command; the output directory is `site`. Pages reads `site/_headers` and `site/_redirects` from it.
+3. Custom domains `panindo.app` and `www.panindo.app`. `www` goes to the apex through a Cloudflare Redirect Rule on the zone (Pages `_redirects` can't match a hostname).
 4. After the first deploy, check the response headers (`curl -I https://panindo.app/`) and run the site through a header checker such as securityheaders.com.
 
 No environment variables or secrets are needed.
 
 ### Notes
 
-- Clean URLs come from the folder layout (`/privacy/`, `/terms/`, ...), not from Netlify's Pretty URLs setting.
+- Clean URLs come from the folder layout (`/privacy/`, `/terms/`, ...), not from a host's Pretty URLs setting.
 - The CSP allows only this site (`style-src 'self'; font-src 'self'`). `img-src` also allows `data:` for the CSS paper texture. Inline `style="..."` attributes are blocked, so keep all styling in `styles.css`.
 - HSTS is set without `preload`. Add `preload` and submit to hstspreload.org only once every subdomain (including app.panindo.app) is HTTPS-only for good.
 - Deep links (PRD R10.5) need `/.well-known/assetlinks.json` (and `apple-app-site-association` once iOS exists) on `app.panindo.app`, the web app's domain, not on this site. They must be served without redirects and with `Content-Type: application/json`.

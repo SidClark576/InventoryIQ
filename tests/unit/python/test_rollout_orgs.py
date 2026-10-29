@@ -1,4 +1,4 @@
-"""scripts/rollout_orgs.py against moto: dry run writes nothing, deploy, migrate + routes, remigrate, live guard."""
+"""scripts/rollout_orgs.py against moto: dry run writes nothing, deploy, migrate + routes, remigrate, domain, live guard."""
 import base64
 import hashlib
 import io
@@ -79,7 +79,8 @@ def aws(monkeypatch):
 
 def _state(aws):
     lam, gw, api = aws['lambda'], aws['apigateway'], aws['api']
-    fns = {f['FunctionName']: (f['Handler'], f['CodeSha256']) for f in lam.list_functions()['Functions']}
+    fns = {f['FunctionName']: (f['Handler'], f['CodeSha256'], str(f.get('Environment')))
+           for f in lam.list_functions()['Functions']}
     resources = sorted((r['path'], tuple(sorted(r.get('resourceMethods') or {})))
                        for r in gw.get_resources(restApiId=api)['items'])
     deployments = len(gw.get_deployments(restApiId=api)['items'])
@@ -100,6 +101,7 @@ def test_dry_run_of_every_step_prints_calls_and_writes_nothing(aws, capsys):
     out = capsys.readouterr().out
     assert 'DRY RUN' in out and 'update code AddItem' in out and 'create function Orgs' in out
     assert 'GET /orgs -> Orgs' in out and 'deploy stage prod' in out
+    assert 'set env Authentication: APP_URL, CORS_ORIGIN, SES_SENDER' in out and 'skip env OrgInvites' in out
 
 
 def test_deploy_updates_fixes_handlers_creates_org_functions_and_adds_no_route(aws, capsys):
@@ -148,6 +150,28 @@ def test_migrate_routes_stamps_adds_routes_and_permissions_redeploys_then_remigr
     _run('--step', 'migrate-routes', '--apply')  # rerun: methods and permissions already there
     _run('--step', 'remigrate', '--apply')
     assert 'APPLIED: 0 orgs to create, 0 items to stamp' in capsys.readouterr().out.rsplit('APPLY remigrate', 1)[1]
+
+
+def test_domain_updates_code_and_merges_only_its_env_keys(aws, capsys):
+    _run('--step', 'deploy', '--apply')
+    lam = aws['lambda']
+    keep = {'JWT_SECRET': 'jwt-secret', 'SENTRY_DSN': 'dsn-secret', 'CORS_ORIGIN': 'https://old.example'}
+    lam.update_function_configuration(FunctionName='Authentication', Environment={'Variables': keep})
+    lam.update_function_code(FunctionName='Orgs', ZipFile=OLD_ZIP)
+    _run('--step', 'domain', '--apply')
+    env = {n: lam.get_function_configuration(FunctionName=n).get('Environment', {}).get('Variables', {})
+           for n in rollout_orgs.LIVE_FUNCTIONS + rollout_orgs.ORG_FUNCTIONS}
+    new = {'CORS_ORIGIN': rollout_orgs.CORS_ORIGIN, 'APP_URL': 'https://app.panindo.app',
+           'SES_SENDER': 'noreply@panindo.app'}
+    assert env['Authentication'] == {**keep, **new}
+    assert env['OrgInvites'] == {'SENTRY_DSN': 'dsn-secret', 'APP_URL': new['APP_URL'], 'SES_SENDER': new['SES_SENDER']}
+    assert env['Proxy'] == {'CORS_ORIGIN': new['CORS_ORIGIN']}
+    assert env['AddItem'] == {'SENTRY_DSN': 'dsn-secret', 'API_KEY_SECRET': 'other'}
+    assert lam.get_function_configuration(FunctionName='Orgs')['CodeSha256'] == _sha(NEW_ZIP)
+    out = capsys.readouterr().out.rsplit('APPLY domain', 1)[1]
+    assert 'update code Orgs' in out and 'set env OrgInvites: APP_URL, SES_SENDER' in out
+    for value in [*keep.values(), *new.values()]:
+        assert value not in out
 
 
 def test_apply_without_endpoint_refuses_live_before_any_client(monkeypatch):

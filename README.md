@@ -1,10 +1,10 @@
 # InventoryIQ
 
-Multi-tenant inventory app. The frontend is a Vite TypeScript build published on **Netlify** (`https://theinventoryiq.netlify.app`). Backend is AWS Lambda + API Gateway + DynamoDB in `us-east-1` (account `023202272390`, profile `inventoryiq`).
+Multi-tenant inventory app. The frontend is a Vite TypeScript build published on **Cloudflare Pages** (`https://app.panindo.app`; the old `theinventoryiq.netlify.app` redirects there). Backend is AWS Lambda + API Gateway + DynamoDB in `us-east-1` (account `023202272390`, profile `inventoryiq`).
 
 ## Stack
 
-- Frontend: Vite TypeScript in `frontend/src`, HTML pages in `frontend/`. Netlify runs `npm run build` and publishes `frontend/dist` ([`netlify.toml`](netlify.toml))
+- Frontend: Vite TypeScript in `frontend/src`, HTML pages in `frontend/`. Cloudflare Pages runs `npm run build` and publishes `frontend/dist` (`frontend/public/_redirects` and `_headers` are copied in). [`netlify.toml`](netlify.toml) only redirects the old address
 - API: `https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy`
 - Auth: stateless HS256 JWT (`X-Session-Token`)
 - Data: DynamoDB (see [ARCHITECTURE.md](ARCHITECTURE.md))

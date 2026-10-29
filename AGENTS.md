@@ -25,7 +25,7 @@ This project uses OpenWolf. Full protocol: [.wolf/OPENWOLF.md](.wolf/OPENWOLF.md
 
 ## 1. Architecture & Request Flow
 
-Serverless multi-tenant inventory system on AWS. Static Netlify frontend (`theinventoryiq.netlify.app`) → API Gateway proxy stage → `Proxy.py` → API Gateway real stage (x-api-key) → Lambdas.
+Serverless multi-tenant inventory system on AWS. Static Cloudflare Pages frontend (`app.panindo.app`; `theinventoryiq.netlify.app` 301s there) → API Gateway proxy stage → `Proxy.py` → API Gateway real stage (x-api-key) → Lambdas.
 
 ```
 Browser (sessionStorage.sessionToken, sent as X-Session-Token)
@@ -69,7 +69,7 @@ Authentication.mjs (Node) · Python CRUD/org Lambdas · SQS/SNS alerts
 ## 2. Directory Layout
 
 ```
-├── frontend/     # Vite + React SPA (shadcn preset b1e6VsioIy). Netlify publishes frontend/dist
+├── frontend/     # Vite + React SPA (shadcn preset b1e6VsioIy). Cloudflare Pages publishes frontend/dist
 ├── lambda/       # Standalone Lambdas (Python + Node ESM). python_vendor/ = bundled pip deps
 │                 # (sentry_sdk, certifi, urllib3) — include in deploy zips for Lambdas that import them
 ├── scripts/      # Operational one-shots (migrate_orgs.py)
@@ -84,7 +84,7 @@ Authentication.mjs (Node) · Python CRUD/org Lambdas · SQS/SNS alerts
 
 The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` plus `/src/main.tsx`). Toasts are sonner, mounted by `src/components/ui/sonner.tsx`.
 
-**Routes.** Public: `/login`, `/forgot-password`, `/reset-password`, `/accept`. Signed in, full screen: `/onboarding` (login sends an owner whose store is still "My Inventory" and not onboarded there). Signed in (inside `AppLayout`): `/today`, `/stock`, `/activity`, `/team`, `/insights` (linked from Today, not in the nav). Old routes redirect and keep the query string: `/dashboard` → `/today`, `/inventory` → `/stock`, `/transactions` → `/activity`, `/org` → `/team`, `/add-item` → `/stock?new=1` (or `/stock?item=<id>` when `iq_editItem` holds an existing item). Old `*.html` URLs map through `src/app/legacyHtml.ts`; invite and reset emails still use `/accept.html?token=` and `/reset-password.html?token=`. Netlify 200-rewrites every legacy `*.html` to `/index.html` with `force = true`, so the token stays, and React replace-navigates to the new route.
+**Routes.** Public: `/login`, `/forgot-password`, `/reset-password`, `/accept`. Signed in, full screen: `/onboarding` (login sends an owner whose store is still "My Inventory" and not onboarded there). Signed in (inside `AppLayout`): `/today`, `/stock`, `/activity`, `/team`, `/insights` (linked from Today, not in the nav). Old routes redirect and keep the query string: `/dashboard` → `/today`, `/inventory` → `/stock`, `/transactions` → `/activity`, `/org` → `/team`, `/add-item` → `/stock?new=1` (or `/stock?item=<id>` when `iq_editItem` holds an existing item). Old `*.html` URLs map through `src/app/legacyHtml.ts`; invite and reset emails still use `/accept.html?token=` and `/reset-password.html?token=`. `frontend/public/_redirects` 200-rewrites every legacy `*.html` to `/` (Pages strips `/index.html` with a redirect), so the token stays, and React replace-navigates to the new route.
 
 **Shell.** Desktop: sidebar with brand, org switcher, nav (Today, Stock, Activity, Team) and the account menu at the bottom. Mobile (<768px): top bar (brand + account menu, which also holds the org picker) and a bottom tab bar. Team shows only when `GET /orgs` returned orgs (`useOrgShell().orgsAvailable`); 403/404 from org routes means legacy mode (no `X-IQ-Org`).
 
@@ -105,7 +105,7 @@ The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` p
 
 **Backend limits the UI respects.** Stock change reasons are free text in `notes` ("Used 3", "Waste: 2", "Damaged: 1", "Received 12", "Count fix"); the server derives `stock_in`/`stock_out`/`update`. `GET /transactions` returns at most 200 rows, newest first, no filters, so per-item history is a client-side filter ("recent history"). `price` can arrive as a string; use `priceOf()`. CORS allows GET/POST/PUT/DELETE only (no PATCH) and headers `Content-Type`, `x-api-key`, `X-Session-Token`, `If-Match`, `Idempotency-Key`, `X-IQ-Org`. Import CSV is disabled after its routes answer 403/404. Not built because the backend has no support: suppliers, purchase orders, on-order quantities, snooze, storage locations, usage forecasts, member role changes.
 
-`npm run dev` serves Vite on port 8000 (the live API's CORS origin). `npm run build` typechecks and writes `frontend/dist`. Netlify runs that build and publishes `frontend/dist`.
+`npm run dev` serves Vite on port 8000 (the live API's CORS origin). `npm run build` typechecks and writes `frontend/dist`. Cloudflare Pages runs that build and publishes `frontend/dist`.
 
 ### Backend (`lambda/`)
 

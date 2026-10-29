@@ -1,0 +1,17 @@
+# Cloudflare Pages (panindo-app). Vite copies this file into frontend/dist.
+# Legacy *.html URLs: invite and reset emails use /accept.html?token= and /reset-password.html?token=.
+# Status 200 is a rewrite, so the address bar (and ?token=) stays; React maps each old page to its route
+# (frontend/src/app/legacyHtml.ts). Target is / and not /index.html: Pages strips /index.html with a
+# redirect, which would drop the page name. No /* catch-all: with no top-level 404.html, Pages serves the SPA.
+/accept.html / 200
+/reset-password.html / 200
+/login.html / 200
+/dashboard.html / 200
+/inventory.html / 200
+/forgot-password.html / 200
+/add-item.html / 200
+/insights.html / 200
+/transactions.html / 200
+/org.html / 200
+/suppliers.html / 200
+/forecast.html / 200

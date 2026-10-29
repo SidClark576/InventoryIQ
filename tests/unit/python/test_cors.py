@@ -5,6 +5,8 @@ import sys
 
 LAMBDA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../lambda'))
 APP_ORIGINS = {'capacitor://localhost', 'https://localhost'}
+ORIGINS = {'https://app.panindo.app', 'https://development.panindo-app.pages.dev', 'https://theinventoryiq.netlify.app',
+           'http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost:5500', *APP_ORIGINS}
 
 
 def _split(value):
@@ -22,7 +24,7 @@ def test_cors_defaults_match_and_admit_app_origins(monkeypatch):
     import Proxy
 
     shared = _split(_logging.DEFAULT_CORS_ORIGINS)
-    assert APP_ORIGINS <= shared
+    assert shared == ORIGINS
     assert _logging._CORS_ORIGINS == shared
     assert Proxy._CORS_ORIGINS == shared
 
@@ -30,3 +32,6 @@ def test_cors_defaults_match_and_admit_app_origins(monkeypatch):
         match = re.search(r"process\.env\.CORS_ORIGIN \|\| '([^']+)'", f.read())
     assert match, 'Authentication.mjs CORS default not found'
     assert _split(match.group(1)) == shared
+
+    fallback = _logging.cors_headers(request_origin='https://evil.example')['Access-Control-Allow-Origin']
+    assert fallback == 'https://app.panindo.app'
