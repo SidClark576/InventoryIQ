@@ -18,7 +18,7 @@ export function PrintReport({ groups, start, asOf, storeName }: PrintReportProps
         <thead>
           <tr>
             {REPORT_HEADERS.map((header, index) => (
-              <th key={header} className={index >= 2 ? "num" : undefined}>
+              <th key={header} className={index >= 3 ? "num" : undefined}>
                 {header}
               </th>
             ))}
@@ -34,7 +34,8 @@ export function PrintReport({ groups, start, asOf, storeName }: PrintReportProps
             ...group.rows.map((row, index) => (
               <tr key={`${group.category}-${row.name}-${index}`}>
                 <td>{row.name}</td>
-                <td>{row.size}</td>
+                <td>{row.category}</td>
+                <td>{row.description}</td>
                 <td className="num">{formatMoney(row.price)}</td>
                 <td className="num">{row.starting}</td>
                 <td className="num">{row.stockIn}</td>

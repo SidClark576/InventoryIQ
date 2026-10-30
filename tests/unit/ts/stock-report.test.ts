@@ -35,10 +35,12 @@ describe("stock report", () => {
     ];
     const [cans, care] = buildStockReport(items, txs, start);
     assert.deepEqual(cans?.rows, [
-      { name: "Corned beef", size: "", price: 40, starting: 5, stockIn: 0, now: 5 },
-      { name: "Sardines", size: "155g", price: 53, starting: 10, stockIn: 12, now: 20 },
+      { name: "Corned beef", category: "Can goods", description: "", price: 40, starting: 5, stockIn: 0, now: 5 },
+      { name: "Sardines", category: "Can goods", description: "155g", price: 53, starting: 10, stockIn: 12, now: 20 },
     ]);
-    assert.deepEqual(care?.rows, [{ name: "Soap", size: "", price: 25, starting: 0, stockIn: 9, now: 7 }]);
+    assert.deepEqual(care?.rows, [
+      { name: "Soap", category: "Personal care", description: "", price: 25, starting: 0, stockIn: 9, now: 7 },
+    ]);
   });
 
   test("groups sort by category with Uncategorized last, rows by name", () => {
