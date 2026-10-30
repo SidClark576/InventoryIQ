@@ -84,6 +84,11 @@ def _handle(event, context):
                 return err
             if name in body:
                 changes[name] = value
+        expires_at, err = _logging.date_field(body, 'expiresAt')
+        if err:
+            return err
+        if expires_at is not None:
+            changes['expiresAt'] = expires_at
 
         # Sprint 3: If-Match header required for all updates (optimistic locking)
         if_match_raw = (

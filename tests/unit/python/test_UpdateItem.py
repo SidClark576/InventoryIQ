@@ -90,3 +90,17 @@ def test_valid_update_keeps_integers(update_item):
     assert type(item['quantity']) is int and type(item['version']) is int and item['price'] == 12.25
     row = update_item.table.get_item(Key={'itemID': 'i1'})['Item']
     assert row['name'] == 'Rice 5kg' and row['price'] == Decimal('12.25') and row['version'] == 4
+
+
+@pytest.mark.parametrize('value,stored', [('2026-11-15', '2026-11-15'), ('', ''), (None, '')])
+def test_expires_at_is_stored_or_cleared(update_item, value, stored):
+    res = update_item.lambda_handler({**_event(3), 'body': json.dumps({'expiresAt': value})}, None)
+    assert res['statusCode'] == 200
+    assert update_item.table.get_item(Key={'itemID': 'i1'})['Item']['expiresAt'] == stored
+
+
+@pytest.mark.parametrize('value', ['15/11/2026', 'soon', 20261115, '2026-02-30'])
+def test_bad_expires_at_is_400_with_field(update_item, value):
+    res = update_item.lambda_handler({**_event(3), 'body': json.dumps({'expiresAt': value})}, None)
+    assert res['statusCode'] == 400 and _code(res) == 'INVALID_FIELD'
+    assert json.loads(res['body'])['field'] == 'expiresAt'

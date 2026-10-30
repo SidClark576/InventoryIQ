@@ -137,3 +137,24 @@ def _load_idem_table():
     boto3.client('dynamodb').create_table(
         TableName='IdempotencyKeys', KeySchema=[{'AttributeName': 'key', 'KeyType': 'HASH'}],
         AttributeDefinitions=[{'AttributeName': 'key', 'AttributeType': 'S'}], BillingMode='PAY_PER_REQUEST')
+
+
+def _add(body):
+    import sys
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../lambda')))
+    import AddItem
+    return AddItem.lambda_handler({'body': json.dumps({'name': 'Milk', **body}),
+                                   'headers': {'x-iq-user': 'test@example.com'}}, {})
+
+
+@pytest.mark.parametrize('body,stored', [({'expiresAt': '2026-11-15'}, '2026-11-15'), ({}, '')])
+def test_add_item_stores_expires_at(dynamodb_setup, body, stored):
+    res = _add(body)
+    assert res['statusCode'] == 201
+    assert json.loads(res['body'])['item']['expiresAt'] == stored
+
+
+def test_add_item_bad_expires_at_is_400(dynamodb_setup):
+    res = _add({'expiresAt': '15/11/2026'})
+    assert res['statusCode'] == 400
+    assert json.loads(res['body'])['field'] == 'expiresAt'

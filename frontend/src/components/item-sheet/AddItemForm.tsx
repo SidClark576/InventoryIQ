@@ -19,6 +19,7 @@ type Draft = {
   price: string;
   barcode: string;
   description: string;
+  expires: string;
 };
 
 const EMPTY: Draft = {
@@ -29,6 +30,7 @@ const EMPTY: Draft = {
   price: "",
   barcode: "",
   description: "",
+  expires: "",
 };
 
 function text(value: unknown): string {
@@ -111,6 +113,7 @@ export function AddItemForm({ onDone }: AddItemFormProps) {
         price,
         barcode: draft.barcode.trim(),
         description: draft.description.trim(),
+        expiresAt: draft.expires,
       },
       idemKey,
     );
@@ -200,6 +203,15 @@ export function AddItemForm({ onDone }: AddItemFormProps) {
             className="tabular-nums"
             value={draft.price}
             onChange={(event) => patch({ price: event.target.value })}
+          />
+        </Field>
+        <Field id="n-expires" label="Expires" className="col-span-2">
+          <Input
+            id="n-expires"
+            type="date"
+            className="tabular-nums"
+            value={draft.expires}
+            onChange={(event) => patch({ expires: event.target.value })}
           />
         </Field>
         <Field id="n-description" label="Size / description" className="col-span-2">

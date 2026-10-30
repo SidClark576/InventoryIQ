@@ -1,5 +1,6 @@
+import type { InventoryItem } from "@/api";
 import { Badge } from "@/components/ui/badge";
-import type { StockLevel } from "@/lib/dashboardStats";
+import { daysUntilExpiry, expiryLevelOf, type StockLevel } from "@/lib/dashboardStats";
 import { cn } from "@/lib/utils";
 
 export const LEVEL_LABEL: Record<StockLevel, string> = {
@@ -26,6 +27,21 @@ export function StatusBadge({ level, className }: { level: StockLevel; className
     <Badge variant="secondary" className={cn("gap-1.5 font-semibold", LEVEL_CLASS[level], className)}>
       <span aria-hidden className={cn("size-1.5 rounded-full", LEVEL_FILL[level])} />
       {LEVEL_LABEL[level]}
+    </Badge>
+  );
+}
+
+/** Red once past the date, amber within the warning window; nothing otherwise. */
+export function ExpiryBadge({ item, className }: { item: InventoryItem; className?: string }) {
+  const level = expiryLevelOf(item);
+  if (!level) return null;
+  const days = daysUntilExpiry(item);
+  const tone: StockLevel = level === "expired" ? "out" : "low";
+  const label = level === "expired" ? "Expired" : days === 0 ? "Expires today" : `Expires in ${days} d`;
+  return (
+    <Badge variant="secondary" className={cn("gap-1.5 font-semibold", LEVEL_CLASS[tone], className)}>
+      <span aria-hidden className={cn("size-1.5 rounded-full", LEVEL_FILL[tone])} />
+      {label}
     </Badge>
   );
 }

@@ -39,6 +39,11 @@ export function formatCompactMoney(value: number, currency = activeCurrency()): 
   );
 }
 
+/** A `YYYY-MM-DD` day in the user's locale, read as that calendar day (not UTC midnight). */
+export function formatDay(day: string): string {
+  return new Date(`${day}T00:00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
+
 export function plural(count: number, one: string, many = `${one}s`): string {
   return `${count} ${count === 1 ? one : many}`;
 }

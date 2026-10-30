@@ -2,8 +2,9 @@ import json
 import boto3
 import os
 from decimal import Decimal
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from boto3.dynamodb.conditions import Attr
+from botocore.exceptions import ClientError
 import time as _time
 import _logging
 
@@ -23,6 +24,9 @@ table = dynamodb.Table(os.environ.get('DYNAMODB_TABLE', 'InventoryIQ'))
 # SNS Topic ARN controls where alert emails/SMS are sent.
 # If empty, SNS publish is skipped (useful for local testing).
 SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN', '')
+
+# Items expiring today through this many days out count as "expiring soon".
+EXPIRY_WINDOW_DAYS = 7
 
 def lambda_handler(event, context):
     t0 = _time.time()
@@ -69,6 +73,11 @@ def _handle(event, context):
         while 'LastEvaluatedKey' in result:
             result = table.scan(ExclusiveStartKey=result['LastEvaluatedKey'])
             items.extend(result.get('Items', []))
+
+        # Soft-deleted rows are in the bin, not in stock.
+        items = [item for item in items if not item.get('deletedAt')]
+        now = datetime.now(timezone.utc)
+        expired, expiring_soon = _expiry_due(items, now.date())
 
         # ── STEP 2: CLASSIFY ITEMS BY STOCK STATUS ────────────────────────────
         out_of_stock = []   # Items with quantity == 0 (critical)
@@ -132,7 +141,6 @@ def _handle(event, context):
         # ── STEP 4: BUILD THE EMAIL BODY ─────────────────────────────────────
         # The report is a plain-text email formatted with ASCII box-drawing characters
         # so it displays correctly in any email client without HTML rendering.
-        now = datetime.now(timezone.utc)
         date_str = now.strftime("%A, %B %d, %Y")   # e.g. "Monday, April 06, 2026"
         time_str = now.strftime("%I:%M %p UTC")     # e.g. "09:00 AM UTC"
 
@@ -216,6 +224,8 @@ def _handle(event, context):
                 "",
             ]
 
+        lines += _expiry_lines(expired, expiring_soon)
+
         # All-clear message: only shown when there are zero stock issues
         if not out_of_stock and not low_stock:
             lines += [
@@ -247,6 +257,7 @@ def _handle(event, context):
             subject += f"⚠️ {len(low_stock)} Low Stock"
         else:
             subject += "✅ All Healthy"
+        subject += _expiry_subject(expired, expiring_soon)
 
         # ── STEP 6: PUBLISH TO SNS ────────────────────────────────────────────
         # SNS delivers the message to all confirmed subscriptions on the topic
@@ -258,6 +269,9 @@ def _handle(event, context):
                 Subject=subject,
                 Message='\n'.join(lines)  # Join all lines into a single string
             )
+            # Only after a successful publish: each item is reported once per state.
+            _mark_alerted(expired, 'expiredAlertedFor')
+            _mark_alerted(expiring_soon, 'expirySoonAlertedFor')
 
         # Return a summary to the caller (EventBridge or manual test invocation)
         return {
@@ -266,9 +280,71 @@ def _handle(event, context):
                 'message': 'Daily alert sent.',
                 'outOfStock': len(out_of_stock),
                 'lowStock': len(low_stock),
+                'expired': len(expired),
+                'expiringSoon': len(expiring_soon),
                 'subject': subject
             })
         }
 
     except Exception as e:
         return _logging.server_error(e, event)
+
+
+def _expiry_due(items, today):
+    """(expired, expiring_soon) items not yet alerted for their current expiresAt.
+    Each flag holds the expiresAt it was sent for, so a new date re-arms both."""
+    expired, soon = [], []
+    for item in items:
+        try:
+            expires = date.fromisoformat(item.get('expiresAt') or '')
+        except (TypeError, ValueError):  # undated or unreadable
+            continue
+        if expires < today:
+            flag, bucket = 'expiredAlertedFor', expired
+        elif expires <= today + timedelta(days=EXPIRY_WINDOW_DAYS):
+            flag, bucket = 'expirySoonAlertedFor', soon
+        else:
+            continue
+        if item.get(flag) != item['expiresAt']:
+            bucket.append(item)
+    return expired, soon
+
+
+def _expiry_lines(expired, soon):
+    """Report section for items that expired or expire within the window."""
+    rule = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    if not expired and not soon:
+        return [rule, "  ⏰ EXPIRING / EXPIRED  — None", rule, ""]
+    lines = [rule, f"  ⏰ EXPIRING / EXPIRED  ({len(expired)} expired, {len(soon)} within "
+                   f"{EXPIRY_WINDOW_DAYS} days)", rule, ""]
+    for label, rows in (('Expired   ', expired), ('Expires   ', soon)):
+        for item in rows:
+            lines += [
+                f"  ▸ {item.get('name', 'Unknown')}",
+                f"    Category  : {item.get('category', 'Uncategorized')}",
+                f"    {label}: {item['expiresAt']}",
+                "",
+            ]
+    return lines
+
+
+def _expiry_subject(expired, soon):
+    parts = [f"{n} {label}" for n, label in ((len(expired), 'Expired'), (len(soon), 'Expiring')) if n]
+    return f" | ⏰ {', '.join(parts)}" if parts else ''
+
+
+def _mark_alerted(items, flag):
+    """Record the expiresAt each alert was sent for. Never touches version (not a user edit)."""
+    for item in items:
+        try:
+            table.update_item(
+                Key={'itemID': item['itemID']},
+                UpdateExpression='SET #flag = :exp',
+                # Skip rows deleted or re-dated since the scan; the new date re-arms on its own.
+                ConditionExpression='#exp = :exp AND attribute_not_exists(deletedAt)',
+                ExpressionAttributeNames={'#flag': flag, '#exp': 'expiresAt'},
+                ExpressionAttributeValues={':exp': item['expiresAt']},
+            )
+        except ClientError as e:
+            if e.response['Error']['Code'] != 'ConditionalCheckFailedException':
+                raise

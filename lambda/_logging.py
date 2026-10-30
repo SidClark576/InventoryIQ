@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import uuid
+from datetime import date
 from decimal import Decimal
 
 # Add python_vendor to path for sentry-sdk
@@ -227,3 +228,18 @@ def number_field(body, name, integer=False, default=None):
         return None, response(400, {'error': f'{name} must be a non-negative {kind}',
                                     'code': 'INVALID_FIELD', 'field': name})
     return (int(num) if integer else num), None
+
+
+def date_field(body, name):
+    """`YYYY-MM-DD` date from `body[name]`: (value, None) or (None, 400).
+    Absent -> (None, None); '' or null -> ('', None), which clears the field."""
+    if name not in body:
+        return None, None
+    raw = body[name]
+    if raw is None or raw == '':
+        return '', None
+    try:
+        return date.fromisoformat(raw).isoformat(), None
+    except (TypeError, ValueError):
+        return None, response(400, {'error': f'{name} must be a date (YYYY-MM-DD)',
+                                    'code': 'INVALID_FIELD', 'field': name})
