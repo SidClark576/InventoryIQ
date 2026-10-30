@@ -76,6 +76,9 @@ def _handle(event, context):
             nums[name], err = _logging.number_field(body, name, integer, default)
             if err:
                 return err
+        expires_at, err = _logging.date_field(body, 'expiresAt')
+        if err:
+            return err
 
         # Idempotency: check for duplicate request before doing any writes
         idem_key = (
@@ -110,6 +113,7 @@ def _handle(event, context):
             'price'            : nums['price'],
             'lowStockThreshold': nums['lowStockThreshold'],
             'barcode'          : body.get('barcode', ''),
+            'expiresAt'        : expires_at or '',
             'version'          : 1,
             'createdAt'        : timestamp,
             'updatedAt'        : timestamp,

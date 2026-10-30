@@ -5,12 +5,12 @@ import { useOrgShell } from "@/app/AppLayout";
 import { useStockActions } from "@/app/use-stock-actions";
 import { LevelGauge } from "@/components/charts/level-gauge";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { StatusBadge } from "@/components/status-badge";
+import { ExpiryBadge, StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { priceOf, quantityOf, stockLevelOf, thresholdOf } from "@/lib/dashboardStats";
-import { formatMoney } from "@/lib/format";
+import { expiryOf, priceOf, quantityOf, stockLevelOf, thresholdOf } from "@/lib/dashboardStats";
+import { formatDay, formatMoney } from "@/lib/format";
 import { AdjustControls } from "./AdjustControls";
 import { ItemEditForm } from "./ItemEditForm";
 import { ItemHistory } from "./ItemHistory";
@@ -53,7 +53,10 @@ export function ItemPanel({ item, onDeleted }: ItemPanelProps) {
               </span>
               <span className="text-sm text-muted-foreground">on hand</span>
             </p>
-            <StatusBadge level={level} />
+            <div className="flex flex-col items-end gap-1.5">
+              <StatusBadge level={level} />
+              <ExpiryBadge item={item} />
+            </div>
           </div>
           <LevelGauge quantity={quantity} threshold={threshold} level={level} className="bg-background" />
           <dl className="flex gap-6 text-xs text-muted-foreground">
@@ -71,6 +74,12 @@ export function ItemPanel({ item, onDeleted }: ItemPanelProps) {
                 {formatMoney(priceOf(item) * quantity)}
               </dd>
             </div>
+            {expiryOf(item) ? (
+              <div>
+                <dt>Expires</dt>
+                <dd className="text-sm font-medium text-foreground tabular-nums">{formatDay(expiryOf(item))}</dd>
+              </div>
+            ) : null}
           </dl>
         </div>
 

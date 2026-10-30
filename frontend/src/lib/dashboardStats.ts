@@ -45,6 +45,30 @@ export function stockLevelOf(item: InventoryItem): StockLevel {
   return quantity <= thresholdOf(item) ? "low" : "ok";
 }
 
+export type ExpiryLevel = "expired" | "soon";
+
+// Same window as DailyAlert.py's EXPIRY_WINDOW_DAYS.
+export const EXPIRY_WINDOW_DAYS = 7;
+const DAY_MS = 86_400_000;
+
+/** `YYYY-MM-DD`, or "" when the item has no expiry date. */
+export function expiryOf(item: InventoryItem): string {
+  return typeof item.expiresAt === "string" ? item.expiresAt : "";
+}
+
+/** Whole calendar days from `today` (local) to the expiry date; negative once past, null when undated. */
+export function daysUntilExpiry(item: InventoryItem, today = new Date()): number | null {
+  const expires = Date.parse(`${expiryOf(item)}T00:00:00Z`);
+  if (Number.isNaN(expires)) return null;
+  return Math.round((expires - Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())) / DAY_MS);
+}
+
+export function expiryLevelOf(item: InventoryItem, today = new Date()): ExpiryLevel | null {
+  const days = daysUntilExpiry(item, today);
+  if (days === null || days > EXPIRY_WINDOW_DAYS) return null;
+  return days < 0 ? "expired" : "soon";
+}
+
 export function countByLevel(items: readonly InventoryItem[]): Record<StockLevel, number> {
   return items.reduce<Record<StockLevel, number>>(
     (counts, item) => {

@@ -5,7 +5,7 @@ import { useStockActions, type ItemFields } from "@/app/use-stock-actions";
 import { Field, TEXTAREA_CLASS } from "@/components/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { priceOf, thresholdOf } from "@/lib/dashboardStats";
+import { expiryOf, priceOf, thresholdOf } from "@/lib/dashboardStats";
 import { currencySymbol } from "@/lib/format";
 
 type Draft = {
@@ -15,6 +15,7 @@ type Draft = {
   threshold: string;
   barcode: string;
   description: string;
+  expires: string;
 };
 
 function draftOf(item: InventoryItem): Draft {
@@ -25,6 +26,7 @@ function draftOf(item: InventoryItem): Draft {
     threshold: String(thresholdOf(item)),
     barcode: item.barcode ?? "",
     description: item.description ?? "",
+    expires: expiryOf(item),
   };
 }
 
@@ -43,6 +45,7 @@ function changesFrom(item: InventoryItem, draft: Draft): ItemFields | string {
     lowStockThreshold: threshold,
     barcode: draft.barcode.trim(),
     description: draft.description.trim(),
+    expiresAt: draft.expires,
   };
   const before: ItemFields = {
     name: item.name ?? "",
@@ -51,6 +54,7 @@ function changesFrom(item: InventoryItem, draft: Draft): ItemFields | string {
     lowStockThreshold: thresholdOf(item),
     barcode: item.barcode ?? "",
     description: item.description ?? "",
+    expiresAt: expiryOf(item),
   };
   return Object.fromEntries(
     (Object.keys(next) as (keyof ItemFields)[])
@@ -136,6 +140,15 @@ export function ItemEditForm({ item }: { item: InventoryItem }) {
           className="tabular-nums"
           value={draft.threshold}
           onChange={(event) => patch({ threshold: event.target.value })}
+        />
+      </Field>
+      <Field id="e-expires" label="Expires" className="col-span-2">
+        <Input
+          id="e-expires"
+          type="date"
+          className="tabular-nums"
+          value={draft.expires}
+          onChange={(event) => patch({ expires: event.target.value })}
         />
       </Field>
       <Field id="e-barcode" label="Barcode" className="col-span-2">

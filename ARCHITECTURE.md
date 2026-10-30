@@ -88,7 +88,7 @@ the Lambda) → item write + audit log write in one `TransactWriteItems`.
 
 | Table | PK | SK | GSIs | TTL | Notes |
 |---|---|---|---|---|---|
-| `InventoryIQ` | `itemID` | — | `userID-index`, `orgID-index` | — | Items: `name`, `category`, `quantity`, `price` (Decimal), `lowStockThreshold`, `userID`, `orgID`, `barcode`, `version`, timestamps, `deletedAt`/`deletedBy` |
+| `InventoryIQ` | `itemID` | — | `userID-index`, `orgID-index` | — | Items: `name`, `category`, `quantity`, `price` (Decimal), `lowStockThreshold`, `userID`, `orgID`, `barcode`, `expiresAt` (`YYYY-MM-DD` or ""), `expiredAlertedFor`/`expirySoonAlertedFor` (the `expiresAt` DailyAlert last alerted for), `version`, timestamps, `deletedAt`/`deletedBy` |
 | `Users` | `Email` | — | — | — | `passwordHash` (scrypt), `salt`. Streams on — REMOVE triggers `CascadeDeleteUser` |
 | `Sessions` | `sessionToken` | — | `userID-index` | `expiresAt` | Audit trail + logout cleanup only |
 | `AuthAttempts` | `email` | — | — | `ttl` | Failed-login rate limiting, 15-min lockout |
