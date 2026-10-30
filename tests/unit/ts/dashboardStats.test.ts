@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import type { InventoryItem } from "../../../frontend/src/api.ts";
 import {
+  daysUntilExpiry,
   deriveDashStats,
+  expiryLevelOf,
   quantityOf,
   stockLevelOf,
 } from "../../../frontend/src/lib/dashboardStats.ts";
@@ -83,5 +85,26 @@ describe("deriveDashStats", () => {
     ]);
 
     assert.doesNotThrow(() => deriveDashStats(items));
+  });
+});
+
+describe("expiryLevelOf", () => {
+  // Local calendar day, as the browser sees it.
+  const today = new Date(2026, 10, 10, 23, 30);
+
+  test("past is expired, today through +7 days is soon, later or missing is null", () => {
+    assert.equal(expiryLevelOf({ expiresAt: "2026-11-09" }, today), "expired");
+    assert.equal(expiryLevelOf({ expiresAt: "2026-11-10" }, today), "soon");
+    assert.equal(expiryLevelOf({ expiresAt: "2026-11-17" }, today), "soon");
+    assert.equal(expiryLevelOf({ expiresAt: "2026-11-18" }, today), null);
+    assert.equal(expiryLevelOf({ expiresAt: "" }, today), null);
+    assert.equal(expiryLevelOf({}, today), null);
+  });
+
+  test("daysUntilExpiry counts calendar days", () => {
+    assert.equal(daysUntilExpiry({ expiresAt: "2026-11-13" }, today), 3);
+    assert.equal(daysUntilExpiry({ expiresAt: "2026-11-09" }, today), -1);
+    assert.equal(daysUntilExpiry({ expiresAt: "2027-01-01" }, today), 52);
+    assert.equal(daysUntilExpiry({}, today), null);
   });
 });

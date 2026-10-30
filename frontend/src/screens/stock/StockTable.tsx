@@ -4,13 +4,14 @@ import { CaretRightIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react";
 import type { InventoryItem } from "@/api";
 import { SHEET_LINK_STATE } from "@/app/use-sheet-params";
 import { LevelGauge } from "@/components/charts/level-gauge";
-import { LEVEL_LABEL, StatusBadge } from "@/components/status-badge";
+import { ExpiryBadge, LEVEL_LABEL, StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { quantityOf, stockLevelOf, thresholdOf } from "@/lib/dashboardStats";
+import { expiryOf, quantityOf, stockLevelOf, thresholdOf } from "@/lib/dashboardStats";
+import { formatDay } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { countedValue, type Counts } from "./count";
 import type { StockGroup } from "./stock-view";
@@ -117,7 +118,7 @@ export function StockTable({
   );
 }
 
-const COLUMNS = 5;
+const COLUMNS = 6;
 
 type StockHeadProps = {
   counting: boolean;
@@ -156,6 +157,7 @@ function StockHead({ counting, checkCol, allSelected, someSelected, visibleIDs, 
         <th className={cn(HEAD, counting ? "w-24 text-right sm:w-28" : "hidden w-28 md:table-cell")}>
           {counting ? "Difference" : "Status"}
         </th>
+        <th className={cn(HEAD, "hidden w-32 md:table-cell")}>{counting ? null : "Expires"}</th>
       </tr>
     </thead>
   );
@@ -323,7 +325,23 @@ function StockRow(props: StockRowProps) {
           <StatusBadge level={level} />
         )}
       </td>
+      <ExpiryCell item={item} counting={counting} />
     </tr>
+  );
+}
+
+/** Blank while counting; the date plus a red/amber badge when it is past or close. */
+function ExpiryCell({ item, counting }: { item: InventoryItem; counting: boolean }) {
+  const expiry = expiryOf(item);
+  return (
+    <td className={cn(CELL, "hidden md:table-cell")}>
+      {counting || !expiry ? null : (
+        <div className="flex flex-col items-start gap-1">
+          <span className="text-xs whitespace-nowrap text-muted-foreground tabular-nums">{formatDay(expiry)}</span>
+          <ExpiryBadge item={item} />
+        </div>
+      )}
+    </td>
   );
 }
 

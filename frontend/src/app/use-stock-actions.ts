@@ -20,6 +20,8 @@ export type ItemFields = {
   lowStockThreshold?: number;
   description?: string;
   barcode?: string;
+  /** `YYYY-MM-DD`; "" clears it. */
+  expiresAt?: string;
 };
 
 type QuantityOptions = {

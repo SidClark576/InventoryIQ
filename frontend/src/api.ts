@@ -28,6 +28,8 @@ export type InventoryItem = {
   version?: number;
   barcode?: string;
   description?: string;
+  /** `YYYY-MM-DD`; "" or missing = no expiry date. */
+  expiresAt?: string;
   userID?: string;
   orgID?: string;
   deletedAt?: string;
