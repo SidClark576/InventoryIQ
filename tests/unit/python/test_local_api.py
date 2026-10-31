@@ -186,3 +186,47 @@ def test_static_table_when_gateway_env_unset(monkeypatch):
     monkeypatch.delenv('LOCAL_API_GATEWAY', raising=False)
     monkeypatch.setattr(local_api, '_aws', lambda name: pytest.fail('gateway read'))
     assert _status('POST', '/items/import') == 200 and calls[-1][0] == 'BulkImport'
+
+
+# ── /proxy/* through Proxy's in-process invoke path (job 017) ─────────────────
+def _fresh_setup(monkeypatch, mode=None):
+    monkeypatch.setattr(os, 'environ', dict(os.environ))
+    os.environ.pop('PROXY_MODE', None)
+    if mode:
+        os.environ['PROXY_MODE'] = mode
+    monkeypatch.delitem(sys.modules, 'Proxy', raising=False)
+    local_api.setup()
+    import Proxy
+    return Proxy
+
+
+def test_routes_table_is_shared_with_proxy():
+    import _routes
+    assert local_api.ROUTES is _routes.ROUTES and local_api.match_route is _routes.match_route
+
+
+def test_proxy_serves_routes_through_in_process_invoke_by_default(monkeypatch):
+    from conftest import jwt_for
+    proxy = _fresh_setup(monkeypatch)
+    assert os.environ['PROXY_MODE'] == 'invoke' and proxy.PROXY_MODE == 'invoke'
+    calls, real = [], local_api.handler
+
+    def fake_handler(module):
+        if module == 'Proxy':
+            return real(module)
+        return lambda event, context: calls.append((module, event)) or {'statusCode': 200, 'body': '{}'}
+
+    monkeypatch.setattr(local_api, 'handler', fake_handler)
+    token = jwt_for(os.environ['JWT_SECRET'], 'u@x.co')
+    for path, module in [('/proxy/items', 'GetAllItems'), ('/proxy/barcode/4800000000017', 'BarcodeLookup')]:
+        res = local_api.route('GET', path, {'x-session-token': token, 'x-iq-user': 'evil@x.co'}, None, None)
+        assert res['statusCode'] == 200, path
+        assert calls[-1][0] == module
+        headers = calls[-1][1]['headers']
+        assert headers['x-iq-user'] == 'u@x.co' and 'x-api-key' not in headers
+
+
+def test_proxy_mode_http_keeps_the_backend_hop(monkeypatch):
+    proxy = _fresh_setup(monkeypatch, 'http')
+    assert os.environ['PROXY_MODE'] == 'http' and proxy.PROXY_MODE == 'http'
+    assert proxy.API_ENDPOINT.endswith('/_backend')
