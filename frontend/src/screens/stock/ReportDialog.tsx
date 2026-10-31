@@ -18,7 +18,7 @@ import { plural } from "@/lib/format";
 import { buildStockReport, defaultStartDate, localDate, type ReportGroup } from "@/lib/stock-report";
 import { downloadReportCsv } from "./export";
 
-export type StockReport = { groups: ReportGroup[]; start: Date; asOf: Date };
+export type StockReport = { groups: ReportGroup[]; start: Date; asOf: Date; selected: boolean };
 
 type ReportDialogProps = {
   open: boolean;
@@ -27,23 +27,25 @@ type ReportDialogProps = {
   /** The items are a selection, not the whole store: says so and names the CSV `_selected`. */
   selected: boolean;
   onPrint: (report: StockReport) => void;
+  /** Coming Back from the print preview: the form keeps the previewed start date (YYYY-MM-DD) and focus returns to Print. */
+  backStart?: string;
 };
 
 /** One dialog for both report outputs: pick the start date, then Export CSV or Print. */
-export function ReportDialog({ open, onOpenChange, items, selected, onPrint }: ReportDialogProps) {
+export function ReportDialog({ open, onOpenChange, items, selected, onPrint, backStart }: ReportDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm">
-        {/* Mounted only while open, so the date and error reset each time. */}
-        <ReportForm items={items} selected={selected} onDone={() => onOpenChange(false)} onPrint={onPrint} />
+      <DialogContent className="sm:max-w-sm" initialFocus={backStart ? () => document.getElementById("report-print") : true}>
+        {/* Mounted only while open, so the date and error reset each time (Back from the preview keeps the date). */}
+        <ReportForm items={items} selected={selected} onDone={() => onOpenChange(false)} onPrint={onPrint} backStart={backStart} />
       </DialogContent>
     </Dialog>
   );
 }
 
-function ReportForm({ items, selected, onDone, onPrint }: Omit<ReportDialogProps, "open" | "onOpenChange"> & { onDone: () => void }) {
+function ReportForm({ items, selected, onDone, onPrint, backStart }: Omit<ReportDialogProps, "open" | "onOpenChange"> & { onDone: () => void }) {
   const today = localDate(new Date());
-  const [date, setDate] = useState(defaultStartDate);
+  const [date, setDate] = useState(() => backStart ?? defaultStartDate());
   const [busy, setBusy] = useState<"csv" | "print" | null>(null);
   const [error, setError] = useState("");
 
@@ -57,7 +59,7 @@ function ReportForm({ items, selected, onDone, onPrint }: Omit<ReportDialogProps
     setError("");
     try {
       const txs = parseTransactions(await getTransactions(start.toISOString()));
-      const report = { groups: buildStockReport(items, txs, start), start, asOf: new Date() };
+      const report = { groups: buildStockReport(items, txs, start), start, asOf: new Date(), selected };
       onDone();
       if (kind === "print") {
         onPrint(report);
@@ -75,7 +77,7 @@ function ReportForm({ items, selected, onDone, onPrint }: Omit<ReportDialogProps
   return (
     <div className="grid gap-6">
       <DialogHeader>
-        <DialogTitle>Stock report</DialogTitle>
+        <DialogTitle>{selected ? "Selected items" : "Stock report"}</DialogTitle>
         <DialogDescription>
           {selected ? `Report for ${plural(items.length, "selected item")}.` : `Report for all ${plural(items.length, "item")}.`} Starting stock is what you had on this date. Stock in counts deliveries since then.
         </DialogDescription>
@@ -93,8 +95,8 @@ function ReportForm({ items, selected, onDone, onPrint }: Omit<ReportDialogProps
         <Button id="report-csv" type="button" variant="outline" disabled={busy !== null} onClick={() => void run("csv")}>
           {busy === "csv" ? "Exporting…" : "Export CSV"}
         </Button>
-        <Button id="report-print" type="button" disabled={busy !== null} onClick={() => void run("print")}>
-          {busy === "print" ? "Loading…" : "Print"}
+        <Button id="report-print" type="button" disabled={busy !== null || items.length === 0} onClick={() => void run("print")}>
+          {items.length === 0 ? "Nothing to print yet" : busy === "print" ? "Loading…" : "Print"}
         </Button>
       </DialogFooter>
     </div>

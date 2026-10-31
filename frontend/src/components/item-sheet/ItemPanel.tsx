@@ -4,7 +4,6 @@ import type { InventoryItem } from "@/api";
 import { useOrgShell } from "@/app/AppLayout";
 import { useStockActions } from "@/app/use-stock-actions";
 import { LevelGauge } from "@/components/charts/level-gauge";
-import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ExpiryBadge, StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -23,7 +22,6 @@ type ItemPanelProps = {
 export function ItemPanel({ item, onDeleted }: ItemPanelProps) {
   const { deleteItems } = useStockActions();
   const { canEdit } = useOrgShell();
-  const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const quantity = quantityOf(item);
   const threshold = thresholdOf(item);
@@ -34,7 +32,6 @@ export function ItemPanel({ item, onDeleted }: ItemPanelProps) {
     setDeleting(true);
     const deleted = await deleteItems([item]);
     setDeleting(false);
-    setConfirming(false);
     if (deleted.length) onDeleted();
   }
 
@@ -99,23 +96,15 @@ export function ItemPanel({ item, onDeleted }: ItemPanelProps) {
               type="button"
               variant="destructive"
               className="self-start"
-              onClick={() => setConfirming(true)}
+              disabled={deleting}
+              onClick={() => void remove()}
             >
               <TrashIcon />
-              Delete item
+              {deleting ? "Deleting…" : "Delete item"}
             </Button>
           </>
         ) : null}
       </div>
-      <ConfirmDialog
-        open={confirming}
-        onOpenChange={setConfirming}
-        title="Delete this item?"
-        description={`${item.name || "This item"} moves to deleted items. You can restore it for 30 days.`}
-        confirmLabel="Delete"
-        busy={deleting}
-        onConfirm={() => void remove()}
-      />
     </>
   );
 }

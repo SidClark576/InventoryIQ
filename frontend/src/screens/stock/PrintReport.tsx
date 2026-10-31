@@ -1,20 +1,21 @@
 import { formatMoney } from "@/lib/format";
-import { REPORT_HEADERS, type ReportGroup } from "@/lib/stock-report";
+import { REPORT_HEADERS } from "@/lib/stock-report";
+import type { StockReport } from "./ReportDialog";
 
-type PrintReportProps = { groups: readonly ReportGroup[]; start: Date; asOf: Date; storeName: string };
+type ReportProps = { report: StockReport; storeName: string };
 
 const longDate = (date: Date) => date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 
-/** The paper "Inventory of Stocks" sheet. Hidden on screen; index.css shows it when <html data-iq-print="inventory"> prints. */
-export function PrintReport({ groups, start, asOf, storeName }: PrintReportProps) {
+/** The paper "Inventory of Stocks" sheet, id-less so the preview and the printout can both render it. Styled by `.report-sheet` in index.css. */
+export function ReportTable({ report: { groups, start, asOf, selected }, storeName }: ReportProps) {
   return (
-    <section id="print-section" data-print-region aria-hidden>
+    <>
       <h1 className="print-title">{storeName}</h1>
-      <p className="print-subtitle">Inventory of Stocks</p>
+      <p className="print-subtitle">Inventory of Stocks{selected ? " · Selected items" : ""}</p>
       <p className="print-meta">
         As of {longDate(asOf)} · from {longDate(start)}
       </p>
-      <table id="print-table">
+      <table>
         <thead>
           <tr>
             {REPORT_HEADERS.map((header, index) => (
@@ -45,6 +46,15 @@ export function PrintReport({ groups, start, asOf, storeName }: PrintReportProps
           ])}
         </tbody>
       </table>
+    </>
+  );
+}
+
+/** What actually prints. Hidden on screen; index.css shows it when <html data-iq-print="inventory"> prints. */
+export function PrintReport(props: ReportProps) {
+  return (
+    <section id="print-section" className="report-sheet" data-print-region aria-hidden>
+      <ReportTable {...props} />
     </section>
   );
 }
