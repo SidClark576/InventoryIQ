@@ -25,7 +25,7 @@ This project uses OpenWolf. Full protocol: [.wolf/OPENWOLF.md](.wolf/OPENWOLF.md
 
 ## 1. Architecture & Request Flow
 
-Serverless multi-tenant inventory system on AWS. Static Cloudflare Pages frontend (`app.panindo.app`; `theinventoryiq.netlify.app` 301s there) → API Gateway proxy stage → `Proxy.py` → API Gateway real stage (x-api-key) → Lambdas.
+Serverless multi-tenant inventory system on AWS. Static Cloudflare Pages frontend (`app.panindo.app`; `theinventoryiq.netlify.app` 301s there) → API Gateway proxy stage → `Proxy.py` → API Gateway real stage (x-api-key) → Lambdas. With `PROXY_MODE=invoke` (Proxy env), `Proxy.py` skips the second hop and calls each route's Lambda directly (`lambda:InvokeFunction`, API-Gateway-shaped event, route table in `lambda/_routes.py`, function name = module name); unset keeps the HTTP hop until the rollout.
 
 ```
 Browser (sessionStorage.sessionToken, sent as X-Session-Token)
@@ -51,12 +51,12 @@ Authentication.mjs (Node) · Python CRUD/org Lambdas · SQS/SNS alerts
 
 - `Authentication.mjs` signs an HS256 JWT on login (`sub` = lowercased email). Client stores it in `sessionStorage.sessionToken`.
 - Validation is stateless — `Proxy.py` and `Authorizer.mjs` verify the signature with stdlib crypto only. **No external JWT library anywhere; keep it pure `crypto` / `hmac`+`hashlib`.**
-- `JWT_SECRET` env var MUST match across `Authentication`, `Proxy`, and `Authorizer` Lambdas or all logins 401.
+- `JWT_SECRET` env var MUST match across `Authentication`, `Proxy`, and `Authorizer` Lambdas or all logins 401. When `JWT_SECRET_PARAM` names an SSM SecureString, `Proxy` and `Authentication` read the secret from it once per cold start and fall back to `JWT_SECRET` if it is unset or the read fails.
 - The `Sessions` table is now audit-trail + logout cleanup only — never used for token validation.
 
 **Local backend — test locally before any deploy.** Every Lambda change runs on the Mac first; never push an untested handler to AWS.
 
-- Start: `npm run dev:local` (needs Docker running; one-time setup: `npm ci`, `.venv/bin/pip install -r scripts/requirements.txt` and `docker pull floci/floci:2.3.0`). It starts Floci (`floci/floci:2.3.0` container `panindo-floci`, in-memory, fake DynamoDB, SES, SNS, SQS, S3, Secrets Manager) on :4566, `scripts/local_api.py` on :3001 (the real handlers behind `/auth`, `/proxy` and Proxy's `/_backend` target), seeds a test store with `scripts/local_seed.py`, then Vite on :8000 pointed at :3001 via `VITE_API_BASE`. Ports: `LOCAL_FLOCI_PORT`, `LOCAL_API_PORT`, `LOCAL_DEV_PORT`.
+- Start: `npm run dev:local` (needs Docker running; one-time setup: `npm ci`, `.venv/bin/pip install -r scripts/requirements.txt` and `docker pull floci/floci:2.3.0`). It starts Floci (`floci/floci:2.3.0` container `panindo-floci`, in-memory, fake DynamoDB, SES, SNS, SQS, S3, Secrets Manager) on :4566, `scripts/local_api.py` on :3001 (the real handlers behind `/auth`, `/proxy` and Proxy's `/_backend` target; `/proxy` runs `PROXY_MODE=invoke` by default, calling handlers in-process, and `PROXY_MODE=http npm run dev:local` tests the legacy `/_backend` hop), seeds a test store with `scripts/local_seed.py`, then Vite on :8000 pointed at :3001 via `VITE_API_BASE`. Ports: `LOCAL_FLOCI_PORT`, `LOCAL_API_PORT`, `LOCAL_DEV_PORT`.
 - Stop: Ctrl-C stops all four and removes the container. Reseed = restart (Floci keeps nothing).
 - Test login: `.local/test-login.json` (gitignored; owner, staff (editor), shared generated password). Never commit it or copy the password anywhere.
 - Emails are never sent: the runner prints each SES message Floci captured (read from Floci's `GET /_aws/ses`). Barcode lookups never reach the internet: seeded barcodes answer from `BarcodeCache`, any other code is "not found".
