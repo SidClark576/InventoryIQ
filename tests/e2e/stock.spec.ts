@@ -74,3 +74,27 @@ test.describe('Stock', () => {
     await expect(page.getByRole('columnheader', { name: 'Counted' })).toHaveCount(0)
   })
 })
+
+// Deletes data, so it runs only against dev:local (Floci + scripts/local_api.py). Under plain `npm run dev` the app
+// calls the live API and this test skips; a skip there proves nothing.
+test('Delete → Undo puts the item back (dev:local only)', async ({ authenticatedPage: page }) => {
+  const firstItems = page.waitForRequest(/\/proxy\/items/)
+  await page.goto('/stock')
+  const { hostname } = new URL((await firstItems).url())
+  test.skip(hostname !== 'localhost' && hostname !== '127.0.0.1', 'Deletes data: runs only on npm run dev:local')
+
+  const name = `E2E undo ${Date.now()}`
+  await page.locator('#btn-add-new').click()
+  await page.locator('#n-name').fill(name)
+  await page.getByRole('button', { name: 'Add item' }).click()
+  const row = page.locator('#inventory-table tbody tr[data-item-id]', { hasText: name })
+  await expect(row).toBeVisible({ timeout: 20000 })
+  await page.keyboard.press('Escape')
+
+  await row.getByRole('link').first().click()
+  await page.getByRole('button', { name: 'Delete item' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(row).toHaveCount(0)
+  await page.getByRole('button', { name: 'Undo' }).click()
+  await expect(row).toBeVisible({ timeout: 20000 })
+})

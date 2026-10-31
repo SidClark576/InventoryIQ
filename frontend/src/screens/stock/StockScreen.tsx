@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { flushSync } from "react-dom";
 import { useSearchParams } from "react-router";
 import { PlusIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
@@ -7,7 +6,6 @@ import { lookupBarcode, type InventoryItem } from "@/api";
 import { useOrgShell } from "@/app/AppLayout";
 import { useInventory } from "@/app/inventory-store";
 import { useSheetParams } from "@/app/use-sheet-params";
-import { useStockActions } from "@/app/use-stock-actions";
 import { BarcodeScanDialog } from "@/components/barcode-scan-dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ItemSheetHost } from "@/components/item-sheet/ItemSheetHost";
@@ -16,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useIsDesktop } from "@/hooks/use-media-query";
 import { countByLevel, deriveDashStats } from "@/lib/dashboardStats";
 import { plural } from "@/lib/format";
+import { localDate } from "@/lib/stock-report";
 import { getCurrentOrgName, setEditItem } from "@/session";
 import { CategoriesDialog } from "./CategoriesDialog";
 import { summarizeCount, type Counts } from "./count";
@@ -24,20 +23,22 @@ import { CountReviewDialog } from "./CountReviewDialog";
 import { CountBar, SelectionBar } from "./FloatingBar";
 import { HealthBar } from "./HealthBar";
 import { ImportDialog } from "./ImportDialog";
+import { PrintPreviewDialog } from "./PrintPreviewDialog";
 import { PrintReport } from "./PrintReport";
-import { ReportDialog, type StockReport } from "./ReportDialog";
+import { ReportDialog } from "./ReportDialog";
 import { EmptyShelf, NoMatches, StockError, StockSkeleton } from "./StockStates";
 import { StockTable } from "./StockTable";
 import { StockToolbar } from "./StockToolbar";
 import { DEEP_LINK_DIALOGS, dialogFromParams, filterItems, groupItems, useStockView } from "./stock-view";
 import { TrashView } from "./TrashView";
+import { usePrintReport } from "./use-print-report";
+import { useBulkDelete } from "./use-bulk-delete";
 import { useRowStepper } from "./use-row-stepper";
 
-type DialogName = "scan" | "categories" | "import" | "review" | "bulk-delete" | "stop-count" | "report" | null;
+type DialogName = "scan" | "categories" | "import" | "review" | "stop-count" | "report" | null;
 
 export function StockScreen() {
   const { items, itemsStatus, reloadItems } = useInventory();
-  const { deleteItems } = useStockActions();
   const { canEdit, orgEpoch } = useOrgShell();
   const { openItem, openNew, itemHref } = useSheetParams();
   const view = useStockView();
@@ -49,9 +50,9 @@ export function StockScreen() {
   const [counting, setCounting] = useState(false);
   const [counts, setCounts] = useState<Counts>({});
   const [dialog, setDialog] = useState<DialogName>(null);
-  const [busy, setBusy] = useState(false);
   const [importAvailable, setImportAvailable] = useState(true);
-  const [report, setReport] = useState<StockReport | null>(null);
+  const { printable, preview, setPreview, print } = usePrintReport(orgEpoch);
+  const [backStart, setBackStart] = useState<string>();
   const [reportFor, setReportFor] = useState<{ items: readonly InventoryItem[]; selected: boolean }>({ items: [], selected: false });
 
   useEffect(() => {
@@ -73,20 +74,6 @@ export function StockScreen() {
     setParams(next, { replace: true });
   }, [params, setParams, canEdit]);
 
-  // Print styles key off this attribute (index.css), set by print() only. After printing, drop the report so a
-  // later Ctrl+P prints the page as is, never a stale report.
-  useEffect(() => {
-    const clear = () => {
-      delete document.documentElement.dataset.iqPrint;
-      setReport(null);
-    };
-    window.addEventListener("afterprint", clear);
-    return () => {
-      window.removeEventListener("afterprint", clear);
-      delete document.documentElement.dataset.iqPrint;
-    };
-  }, []);
-
   const loading = itemsStatus === "idle" || itemsStatus === "loading";
   const levelCounts = useMemo(() => countByLevel(items), [items]);
   const value = useMemo(() => deriveDashStats(items).estimatedInventoryValue, [items]);
@@ -98,6 +85,8 @@ export function StockScreen() {
     () => rows.filter((item) => item.itemID && selected.has(item.itemID)),
     [rows, selected],
   );
+  const storeName = getCurrentOrgName() || "Panindo";
+  const bulkDelete = useBulkDelete(selectedItems, rows.length, setSelected);
   const filtered = view.status !== "all" || view.query.trim() !== "";
 
   // Drop selections for rows that disappeared (deleted elsewhere, org switch).
@@ -152,14 +141,14 @@ export function StockScreen() {
       return;
     }
     setReportFor({ items: targets, selected });
+    setBackStart(undefined);
     setDialog("report");
   }
 
-  function print(next: StockReport) {
-    document.documentElement.dataset.iqPrint = "inventory";
-    // flushSync renders the report before the browser snapshots the page.
-    flushSync(() => setReport(next));
-    window.print();
+  function backToReport() {
+    if (preview) setBackStart(localDate(preview.start));
+    setPreview(null);
+    setDialog("report");
   }
 
   async function onScanCode(code: string): Promise<string | void> {
@@ -181,15 +170,6 @@ export function StockScreen() {
     setDialog(null);
     if (!product) toast(`No product found for ${code}`, { description: "Add it with the barcode filled in." });
     openNew();
-  }
-
-  async function bulkDelete() {
-    setBusy(true);
-    const deleted = new Set(await deleteItems(selectedItems));
-    setBusy(false);
-    setDialog(null);
-    // Rows that failed stay selected so a retry is one click.
-    setSelected(new Set(selectedItems.flatMap((item) => (item.itemID && !deleted.has(item.itemID) ? [item.itemID] : []))));
   }
 
   function finishCount(failedIDs: readonly string[]) {
@@ -321,15 +301,13 @@ export function StockScreen() {
             count={selectedItems.length}
             canEdit={canEdit}
             onExport={() => openReport(selectedItems, true)}
-            onDelete={() => setDialog("bulk-delete")}
+            onDelete={bulkDelete.ask}
             onClear={() => setSelected(new Set())}
           />
         ) : null}
       </div>
 
-      {report ? (
-        <PrintReport groups={report.groups} start={report.start} asOf={report.asOf} storeName={getCurrentOrgName() || "Panindo"} />
-      ) : null}
+      {printable ? <PrintReport report={printable} storeName={storeName} /> : null}
 
       <BarcodeScanDialog
         open={dialog === "scan"}
@@ -342,6 +320,13 @@ export function StockScreen() {
         onOpenChange={(open) => setDialog(open ? "report" : null)}
         items={reportFor.items}
         selected={reportFor.selected}
+        onPrint={setPreview}
+        backStart={backStart}
+      />
+      <PrintPreviewDialog
+        report={preview}
+        storeName={storeName}
+        onBack={backToReport}
         onPrint={print}
       />
       <CategoriesDialog open={dialog === "categories"} onOpenChange={(open) => setDialog(open ? "categories" : null)} />
@@ -359,13 +344,12 @@ export function StockScreen() {
         onFinished={finishCount}
       />
       <ConfirmDialog
-        open={dialog === "bulk-delete"}
-        onOpenChange={(open) => setDialog(open ? "bulk-delete" : null)}
+        open={bulkDelete.confirming}
+        onOpenChange={bulkDelete.setConfirming}
         title={`Delete ${plural(selectedItems.length, "item")}?`}
         description="They move to deleted items. You can restore them for 30 days."
         confirmLabel="Delete"
-        busy={busy}
-        onConfirm={() => void bulkDelete()}
+        onConfirm={() => void bulkDelete.run()}
       />
       <ConfirmDialog
         open={dialog === "stop-count"}

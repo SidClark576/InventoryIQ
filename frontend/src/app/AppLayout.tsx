@@ -7,8 +7,10 @@ import {
   useMemo,
   useState,
   type ComponentType,
+  type MouseEvent,
 } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router";
+import { flushSync } from "react-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import {
   HouseSimpleIcon,
   PackageIcon,
@@ -25,6 +27,7 @@ import {
   type OrgRecord,
 } from "@/api";
 import { InventoryProvider, useInventory } from "@/app/inventory-store";
+import { canEditRole } from "@/lib/org-shell";
 import { AccountMenu } from "@/components/account-menu";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -87,8 +90,6 @@ const NAV: readonly NavItem[] = [
   { to: "/team", label: "Team", icon: UsersThreeIcon },
 ];
 
-const EDIT_ROLES: ReadonlySet<string> = new Set(["editor", "admin", "owner"]);
-
 function currentRoleOf(orgs: OrgRecord[]): string {
   return orgs.find((org) => org.orgID === getCurrentOrg())?.role ?? getCurrentRole();
 }
@@ -143,6 +144,8 @@ export function AppLayout() {
         if (chosen?.name) setCurrentOrgName(chosen.name);
         // Screens refetch for the new org right away; the org list refresh only updates names and roles.
         setOrgEpoch((epoch) => epoch + 1);
+        // Undo toasts would act on the old org's items.
+        toast.dismiss();
         await refreshOrgs();
         toast.success(`Switched to ${chosen?.name || "organization"}`);
       } catch (err: unknown) {
@@ -174,9 +177,7 @@ export function AppLayout() {
   }, [loggingOut, navigate]);
 
   const shell = useMemo<OrgShellContextValue>(() => {
-    const role = currentRoleOf(orgs);
-    // No role and no orgs is legacy mode, which has full access.
-    const canEdit = role ? EDIT_ROLES.has(role) : orgs.length === 0;
+    const canEdit = canEditRole(currentRoleOf(orgs), orgs.length);
     return { orgs, orgsAvailable: orgs.length > 0, orgsReady, orgEpoch, refreshOrgs, canEdit };
   }, [orgs, orgsReady, orgEpoch, refreshOrgs]);
 
@@ -196,7 +197,7 @@ export function AppLayout() {
           >
             Skip to content
           </a>
-          <aside className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
+          <aside className="sticky top-0 [view-transition-name:app-sidebar] hidden h-svh w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
             <div className="flex h-16 items-center px-5">
               <Brand />
             </div>
@@ -207,7 +208,7 @@ export function AppLayout() {
             </div>
           </aside>
           <div className="flex min-w-0 flex-1 flex-col">
-            <header className="sticky top-0 z-30 flex min-h-14 pt-[env(safe-area-inset-top)] items-center gap-2 border-b border-border bg-background/90 px-4 backdrop-blur-md md:hidden">
+            <header className="sticky top-0 z-30 [view-transition-name:app-header] flex min-h-14 pt-[env(safe-area-inset-top)] items-center gap-2 border-b border-border bg-background/90 px-4 backdrop-blur-md md:hidden">
               <Brand />
               <div className="ml-auto min-w-0">
                 <AccountMenu
@@ -324,14 +325,37 @@ function visibleNav(showTeam: boolean): readonly NavItem[] {
   return showTeam ? NAV : NAV.filter((item) => item.to !== "/team");
 }
 
+/**
+ * Nav-link clicks cross-fade the page content (index.css). BrowserRouter ignores NavLink's `viewTransition`, so this
+ * wraps the navigation itself. Modified clicks, back/forward and `?item=`-style URL changes keep today's behaviour.
+ */
+function useNavClick(): (event: MouseEvent<HTMLAnchorElement>, to: string) => void {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  return (event, to) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    document.getElementById("main")?.focus({ preventScroll: true });
+    // Same page: no fade, but still navigate so `?status=`/`?item=` clear as before.
+    if (to === pathname || !document.startViewTransition || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      void navigate(to);
+      return;
+    }
+    // A newer click skips the running transition, so the last click wins.
+    document.startViewTransition(() => flushSync(() => void navigate(to)));
+  };
+}
+
 function SideNav({ showTeam }: { showTeam: boolean }) {
   const restock = useRestockCount();
+  const onNavClick = useNavClick();
   return (
     <nav aria-label="Main" className="flex flex-col gap-0.5 px-3">
       {visibleNav(showTeam).map((item) => (
         <NavLink
           key={item.to}
           to={item.to}
+          onClick={(event) => onNavClick(event, item.to)}
           className={({ isActive }) =>
             cn(
               "group flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-sidebar-ring/50",
@@ -362,16 +386,18 @@ function SideNav({ showTeam }: { showTeam: boolean }) {
 function TabBar({ showTeam }: { showTeam: boolean }) {
   const restock = useRestockCount();
   const items = visibleNav(showTeam);
+  const onNavClick = useNavClick();
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 [view-transition-name:app-tabbar] border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
     >
       <ul className="grid" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
         {items.map((item) => (
           <li key={item.to}>
             <NavLink
               to={item.to}
+              onClick={(event) => onNavClick(event, item.to)}
               className={({ isActive }) =>
                 cn(
                   "relative flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium outline-none focus-visible:bg-muted",
