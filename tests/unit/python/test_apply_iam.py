@@ -256,3 +256,11 @@ def test_switch_retries_while_the_new_role_propagates(monkeypatch):
     monkeypatch.setattr(apply_iam.time, 'sleep', lambda s: None)
     apply_iam.switch_role(Lam(), 'AddItem', 'new', True)
     assert Lam.calls == 3
+
+
+def test_ses_send_covers_recipient_identities():
+    # SES sandbox also authorizes ses:SendEmail against each verified recipient identity, not only the sender.
+    for path in sorted(apply_iam.IAM_DIR.glob('*.json')):
+        for stmt in json.loads(path.read_text())['Statement']:
+            if 'ses:SendEmail' in stmt['Action']:
+                assert 'arn:aws:ses:${Region}:${AccountId}:identity/*' in stmt['Resource'], path.name

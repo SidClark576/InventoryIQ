@@ -56,7 +56,7 @@
         "ses:SendEmail"
       ],
       "Resource": [
-        "arn:aws:ses:${Region}:${AccountId}:identity/panindo.app"
+        "arn:aws:ses:${Region}:${AccountId}:identity/*"
       ]
     }
   ]
