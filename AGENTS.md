@@ -132,6 +132,7 @@ The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` p
 ### Scripts (`scripts/`)
 
 - `migrate_orgs.py` — one-shot backfill: personal org per existing user, stamps `orgID` on their data. **Dry-run by default**; `--apply` writes, `--selftest` runs offline. Idempotent. Prereq: org tables + `orgID-index` GSIs must already exist (it does not create them).
+- `apply_iam.py` — one least-privilege role per Lambda (`panindo-<Fn>`) from `scripts/iam/<Fn>.json` (`${Region}`/`${AccountId}` placeholders; X-Ray added when tracing is Active). **Dry-run by default**; `--apply` deletes the leftover `LambdaDLQ` triggers, writes roles, gates on `iam:SimulatePrincipalPolicy`, then switches each function's Role; `--rollback` returns all to `InventoryIQ-LambdaExecutionRole`; `--only <Fn>`. Live writes need `ROLLOUT_LIVE=1`. A Lambda that starts using a new table/topic/API needs its JSON updated.
 
 ---
 
