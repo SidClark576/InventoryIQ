@@ -94,7 +94,7 @@ The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` p
 - `src/screens/stock/` — `StockScreen` orchestrates `HealthBar` (legend = status filter), `StockToolbar` (search, group by Status/Category, Scan, Count stock, More: categories, import, export, print, deleted), `StockTable` (collapsible groups, selection), `FloatingBar` (bulk actions / count progress), `CountReviewDialog`, `TrashView`, `ImportDialog`, `CategoriesDialog`, `PrintReport`. Filters, grouping, search and the trash view live in the URL (`?status=`, `?group=`, `?q=`, `?view=trash`).
 - `src/screens/activity/` — day-grouped feed with filters (All, Stock in, Stock out, Waste and damage, Edits) and search; `?type=` and `?q=` in the URL.
 - `src/screens/team/` — seats (members + pending invites against `ORG_SEAT_CAP` default 5), members, invite form (admin/owner only).
-- `src/screens/InsightsScreen.tsx` — the only caller of `GET /insights`, on explicit load/refresh.
+- `src/screens/InsightsScreen.tsx` — computed in the browser (`lib/insights.ts`) from the item cache and `GET /transactions?since=<30 days ago>`; the app never calls `GET /insights` (it sends SNS on every call).
 - `src/screens/LoginScreen.tsx`, `ForgotPasswordScreen.tsx`, `ResetPasswordScreen.tsx`, `AcceptScreen.tsx` — auth. Inputs stay `#login-email` and `#login-password`.
 - `src/lib/` — pure helpers with node unit tests in `tests/unit/ts/`: `dashboardStats.ts` (levels, counts, restock queue), `activity.ts` (transaction filters, day groups), `reasons.ts` (adjust reasons → notes), `csv.ts`, `format.ts`.
 - `src/config.ts` — `API_ENDPOINT` (`/prod/proxy`) and `AUTH_ENDPOINT` (`/prod/auth`). No API key in the client.

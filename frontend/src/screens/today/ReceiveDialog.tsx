@@ -13,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { quantityOf } from "@/lib/dashboardStats";
-import { reasonNote } from "@/lib/reasons";
 
 type ReceiveDialogProps = {
   itemID: string | null;
@@ -22,17 +21,15 @@ type ReceiveDialogProps = {
 
 /**
  * Quick "a delivery arrived" from Today: adds units with a "Received N" note.
- * Reads the item from the store on every render so a retry after a 412 uses the fresh version.
  */
 export function ReceiveDialog({ itemID, onClose }: ReceiveDialogProps) {
   const { items } = useInventory();
-  const { setQuantity } = useStockActions();
+  const { setQuantityOptimistic } = useStockActions();
   const item = itemID ? (items.find((entry) => entry.itemID === itemID) ?? null) : null;
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!item) return;
     const units = Number(amount);
@@ -40,21 +37,18 @@ export function ReceiveDialog({ itemID, onClose }: ReceiveDialogProps) {
       setError("Enter how many arrived (a whole number, 1 or more).");
       return;
     }
-    setBusy(true);
-    const saved = await setQuantity(item, quantityOf(item) + units, reasonNote("Received", "add", units));
-    setBusy(false);
-    if (saved) {
-      setAmount("");
-      setError("");
-      onClose();
-    }
+    // Shows on Today at once; the store saves it (and says so if the save fails).
+    setQuantityOptimistic(item, units, "Received");
+    setAmount("");
+    setError("");
+    onClose();
   }
 
   return (
     <Dialog
       open={item !== null}
       onOpenChange={(open) => {
-        if (!open && !busy) {
+        if (!open) {
           setAmount("");
           setError("");
           onClose();
@@ -62,7 +56,7 @@ export function ReceiveDialog({ itemID, onClose }: ReceiveDialogProps) {
       }}
     >
       <DialogContent>
-        <form className="grid gap-6" onSubmit={(event) => void onSubmit(event)} noValidate>
+        <form className="grid gap-6" onSubmit={onSubmit} noValidate>
           <DialogHeader>
             <DialogTitle>Receive {item?.name || "item"}</DialogTitle>
             <DialogDescription>
@@ -89,11 +83,11 @@ export function ReceiveDialog({ itemID, onClose }: ReceiveDialogProps) {
             ) : null}
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" disabled={busy} onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={busy}>
-              {busy ? "Saving…" : "Add to stock"}
+            <Button type="submit">
+              Add to stock
             </Button>
           </DialogFooter>
         </form>
