@@ -1,0 +1,50 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "OwnLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/DeleteCategory",
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/DeleteCategory:*"
+      ]
+    },
+    {
+      "Sid": "InventoryIQ",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:Query",
+        "dynamodb:UpdateItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryIQ",
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryIQ/index/*"
+      ]
+    },
+    {
+      "Sid": "InventoryTransactions",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:PutItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryTransactions"
+      ]
+    },
+    {
+      "Sid": "OrgMembers",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/OrgMembers"
+      ]
+    }
+  ]
+}

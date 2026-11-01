@@ -1,0 +1,40 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "OwnLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/GetTransactions",
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/GetTransactions:*"
+      ]
+    },
+    {
+      "Sid": "InventoryTransactions",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:Query",
+        "dynamodb:Scan"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryTransactions",
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryTransactions/index/*"
+      ]
+    },
+    {
+      "Sid": "OrgMembers",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/OrgMembers"
+      ]
+    }
+  ]
+}

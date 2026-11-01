@@ -1,0 +1,120 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "OwnLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/Authentication",
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/Authentication:*"
+      ]
+    },
+    {
+      "Sid": "Users",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/Users"
+      ]
+    },
+    {
+      "Sid": "Sessions",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:PutItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/Sessions",
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/Sessions/index/*"
+      ]
+    },
+    {
+      "Sid": "AuthAttempts",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/AuthAttempts"
+      ]
+    },
+    {
+      "Sid": "PasswordResets",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:DeleteItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/PasswordResets"
+      ]
+    },
+    {
+      "Sid": "Organizations",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:PutItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/Organizations"
+      ]
+    },
+    {
+      "Sid": "OrgMembers",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:PutItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/OrgMembers"
+      ]
+    },
+    {
+      "Sid": "SendEmail",
+      "Effect": "Allow",
+      "Action": [
+        "ses:SendEmail"
+      ],
+      "Resource": [
+        "arn:aws:ses:${Region}:${AccountId}:identity/*"
+      ]
+    },
+    {
+      "Sid": "JwtSecret",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter"
+      ],
+      "Resource": [
+        "arn:aws:ssm:${Region}:${AccountId}:parameter/panindo/jwt-secret"
+      ]
+    },
+    {
+      "Sid": "JwtSecretDecrypt",
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "ssm.${Region}.amazonaws.com"
+        }
+      }
+    }
+  ]
+}

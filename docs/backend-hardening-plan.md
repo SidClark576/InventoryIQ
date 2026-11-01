@@ -42,6 +42,7 @@ All 18 Lambdas share one role with full DynamoDB/SNS/SQS/SES and Secrets Manager
 
 - One role per function group (read-only items, item writers, org, auth, scheduled jobs, cascade delete, proxy), each scoped to the exact table ARNs (+ `/index/*`), the one topic, queue, SES identity and parameter it uses. No `dynamodb:DeleteTable`, no `sns:Publish` to phone numbers.
 - Commit the policies as JSON under `scripts/iam/` so they're reviewable; apply with a dry-run-by-default script like `rollout_orgs.py`.
+- Built (job 019): one role per Lambda, `scripts/iam/*.json` + `scripts/apply_iam.py` (dry run; `ROLLOUT_LIVE=1 ... --apply`, `--rollback` to undo). Stripping the old shared role is a later step.
 
 ## Phase 3 — Query and job fixes (factory job, $0, lowers read cost as data grows)
 

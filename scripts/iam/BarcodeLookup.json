@@ -1,0 +1,39 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "OwnLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/BarcodeLookup",
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/BarcodeLookup:*"
+      ]
+    },
+    {
+      "Sid": "BarcodeCache",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/BarcodeCache"
+      ]
+    },
+    {
+      "Sid": "OrgMembers",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/OrgMembers"
+      ]
+    }
+  ]
+}

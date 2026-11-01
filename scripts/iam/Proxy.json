@@ -1,0 +1,73 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "OwnLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/Proxy",
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/Proxy:*"
+      ]
+    },
+    {
+      "Sid": "OrgMembers",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/OrgMembers"
+      ]
+    },
+    {
+      "Sid": "InvokeRoutes",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Resource": [
+        "arn:aws:lambda:${Region}:${AccountId}:function:AddItem",
+        "arn:aws:lambda:${Region}:${AccountId}:function:BarcodeLookup",
+        "arn:aws:lambda:${Region}:${AccountId}:function:DeleteCategory",
+        "arn:aws:lambda:${Region}:${AccountId}:function:DeleteItem",
+        "arn:aws:lambda:${Region}:${AccountId}:function:GetAllItems",
+        "arn:aws:lambda:${Region}:${AccountId}:function:GetCategories",
+        "arn:aws:lambda:${Region}:${AccountId}:function:GetTransactions",
+        "arn:aws:lambda:${Region}:${AccountId}:function:LowItemInsight",
+        "arn:aws:lambda:${Region}:${AccountId}:function:OrgInvites",
+        "arn:aws:lambda:${Region}:${AccountId}:function:OrgMembers",
+        "arn:aws:lambda:${Region}:${AccountId}:function:Orgs",
+        "arn:aws:lambda:${Region}:${AccountId}:function:RestoreItem",
+        "arn:aws:lambda:${Region}:${AccountId}:function:UpdateItem"
+      ]
+    },
+    {
+      "Sid": "JwtSecret",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter"
+      ],
+      "Resource": [
+        "arn:aws:ssm:${Region}:${AccountId}:parameter/panindo/jwt-secret"
+      ]
+    },
+    {
+      "Sid": "JwtSecretDecrypt",
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "ssm.${Region}.amazonaws.com"
+        }
+      }
+    }
+  ]
+}
