@@ -14,7 +14,8 @@ concurrency:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04, which Playwright 1.59 can't install browsers on.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,8 +46,10 @@ jobs:
       # The seed writes a fresh local-only login on every run; it is not a secret.
       - name: Seeded login for e2e
         run: |
+          password=$(jq -r .password .local/test-login.json)
+          echo "::add-mask::$password"
           echo "EVAL_EMAIL=$(jq -r .owner .local/test-login.json)" >> "$GITHUB_ENV"
-          echo "EVAL_PASSWORD=$(jq -r .password .local/test-login.json)" >> "$GITHUB_ENV"
+          echo "EVAL_PASSWORD=$password" >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
         env:
