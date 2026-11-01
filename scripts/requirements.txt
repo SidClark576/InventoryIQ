@@ -1,4 +1,4 @@
-boto3>=1.34.0
-moto==5.2.1  # unit tests (tests/unit/python)
-pytest==9.0.3  # unit tests (tests/unit/python)
+boto3>=1.43.121
+moto==5.2.5  # unit tests (tests/unit/python)
+pytest==9.2.0  # unit tests (tests/unit/python)
 openapi-spec-validator==0.9.0  # moto apigateway (tests/unit/python/test_rollout_orgs.py)
