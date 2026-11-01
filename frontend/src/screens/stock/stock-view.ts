@@ -121,3 +121,8 @@ export function useStockView() {
     },
   };
 }
+
+/** Undo covers small bulk deletes; 10+ rows or every shown row (Select all) still asks first. */
+export function bulkDeleteNeedsConfirm(selectedCount: number, shownCount: number): boolean {
+  return selectedCount >= 10 || selectedCount === shownCount;
+}

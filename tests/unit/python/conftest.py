@@ -1,7 +1,12 @@
 """Shared moto setup: data + org tables (with GSIs), member a@b.co (editor of o1), fresh Lambda imports."""
+import base64
+import hashlib
+import hmac
 import importlib
+import json
 import os
 import sys
+import time
 
 import boto3
 import pytest
@@ -9,6 +14,14 @@ from moto import mock_aws
 
 LAMBDA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../lambda'))
 HEADERS = {'x-iq-user': 'a@b.co', 'x-iq-org': 'o1'}
+
+
+def jwt_for(secret, sub):
+    """A session token Proxy accepts: HS256 over `secret`, valid for a minute."""
+    def b64(raw):
+        return base64.urlsafe_b64encode(raw).rstrip(b'=')
+    msg = b64(b'{"alg":"HS256","typ":"JWT"}') + b'.' + b64(json.dumps({'sub': sub, 'exp': time.time() + 60}).encode())
+    return (msg + b'.' + b64(hmac.new(secret.encode(), msg, hashlib.sha256).digest())).decode()
 
 
 def _table(ddb, name, key, range_key=None, gsis=()):

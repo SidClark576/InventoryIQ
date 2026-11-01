@@ -1,4 +1,4 @@
-/** Common sari-sari items for onboarding step 2; sizes live in `description` (the report's Size column). No prices: they differ per store, so the owner fills them in. */
+/** Common sari-sari items for onboarding step 2; sizes live in `description` (the report's Description column). No prices: they differ per store, so the owner fills them in. */
 export type StarterItem = { name: string; description: string; category: string };
 
 export const STARTER_ITEMS: StarterItem[] = [

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import { clampDelta, serialize, settleStep } from "../../../frontend/src/screens/stock/stepper.ts";
-import { filterItems, groupingFromParam, matchesQuery } from "../../../frontend/src/screens/stock/stock-view.ts";
+import { bulkDeleteNeedsConfirm, filterItems, groupingFromParam, matchesQuery } from "../../../frontend/src/screens/stock/stock-view.ts";
 
 describe("settleStep", () => {
   test("negative delta is a sale, positive a delivery", () => {
@@ -79,5 +79,18 @@ describe("serialize", () => {
     await serialize(queue, "a", async () => 1);
     await Promise.resolve();
     assert.equal(queue.has("a"), false);
+  });
+});
+
+describe("bulkDeleteNeedsConfirm", () => {
+  test("fewer than 10 selected rows delete without a confirm", () => {
+    assert.equal(bulkDeleteNeedsConfirm(9, 50), false);
+    assert.equal(bulkDeleteNeedsConfirm(1, 50), false);
+  });
+  test("10 or more always confirm", () => {
+    assert.equal(bulkDeleteNeedsConfirm(10, 50), true);
+  });
+  test("every shown row selected (Select all) confirms", () => {
+    assert.equal(bulkDeleteNeedsConfirm(3, 3), true);
   });
 });

@@ -151,7 +151,59 @@
     }
 }
 
-/* Inventory report. InventoryScreen sets data-iq-print="inventory" before window.print(). */
+/* Report paper: the print preview and the printout share this typography. White on purpose, in dark theme too. */
+.report-sheet {
+  background: #fff;
+  color: #111;
+}
+
+.report-sheet .print-title {
+  font-size: 20px;
+  font-weight: 900;
+  margin: 0 0 4px;
+}
+
+.report-sheet .print-subtitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.report-sheet .print-meta {
+  margin: 0 0 16px;
+}
+
+.report-sheet table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.report-sheet th,
+.report-sheet td {
+  border: 1px solid #111 !important;
+  padding: 6px 8px !important;
+  text-align: left !important;
+}
+
+.report-sheet thead th {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.report-sheet .print-category th {
+  font-weight: 700;
+  padding-top: 10px !important;
+}
+
+.report-sheet td.num,
+.report-sheet th.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Inventory report. StockScreen sets data-iq-print="inventory" while a report prints or is previewed. */
 #print-section {
   display: none;
 }
@@ -206,49 +258,40 @@
     background: #fff !important;
     box-shadow: none !important;
   }
+}
 
-  html[data-iq-print="inventory"] #print-section .print-title {
-    font-size: 20px;
-    font-weight: 900;
-    margin: 0 0 4px;
+/* Smooth corners where supported (Chromium); Safari and Firefox keep plain rounded corners. */
+@supports (corner-shape: squircle) {
+  :is([data-slot="card"], [data-slot="dialog-content"], [data-slot="sheet-content"], [data-slot="button"]):not(.rounded-full) {
+    corner-shape: squircle;
+  }
+}
+
+/* Nav-link clicks cross-fade the page (AppLayout); the sidebar, mobile header and tab bar have their own names, so they stay put. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 150ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* Toasts sit above the floating bulk bar when it is up, and above the tab bar + safe area below md. */
+body:has([data-floating-bar]) [data-sonner-toaster][data-y-position="bottom"] {
+  bottom: 6rem !important;
+}
+
+@media (max-width: 767px) {
+  [data-sonner-toaster][data-y-position="bottom"] {
+    bottom: calc(5rem + env(safe-area-inset-bottom)) !important;
   }
 
-  html[data-iq-print="inventory"] #print-section .print-subtitle {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
-  html[data-iq-print="inventory"] #print-section .print-meta {
-    margin: 0 0 16px;
-  }
-
-  html[data-iq-print="inventory"] #print-section table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-
-  html[data-iq-print="inventory"] #print-section th,
-  html[data-iq-print="inventory"] #print-section td {
-    border: 1px solid #111 !important;
-    padding: 6px 8px !important;
-    text-align: left !important;
-  }
-
-  html[data-iq-print="inventory"] #print-section thead th {
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
-  html[data-iq-print="inventory"] #print-section .print-category th {
-    font-weight: 700;
-    padding-top: 10px !important;
-  }
-
-  html[data-iq-print="inventory"] #print-section td.num,
-  html[data-iq-print="inventory"] #print-section th.num {
-    text-align: right !important;
+  body:has([data-floating-bar]) [data-sonner-toaster][data-y-position="bottom"] {
+    bottom: calc(9rem + env(safe-area-inset-bottom)) !important;
   }
 }

@@ -32,10 +32,14 @@ test.describe('Stock', () => {
     await expect(filters.getByRole('button', { name: /^In stock/ })).toHaveAttribute('aria-pressed', 'true')
   })
 
-  test('group by category', async ({ authenticatedPage: page }) => {
-    await page.getByRole('group', { name: 'Group by' }).getByRole('button', { name: 'Category' }).click()
-    await expect(page).toHaveURL(/group=category/)
-    await expect(page.getByRole('button', { name: 'Order now' })).toHaveCount(0)
+  // Category is the default grouping, so it leaves no group= in the URL (stock-view.ts setGrouping).
+  test('group by status then back to category', async ({ authenticatedPage: page }) => {
+    const groupBy = page.getByRole('group', { name: 'Group by' })
+    await groupBy.getByRole('button', { name: 'Status' }).click()
+    await expect(page).toHaveURL(/group=status/)
+    await groupBy.getByRole('button', { name: 'Category' }).click()
+    await expect(page).not.toHaveURL(/group=/)
+    await expect(page.locator('#inventory-table th', { hasText: 'Order now' })).toHaveCount(0)
   })
 
   test('categories dialog opens from More', async ({ authenticatedPage: page }) => {
@@ -73,4 +77,30 @@ test.describe('Stock', () => {
     await page.getByRole('region', { name: 'Stock count' }).getByRole('button', { name: 'Cancel' }).click()
     await expect(page.getByRole('columnheader', { name: 'Counted' })).toHaveCount(0)
   })
+})
+
+// Deletes data, so it runs only against dev:local (Floci + scripts/local_api.py). Under plain `npm run dev` the app
+// calls the live API and this test skips; a skip there proves nothing.
+test('Delete → Undo puts the item back (dev:local only)', async ({ authenticatedPage: page }) => {
+  const firstItems = page.waitForRequest(/\/proxy\/items/)
+  await page.goto('/stock')
+  const { hostname } = new URL((await firstItems).url())
+  test.skip(hostname !== 'localhost' && hostname !== '127.0.0.1', 'Deletes data: runs only on npm run dev:local')
+
+  const name = `E2E undo ${Date.now()}`
+  await page.locator('#btn-add-new').click()
+  await page.locator('#n-name').fill(name)
+  await page.getByRole('button', { name: 'Add item' }).click()
+  const row = page.locator('#inventory-table tbody tr[data-item-id]', { hasText: name })
+  await expect(row).toBeVisible({ timeout: 20000 })
+  await page.keyboard.press('Escape')
+
+  await row.getByRole('link').first().click()
+  await page.getByRole('button', { name: 'Delete item' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(row).toHaveCount(0)
+  // Sonner lists the newest toast first and the "Added" toast may still be up: pick the delete toast by its text.
+  const deleted = page.locator('[data-sonner-toast]', { hasText: `Deleted ${name}` })
+  await deleted.getByRole('button', { name: 'Undo', exact: true }).click()
+  await expect(row).toBeVisible({ timeout: 20000 })
 })

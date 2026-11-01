@@ -6,8 +6,8 @@ export function downloadReportCsv(groups: readonly ReportGroup[], asOf: Date, su
   const csv = toCsv(
     REPORT_HEADERS,
     groups.flatMap((group) => [
-      [`${group.category.toUpperCase()}:`, "", "", "", "", ""],
-      ...group.rows.map((row) => [row.name, row.size, row.price, row.starting, row.stockIn, row.now]),
+      [`${group.category.toUpperCase()}:`, "", "", "", "", "", ""],
+      ...group.rows.map((row) => [row.name, row.category, row.description, row.price, row.starting, row.stockIn, row.now]),
     ]),
   );
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));

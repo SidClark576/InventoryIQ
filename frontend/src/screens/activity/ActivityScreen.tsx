@@ -113,9 +113,16 @@ export function ActivityScreen() {
         </div>
       </div>
 
-      <p id="tx-count" className="-mt-1 text-xs text-muted-foreground tabular-nums" aria-live="polite">
-        {loading ? "Loading…" : `${rows.length} of the latest ${transactions.length} changes`}
-      </p>
+      <div id="tx-count" className="-mt-1 text-xs text-muted-foreground tabular-nums" aria-live="polite" aria-busy={loading}>
+        {loading ? (
+          <>
+            <Skeleton className="inline-block h-3 w-40 align-middle" />
+            <span className="sr-only">Loading</span>
+          </>
+        ) : (
+          `${rows.length} of the latest ${transactions.length} changes`
+        )}
+      </div>
 
       {txStatus === "error" ? (
         <div role="alert" className="flex flex-wrap items-center gap-3 rounded-3xl border border-destructive/30 bg-destructive/5 px-5 py-4 text-sm">

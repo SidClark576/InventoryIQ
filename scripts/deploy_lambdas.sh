@@ -26,7 +26,7 @@ pack_python() {
   rm -f "$zip"
   (
     cd "$ROOT/lambda"
-    zip -q "$zip" "${name}.py" _logging.py _org.py
+    zip -q "$zip" "${name}.py" _logging.py _org.py _routes.py
     if grep -q 'sentry_sdk\|_logging' "${name}.py" 2>/dev/null; then
       zip -q -r "$zip" python_vendor || true
     fi

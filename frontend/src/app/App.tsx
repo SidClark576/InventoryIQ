@@ -6,19 +6,59 @@ import { isLocalPreview, SESSION_EXPIRED_EVENT } from "@/api";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
 
 // Each screen is its own chunk, so sign-in does not download the stock screen.
 const AcceptScreen = lazy(() => import("@/screens/AcceptScreen").then((m) => ({ default: m.AcceptScreen })));
-const ActivityScreen = lazy(() => import("@/screens/activity/ActivityScreen").then((m) => ({ default: m.ActivityScreen })));
 const ForgotPasswordScreen = lazy(() => import("@/screens/ForgotPasswordScreen").then((m) => ({ default: m.ForgotPasswordScreen })));
-const InsightsScreen = lazy(() => import("@/screens/InsightsScreen").then((m) => ({ default: m.InsightsScreen })));
 const LoginScreen = lazy(() => import("@/screens/LoginScreen").then((m) => ({ default: m.LoginScreen })));
 const OnboardingScreen = lazy(() => import("@/screens/onboarding/OnboardingScreen").then((m) => ({ default: m.OnboardingScreen })));
 const ResetPasswordScreen = lazy(() => import("@/screens/ResetPasswordScreen").then((m) => ({ default: m.ResetPasswordScreen })));
-const StockScreen = lazy(() => import("@/screens/stock/StockScreen").then((m) => ({ default: m.StockScreen })));
-const TeamScreen = lazy(() => import("@/screens/team/TeamScreen").then((m) => ({ default: m.TeamScreen })));
-const TodayScreen = lazy(() => import("@/screens/today/TodayScreen").then((m) => ({ default: m.TodayScreen })));
+
+/**
+ * A lazy screen whose chunk can be loaded ahead of time. Once loaded it renders directly instead of through lazy(),
+ * which would still suspend once and flash the skeleton inside a page cross-fade.
+ */
+function preloadable(load: () => Promise<ComponentType>): { Screen: ComponentType; preload: () => Promise<unknown> } {
+  let Loaded: ComponentType | undefined;
+  const preload = () => load().then((component) => (Loaded = component));
+  const Lazy = lazy(() => preload().then((component) => ({ default: component })));
+  // Picked once per mount: swapping Lazy for Loaded mid-life would remount the screen and lose its state.
+  function Screen() {
+    const [Component] = useState(() => Loaded ?? Lazy);
+    return <Component />;
+  }
+  return { Screen, preload };
+}
+
+// The signed-in screens, also preloaded at idle once signed in so page switches don't wait on the network.
+const SIGNED_IN = {
+  activity: preloadable(() => import("@/screens/activity/ActivityScreen").then((m) => m.ActivityScreen)),
+  insights: preloadable(() => import("@/screens/InsightsScreen").then((m) => m.InsightsScreen)),
+  stock: preloadable(() => import("@/screens/stock/StockScreen").then((m) => m.StockScreen)),
+  team: preloadable(() => import("@/screens/team/TeamScreen").then((m) => m.TeamScreen)),
+  today: preloadable(() => import("@/screens/today/TodayScreen").then((m) => m.TodayScreen)),
+};
+const ActivityScreen = SIGNED_IN.activity.Screen;
+const InsightsScreen = SIGNED_IN.insights.Screen;
+const StockScreen = SIGNED_IN.stock.Screen;
+const TeamScreen = SIGNED_IN.team.Screen;
+const TodayScreen = SIGNED_IN.today.Screen;
+
+/** Loads every signed-in screen once the browser is idle. A failed chunk (stale deploy) is left to the route's own load. */
+function usePreloadScreens() {
+  useEffect(() => {
+    const run = () => {
+      for (const { preload } of Object.values(SIGNED_IN)) preload().catch(() => {});
+    };
+    if (typeof requestIdleCallback === "function") {
+      const id = requestIdleCallback(run);
+      return () => cancelIdleCallback(id);
+    }
+    const timer = setTimeout(run, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+}
 import { getEditItem, getLocalLogout, getUserEmail, setUserEmail } from "@/session";
 
 /**
@@ -95,6 +135,7 @@ function LoginRoute() {
 
 function RequireAuth() {
   applyLocalPreview();
+  usePreloadScreens();
   if (!getUserEmail()) return <Navigate to="/login" replace />;
   return <AppLayout />;
 }
@@ -145,7 +186,8 @@ export function App() {
       disableTransitionOnChange
       scriptProps={{ type: "application/json" }}
     >
-      <BrowserRouter>
+      {/* Sync navigations, so the nav cross-fade (AppLayout useNavClick) can flushSync the new page inside startViewTransition. */}
+      <BrowserRouter useTransitions={false}>
         <SessionExpiredRedirect />
         <ErrorBoundary>
           {/* Signed-out screens only; the app layout has its own skeleton fallback around its Outlet. */}

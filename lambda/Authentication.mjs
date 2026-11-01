@@ -86,7 +86,19 @@ function _corsHeaders(requestOrigin = '') {
     return base;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || '';
+// JWT secret (must match Proxy): SSM SecureString JWT_SECRET_PARAM, read once per cold start; the JWT_SECRET env
+// var when the param is unset or the read fails. client-ssm ships in the Lambda Node runtime (no npm dependency).
+let JWT_SECRET = process.env.JWT_SECRET || '';
+if (process.env.JWT_SECRET_PARAM) {
+    try {
+        const { SSMClient, GetParameterCommand } = await import("@aws-sdk/client-ssm");
+        const out = await new SSMClient({}).send(
+            new GetParameterCommand({ Name: process.env.JWT_SECRET_PARAM, WithDecryption: true }));
+        JWT_SECRET = out.Parameter?.Value || JWT_SECRET;
+    } catch (err) {
+        console.error('JWT_SECRET_PARAM read failed; using the JWT_SECRET env var:', err?.name);
+    }
+}
 if (!JWT_SECRET) {
     console.error('FATAL: JWT_SECRET environment variable is not set');
 }

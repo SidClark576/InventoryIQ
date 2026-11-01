@@ -32,8 +32,14 @@ type QuantityOptions = {
 };
 
 
-/** Undo toasts stay longer than Sonner's 4s default so there is time to react. */
+/** Undo toasts stay longer than Sonner's 4s default so there is time to react; bulk ones longer still. */
 const UNDO_TOAST_MS = 10_000;
+const BULK_UNDO_TOAST_MS = 15_000;
+
+/** Someone else got there first: 410 on delete, 409 on restore. Not an error, just stale data. */
+function isGone(result: PromiseSettledResult<unknown> | undefined, status: number): boolean {
+  return result?.status === "rejected" && result.reason instanceof ApiError && result.reason.status === status;
+}
 
 function nameOf(item: InventoryItem): string {
   return item.name || "Item";
@@ -158,8 +164,10 @@ export function useStockActions() {
         targets.map((item) => (item.itemID ? restoreItem(item.itemID) : Promise.reject(new Error("No id")))),
       );
       const restored = targets.filter((_, index) => results[index]?.status === "fulfilled");
-      const failed = targets.length - restored.length;
-      if (restored.length) {
+      const already = results.filter((result) => isGone(result, 409)).length;
+      const failed = targets.length - restored.length - already;
+      if (already) toast("Already restored");
+      if (restored.length || already) {
         await reloadItems();
         invalidateTransactions();
       }
@@ -176,15 +184,20 @@ export function useStockActions() {
         targets.map((item) => (item.itemID ? deleteItem(item.itemID) : Promise.reject(new Error("No id")))),
       );
       const deleted = targets.filter((_, index) => results[index]?.status === "fulfilled");
-      const failed = targets.length - deleted.length;
+      const already = results.filter((result) => isGone(result, 410)).length;
+      const failed = targets.length - deleted.length - already;
       const ids = deleted.flatMap((item) => (item.itemID ? [item.itemID] : []));
       removeItems(ids);
       invalidateTransactions();
+      if (already) {
+        toast("Already deleted");
+        await reloadItems();
+      }
       if (deleted.length) {
         const label = deleted.length === 1 ? `Deleted ${nameOf(deleted[0]!)}` : `Deleted ${deleted.length} items`;
         toast.success(label, {
           description: "Restore from Show deleted for 30 days.",
-          duration: UNDO_TOAST_MS,
+          duration: deleted.length === 1 ? UNDO_TOAST_MS : BULK_UNDO_TOAST_MS,
           action: {
             label: "Undo",
             onClick: () => {
@@ -196,14 +209,14 @@ export function useStockActions() {
         });
       }
       if (failed) {
-        const first = results.find((result) => result.status === "rejected");
+        const first = results.find((result) => result.status === "rejected" && !isGone(result, 410));
         toast.error(`Couldn't delete ${failed} item${failed === 1 ? "" : "s"}`, {
           description: first && first.status === "rejected" ? errorText(first.reason, "") : undefined,
         });
       }
       return ids;
     },
-    [removeItems, invalidateTransactions, restoreItems],
+    [removeItems, invalidateTransactions, restoreItems, reloadItems],
   );
 
   return { setQuantity, saveFields, createItem, deleteItems, restoreItems, reportFailure };

@@ -2,7 +2,8 @@
 """Local API runner: serves the live API Gateway routes on localhost by calling the real Lambda handlers.
 
   /auth/*      -> lambda/Authentication.mjs (one `node` child per request)
-  /proxy/*     -> lambda/Proxy.py, whose API_ENDPOINT points back at /_backend
+  /proxy/*     -> lambda/Proxy.py; PROXY_MODE=invoke (default) calls each route's handler in-process,
+                  PROXY_MODE=http forwards to /_backend (its API_ENDPOINT)
   /_backend/*  -> the Python handler for each route frontend/src/api.ts calls (needs the seeded x-api-key);
                   with LOCAL_API_GATEWAY=1 only the routes deployed to Floci's InventoryIQ-API `prod` stage
 
@@ -47,28 +48,9 @@ AWS_ENV = {
 }
 _NEVER = ('SENTRY_DSN', 'AWS_PROFILE', 'AWS_SESSION_TOKEN', 'AWS_SECURITY_TOKEN')
 
-# (method, API Gateway resource, handler module): the routes frontend/src/api.ts calls.
-ROUTES = [
-    ('GET', '/items', 'GetAllItems'),
-    ('POST', '/items', 'AddItem'),
-    ('POST', '/items/import', 'BulkImport'),
-    ('PUT', '/items/{itemID}', 'UpdateItem'),
-    ('DELETE', '/items/{itemID}', 'DeleteItem'),
-    ('POST', '/items/{itemID}/restore', 'RestoreItem'),
-    ('GET', '/import/presign', 'BulkImport'),
-    ('GET', '/import/{jobId}', 'BulkImport'),
-    ('GET', '/insights', 'LowItemInsight'),
-    ('GET', '/transactions', 'GetTransactions'),
-    ('GET', '/categories', 'GetCategories'),
-    ('DELETE', '/categories/{categoryName}', 'DeleteCategory'),
-    ('GET', '/barcode/{code}', 'BarcodeLookup'),
-    ('GET', '/orgs', 'Orgs'),
-    ('POST', '/orgs/{id}/switch', 'Orgs'),
-    ('PUT', '/orgs/{id}', 'Orgs'),
-    ('GET', '/orgs/{id}/members', 'OrgMembers'),
-    ('POST', '/orgs/{id}/invites', 'OrgInvites'),
-    ('POST', '/org-invites/{token}/accept', 'OrgInvites'),
-]
+if str(LAMBDA) not in sys.path:
+    sys.path.insert(0, str(LAMBDA))
+from _routes import ROUTES, match_route  # noqa: E402,F401  (shared with Proxy.py; tests read local_api.ROUTES)
 
 NODE_INVOKE = """
 console.log = console.error;  // stdout carries only the handler result; logs go to the runner's stderr
@@ -95,13 +77,14 @@ def setup():
         'API_ENDPOINT': f'http://localhost:{PORT}/_backend',
         'LOG_STDOUT': '1',
     })
-    if str(LAMBDA) not in sys.path:
-        sys.path.insert(0, str(LAMBDA))
+    os.environ.setdefault('PROXY_MODE', 'invoke')  # http = Proxy's legacy hop through /_backend
     import _logging
     dev = f'http://localhost:{DEV_PORT},http://127.0.0.1:{DEV_PORT}'
     os.environ['CORS_ORIGIN'] = f'{_logging.DEFAULT_CORS_ORIGINS},{dev}'  # read by Proxy and node at load
     barcode = importlib.import_module('BarcodeLookup')
     barcode._lookup_off = barcode._lookup_upc = offline_lookup
+    # invoke mode: Proxy calls the handler in-process instead of lambda:InvokeFunction
+    importlib.import_module('Proxy')._invoke_lambda = lambda name, event: handler(name)(event, None)
 
 
 def handler(module):
@@ -163,24 +146,6 @@ def gateway_routes():
     # ponytail: one page (50) of list_functions covers the 18 functions; paginate if that grows
     handlers = {f['FunctionName']: f['Handler'] for f in _aws('lambda').list_functions()['Functions']}
     return routes_from_gateway(_deployed['resources'], handlers)
-
-
-def match_route(method, path, routes):
-    """Return (module, resource, decoded pathParameters or None) for a backend path, or None."""
-    parts = path.strip('/').split('/')
-    for route_method, resource, module in routes:
-        segs = resource.strip('/').split('/')
-        if route_method != method or len(segs) != len(parts):
-            continue
-        params = {}
-        for seg, part in zip(segs, parts):
-            if seg.startswith('{'):
-                params[seg[1:-1]] = urllib.parse.unquote(part)
-            elif seg != part:
-                break
-        else:
-            return module, resource, params or None
-    return None
 
 
 def _event(method, path, headers, body, query, resource, path_params):

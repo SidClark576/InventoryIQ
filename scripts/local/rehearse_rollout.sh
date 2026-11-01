@@ -7,6 +7,7 @@ cd "$(dirname "$0")/../.."
 FLOCI_IMAGE=floci/floci:2.3.0
 NAME=panindo-floci-rollout
 export LOCAL_FLOCI_PORT="${LOCAL_FLOCI_PORT:-4567}" LOCAL_API_PORT="${LOCAL_API_PORT:-3101}" LOCAL_API_GATEWAY=1
+export PROXY_MODE="${PROXY_MODE:-http}"  # mirror live: Proxy -> deployed `prod` routes
 export LOCAL_AWS_URL="http://localhost:$LOCAL_FLOCI_PORT"
 docker info >/dev/null 2>&1 || { echo "Docker is not running: start Docker Desktop, then retry." >&2; exit 1; }
 docker image inspect "$FLOCI_IMAGE" >/dev/null 2>&1 \
