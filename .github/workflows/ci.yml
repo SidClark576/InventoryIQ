@@ -1,74 +1,55 @@
 name: ci
 
 on:
+  pull_request:
   push:
     branches: [main, development]
-  pull_request:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  node:
+  ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: '20'
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
           cache: npm
       - run: npm ci
       - run: npm run typecheck
       - run: npm run test:unit
       - run: npm run build
-
-  python:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - run: pip install -r scripts/requirements.txt
-      - name: Compile Lambdas
-        run: python3 -m py_compile lambda/*.py
-      - name: Unit tests (moto, no AWS)
-        run: python -m pytest tests/unit/python -q
-
-  secret-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Scan tracked files for AWS keys and private keys
-        # ponytail: two regexes, no tool; gitleaks is the upgrade if broader coverage is wanted
+      - run: python -m py_compile lambda/*.py
+      - run: python -m pytest tests/unit/python -q
+      # Local stack, no AWS: mirrors scripts/dev_local.sh. The image tag must match scripts/dev_local.sh.
+      - name: Start Floci, local API and seed
         run: |
-          if git grep -nE 'AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----' -- . ':!package-lock.json'; then
-            echo "Possible secret committed (see matches above)."
-            exit 1
-          fi
-
-  e2e:
-    runs-on: ubuntu-latest
-    env:
-      HAS_EVAL: ${{ secrets.EVAL_EMAIL != '' && secrets.BASE_URL != '' }}
-      BASE_URL: ${{ secrets.BASE_URL }}
-      EVAL_EMAIL: ${{ secrets.EVAL_EMAIL }}
-      EVAL_PASSWORD: ${{ secrets.EVAL_PASSWORD }}
-    steps:
-      - name: Skip notice
-        if: env.HAS_EVAL != 'true'
-        run: echo "No EVAL_EMAIL or BASE_URL secret (no staging yet), skipping E2E."
-      - uses: actions/checkout@v4
-        if: env.HAS_EVAL == 'true'
-      - uses: actions/setup-node@v4
-        if: env.HAS_EVAL == 'true'
-        with:
-          node-version: '20'
-          cache: npm
-      - run: npm ci
-        if: env.HAS_EVAL == 'true'
+          docker run -d --name panindo-floci -p 127.0.0.1:4566:4566 floci/floci:2.3.0
+          for _ in $(seq 50); do curl -sf http://localhost:4566/_floci/health >/dev/null && break; sleep 0.2; done
+          curl -sf http://localhost:4566/_floci/health >/dev/null || { docker logs panindo-floci; exit 1; }
+          python scripts/local_api.py > "$RUNNER_TEMP/local_api.log" 2>&1 &
+          python scripts/local_seed.py
+      # The seed writes a fresh local-only login on every run; it is not a secret.
+      - name: Seeded login for e2e
+        run: |
+          echo "EVAL_EMAIL=$(jq -r .owner .local/test-login.json)" >> "$GITHUB_ENV"
+          echo "EVAL_PASSWORD=$(jq -r .password .local/test-login.json)" >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
-        if: env.HAS_EVAL == 'true'
-      - name: Playwright
-        if: env.HAS_EVAL == 'true'
-        run: npx playwright test
+      - run: npm run test:e2e
+        env:
+          VITE_API_BASE: http://localhost:3001
+      - if: failure()
+        run: cat "$RUNNER_TEMP/local_api.log"

@@ -47,14 +47,10 @@ test.describe('Navigation', () => {
   })
 
   test('Team appears in the nav only when organizations load', async ({ authenticatedPage: page }) => {
-    const orgs = await page.evaluate(async () => {
-      const res = await fetch('https://d1g2j27343.execute-api.us-east-1.amazonaws.com/prod/proxy/orgs', {
-        headers: { 'Content-Type': 'application/json', 'X-Session-Token': sessionStorage.getItem('sessionToken') || '' },
-      })
-      if (!res.ok) return 0
-      const body = (await res.json()) as { orgs?: unknown[] }
-      return body.orgs?.length ?? 0
-    })
+    const orgsResponse = page.waitForResponse(/\/proxy\/orgs/)
+    await page.goto('/today')
+    const res = await orgsResponse
+    const orgs = res.ok() ? (((await res.json()) as { orgs?: unknown[] }).orgs?.length ?? 0) : 0
     const team = page.getByRole('navigation', { name: 'Main' }).first().getByRole('link', { name: 'Team' })
     if (orgs > 0) await expect(team).toBeVisible({ timeout: 15000 })
     else await expect(team).toHaveCount(0)
