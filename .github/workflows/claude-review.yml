@@ -1,0 +1,47 @@
+name: claude-review
+
+# Advisory review. Plain pull_request event and no comment trigger, so PR code never
+# runs with the repo's secrets.
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    if: github.actor != 'dependabot[bot]' && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Pick lenses by path
+        id: lenses
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          files=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
+          lenses="security"
+          if grep -qE '^(lambda|scripts)/' <<<"$files"; then lenses="$lenses, DynamoDB data access"; fi
+          if grep -q '^frontend/' <<<"$files"; then lenses="$lenses, UI/UX"; fi
+          echo "lenses=$lenses" >> "$GITHUB_OUTPUT"
+      - uses: anthropics/claude-code-action@16f9f71ab9c490faf367f94dd294897edc25be33 # v1.0.261
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            Review pull request #${{ github.event.pull_request.number }} in ${{ github.repository }}.
+            Lenses: ${{ steps.lenses.outputs.lenses }}.
+            Follow AGENTS.md. Read the diff with gh pr diff.
+            Post one comment with findings as file:line, problem, fix. Advisory only.
+          claude_args: >-
+            --allowedTools "Read,Grep,Glob,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*)"

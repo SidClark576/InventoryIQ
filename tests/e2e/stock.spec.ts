@@ -32,10 +32,14 @@ test.describe('Stock', () => {
     await expect(filters.getByRole('button', { name: /^In stock/ })).toHaveAttribute('aria-pressed', 'true')
   })
 
-  test('group by category', async ({ authenticatedPage: page }) => {
-    await page.getByRole('group', { name: 'Group by' }).getByRole('button', { name: 'Category' }).click()
-    await expect(page).toHaveURL(/group=category/)
-    await expect(page.getByRole('button', { name: 'Order now' })).toHaveCount(0)
+  // Category is the default grouping, so it leaves no group= in the URL (stock-view.ts setGrouping).
+  test('group by status then back to category', async ({ authenticatedPage: page }) => {
+    const groupBy = page.getByRole('group', { name: 'Group by' })
+    await groupBy.getByRole('button', { name: 'Status' }).click()
+    await expect(page).toHaveURL(/group=status/)
+    await groupBy.getByRole('button', { name: 'Category' }).click()
+    await expect(page).not.toHaveURL(/group=/)
+    await expect(page.locator('#inventory-table th', { hasText: 'Order now' })).toHaveCount(0)
   })
 
   test('categories dialog opens from More', async ({ authenticatedPage: page }) => {
@@ -95,6 +99,8 @@ test('Delete → Undo puts the item back (dev:local only)', async ({ authenticat
   await page.getByRole('button', { name: 'Delete item' }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(row).toHaveCount(0)
-  await page.getByRole('button', { name: 'Undo' }).click()
+  // Sonner lists the newest toast first and the "Added" toast may still be up: pick the delete toast by its text.
+  const deleted = page.locator('[data-sonner-toast]', { hasText: `Deleted ${name}` })
+  await deleted.getByRole('button', { name: 'Undo', exact: true }).click()
   await expect(row).toBeVisible({ timeout: 20000 })
 })
