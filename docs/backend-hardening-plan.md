@@ -20,7 +20,7 @@ No code. Do these first; they are free and remove the worst risks.
 - [ ] Delete leftovers: canary results bucket + canary role, `inventoryiq-frontend-v2` bucket (site now on Cloudflare), purge `InventoryIQ-StockQueue` (3 orphan messages, no consumer).
 - [ ] Remove the 3 event-source mappings on `LambdaDLQ` (DailyAlert, LowItemInsight, PurgeDeletedItems) — a stray message would trigger a purge.
 - [ ] Budgets: add a *forecast* alert to "Panindo monthly $10"; delete the always-red $1 "Zero Spend" budget; create a free Cost Anomaly Detection monitor.
-- [ ] API Gateway stage `prod` → default method throttling: rate 20, burst 40. Override `/auth/*` and `/barcode/{code}` to rate 2, burst 5. (Free; caps how fast anyone can run up the bill.)
+- [ ] API Gateway stage `prod` → default method throttling: rate 20, burst 40. Override `/auth/*` to rate 2, burst 5 (no `/barcode/{code}` override: barcode is reached via Proxy's direct invoke). Via `scripts/apply_monitoring.py`. (Free; caps how fast anyone can run up the bill.)
 - [ ] Lambda: switch all functions to `arm64` (~20% cheaper) and 256 MB (fewer cold-start timeouts). Python/Node code has no native deps except `python_vendor/` (pure Python: sentry_sdk, certifi, urllib3), so no rebuild needed. Set Proxy timeout to 10s.
 
 ## Phase 1 — Close the tenant hole + remove the double hop (factory job, $0, saves ~50% per request)
@@ -53,7 +53,7 @@ All 18 Lambdas share one role with full DynamoDB/SNS/SQS/SES and Secrets Manager
 - Scheduled jobs: 2 retries + DLQ; fix schedule time zone (Pacific/Honolulu → Asia/Manila).
 - TTL: add `ttl` to `OrgInvites` (expired invites) — leave `InventoryTransactions` (it's the audit trail).
 
-## Phase 4 — Free monitoring (factory job or console, $0)
+## Phase 4 — Free monitoring (via `scripts/apply_monitoring.py`, $0)
 
 Fits in CloudWatch free tier (10 alarms):
 - Lambda `Throttles` > 0 (account), `Errors` on Proxy/Authentication, API Gateway `5XXError`, DLQ depth > 0, SES bounce rate. All → existing email.
