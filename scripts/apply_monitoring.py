@@ -101,14 +101,16 @@ def alarms(c, ops_arn, apply):
 
 
 def set_log_role(apigw, role_arn):
-    for attempt in range(10):  # a new role takes a few seconds to become usable by API Gateway
+    # A new role takes a few seconds to become usable (BadRequest), and UpdateAccount is rate limited
+    # to about one call per 20 s per account (TooManyRequests).
+    for attempt in range(10):
         try:
             apigw.update_account(patchOperations=[{'op': 'replace', 'path': '/cloudwatchRoleArn', 'value': role_arn}])
             return
-        except apigw.exceptions.BadRequestException:
+        except (apigw.exceptions.BadRequestException, apigw.exceptions.TooManyRequestsException):
             if attempt == 9:
                 raise
-            time.sleep(3)
+            time.sleep(20)
 
 
 def logrole(c, ops_arn, apply):

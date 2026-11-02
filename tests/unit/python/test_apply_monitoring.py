@@ -227,7 +227,27 @@ def test_log_role_retries_while_iam_propagates(monkeypatch):
         calls.append(kw)
         if len(calls) < 3:
             raise BadRequest()
-    apigw = SimpleNamespace(exceptions=SimpleNamespace(BadRequestException=BadRequest), update_account=update_account)
+    apigw = SimpleNamespace(exceptions=SimpleNamespace(BadRequestException=BadRequest,
+                                                       TooManyRequestsException=TooMany), update_account=update_account)
     monkeypatch.setattr(apply_monitoring.time, 'sleep', lambda s: None)
     apply_monitoring.set_log_role(apigw, 'arn:role')
     assert len(calls) == 3
+
+
+class TooMany(Exception):
+    pass
+
+
+def test_log_role_retries_when_update_account_is_rate_limited(monkeypatch):
+    # Live 2026-11-02: UpdateAccount raised TooManyRequestsException (boto3 gave up after 4 tries).
+    calls, sleeps = [], []
+
+    def update_account(**kw):
+        calls.append(kw)
+        if len(calls) < 3:
+            raise TooMany()
+    apigw = SimpleNamespace(exceptions=SimpleNamespace(BadRequestException=ValueError, TooManyRequestsException=TooMany),
+                            update_account=update_account)
+    monkeypatch.setattr(apply_monitoring.time, 'sleep', sleeps.append)
+    apply_monitoring.set_log_role(apigw, 'arn:role')
+    assert len(calls) == 3 and min(sleeps) >= 20
