@@ -281,7 +281,6 @@ export function StockScreen() {
             onCount={(id, raw) => setCounts((prev) => ({ ...prev, [id]: raw }))}
             itemHref={itemHref}
             canEdit={canEdit}
-            pending={stepper.pending}
             onStep={stepper.step}
             selecting={selectedItems.length > 0}
           />

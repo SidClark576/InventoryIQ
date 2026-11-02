@@ -24,9 +24,3 @@ export function reasonNote(reason: Reason | null, direction: Direction, amount: 
   if (effective === "Waste" || effective === "Damaged") return `${effective}: ${amount}`;
   return `${effective} ${amount}`;
 }
-
-/** Quantity after applying `amount` in `direction`, never below zero. */
-export function nextQuantity(current: number, direction: Direction, amount: number): number {
-  const next = direction === "add" ? current + amount : current - amount;
-  return Math.max(0, next);
-}

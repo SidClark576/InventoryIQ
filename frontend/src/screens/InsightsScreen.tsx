@@ -1,121 +1,58 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Link } from "react-router";
 import { ArrowClockwiseIcon } from "@phosphor-icons/react";
-import { ensureOrgContext, getInsights } from "@/api";
+import { ensureOrgContext, getTransactions, type InventoryItem } from "@/api";
 import { useOrgShell } from "@/app/AppLayout";
+import { useInventory, type LoadStatus } from "@/app/inventory-store";
+import { SHEET_LINK_STATE, useSheetParams } from "@/app/use-sheet-params";
 import { PageHeader } from "@/components/page-header";
-import { Button } from "@/components/ui/button";
 import { RadialGauge } from "@/components/charts/radial-gauge";
 import { StockBar } from "@/components/charts/stock-bar";
+import { TEXT_LINK_CLASS } from "@/components/text-link";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getCurrentOrg } from "@/session";
+import { parseTransactions, type Transaction } from "@/lib/activity";
+import { quantityOf } from "@/lib/dashboardStats";
 import { errorText } from "@/lib/errors";
 import { formatCompactMoney } from "@/lib/format";
+import { deriveInsights, HISTORY_DAYS, RUNS_OUT_WITHIN_DAYS } from "@/lib/insights";
+import { cn } from "@/lib/utils";
+import { getCurrentOrg } from "@/session";
 
-type StockItem = { name?: unknown; quantity?: unknown };
-type ReorderItem = {
-  urgency?: string;
-  name?: unknown;
-  category?: unknown;
-  currentQuantity?: string | number | null;
-  suggestedOrderQuantity?: string | number | null;
-};
-type RiskItem = {
-  riskPercent?: unknown;
-  category?: unknown;
-  atRiskItems?: string | number | null;
-  totalItems?: string | number | null;
-};
+/** Long lists show this many rows, then "See all". */
+const TOP = 8;
 
-type InsightView = {
-  healthScore: number;
-  atRiskCount: number;
-  totalProducts: number;
-  estValue: number;
-  lowCount: number;
-  outCount: number;
-  inStockCount: number;
-  recommendations: unknown[];
-  reorder: ReorderItem[];
-  risks: RiskItem[];
-  lowItems: StockItem[];
-  outItems: StockItem[];
-};
+type History = { status: LoadStatus; rows: Transaction[]; error: string };
+type CardState = { status: LoadStatus; error: string; onRetry: () => void };
 
-const URGENCY: Record<string, { className: string; bar: string; label: string }> = {
-  critical: { className: "text-destructive", bar: "bg-destructive", label: "Critical" },
-  high: { className: "text-warning", bar: "bg-warning", label: "High" },
-  medium: { className: "text-muted-foreground", bar: "bg-muted-foreground", label: "Medium" },
-  low: { className: "text-success", bar: "bg-success", label: "Low" },
-};
+// Full class names so Tailwind sees them.
+const RISK_TONE = [
+  { text: "text-destructive", bar: "bg-destructive" },
+  { text: "text-warning", bar: "bg-warning" },
+  { text: "text-success", bar: "bg-success" },
+] as const;
 
-function finite(value: unknown, fallback: number): number {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : fallback;
-}
+const days = (n: number) => `${n} day${n === 1 ? "" : "s"}`;
 
-function text(value: unknown): string {
-  if (value === null || value === undefined || value === false) return "";
-  return String(value);
-}
-
-
-
-function parseInsights(raw: Record<string, unknown>): InsightView {
-  const summary = (raw.summary ?? {}) as Record<string, unknown>;
-  const lowItems = Array.isArray(raw.lowStockItems) ? (raw.lowStockItems as StockItem[]) : [];
-  const outItems = Array.isArray(raw.outOfStockItems) ? (raw.outOfStockItems as StockItem[]) : [];
-  const totalProducts = finite(summary.totalProducts, 0);
-  const lowCount = finite(summary.lowStockCount, lowItems.length);
-  const outCount = finite(summary.outOfStockCount, outItems.length);
-  return {
-    healthScore: finite(summary.healthScore, 100),
-    atRiskCount: finite(summary.atRiskCount, 0),
-    totalProducts,
-    estValue: finite(summary.estimatedInventoryValue, 0),
-    lowCount,
-    outCount,
-    inStockCount: Math.max(0, totalProducts - lowCount - outCount),
-    recommendations: Array.isArray(raw.recommendations) ? raw.recommendations : [],
-    reorder: Array.isArray(raw.topReorderPriorities) ? (raw.topReorderPriorities as ReorderItem[]) : [],
-    risks: Array.isArray(raw.categoryRiskBreakdown) ? (raw.categoryRiskBreakdown as RiskItem[]) : [],
-    lowItems,
-    outItems,
-  };
-}
-
-// GET /insights queues an SQS message and can send an SNS alert on every call.
-// Share one in-flight request per org so a StrictMode remount or a quick
-// re-render never fires a second one; Refresh starts a new request explicitly.
-let inflight: { orgID: string; request: Promise<Record<string, unknown>> } | null = null;
-
-function loadInsightsOnce(orgID: string): Promise<Record<string, unknown>> {
-  if (inflight && inflight.orgID === orgID) return inflight.request;
-  const request = getInsights().finally(() => {
-    if (inflight?.request === request) inflight = null;
-  });
-  inflight = { orgID, request };
-  return request;
-}
-
+/**
+ * Computed in the browser from the shared item cache and the last 30 days of GET /transactions.
+ * Never calls GET /insights: that endpoint sends SNS/SQS messages on every request.
+ */
 export function InsightsScreen() {
   const { orgEpoch } = useOrgShell();
-  const [view, setView] = useState<InsightView | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState(0);
+  const { items, itemsStatus, itemsError, reloadItems } = useInventory();
+  const [history, setHistory] = useState<History>({ status: "loading", rows: [], error: "" });
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     document.title = "Insights | Panindo";
   }, []);
 
-  // Only orgEpoch and an explicit Refresh trigger a load; never `orgs` (it changes right after mount).
+  // Only orgEpoch and Retry/Refresh load; never `orgs`. The cleanup drops a response that lands after an org switch.
   useEffect(() => {
     let cancelled = false;
-    setView(null);
-    setError(null);
-    setLoading(true);
+    setHistory({ status: "loading", rows: [], error: "" });
     void (async () => {
       try {
         await ensureOrgContext();
@@ -123,35 +60,45 @@ export function InsightsScreen() {
         // Legacy (no-org) mode.
       }
       const orgID = getCurrentOrg();
-      if (cancelled) return;
+      const since = new Date(Date.now() - HISTORY_DAYS * 86_400_000).toISOString();
       try {
-        const raw = await loadInsightsOnce(orgID);
-        if (cancelled || getCurrentOrg() !== orgID) return;
-        setView(parseInsights(raw));
+        const rows = parseTransactions(await getTransactions(since));
+        if (!cancelled && getCurrentOrg() === orgID) setHistory({ status: "ready", rows, error: "" });
       } catch (err: unknown) {
         if (cancelled || getCurrentOrg() !== orgID) return;
-        setView(null);
-        setError(errorText(err));
-      } finally {
-        if (!cancelled && getCurrentOrg() === orgID) setLoading(false);
+        setHistory({ status: "error", rows: [], error: errorText(err, "Couldn't load stock history.") });
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [orgEpoch, refreshToken]);
+  }, [orgEpoch, attempt]);
+
+  const insights = useMemo(() => deriveInsights(items, history.rows), [items, history.rows]);
+  const retryHistory = () => setAttempt((n) => n + 1);
+  const itemsCard: CardState = {
+    status: itemsStatus === "idle" ? "loading" : itemsStatus,
+    error: itemsError ?? "",
+    onRetry: () => void reloadItems(),
+  };
+  // Cards that also need history wait for (or report) the item cache first.
+  const historyCard: CardState = itemsCard.status === "ready" ? { ...history, onRetry: retryHistory } : itemsCard;
+  const { stats, health } = insights;
 
   return (
     <div id="insights-content" className="flex flex-col gap-6">
       <PageHeader
         title="Insights"
-        description="Stock health, category risk, and what to reorder next."
+        description={`Stock health and trends from the last ${HISTORY_DAYS} days.`}
         actions={
           <Button
             type="button"
             variant="outline"
-            disabled={loading}
-            onClick={() => setRefreshToken((token) => token + 1)}
+            disabled={history.status === "loading" || itemsCard.status === "loading"}
+            onClick={() => {
+              void reloadItems();
+              retryHistory();
+            }}
           >
             <ArrowClockwiseIcon />
             Refresh
@@ -159,214 +106,193 @@ export function InsightsScreen() {
         }
       />
 
-      {loading ? <InsightsSkeleton /> : null}
-      {!loading && error ? (
-        <Card>
-          <CardContent className="py-10 text-center">
-            <p className="font-medium">Unable to analyze right now</p>
-            <p className="mt-1 text-sm text-muted-foreground">{error}</p>
-          </CardContent>
-        </Card>
-      ) : null}
-      {!loading && !error && view ? <InsightsBody view={view} /> : null}
-    </div>
-  );
-}
-
-function InsightsSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <Card className="items-center">
-        <CardContent>
-          <Skeleton className="size-40 rounded-full" />
-        </CardContent>
-      </Card>
-      <Card className="lg:col-span-2">
-        <CardContent className="flex flex-col gap-3">
-          <Skeleton className="h-4 w-40" />
-          <Skeleton className="h-3 w-full" />
-          <Skeleton className="h-3 w-3/4" />
-          <Skeleton className="h-3 w-5/6" />
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function InsightsBody({ view }: { view: InsightView }) {
-  return (
-    <>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card>
-          <CardContent className="flex flex-col items-center text-center">
-            <RadialGauge value={view.healthScore} size={168} label="Health" />
-            <p className="mt-4 text-sm font-medium text-muted-foreground">Inventory health score</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              <span className="font-medium text-foreground tabular-nums">{view.atRiskCount}</span> of{" "}
-              <span className="tabular-nums">{view.totalProducts}</span> at risk
+        <InsightCard title="Inventory health" state={itemsCard}>
+          {health === null ? (
+            <p className="text-sm text-muted-foreground">
+              Add items to see your stock health.{" "}
+              <Link to="/stock?new=1" className={TEXT_LINK_CLASS}>
+                Add an item
+              </Link>
             </p>
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Stock distribution</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <StockBar inStock={view.inStockCount} low={view.lowCount} out={view.outCount} />
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-xl border border-border p-4">
-                <p className="text-sm text-muted-foreground">Products</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums">{view.totalProducts}</p>
-              </div>
-              <div className="rounded-xl border border-border p-4">
-                <p className="text-sm text-muted-foreground">Inventory value</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums">{formatCompactMoney(view.estValue)}</p>
-              </div>
+          ) : (
+            <div className="flex flex-col items-center text-center">
+              <RadialGauge value={health} size={168} label="Health" />
+              <p className="mt-4 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground tabular-nums">
+                  {stats.outOfStockCount + stats.lowStockCount}
+                </span>{" "}
+                of <span className="tabular-nums">{stats.totalProducts}</span> low or out
+              </p>
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </InsightCard>
+        <InsightCard title="Stock distribution" state={itemsCard} className="lg:col-span-2">
+          <div className="flex flex-col gap-4">
+            <StockBar
+              inStock={stats.totalProducts - stats.lowStockCount - stats.outOfStockCount}
+              low={stats.lowStockCount}
+              out={stats.outOfStockCount}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <Stat label="Products" value={String(stats.totalProducts)} />
+              <Stat label="Inventory value" value={formatCompactMoney(stats.estimatedInventoryValue)} />
+            </div>
+          </div>
+        </InsightCard>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recommendations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {view.recommendations.length === 0 ? (
-              <p className="text-sm text-muted-foreground">All clear — no recommendations right now.</p>
-            ) : (
-              <ul className="flex flex-col gap-2">
-                {view.recommendations.map((item, index) => (
-                  <li key={index} className="border-b border-border py-2 text-sm text-muted-foreground last:border-0">
-                    {text(item)}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Top reorder priorities</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            {view.reorder.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No reorder priorities yet.</p>
-            ) : (
-              view.reorder.map((item, index) => {
-                const urgency = URGENCY[item.urgency || ""] ?? URGENCY.low;
-                return (
-                  <div key={index} className="relative overflow-hidden rounded-xl border border-border px-4 py-3 pl-5">
-                    <span className={`absolute inset-y-0 left-0 w-1 ${urgency.bar}`} />
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{text(item.name)}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {text(item.category) || "Uncategorized"} · Qty{" "}
-                          <span className="tabular-nums">{item.currentQuantity}</span>
-                        </p>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p className={`text-xs font-medium ${urgency.className}`}>{urgency.label}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Reorder{" "}
-                          <span className="font-medium text-foreground tabular-nums">~{item.suggestedOrderQuantity}</span>
-                        </p>
-                      </div>
-                    </div>
+        <InsightCard title="Runs out soon" state={historyCard}>
+          {insights.estimated === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Not enough history yet. An estimate needs 2 or more uses of an item across 3 days.
+            </p>
+          ) : (
+            <ItemList
+              empty={`Nothing runs out in the next ${RUNS_OUT_WITHIN_DAYS} days.`}
+              rows={insights.runningOut.map(({ item, daysLeft }) => ({ item, detail: `~${days(daysLeft)} left` }))}
+            />
+          )}
+        </InsightCard>
+        <InsightCard title="Expiring soon" state={itemsCard}>
+          <ItemList
+            empty="Nothing expires in the next 7 days."
+            rows={insights.expiring.map(({ item, days: left }) => ({
+              item,
+              detail: left < 0 ? "Expired" : left === 0 ? "Today" : `In ${days(left)}`,
+              tone: left < 0 ? "font-medium text-destructive" : undefined,
+            }))}
+          />
+        </InsightCard>
+        <InsightCard title="Not moving" state={historyCard}>
+          <ItemList
+            empty={`Every item in stock moved in the last ${HISTORY_DAYS} days.`}
+            rows={insights.notMoving.map((item) => ({ item, detail: `${quantityOf(item)} on hand` }))}
+          />
+        </InsightCard>
+        <InsightCard title="Waste and damage" state={historyCard}>
+          {insights.waste.changes === 0 ? (
+            <p className="text-sm text-muted-foreground">No waste or damage logged in the last {HISTORY_DAYS} days.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <Stat label="Units" value={String(insights.waste.units)} />
+              <Stat label="Value" value={formatCompactMoney(insights.waste.value)} />
+            </div>
+          )}
+        </InsightCard>
+        <InsightCard title="Category risk" state={itemsCard} className="lg:col-span-2">
+          {insights.categoryRisk.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No categories yet.</p>
+          ) : (
+            insights.categoryRisk.map((risk) => {
+              const tone = RISK_TONE[risk.percent >= 50 ? 0 : risk.percent >= 20 ? 1 : 2];
+              return (
+                <div key={risk.category} className="border-b border-border py-2.5 last:border-0">
+                  <div className="mb-1.5 flex flex-wrap items-center justify-between gap-x-3 text-sm">
+                    <span className="font-medium">{risk.category}</span>
+                    <span className="text-muted-foreground tabular-nums">
+                      <span className={`font-medium ${tone.text}`}>{risk.atRisk}</span>/{risk.total} low or out ·{" "}
+                      {risk.percent}%
+                    </span>
                   </div>
-                );
-              })
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Category risk</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {view.risks.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No category data.</p>
-            ) : (
-              view.risks.map((risk, index) => {
-                const pct = Number(risk.riskPercent) || 0;
-                const tone = pct >= 50 ? "bg-destructive" : pct >= 20 ? "bg-warning" : "bg-success";
-                const textTone = pct >= 50 ? "text-destructive" : pct >= 20 ? "text-warning" : "text-success";
-                return (
-                  <div key={index} className="border-b border-border py-2.5 last:border-0">
-                    <div className="mb-1.5 flex items-center justify-between text-sm">
-                      <span className="font-medium">{text(risk.category)}</span>
-                      <span className="text-muted-foreground tabular-nums">
-                        <span className={`font-medium ${textTone}`}>{risk.atRiskItems}</span>/{risk.totalItems} · {pct}%
-                      </span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div className={`h-full rounded-full ${tone}`} style={{ width: `${Math.min(100, pct)}%` }} />
-                    </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                    <div className={`h-full rounded-full ${tone.bar}`} style={{ width: `${risk.percent}%` }} />
                   </div>
-                );
-              })
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Stock watch</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="low">
-              <TabsList>
-                <TabsTrigger value="low">Low stock</TabsTrigger>
-                <TabsTrigger value="out">Out of stock</TabsTrigger>
-              </TabsList>
-              <TabsContent value="low">
-                <StockList
-                  empty="No low-stock items."
-                  items={view.lowItems.map((item) => ({
-                    name: text(item.name),
-                    detail: `${String(item.quantity)} left`,
-                    detailClass: "font-medium text-foreground tabular-nums",
-                  }))}
-                />
-              </TabsContent>
-              <TabsContent value="out">
-                <StockList
-                  empty="No out-of-stock items."
-                  items={view.outItems.map((item) => ({
-                    name: text(item.name),
-                    detail: "Out",
-                    detailClass: "text-xs font-medium text-destructive",
-                  }))}
-                />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+                </div>
+              );
+            })
+          )}
+        </InsightCard>
       </div>
-    </>
+    </div>
   );
 }
 
-function StockList({
-  items,
-  empty,
+function InsightCard({
+  title,
+  state,
+  className,
+  children,
 }: {
-  items: Array<{ name: string; detail: string; detailClass: string }>;
-  empty: string;
+  title: string;
+  state: CardState;
+  className?: string;
+  children: ReactNode;
 }) {
-  if (items.length === 0) return <p className="text-sm text-muted-foreground">{empty}</p>;
   return (
-    <ul>
-      {items.map((item, index) => (
-        <li key={index} className="flex items-center justify-between border-b border-border py-2 text-sm last:border-0">
-          <span className="text-muted-foreground">{item.name}</span>
-          <span className={item.detailClass}>{item.detail}</span>
-        </li>
-      ))}
-    </ul>
+    <Card className={className} aria-busy={state.status === "loading"}>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {state.status === "loading" ? (
+          <div className="flex flex-col gap-3" role="status" aria-label={`Loading ${title.toLowerCase()}`}>
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+          </div>
+        ) : state.status === "error" ? (
+          <div className="flex flex-col items-start gap-3" role="alert">
+            <p className="text-sm text-muted-foreground">{state.error || "Couldn't load this right now."}</p>
+            <Button type="button" variant="outline" size="sm" onClick={state.onRetry}>
+              <ArrowClockwiseIcon />
+              Retry
+            </Button>
+          </div>
+        ) : (
+          children
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border p-4">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
+    </div>
+  );
+}
+
+type Row = { item: InventoryItem; detail: string; tone?: string };
+
+/** Item names open the item sheet (read-only for viewers); long lists show TOP rows, then "See all". */
+function ItemList({ rows, empty }: { rows: Row[]; empty: string }) {
+  const { itemHref } = useSheetParams();
+  const [all, setAll] = useState(false);
+  if (rows.length === 0) return <p className="text-sm text-muted-foreground">{empty}</p>;
+  const shown = all ? rows : rows.slice(0, TOP);
+  return (
+    <div className="flex flex-col items-start">
+      <ul className="w-full">
+        {shown.map(({ item, detail, tone }) => (
+          <li
+            key={item.itemID ?? item.name}
+            className="flex min-h-11 items-center justify-between gap-3 border-b border-border text-sm last:border-0"
+          >
+            {item.itemID ? (
+              <Link
+                to={itemHref(item.itemID)}
+                state={SHEET_LINK_STATE}
+                className={cn(TEXT_LINK_CLASS, "min-w-0 truncate py-2 no-underline hover:underline")}
+              >
+                {item.name || "Unnamed item"}
+              </Link>
+            ) : (
+              <span className="min-w-0 truncate">{item.name || "Unnamed item"}</span>
+            )}
+            <span className={cn("shrink-0 tabular-nums", tone ?? "text-muted-foreground")}>{detail}</span>
+          </li>
+        ))}
+      </ul>
+      {rows.length > TOP ? (
+        <Button type="button" variant="link" className="mt-1 px-0" onClick={() => setAll((open) => !open)}>
+          {all ? "Show fewer" : `See all ${rows.length}`}
+        </Button>
+      ) : null}
+    </div>
   );
 }

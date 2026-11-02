@@ -6,7 +6,7 @@ import {
   restockQueue,
   thresholdOf,
 } from "../../../frontend/src/lib/dashboardStats.ts";
-import { nextQuantity, reasonAllows, reasonNote } from "../../../frontend/src/lib/reasons.ts";
+import { reasonAllows, reasonNote } from "../../../frontend/src/lib/reasons.ts";
 import { parseCsv, toCsv } from "../../../frontend/src/lib/csv.ts";
 import { nextUncounted } from "../../../frontend/src/screens/stock/count.ts";
 
@@ -66,11 +66,6 @@ describe("reasons", () => {
     assert.equal(reasonNote("Count fix", "add", 3), "Count fix");
     assert.equal(reasonNote(null, "remove", 4), "Used 4");
     assert.equal(reasonNote(null, "add", 4), "Received 4");
-  });
-
-  test("never goes below zero", () => {
-    assert.equal(nextQuantity(3, "remove", 5), 0);
-    assert.equal(nextQuantity(3, "add", 5), 8);
   });
 });
 

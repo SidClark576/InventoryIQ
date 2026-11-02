@@ -30,8 +30,6 @@ type StockTableProps = {
   itemHref: ItemHref;
   /** Viewers get no steppers. */
   canEdit: boolean;
-  /** Unsaved −/+ taps per itemID, shown on top of the cached quantity. */
-  pending: ReadonlyMap<string, number>;
   onStep: (item: InventoryItem, by: 1 | -1) => void;
   /** Something is selected: on touch, checkboxes show and a tap toggles instead of opening. */
   selecting: boolean;
@@ -61,7 +59,6 @@ export function StockTable({
   onCount,
   itemHref,
   canEdit,
-  pending,
   onStep,
   selecting,
 }: StockTableProps) {
@@ -104,7 +101,7 @@ export function StockTable({
                       itemHref={itemHref}
                       checkCol={checkCol}
                       stepper={canEdit && !counting && !selectMode}
-                      shown={quantityOf(item) + (item.itemID ? pending.get(item.itemID) ?? 0 : 0)}
+                      shown={quantityOf(item)}
                       onStep={onStep}
                       selectMode={selectMode}
                     />
