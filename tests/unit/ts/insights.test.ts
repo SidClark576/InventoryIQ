@@ -81,11 +81,13 @@ describe("deriveInsights: expiring, not moving, waste, health, categories", () =
     assert.deepEqual(deriveInsights(items, txs, NOW).waste, { units: 3, value: 7.5, changes: 2 });
   });
 
-  test("health matches DailyAlert: 100 − 25·out − 10·low, floor 0, none for an empty store", () => {
+  test("health is the share of healthy stock: out counts 1, low 0.4, none for an empty store", () => {
     assert.equal(deriveInsights([], [], NOW).health, null);
     const items = [{ quantity: 0 }, { quantity: 2, lowStockThreshold: 5 }, { quantity: 3 }, { quantity: 50 }];
     assert.equal(deriveInsights(items, [], NOW).health, 55);
     assert.equal(deriveInsights(Array.from({ length: 5 }, () => ({ quantity: 0 })), [], NOW).health, 0);
+    const bigStore = [...Array.from({ length: 4 }, () => ({ quantity: 0 })), ...Array.from({ length: 6 }, () => ({ quantity: 50 }))];
+    assert.equal(deriveInsights(bigStore, [], NOW).health, 60);
   });
 
   test("category risk, riskiest first", () => {

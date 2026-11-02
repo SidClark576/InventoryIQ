@@ -129,11 +129,15 @@ export function InsightsScreen() {
         </InsightCard>
         <InsightCard title="Stock distribution" state={itemsCard} className="lg:col-span-2">
           <div className="flex flex-col gap-4">
-            <StockBar
-              inStock={stats.totalProducts - stats.lowStockCount - stats.outOfStockCount}
-              low={stats.lowStockCount}
-              out={stats.outOfStockCount}
-            />
+            {stats.totalProducts > 0 ? (
+              <StockBar
+                inStock={stats.totalProducts - stats.lowStockCount - stats.outOfStockCount}
+                low={stats.lowStockCount}
+                out={stats.outOfStockCount}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">Add items to see your stock mix.</p>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <Stat label="Products" value={String(stats.totalProducts)} />
               <Stat label="Inventory value" value={formatCompactMoney(stats.estimatedInventoryValue)} />

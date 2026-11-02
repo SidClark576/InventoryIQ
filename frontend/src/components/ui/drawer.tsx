@@ -28,7 +28,7 @@ function DrawerContent({
     <DrawerPrimitive.Portal>
       <DrawerPrimitive.Backdrop
         data-slot="drawer-overlay"
-        className="fixed inset-0 z-50 bg-black/80 opacity-[calc(1-var(--drawer-swipe-progress,0))] transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0 data-swiping:duration-0 supports-backdrop-filter:backdrop-blur-xs"
+        className="fixed inset-0 z-50 bg-black/80 opacity-[calc(1-var(--drawer-swipe-progress,0))] transition-opacity duration-200 motion-reduce:transition-none data-ending-style:opacity-0 data-starting-style:opacity-0 data-swiping:duration-0 supports-backdrop-filter:backdrop-blur-xs"
       />
       {/* ponytail: touch-pan-y stops iOS panning the sheet sideways; Base UI only claims the vertical drag. */}
       <DrawerPrimitive.Viewport className="fixed inset-0 z-50 flex touch-pan-y items-end">
@@ -39,7 +39,7 @@ function DrawerContent({
           onBlur={() => setTyping(false)}
           className={cn(
             "relative flex max-h-[92svh] w-full flex-col rounded-t-4xl border-t bg-popover bg-clip-padding pb-[env(safe-area-inset-bottom)] text-sm text-popover-foreground shadow-lg outline-none",
-            "[transform:translateY(var(--drawer-swipe-movement-y,0px))] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:duration-0 data-swiping:select-none data-ending-style:[transform:translateY(100%)] data-starting-style:[transform:translateY(100%)] data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)*300ms)]",
+            "[transform:translateY(var(--drawer-swipe-movement-y,0px))] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] data-swiping:duration-0 data-swiping:select-none data-ending-style:[transform:translateY(100%)] data-starting-style:[transform:translateY(100%)] data-ending-style:duration-[calc(var(--drawer-swipe-strength,1)*300ms)] motion-reduce:transition-none",
             className
           )}
           {...props}
@@ -52,7 +52,7 @@ function DrawerContent({
           </DrawerPrimitive.Content>
           <DrawerPrimitive.Close
             data-slot="drawer-close"
-            render={<Button variant="ghost" className="absolute top-4 right-4" size="icon-sm" />}
+            render={<Button variant="ghost" className="absolute top-2 right-2" size="icon-lg" />}
           >
             <XIcon />
             <span className="sr-only">Close</span>

@@ -18,8 +18,12 @@ import { ItemPanel } from "./ItemPanel";
 export function ItemSheetHost() {
   const { itemID, isNew, close } = useSheetParams();
   const { items, itemsStatus } = useInventory();
-  const desktop = useIsDesktop();
+  const wide = useIsDesktop();
   const open = isNew || Boolean(itemID);
+  // Pick Sheet or Drawer when it opens; rotating across 768px while open would remount the body and lose typing.
+  const layout = useRef(wide);
+  if (!open) layout.current = wide;
+  const desktop = layout.current;
   const found = itemID ? items.find((row) => row.itemID === itemID) : undefined;
 
   // While the sheet animates closed (URL already cleared) or right after a delete removed the row,
