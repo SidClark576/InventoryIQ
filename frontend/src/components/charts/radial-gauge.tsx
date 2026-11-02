@@ -10,8 +10,8 @@ type RadialGaugeProps = {
 };
 
 function toneFor(pct: number): string {
-  if (pct < 50) return "stroke-destructive";
-  if (pct < 80) return "stroke-warning";
+  if (pct < 70) return "stroke-destructive";
+  if (pct < 90) return "stroke-warning";
   return "stroke-success";
 }
 

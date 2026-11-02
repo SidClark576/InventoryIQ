@@ -119,8 +119,10 @@ export function deriveInsights(items: readonly InventoryItem[], txs: readonly Tr
   );
 
   const stats = deriveDashStats(items);
+  // Share of healthy stock (out counts 1, low 0.4), so a big store doesn't read 0 after 4 outs.
+  // DailyAlert's email still uses 100 − 25·out − 10·low.
   const health = items.length
-    ? Math.max(0, Math.min(100, 100 - 25 * stats.outOfStockCount - 10 * stats.lowStockCount))
+    ? Math.round(100 * (1 - (stats.outOfStockCount + 0.4 * stats.lowStockCount) / items.length))
     : null;
 
   return { stats, health, runningOut, estimated: estimates.length, expiring, notMoving, waste, categoryRisk: categoryRisk(items) };
