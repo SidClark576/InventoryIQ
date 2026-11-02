@@ -30,7 +30,8 @@ function DrawerContent({
         data-slot="drawer-overlay"
         className="fixed inset-0 z-50 bg-black/80 opacity-[calc(1-var(--drawer-swipe-progress,0))] transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0 data-swiping:duration-0 supports-backdrop-filter:backdrop-blur-xs"
       />
-      <DrawerPrimitive.Viewport className="fixed inset-0 z-50 flex items-end">
+      {/* ponytail: touch-pan-y stops iOS panning the sheet sideways; Base UI only claims the vertical drag. */}
+      <DrawerPrimitive.Viewport className="fixed inset-0 z-50 flex touch-pan-y items-end">
         <DrawerPrimitive.Popup
           data-slot="drawer-content"
           data-base-ui-swipe-ignore={typing ? "" : undefined}
@@ -46,7 +47,7 @@ function DrawerContent({
           <div aria-hidden data-testid="sheet-handle" className="flex h-7 w-full shrink-0 cursor-grab items-center justify-center">
             <div className="h-1 w-10 rounded-full bg-muted-foreground/30" />
           </div>
-          <DrawerPrimitive.Content className="flex min-h-0 flex-col overflow-y-auto overscroll-contain">
+          <DrawerPrimitive.Content className="flex min-h-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain">
             {children}
           </DrawerPrimitive.Content>
           <DrawerPrimitive.Close
