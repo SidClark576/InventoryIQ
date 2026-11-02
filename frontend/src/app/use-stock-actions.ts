@@ -12,6 +12,7 @@ import {
 import { useInventory } from "@/app/inventory-store";
 import { quantityOf } from "@/lib/dashboardStats";
 import { errorText } from "@/lib/errors";
+import { reasonNote, type Reason } from "@/lib/reasons";
 
 export type ItemFields = {
   name?: string;
@@ -57,7 +58,8 @@ function versionOf(item: InventoryItem): number {
  * and a 412 reloads the list so the next attempt uses the current version.
  */
 export function useStockActions() {
-  const { getItem, upsertItem, removeItems, reloadItems, invalidateTransactions } = useInventory();
+  const { upsertItem, removeItems, reloadItems, invalidateTransactions, quantityQueue, serverItem, stageQuantity } =
+    useInventory();
 
   const reportFailure = useCallback(
     (err: unknown, item: InventoryItem, fallback: string) => {
@@ -85,6 +87,39 @@ export function useStockActions() {
     [upsertItem, invalidateTransactions],
   );
 
+  /** "X: 4 → 3" with Undo. Undo drops taps not sent yet, waits for a save in flight, then puts `before` back. */
+  const toastSaved = useCallback(
+    (item: InventoryItem, before: number, next: number, notes: string, undoable: boolean) => {
+      const id = item.itemID;
+      const undo = () => {
+        if (!id) return;
+        // replace keeps the item pending, so the store keeps its server row for the check below.
+        void quantityQueue.replace(id, async () => {
+          const latest = serverItem(id);
+          if (!latest || quantityOf(latest) !== next) {
+            toast.error("Can't undo", { description: `${nameOf(item)} has changed since.` });
+            return;
+          }
+          try {
+            await putItem(latest, { quantity: before, notes: "Undo" });
+            toast.success(`${nameOf(item)} is back to ${before}`);
+          } catch (err: unknown) {
+            reportFailure(err, latest, "Undo failed");
+          }
+        });
+        const server = serverItem(id);
+        if (server) upsertItem(server);
+      };
+      toast.success(`${nameOf(item)}: ${before} → ${next}`, {
+        description: notes || undefined,
+        action: undoable ? { label: "Undo", onClick: undo } : undefined,
+        duration: undoable ? UNDO_TOAST_MS : undefined,
+      });
+    },
+    [quantityQueue, serverItem, upsertItem, putItem, reportFailure],
+  );
+
+  /** Waits for the save (bulk flows). Taps from steppers and the sheet use `setQuantityOptimistic`. */
   const setQuantity = useCallback(
     async (
       item: InventoryItem,
@@ -96,34 +131,53 @@ export function useStockActions() {
       if (next === before) return item;
       try {
         const saved = await putItem(item, { quantity: next, notes });
-        if (!saved || silent) return saved;
-        const undo = () => {
-          const latest = saved.itemID ? getItem(saved.itemID) : undefined;
-          if (!latest || quantityOf(latest) !== next) {
-            toast.error("Can't undo", { description: `${nameOf(item)} has changed since.` });
-            return;
-          }
-          void (async () => {
-            try {
-              await putItem(latest, { quantity: before, notes: "Undo" });
-              toast.success(`${nameOf(item)} is back to ${before}`);
-            } catch (err: unknown) {
-              reportFailure(err, latest, "Undo failed");
-            }
-          })();
-        };
-        toast.success(`${nameOf(item)}: ${before} → ${next}`, {
-          description: notes || undefined,
-          action: undoable ? { label: "Undo", onClick: undo } : undefined,
-          duration: undoable ? UNDO_TOAST_MS : undefined,
-        });
+        if (saved && !silent) toastSaved(item, before, next, notes, undoable);
         return saved;
       } catch (err: unknown) {
         if (!silent) reportFailure(err, item, `Couldn't update ${nameOf(item)}`);
         return null;
       }
     },
-    [putItem, getItem, reportFailure],
+    [putItem, toastSaved, reportFailure],
+  );
+
+  /** One save of `total` units on top of the server row; on failure the cache goes back to that row. */
+  const saveBatch = useCallback(
+    async (id: string, total: number, reason: Reason | null): Promise<boolean> => {
+      const base = serverItem(id);
+      if (!base) return false;
+      const before = quantityOf(base);
+      const next = Math.max(0, before + total);
+      if (next === before) return true;
+      const notes = reasonNote(reason, next > before ? "add" : "remove", Math.abs(next - before));
+      try {
+        if (await putItem(base, { quantity: next, notes })) toastSaved(base, before, next, notes, true);
+        return true;
+      } catch (err: unknown) {
+        quantityQueue.cancel(id);
+        if (err instanceof ApiError && (err.status === 404 || err.status === 410)) {
+          removeItems([id]);
+          toast.error(`${nameOf(base)} was deleted`, { description: "Someone removed it, so the change wasn't saved." });
+          return false;
+        }
+        upsertItem(base);
+        if (err instanceof ApiError && err.status === 412) reportFailure(err, base, "");
+        else toast.error(`Couldn't save ${nameOf(base)}. It's back to ${before}`, { description: errorText(err, "Try again in a moment.") });
+        return false;
+      }
+    },
+    [serverItem, putItem, toastSaved, quantityQueue, removeItems, upsertItem, reportFailure],
+  );
+
+  /** The cached number moves now; taps on one item with the same reason merge into one save ~1 s later. */
+  const setQuantityOptimistic = useCallback(
+    (item: InventoryItem, delta: number, reason: Reason | null = null) => {
+      const id = item.itemID;
+      if (!id || !delta) return;
+      stageQuantity(id, delta);
+      quantityQueue.tap(id, delta, reason ?? "", (total) => saveBatch(id, total, reason));
+    },
+    [stageQuantity, quantityQueue, saveBatch],
   );
 
   const saveFields = useCallback(
@@ -219,5 +273,5 @@ export function useStockActions() {
     [removeItems, invalidateTransactions, restoreItems, reloadItems],
   );
 
-  return { setQuantity, saveFields, createItem, deleteItems, restoreItems, reportFailure };
+  return { setQuantity, setQuantityOptimistic, saveFields, createItem, deleteItems, restoreItems, reportFailure };
 }

@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { MinusIcon, PlusIcon } from "@phosphor-icons/react";
 import type { InventoryItem } from "@/api";
+import { useInventory } from "@/app/inventory-store";
 import { useStockActions } from "@/app/use-stock-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { quantityOf } from "@/lib/dashboardStats";
-import { nextQuantity, reasonAllows, reasonNote, REASONS, type Direction, type Reason } from "@/lib/reasons";
+import { reasonAllows, REASONS, type Direction, type Reason } from "@/lib/reasons";
 
 type AdjustControlsProps = {
   item: InventoryItem;
@@ -15,16 +16,16 @@ type AdjustControlsProps = {
 };
 
 export function AdjustControls({ item, initialReason = null }: AdjustControlsProps) {
-  const { setQuantity } = useStockActions();
+  const { setQuantityOptimistic } = useStockActions();
+  const { pendingIDs } = useInventory();
   const [amount, setAmount] = useState("1");
   const [reason, setReason] = useState<Reason | null>(initialReason);
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+  // The cached row already includes taps still saving, so checks run against the number on screen.
   const current = quantityOf(item);
+  const saving = Boolean(item.itemID && pendingIDs.has(item.itemID));
 
-  async function apply(direction: Direction) {
-    // Enter on the amount field bypasses the disabled buttons.
-    if (busy) return;
+  function apply(direction: Direction) {
     const units = Number(amount);
     if (!Number.isInteger(units) || units < 1) {
       setError("Enter a whole number of 1 or more.");
@@ -35,17 +36,7 @@ export function AdjustControls({ item, initialReason = null }: AdjustControlsPro
       return;
     }
     setError("");
-    setBusy(true);
-    const saved = await setQuantity(
-      item,
-      nextQuantity(current, direction, units),
-      reasonNote(reason, direction, units),
-    );
-    setBusy(false);
-    if (saved) {
-      setReason(null);
-      setAmount("1");
-    }
+    setQuantityOptimistic(item, direction === "add" ? units : -units, reason);
   }
 
   return (
@@ -59,8 +50,8 @@ export function AdjustControls({ item, initialReason = null }: AdjustControlsPro
           variant="outline"
           size="lg"
           className="flex-1"
-          disabled={busy || current <= 0 || !reasonAllows(reason, "remove")}
-          onClick={() => void apply("remove")}
+          disabled={current <= 0 || !reasonAllows(reason, "remove")}
+          onClick={() => apply("remove")}
         >
           <MinusIcon />
           Remove
@@ -77,7 +68,7 @@ export function AdjustControls({ item, initialReason = null }: AdjustControlsPro
           onKeyDown={(event) => {
             if (event.key === "Enter") {
               event.preventDefault();
-              void apply(reason === "Received" ? "add" : "remove");
+              apply(reason === "Received" ? "add" : "remove");
             }
           }}
           className="h-10 w-20 text-center text-base font-semibold tabular-nums"
@@ -86,8 +77,8 @@ export function AdjustControls({ item, initialReason = null }: AdjustControlsPro
           type="button"
           size="lg"
           className="flex-1"
-          disabled={busy || !reasonAllows(reason, "add")}
-          onClick={() => void apply("add")}
+          disabled={!reasonAllows(reason, "add")}
+          onClick={() => apply("add")}
         >
           <PlusIcon />
           Add
@@ -119,6 +110,9 @@ export function AdjustControls({ item, initialReason = null }: AdjustControlsPro
       </div>
       <p className="min-h-4 text-xs text-destructive" role="alert">
         {error}
+      </p>
+      <p className="-mt-2 min-h-4 text-xs text-muted-foreground" role="status">
+        {saving ? "Saving…" : ""}
       </p>
     </section>
   );

@@ -1,21 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { clampDelta, serialize, settleStep } from "../../../frontend/src/screens/stock/stepper.ts";
+import { clampDelta } from "../../../frontend/src/screens/stock/stepper.ts";
+import { serialize } from "../../../frontend/src/lib/quantity-queue.ts";
 import { bulkDeleteNeedsConfirm, filterItems, groupingFromParam, matchesQuery } from "../../../frontend/src/screens/stock/stock-view.ts";
-
-describe("settleStep", () => {
-  test("negative delta is a sale, positive a delivery", () => {
-    assert.deepEqual(settleStep(10, -3), { next: 7, notes: "Sold 3" });
-    assert.deepEqual(settleStep(10, 2), { next: 12, notes: "Received 2" });
-  });
-  test("never goes below zero and notes the real change", () => {
-    assert.deepEqual(settleStep(2, -5), { next: 0, notes: "Sold 2" });
-  });
-  test("no change gives null", () => {
-    assert.equal(settleStep(4, 0), null);
-    assert.equal(settleStep(0, -1), null);
-  });
-});
 
 describe("clampDelta", () => {
   test("stops at zero", () => {

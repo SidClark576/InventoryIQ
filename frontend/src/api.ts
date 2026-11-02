@@ -319,19 +319,6 @@ export async function deleteItem(itemID: string): Promise<Record<string, unknown
   return data as Record<string, unknown>;
 }
 
-export async function getInsights(): Promise<Record<string, unknown>> {
-  const url = `${CONFIG.API_ENDPOINT}/insights`;
-
-  const res = await fetch(url, {
-    headers: await readyHeaders(),
-  });
-  checkQuota(res);
-  check401(res);
-  const data = (await res.json()) as ErrorBody;
-  if (!res.ok) throw new Error(data.error || 'Failed to fetch insights');
-  return data as Record<string, unknown>;
-}
-
 /** Newest 200 rows; with `since` (UTC ISO), every row on or after it. */
 export async function getTransactions(since?: string): Promise<unknown[]> {
   const query = since ? `?since=${encodeURIComponent(since)}` : "";

@@ -1,0 +1,94 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "OwnLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/CascadeDeleteUser",
+        "arn:aws:logs:${Region}:${AccountId}:log-group:/aws/lambda/CascadeDeleteUser:*"
+      ]
+    },
+    {
+      "Sid": "InventoryIQ",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:Query",
+        "dynamodb:BatchWriteItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryIQ",
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryIQ/index/*"
+      ]
+    },
+    {
+      "Sid": "InventoryTransactions",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:Scan",
+        "dynamodb:BatchWriteItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryTransactions"
+      ]
+    },
+    {
+      "Sid": "Sessions",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:Query",
+        "dynamodb:BatchWriteItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/Sessions",
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/Sessions/index/*"
+      ]
+    },
+    {
+      "Sid": "AuthAttempts",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:DeleteItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/AuthAttempts"
+      ]
+    },
+    {
+      "Sid": "PasswordResets",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:Scan",
+        "dynamodb:BatchWriteItem"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/PasswordResets"
+      ]
+    },
+    {
+      "Sid": "UsersStream",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:DescribeStream",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/Users/stream/*"
+      ]
+    },
+    {
+      "Sid": "ListStreams",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:ListStreams"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
