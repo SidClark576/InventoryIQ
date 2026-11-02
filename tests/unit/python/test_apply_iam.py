@@ -103,6 +103,20 @@ def test_every_table_the_code_names_is_granted(name):
     assert not missing, (name, missing)
 
 
+# _org.py helpers -> the table they BatchGetItem from
+ORG_BATCH_GETS = {'list_user_orgs': 'Organizations'}
+
+
+@pytest.mark.parametrize('name', FUNCTIONS)
+def test_batch_get_callers_are_granted_batch_get_item(name):
+    src = _source(name)
+    granted = {r.rsplit(':table/', 1)[-1] for s in _policy(name)['Statement']
+               if 'dynamodb:BatchGetItem' in _as_list(s['Action']) for r in _as_list(s['Resource'])}
+    needs = {t for helper, t in ORG_BATCH_GETS.items() if 'import _org' in src and helper in src}
+    assert needs <= granted, (name, needs - granted)
+    assert granted or 'batch_get_item' not in src, name
+
+
 def test_table_regex_sees_the_org_tables():
     assert {'Organizations', 'OrgMembers', 'OrgInvites'} <= _tables('OrgInvites')
     assert _tables('AddItem') == {'InventoryIQ', 'InventoryTransactions', 'IdempotencyKeys', 'OrgMembers'}

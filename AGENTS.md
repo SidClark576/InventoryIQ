@@ -122,12 +122,12 @@ The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` p
 - `UpdateItem.py` — optimistic-lock update (`If-Match` → 412 on mismatch, new version in `ETag`).
 - `DeleteItem.py` / `RestoreItem.py` / `PurgeDeletedItems.py` — 30-day soft-delete lifecycle.
 - `GetCategories.py` / `DeleteCategory.py` — category ops; `"Uncategorized"` always exists and absorbs orphans.
-- `GetTransactions.py` — chronological audit log.
+- `GetTransactions.py` — chronological audit log: queries `orgID-createdAt-index` newest first (never a scan; falls back to `orgID-index` until that GSI is live). No params = array of the newest 200; `since` = all rows on/after it; `limit` (1-200) / `cursor` = `{items, nextCursor}`.
 - `LowItemInsight.py` — reorder insights; SNS alerts + SQS events, 24h cooldown per user.
 - `BulkImport.py` / `BulkImportAsync.py` — CSV ingest via S3 presigned URLs.
 - `BarcodeLookup.py` — barcode item lookup.
 - `CascadeDeleteUser.py` — DynamoDB Streams trigger on `Users` REMOVE; cascades deletion across all user-owned tables.
-- `DailyAlert.py` — scheduled daily SNS stock summary.
+- `DailyAlert.py` — scheduled daily SNS stock summary: scans `Organizations`, one `orgID-index` query per live org, one combined email; health score = `round(100·(1 − (out + 0.4·low)/total))` like the Insights page.
 
 ### Scripts (`scripts/`)
 
@@ -145,12 +145,12 @@ The runtime is a Vite + React SPA. `frontend/index.html` is the shell (`#root` p
 | `Sessions` | `sessionToken` | — | `userID-index` | `expiresAt` | Audit trail + logout cleanup only. NOT used to validate tokens (JWT is stateless) |
 | `AuthAttempts` | `email` | — | — | `ttl` | Failed-login rate limiting, 15-min lockout |
 | `PasswordResets` | `resetToken` | — | — | `expiresAt` | Single-use reset tokens |
-| `InventoryTransactions` | `transactionID` | — | `orgID-index` | — | Audit trail: `changeType` (`create`/`stock_in`/`stock_out`/`update`/`delete`), before/after/delta quantities |
+| `InventoryTransactions` | `transactionID` | — | `orgID-index`, `orgID-createdAt-index` (RANGE `createdAt`) | — | Audit trail: `changeType` (`create`/`stock_in`/`stock_out`/`update`/`delete`), before/after/delta quantities |
 | `IdempotencyKeys` | `key` | — | — | `expiresAt` | 24h replay cache: stores `responseBody` |
 | `Suppliers` | `supplierID` | — | `userID-index`, `orgID-index` | — | Supplier records |
 | `Organizations` | `orgID` | — | — | — | `name`, `memberCount`, soft-delete via `deletedAt`; store fields (all optional): `storeType`, `country`, `currency` (ISO 4217, drives money formatting), `onboardedAt` (set once by `PUT /orgs/{id}`) |
 | `OrgMembers` | `orgID` | `userID` | `userID-index` | — | `role`, `status` (`active`); the live-lookup table for instant revoke |
-| `OrgInvites` | `inviteTokenHash` | — | `orgID-index`, `email-index` | — | SHA-256 of invite token, `role`, invited email |
+| `OrgInvites` | `inviteTokenHash` | — | `orgID-index`, `email-index` | `ttl` (= `expiresAt`) | SHA-256 of invite token, `role`, invited email |
 
 ---
 

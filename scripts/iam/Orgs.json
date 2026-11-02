@@ -18,6 +18,7 @@
       "Sid": "Organizations",
       "Effect": "Allow",
       "Action": [
+        "dynamodb:BatchGetItem",
         "dynamodb:GetItem",
         "dynamodb:UpdateItem"
       ],

@@ -1,4 +1,5 @@
-"""AC2: expiry alerts go out once per state (soon, expired); a new expiresAt re-arms both."""
+"""DailyAlert: expiry alerts go out once per state (soon, expired), a new expiresAt re-arms both;
+items come from one orgID-index query per live org (never a scan of InventoryIQ); proportional health score."""
 import json
 from datetime import date, datetime, timedelta, timezone
 
@@ -8,9 +9,14 @@ TODAY = date(2026, 11, 10)
 
 
 @pytest.fixture
-def alert(load, monkeypatch):
+def alert(load, ddb, monkeypatch):
+    from conftest import _table
+    _table(ddb, 'Organizations', 'orgID')
+    for org in ({'orgID': 'o1'}, {'orgID': 'o2'}, {'orgID': 'gone', 'deletedAt': '2026-11-01T00:00:00+00:00'}):
+        ddb.Table('Organizations').put_item(Item=org)
     monkeypatch.setenv('SNS_TOPIC_ARN', 'arn:aws:sns:us-east-1:123456789012:alerts')
     mod = load('DailyAlert')
+    monkeypatch.setattr(mod.table, 'scan', lambda **kw: (_ for _ in ()).throw(AssertionError('scan InventoryIQ')))
     sent = []
     monkeypatch.setattr(mod.sns, 'publish', lambda **kw: sent.append(kw))
 
@@ -28,7 +34,7 @@ def alert(load, monkeypatch):
 
 
 def _put(mod, item_id, expires, **extra):
-    mod.table.put_item(Item={'itemID': item_id, 'name': item_id, 'quantity': 50, 'version': 1,
+    mod.table.put_item(Item={'itemID': item_id, 'name': item_id, 'quantity': 50, 'version': 1, 'orgID': 'o1',
                              'expiresAt': expires, **extra})
 
 
@@ -42,7 +48,7 @@ def test_once_per_state_and_rearm(alert):
     _put(alert, 'later', _day(30))
     _put(alert, 'undated', '')
     _put(alert, 'binned', _day(-2), deletedAt='2026-11-01T00:00:00+00:00')
-    alert.table.put_item(Item={'itemID': 'old', 'name': 'old', 'quantity': 50, 'version': 1})
+    alert.table.put_item(Item={'itemID': 'old', 'name': 'old', 'quantity': 50, 'version': 1, 'orgID': 'o1'})
 
     body, msg = alert.run()
     assert (body['expired'], body['expiringSoon']) == (1, 1)
@@ -74,3 +80,32 @@ def test_today_and_day_seven_are_soon_day_eight_is_not(alert):
     _put(alert, 'eight', _day(8))
     body, _ = alert.run()
     assert (body['expired'], body['expiringSoon']) == (0, 2)
+
+
+def _stock(mod, item_id, qty, org='o1', **extra):
+    mod.table.put_item(Item={'itemID': item_id, 'name': item_id, 'quantity': qty, 'lowStockThreshold': 5,
+                             'version': 1, **({'orgID': org} if org else {}), **extra})
+
+
+def test_every_live_orgs_items_in_one_report(alert):
+    _stock(alert, 'rice', 0, 'o1')
+    _stock(alert, 'soap', 0, 'o2')
+    _stock(alert, 'ghost', 0, 'gone')
+    _stock(alert, 'binned', 0, 'o2', deletedAt='2026-11-01T00:00:00+00:00')
+    _stock(alert, 'orphan', 0, None)
+    body, msg = alert.run()
+    assert body['outOfStock'] == 2
+    assert 'rice' in msg and 'soap' in msg
+    assert not any(n in msg for n in ('ghost', 'binned', 'orphan'))
+
+
+@pytest.mark.parametrize('stock, expected', [
+    ([50] * 7 + [0, 2, 3], '82/100 — HEALTHY'),
+    ([0, 0], '0/100 — CRITICAL'),
+    ([], '100/100 — HEALTHY'),
+])
+def test_health_score_is_proportional(alert, stock, expected):
+    for i, qty in enumerate(stock):
+        _stock(alert, f'i{i}', qty)
+    _, msg = alert.run()
+    assert expected in msg

@@ -1,4 +1,6 @@
-"""GetTransactions: `since` returns org rows on/after the date, uncapped; no `since` keeps the 200 cap."""
+"""GetTransactions: `since` returns org rows on/after the date, uncapped; no `since` keeps the 200 cap;
+`limit`/`cursor` page the orgID-createdAt-index; never a scan, and a missing GSI falls back to orgID-index."""
+import base64
 import json
 import os
 import sys
@@ -29,8 +31,11 @@ def tables(monkeypatch):
         tx = ddb.create_table(
             TableName='InventoryTransactions',
             KeySchema=[{'AttributeName': 'transactionID', 'KeyType': 'HASH'}],
-            AttributeDefinitions=[{'AttributeName': n, 'AttributeType': 'S'} for n in ('transactionID', 'orgID', 'userID')],
-            GlobalSecondaryIndexes=[_gsi('orgID'), _gsi('userID')],
+            AttributeDefinitions=[{'AttributeName': n, 'AttributeType': 'S'}
+                                  for n in ('transactionID', 'orgID', 'userID', 'createdAt')],
+            GlobalSecondaryIndexes=[_gsi('orgID'), _gsi('userID'), {
+                'IndexName': 'orgID-createdAt-index', 'Projection': {'ProjectionType': 'ALL'},
+                'KeySchema': [{'AttributeName': 'orgID', 'KeyType': 'HASH'}, {'AttributeName': 'createdAt', 'KeyType': 'RANGE'}]}],
             BillingMode='PAY_PER_REQUEST')
         members = ddb.create_table(
             TableName='OrgMembers',
@@ -41,6 +46,10 @@ def tables(monkeypatch):
         yield tx
 
 
+def _no_scan(**kw):
+    raise AssertionError('GetTransactions must never scan')
+
+
 def _put(tx, rows):
     with tx.batch_writer() as batch:
         for i, (org, created) in enumerate(rows):
@@ -49,6 +58,7 @@ def _put(tx, rows):
 
 def _call(query):
     import GetTransactions
+    GetTransactions.table.scan = _no_scan
     return GetTransactions.lambda_handler({'httpMethod': 'GET', 'headers': HEADERS, 'queryStringParameters': query}, None)
 
 
@@ -67,7 +77,91 @@ def test_without_since_keeps_the_200_cap(tables):
     _put(tables, [(ORG, f'2026-10-01T00:00:{i % 60:02d}.{i:06d}+00:00') for i in range(205)])
     res = _call(None)
     assert res['statusCode'] == 200
-    assert len(json.loads(res['body'])) == 200
+    rows = json.loads(res['body'])
+    assert len(rows) == 200
+    assert [r['createdAt'] for r in rows] == sorted((r['createdAt'] for r in rows), reverse=True)
+    assert rows[0]['createdAt'] == '2026-10-01T00:00:59.000179+00:00'
+
+
+def test_no_params_is_only_the_callers_org(tables):
+    _put(tables, [(ORG, '2026-10-01T00:00:00+00:00'), ('org-2', '2026-10-02T00:00:00+00:00')])
+    assert [r['orgID'] for r in json.loads(_call(None)['body'])] == [ORG]
+
+
+def test_since_is_a_key_condition_not_a_filter(tables, monkeypatch):
+    import GetTransactions
+    seen = []
+    real = GetTransactions.table.query
+    monkeypatch.setattr(GetTransactions.table, 'query', lambda **kw: seen.append(kw) or real(**kw))
+    assert _call({'since': '2026-10-01'})['statusCode'] == 200
+    assert seen and all('FilterExpression' not in kw and kw['IndexName'] == 'orgID-createdAt-index' for kw in seen)
+    assert 'Limit' not in seen[0]
+
+
+def test_limit_and_cursor_page_without_overlap(tables):
+    _put(tables, [(ORG, f'2026-10-0{d}T00:00:00+00:00') for d in (1, 2, 3)] + [('org-2', '2026-10-04T00:00:00+00:00')])
+    first = json.loads(_call({'limit': '2'})['body'])
+    assert [r['createdAt'][:10] for r in first['items']] == ['2026-10-03', '2026-10-02']
+    second = json.loads(_call({'limit': '2', 'cursor': first['nextCursor']})['body'])
+    assert [r['createdAt'][:10] for r in second['items']] == ['2026-10-01']
+    assert 'nextCursor' not in second
+
+
+def test_exactly_full_last_page_has_no_cursor(tables, monkeypatch):
+    import GetTransactions
+    real = GetTransactions.table.query
+
+    def dynamo_like(**kw):  # real DynamoDB returns LastEvaluatedKey whenever Limit is hit, even at the end; moto doesn't
+        res = real(**kw)
+        if kw.get('Limit') == len(res['Items']) and res['Items']:
+            res.setdefault('LastEvaluatedKey', {k: res['Items'][-1][k] for k in ('transactionID', 'orgID', 'createdAt')})
+        return res
+    monkeypatch.setattr(GetTransactions.table, 'query', dynamo_like)
+    _put(tables, [(ORG, f'2026-10-0{d}T00:00:00+00:00') for d in (1, 2, 3, 4)])
+    first = json.loads(_call({'limit': '2'})['body'])
+    second = json.loads(_call({'limit': '2', 'cursor': first['nextCursor']})['body'])
+    assert [r['createdAt'][:10] for r in second['items']] == ['2026-10-02', '2026-10-01']
+    assert 'nextCursor' not in second
+
+
+def test_other_query_errors_are_500_not_a_fallback(tables, monkeypatch):
+    from botocore.exceptions import ClientError
+    import GetTransactions
+
+    def denied(**kw):
+        raise ClientError({'Error': {'Code': 'AccessDeniedException', 'Message': 'no'}}, 'Query')
+    monkeypatch.setattr(GetTransactions.table, 'query', denied)
+    monkeypatch.setattr(GetTransactions._org, 'list_scoped_items', lambda *a: pytest.fail('fell back'))
+    assert _call(None)['statusCode'] == 500
+
+
+@pytest.mark.parametrize('query', [{'limit': '0'}, {'limit': '201'}, {'limit': 'two'}, {'cursor': '!!'},
+                                   {'cursor': base64.urlsafe_b64encode(b'[1]').decode()},
+                                   {'cursor': base64.urlsafe_b64encode(json.dumps(
+                                       {'orgID': 'org-2', 'transactionID': 't0', 'createdAt': 'x'}).encode()).decode()}])
+def test_bad_limit_or_cursor_is_400(tables, query):
+    assert _call(query)['statusCode'] == 400
+
+
+def test_without_the_new_gsi_falls_back_to_org_index(load, ddb):
+    tx = ddb.Table('InventoryTransactions')
+    for i in range(205):
+        tx.put_item(Item={'transactionID': f't{i}', 'orgID': 'o1', 'userID': 'a@b.co',
+                          'createdAt': f'2026-10-01T00:00:{i % 60:02d}.{i:06d}+00:00'})
+    tx.put_item(Item={'transactionID': 'x', 'orgID': 'o2', 'userID': 'z@b.co', 'createdAt': '2027-01-01T00:00:00+00:00'})
+    mod = load('GetTransactions')
+    mod.table.scan = _no_scan
+
+    def call(query=None):
+        return json.loads(mod.lambda_handler({'headers': {'x-iq-user': 'a@b.co', 'x-iq-org': 'o1'},
+                                              'queryStringParameters': query}, {})['body'])
+    rows = call()
+    assert len(rows) == 200 and {r['orgID'] for r in rows} == {'o1'}
+    assert [r['createdAt'] for r in rows] == sorted((r['createdAt'] for r in rows), reverse=True)
+    first = call({'limit': '150'})
+    second = call({'limit': '150', 'cursor': first['nextCursor']})
+    ids = [r['transactionID'] for r in first['items'] + second['items']]
+    assert len(ids) == len(set(ids)) == 205 and 'nextCursor' not in second
 
 
 def test_bad_since_is_400(tables):

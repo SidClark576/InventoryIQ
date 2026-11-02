@@ -18,8 +18,7 @@
       "Sid": "InventoryTransactions",
       "Effect": "Allow",
       "Action": [
-        "dynamodb:Query",
-        "dynamodb:Scan"
+        "dynamodb:Query"
       ],
       "Resource": [
         "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryTransactions",

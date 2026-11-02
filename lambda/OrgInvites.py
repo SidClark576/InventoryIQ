@@ -107,6 +107,7 @@ def _create(event, org_id, actor):
 
     token = secrets.token_urlsafe(32)
     now = datetime.now(timezone.utc)
+    expires_at = str(int(now.timestamp()) + INVITE_TTL_SECONDS)
     invite = {
         'inviteTokenHash': {'S': _hash(token)},
         'inviteID':        {'S': secrets.token_hex(8)},
@@ -116,7 +117,8 @@ def _create(event, org_id, actor):
         'status':          {'S': 'pending'},
         'invitedBy':       {'S': actor},
         'createdAt':       {'S': now.isoformat()},
-        'expiresAt':       {'N': str(int(now.timestamp()) + INVITE_TTL_SECONDS)},
+        'expiresAt':       {'N': expires_at},
+        'ttl':             {'N': expires_at},  # DynamoDB TTL drops it once expired
     }
     # Atomic seat cap: claim a seat only if under the cap.
     try:
