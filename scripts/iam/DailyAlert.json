@@ -18,11 +18,22 @@
       "Sid": "InventoryIQ",
       "Effect": "Allow",
       "Action": [
-        "dynamodb:Scan",
+        "dynamodb:Query",
         "dynamodb:UpdateItem"
       ],
       "Resource": [
-        "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryIQ"
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryIQ",
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryIQ/index/*"
+      ]
+    },
+    {
+      "Sid": "Organizations",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:Scan"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${Region}:${AccountId}:table/Organizations"
       ]
     },
     {
@@ -33,6 +44,16 @@
       ],
       "Resource": [
         "arn:aws:sns:${Region}:${AccountId}:InventoryIQ-Alerts"
+      ]
+    },
+    {
+      "Sid": "JobsDLQ",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:SendMessage"
+      ],
+      "Resource": [
+        "arn:aws:sqs:${Region}:${AccountId}:panindo-jobs-dlq"
       ]
     }
   ]

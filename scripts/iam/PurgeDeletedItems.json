@@ -24,6 +24,16 @@
       "Resource": [
         "arn:aws:dynamodb:${Region}:${AccountId}:table/InventoryIQ"
       ]
+    },
+    {
+      "Sid": "JobsDLQ",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:SendMessage"
+      ],
+      "Resource": [
+        "arn:aws:sqs:${Region}:${AccountId}:panindo-jobs-dlq"
+      ]
     }
   ]
 }

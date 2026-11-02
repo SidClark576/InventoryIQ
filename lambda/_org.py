@@ -118,14 +118,23 @@ def list_scoped_items(table, org_id, user_id, filter_expr=None):
 
 
 def list_user_orgs(user_id):
-    """Orgs the user is an active member of (for the switcher). Uses userID-index GSI."""
+    """Orgs the user is an active member of (for the switcher). Uses userID-index GSI + one BatchGetItem per 100 orgs."""
     res = _members.query(IndexName='userID-index',
                          KeyConditionExpression=Key('userID').eq(user_id))
     rows = [m for m in res.get('Items', []) if m.get('status') == 'active']
-    out = []
-    for m in rows:
-        org = _orgs.get_item(Key={'orgID': m['orgID']}).get('Item')
-        if org and not org.get('deletedAt'):
-            out.append({'orgID': org['orgID'], 'name': org.get('name', ''),
-                        'role': m.get('role'), 'memberCount': int(org.get('memberCount', 1))})
-    return out
+    orgs = _batch_get_orgs([m['orgID'] for m in rows])
+    return [{'orgID': org['orgID'], 'name': org.get('name', ''),
+             'role': m.get('role'), 'memberCount': int(org.get('memberCount', 1))}
+            for m in rows if (org := orgs.get(m['orgID'])) and not org.get('deletedAt')]
+
+
+def _batch_get_orgs(org_ids):
+    """orgID -> Organizations row, BatchGetItem's 100-key limit per request."""
+    found = {}
+    for i in range(0, len(org_ids), 100):
+        req = {ORGS_TABLE: {'Keys': [{'orgID': o} for o in org_ids[i:i + 100]]}}
+        while req:  # ponytail: retries UnprocessedKeys at once; add backoff if throttling shows up
+            res = _ddb.batch_get_item(RequestItems=req)
+            found.update((o['orgID'], o) for o in res.get('Responses', {}).get(ORGS_TABLE, []))
+            req = res.get('UnprocessedKeys')
+    return found

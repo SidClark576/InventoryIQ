@@ -1,4 +1,5 @@
 import json
+import math
 import boto3
 import os
 from decimal import Decimal
@@ -7,6 +8,7 @@ from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
 import time as _time
 import _logging
+import _org
 
 FUNCTION_NAME = 'DailyAlert'
 
@@ -46,8 +48,9 @@ def _handle(event, context):
     Generates and sends a daily inventory stock report via SNS (email/SMS).
 
     This function is triggered on a scheduled basis (e.g., EventBridge cron rule)
-    rather than by an API Gateway request. It scans ALL items across ALL users
-    (no userID filter) and builds a formatted plain-text email report showing:
+    rather than by an API Gateway request. It reads every live org's items (one
+    orgID-index query per org listed in Organizations; items without an orgID are
+    not counted) and builds one combined plain-text email report showing:
     - Overall inventory health score
     - Out-of-stock items that need immediate reordering
     - Low-stock items that should be restocked soon
@@ -62,20 +65,9 @@ def _handle(event, context):
     Response: 200 with summary counts and the email subject line
     """
     try:
-        # ── STEP 1: FETCH ALL INVENTORY ITEMS ────────────────────────────────
-        # Scan the entire table with no filter (all users, all items).
-        # DynamoDB scans return at most 1MB of data per call, so we loop
-        # using LastEvaluatedKey as a "bookmark" to fetch the next page.
-        result = table.scan()
-        items = result.get('Items', [])
-
-        # Pagination loop: keep fetching until there are no more pages
-        while 'LastEvaluatedKey' in result:
-            result = table.scan(ExclusiveStartKey=result['LastEvaluatedKey'])
-            items.extend(result.get('Items', []))
-
+        # ── STEP 1: FETCH EVERY LIVE ORG'S ITEMS ─────────────────────────────
         # Soft-deleted rows are in the bin, not in stock.
-        items = [item for item in items if not item.get('deletedAt')]
+        items = [item for item in _org_items() if not item.get('deletedAt')]
         now = datetime.now(timezone.utc)
         expired, expiring_soon = _expiry_due(items, now.date())
 
@@ -120,12 +112,12 @@ def _handle(event, context):
         at_risk = len(out_of_stock) + len(low_stock)
         healthy = total_products - at_risk
 
-        # Health score starts at 100 and is penalized for stock problems:
-        # -25 per out-of-stock item (critical, immediate action needed)
-        # -10 per low-stock item (warning, plan to restock)
-        # Clamped between 0 and 100. If no items exist, score stays 100.
-        penalty = (len(out_of_stock) * 25) + (len(low_stock) * 10)
-        health_score = max(0, min(100, 100 - penalty)) if total_products else 100
+        # Same proportional score as the Insights page: an out-of-stock item costs a full share of
+        # the store, a low-stock one 0.4 of a share. Clamped 0-100; no items stays 100.
+        # floor(x + 0.5) rounds halves up like the frontend's Math.round (Python round() is banker's).
+        health_score = (max(0, min(100, math.floor(
+            100 * (1 - (len(out_of_stock) + 0.4 * len(low_stock)) / total_products) + 0.5)))
+            if total_products else 100)
 
         # Map the numeric score to a human-readable label and ASCII progress bar
         if health_score >= 80:
@@ -288,6 +280,19 @@ def _handle(event, context):
 
     except Exception as e:
         return _logging.server_error(e, event)
+
+
+def _org_items():
+    """Items of every non-deleted org: scan the small Organizations table, one orgID-index query per org."""
+    items, kwargs = [], {}
+    while True:
+        res = _org._orgs.scan(**kwargs)
+        for org in res.get('Items', []):
+            if not org.get('deletedAt'):
+                items += _org.query_gsi(table, 'orgID-index', 'orgID', org['orgID'])
+        if 'LastEvaluatedKey' not in res:
+            return items
+        kwargs['ExclusiveStartKey'] = res['LastEvaluatedKey']
 
 
 def _expiry_due(items, today):
